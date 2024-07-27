@@ -4430,6 +4430,10 @@
     "H3ID": "MuzzleBrake_GK2",
 	"Note": "Should be MW"
   },
+  "638db77630c4240f9e06f8b6": {
+    "H3ID": "AKMiscAKRS",
+	"Note": "Should be low profile dovetail mount"
+  },
   "576167ab2459773cad038c43": {
 	"Note": "Missing, should be included with Modul 576165642459773c7a400233/Saiga12"
   },
@@ -5182,6 +5186,10 @@
   "606587e18900dc2d9a55b65f": {
 	"Note": "Missing, Should be Modul part of MK47 mutant"
   },
+  "628a60ae6b1d481ff772e9c8": {
+    "H3ID": "ModulRD704Dupe",
+	"Note": "Should be MW"
+  },
   "5644bd2b4bdc2d3b4c8b4572": {
     "H3ID": "ModulAK74NFactory",
 	"Note": "Should be MW"
@@ -5912,6 +5920,13 @@
   "59e6542b86f77411dc52a77a": {
     "H3ID": "ftw.366.fmj"
   },
+  "64748cb8de82c85eaf0a273a": {
+    "H3ID": "BreakActionShorty",
+	"Note": "Should be MP-43 sawed off"
+  },
+  "64748d02d1c009260702b526": {
+	"Note": "Missing, should be modul part of 64748cb8de82c85eaf0a273a/MP-43"
+  },
   "5580223e4bdc2d1c128b457f": {
     "H3ID": "HammerlessLong",
 	"Note": "Should be MP-43-1C"
@@ -6078,6 +6093,69 @@
     "ModulGroup": "NWSVDStocks",
     "ModulPart": "SVDS Rear"
   },
+  "627e14b21713922ded6f2c15": {
+    "H3ID": "NWAIAXMC"
+  },
+  "62811e2510e26c1f344e6554": {
+    "H3ID": "868",
+    "ModulGroup": "NWAXMCGrips",
+    "ModulPart": "AI AXMC Standard"
+  },
+  "62811e335631d45211793c95": {
+    "H3ID": "868",
+    "ModulGroup": "NWAXMCGrips",
+    "ModulPart": "ModulAR2 Grip"
+  },
+  "62811f828193841aca4a45c3": {
+    "H3ID": "868",
+    "ModulGroup": "NWAXMCStock",
+    "ModulPart": "Standard Stock"
+  },
+  "62811fbf09427b40ab14e767": {
+    "H3ID": "868",
+    "ModulGroup": "NWAXMCUpper",
+    "ModulPart": "Billet Upper-Receiver"
+  },
+  "6281204f308cb521f87a8f9b": {
+    "H3ID": "868",
+    "ModulGroup": "NWAXMCChamber",
+    "ModulPart": ".338 Laupa Magazines"
+  },
+  "6281209662cba23f6c4d7a19": {
+    "H3ID": "868",
+    "ModulGroup": "NWAXMCGuard",
+    "ModulPart": "19-Slot"
+  },
+  "628121434fa03b6b6c35dc6a": {
+    "H3ID": "868",
+    "ModulGroup": "NWAXMCBarrel",
+    "ModulPart": "686mm Barrel",
+    "Note": "Should be 28 inches = 711mm"
+  },
+  "628120d309427b40ab14e76d": {
+    "H3ID": "NWAIKeymod6"
+  },
+  "628120dd308cb521f87a8fa1": {
+    "H3ID": "NWAIKeymod11"
+  },
+  "628120fd5631d45211793c9f": {
+    "H3ID": "NWAI338Mag"
+  },
+  "6281212a09427b40ab14e770": {
+    "Note": "Missing, integrated on receiver"
+  },
+  "62812081d23f207deb0ab216": {
+    "Note": "Missing, integrated on barrels"
+  },
+  "628120c21d5df4475f46a337": {
+    "Note": "Missing, should be modul part of NWAIAXMC"
+  },
+  "628120621d5df4475f46a335": {
+    "Note": "Missing, should be modul part of NWAIAXMC"
+  },
+  "62811cd7308cb521f87a8f99": {
+    "Note": "Missing, should be modul part of NWAIAXMC"
+  },
   "5bfea6e90db834001b7347f3": {
     "H3ID": "m700base",
 	"Note": "Should be MW"
@@ -6180,6 +6258,98 @@
   },
   "5d25af8f8abbc3055079fec5": {
     "H3ID": "M700Promag10"
+  },
+  "64ca3d3954fc657e230529cc": {
+    "H3ID": "PKM_PKP",
+	"Note": "Should be modul"
+  },
+  "64637076203536ad5600c990": {
+    "H3ID": "PKM_PKP",
+	"Note": "Should be modul"
+  },
+  "6410733d5dd49d77bd07847e": {
+    "H3ID": "NWAVT40",
+	"Note": "Should be modul"
+  },
+  "646372518610c40fc20204e8": {
+    "H3ID": "PKM_PKP BeltBox"
+  },
+  "6492efe46cc7e29a6f03b2a0": {
+	"Note": "Missing, integrated"
+  },
+  "6492efb8cfcf7c89e701abf3": {
+	"Note": "Missing, integrated"
+  },
+  "6492ef63cfcf7c89e701abf1": {
+	"Note": "Missing, integrated"
+  },
+  "6464d870bb2c580352070cc4": {
+	"Note": "Missing, integrated"
+  },
+  "64cbad529f7cf7f75c077fd5": {
+	"Note": "Missing, Should be modul part of modul PMK/PKP"
+  },
+  "6492fb8253acae0af00a29b6": {
+	"Note": "Missing, Should be modul part of modul PMK/PKP"
+  },
+  "6492e3a97df7d749100e29ee": {
+	"Note": "Missing, Should be modul part of modul PMK/PKP"
+  },
+  "6492d7847363b8a52206bc52": {
+	"Note": "Missing, Should be modul part of modul PMK/PKP"
+  },
+  "6492c8bba6e68e06fb0bae87": {
+	"Note": "Missing, Should be modul part of modul PMK/PKP"
+  },
+  "6492c6dd60fdb10a020621a2": {
+	"Note": "Missing, Should be modul part of modul PMK/PKP"
+  },
+  "6491c6f6ef312a876705191b": {
+	"Note": "Missing, Should be modul part of modul PMK/PKP"
+  },
+  "64639a9aab86f8fd4300146c": {
+	"Note": "Missing, Should be modul part of modul PMK/PKP"
+  },
+  "646371779f5f0ea59a04c204": {
+	"Note": "Missing, Should be modul part of modul PMK/PKP"
+  },
+  "646371a9f2404ab67905c8e6": {
+	"Note": "Missing, Should be modul part of modul PMK/PKP"
+  },
+  "646371faf2404ab67905c8e9": {
+	"Note": "Missing, Should be modul part of modul PMK/PKP"
+  },
+  "643ea5b23db6f9f57107d9fd": {
+    "H3ID": "NWSVT40",
+	"Note": "Should be modul"
+  },
+  "641dc35e19604f20c800be18": {
+    "H3ID": "NWSVTPuScope",
+	"Note": "Should be just the mount, this includes scope"
+  },
+  "641074a07fd350b98c0b3f96": {
+    "H3ID": "NWSVTMag15"
+  },
+  "6422e1ea3c0f06190302161a": {
+    "H3ID": "NWSVTMag10"
+  },
+  "64119d90dcf48d656f0aa275": {
+	"Note": "Missing, Should be included with modul AVT-40"
+  },
+  "64119d672c6d6f921a0929fb": {
+	"Note": "Missing, Should be included with modul AVT-40"
+  },
+  "64119d1f2c6d6f921a0929f8": {
+	"Note": "Missing, Should be included with modul AVT-40"
+  },
+  "6410745d5dd49d77bd078485": {
+	"Note": "Missing, Should be modul part of AVT-40"
+  },
+  "6410758c857473525b08bb77": {
+	"Note": "Missing, Should be modul part of AVT-40"
+  },
+  "64119cdbdcf48d656f0aa272": {
+	"Note": "Missing, Should be modul part of SVT-40"
   },
   "5ae08f0a5acfc408fb1398a1": {
     "H3ID": "FSCE.Mosin.Mosin"
@@ -6371,9 +6541,23 @@
 	"H3ID": "RGM40_Kastet",
 	"Note": "Should be FN40GL Mk2 40mm grenade launcher"
   },
+  "639af924d0446708ee62294e": {
+	"H3ID": "RGM40_Kastet",
+	"Note": "Should be FN40GL Mk2 40mm grenade launcher"
+  },
+  "639c3fbbd0446708ee622ee9": {
+	"H3ID": "RGM40_Kastet",
+	"Note": "Should be FN40GL Mk2 40mm grenade launcher"
+  },
   "6275303a9f372d6ea97f9ec7": {
 	"H3ID": "MGLGrenadeLauncher",
-	"Note": "Should be Modul"
+	"Note": "Should be M32A1"
+  },
+  "6284bd5f95250a29bc628a30": {
+	"Note": "Missing, Should ne included with modul M32A1"
+  },
+  "627bce33f21bc425b06ab967": {
+	"Note": "Missing, Should be Modul part of 6275303a9f372d6ea97f9ec7/MGLGrenadeLauncher"
   },
   "60db29ce99594040e04c4a27": {
     "H3ID": "MTs255",
@@ -6394,6 +6578,59 @@
   "60dc519adf4c47305f6d410d": {
     "H3ID": "Speedloader12gauge_5Shot",
 	"Note": "Missing, Should be MTs-255-12 12ga cylinder, using ID for speed loader instead"
+  },
+  "6259b864ebedf17603599e88": {
+    "H3ID": "ModulM3Dupe",
+	"Note": "Should be MW"
+  },
+  "6259c3387d6aab70bc23a18d": {
+    "H3ID": "StockM3Collapse",
+	"Note": "Should be MW"
+  },
+  "625eb0faa6e3a82193267ad9": {
+    "H3ID": "M3StockTac",
+	"Note": "Should be MW"
+  },
+  "625ebcef6f53af4aa66b44dc": {
+    "H3ID": "M3TacSight",
+	"Note": "Should be MW"
+  },
+  "625ed7c64d9b6612df732146": {
+    "H3ID": "RailM3",
+	"Note": "Should be MW"
+  },
+  "6259c3d8012d6678ec38eeb8": {
+	"Note": "Missing, integrated on StockM3Collapse"
+  },
+  "625ec45bb14d7326ac20f572": {
+	"Note": "Missing, integrated on receiver"
+  },
+  "6259c4347d6aab70bc23a190": {
+	"Note": "Missing, integrated on receiver"
+  },
+  "6259c2c1d714855d182bad85": {
+    "H3ID": "BarrelM3",
+	"Note": "Should be MW"
+  },
+  "625ff2ccb8c587128c1a01dd": {
+    "H3ID": "MagM3_5",
+	"Note": "Should be MW"
+  },
+  "6259bdcabd28e4721447a2aa": {
+    "H3ID": "MagM3_7",
+	"Note": "Should be MW"
+  },
+  "625ff2eb9f5537057932257d": {
+    "H3ID": "MagM3_9",
+	"Note": "Should be MW"
+  },
+  "625ff3046d721f05d93bf2ee": {
+    "H3ID": "MagM3_11",
+	"Note": "Should be MW"
+  },
+  "625ff31daaaa8c1130599f64": {
+    "H3ID": "MagM3_13",
+	"Note": "Should be MW"
   },
   "5e870397991fd70db46995c8": {
     "H3ID": "Modul590Dupe",
@@ -6837,6 +7074,9 @@
     "H3ID": "SV98",
 	"Note": "Should be Modul"
   },
+  "624c29ce09cd027dff2f8cd7": {
+	"Note": "Integrated in SV98, should be modul part"
+  },
   "56ea8222d2720b69698b4567": {
 	"Note": "Integrated in SV98, should be modul part"
   },
@@ -6935,6 +7175,15 @@
   },
   "5888988e24597752fe43a6fa": {
     "H3ID": "NWDVL10Mag"
+  },
+  "64b8f7c241772715af0f9c3d": {
+    "H3ID": "NW762R-HPBT"
+  },
+  "64b8f7b5389d7ffd620ccba2": {
+    "H3ID": "NW762R-SPBT"
+  },
+  "64b8f7968532cf95ee0a0dbf": {
+    "H3ID": "NW762R-FMJ"
   },
   "5887431f2459777e1612938f": {
     "H3ID": "NW762R-LPS"
@@ -7173,6 +7422,24 @@
     "H3ID": "Makarov",
 	"Note": "Should be modul"
   },
+  "648afce7ec6bb25b2608defb": {
+	"Note": "Missing, Should be modul part of modul Makarov"
+  },
+  "63c6adcfb4ba094317063742": {
+	"Note": "Missing, Should be modul part of modul Makarov"
+  },
+  "6374a7e7417239a7bf00f042": {
+	"Note": "Missing, Should be modul part of modul Makarov"
+  },
+  "6374a822e629013b9c0645c8": {
+	"Note": "Missing, Should be modul part of modul Makarov"
+  },
+  "637784c5f7b3f4ac1a0d1a9a": {
+	"Note": "Missing, Should be modul part of modul Makarov"
+  },
+  "637b6d610aef6cfc5e02dd14": {
+	"Note": "Missing, Should be modul part of modul Makarov"
+  },
   "573718ba2459775a75491131": {
     "H3ID": "9x18mmCartridgeJHP",
 	"Note": "Should be 9x18mm PM BZhT gzh"
@@ -7250,6 +7517,10 @@
   "599851db86f77467372f0a18": {
 	"H3ID": "AKStockAKS",
 	"Note": "Should be skeletonized stock specific to PP-19, for some reason its a different item in tarkov"
+  },
+  "62e7e7bbe6da9612f743f1e0": {
+	"H3ID": "GP25_Classic",
+	"Note": "Should be MW"
   },
   "5a0c59791526d8dba737bba7": {
 	"H3ID": "AKMiscGP25",
@@ -7534,6 +7805,12 @@
   },
   "618bab21526131765025ab3f": {
 	"Note": "Missing, integrated with relevant sights"
+  },
+  "63fc449f5bd61c6cf3784a88": {
+	"Note": "Missing, integrated with relevant sights"
+  },
+  "6267c6396b642f77f56f5c1c": {
+	"Note": "Missing, integrated with relevant flashlights"
   },
   "5dff77c759400025ea5150cf": {
 	"H3ID": "FSCE.LPMOUNT"
@@ -8005,6 +8282,84 @@
     "ModulGroup": "Handguards_HK417",
     "ModulPart": "Patrol HANDGUARD"
   },
+  "62e7c4fba689e8c9c50dfc38": {
+    "H3ID": "NWAUGReceiverCoy",
+	"Note": "Should be MW"
+  },
+  "63171672192e68c5460cebc5": {
+    "H3ID": "NWAUGReceiverGray",
+	"Note": "Should be A3, we just use the ID for gray variant instead"
+  },
+  "62e7c72df68e7a0676050c77": {
+    "H3ID": "NWA3Frame",
+	"Note": "Should be MW"
+  },
+  "62e7c7f3c34ea971710c32fc": {
+    "H3ID": "NWAug508A1",
+	"Note": "Should be MW"
+  },
+  "6333f05d1bc0e6217a0e9d34": {
+    "H3ID": "NWAug417A1",
+	"Note": "Should be MW"
+  },
+  "630e39c3bd357927e4007c15": {
+    "H3ID": "NWAug417A3",
+	"Note": "Should be MW"
+  },
+  "62e7c880f68e7a0676050c7c": {
+    "H3ID": "NWAugA1ChargeB",
+	"Note": "Should be MW"
+  },
+  "62ebbc53e3c1e1ec7c02c44f": {
+    "H3ID": "NWAugA3Charge",
+	"Note": "Should be MW"
+  },
+  "62ebd290c427473eff0baafb": {
+    "H3ID": "NWAugM1Optic",
+	"Note": "Should be MW"
+  },
+  "62e7c8f91cd3fde4d503d690": {
+    "H3ID": "NWAugM1Long",
+	"Note": "Should be MW"
+  },
+  "62ea7c793043d74a0306e19f": {
+    "H3ID": "NWA1FrameN",
+	"Note": "Should be MW"
+  },
+  "62ebba1fb658e07ef9082b5a": {
+    "H3ID": "NWAugM1Short",
+	"Note": "Should be MW"
+  },
+  "634e61b0767cb15c4601a877": {
+    "H3ID": "NWAugFore"
+  },
+  "630f2982cdb9e392db0cbcc7": {
+    "H3ID": "NWT4AugSup"
+  },
+  "634eba08f69c710e0108d386": {
+    "H3ID": "NWSli7Sup"
+  },
+  "630f291b9f66a28b37094bb8": {
+    "H3ID": "NWAugA3Comp"
+  },
+  "630f28f0cadb1fe05e06f004": {
+    "H3ID": "NWAugA3Muz"
+  },
+  "630f2872911356c17d06abc5": {
+    "H3ID": "NWAugA1Muz"
+  },
+  "630f27f04f3f6281050b94d7": {
+    "H3ID": "NWRatWorxAdapt"
+  },
+  "630e295c984633f1fb0e7c30": {
+    "H3ID": "NWAugSteyr42"
+  },
+  "62e7c98b550c8218d602cbb4": {
+    "H3ID": "NWAugSteyr30"
+  },
+  "630e1adbbd357927e4007c09": {
+    "H3ID": "NWAugSteyr10"
+  },
   "5447a9cd4bdc2dbd208b4567": {
     "H3ID": "ModulM4A1"
   },
@@ -8108,9 +8463,8 @@
     "ModulPart": "AR15 14.5\" Barrel"
   },
   "55d35ee94bdc2d61338b4568": {
-    "H3ID": "868",
-    "ModulGroup": "Barrels_AR15",
-    "ModulPart": "AR15 10.5\" Barrel"
+    "H3ID": "AR15Barrel10,5in",
+	"Note": "MW map Barrels_AR15:AR15 10.5\" Barrel"
   },
   "63d3d44a2a49307baf09386d": {
     "H3ID": "868",
@@ -8118,24 +8472,20 @@
     "ModulPart": "AR15 16\" Ballistic Advantage Barrel"
   },
   "5c0e2f94d174af029f650d56": {
-    "H3ID": "868",
-    "ModulGroup": "Barrels_AR15",
-    "ModulPart": "AR15 16\" Barrel"
+    "H3ID": "AR15Barrel16in",
+	"Note": "MW map Barrels_AR15:AR15 16\" Barrel"
   },
   "5d440b93a4b9364276578d4b": {
-    "H3ID": "868",
-    "ModulGroup": "Barrels_AR15",
-    "ModulPart": "AR15 18\" Barrel"
+    "H3ID": "AR15Barrel18in",
+	"Note": "MW map Barrels_AR15:AR15 18\" Barrel"
   },
   "5d440b9fa4b93601354d480c": {
-    "H3ID": "868",
-    "ModulGroup": "Barrels_AR15",
-    "ModulPart": "AR15 20\" Barrel"
+    "H3ID": "AR15Barrel10in",
+	"Note": "MW map Barrels_AR15:AR15 20\" Barrel"
   },
   "55d4b9964bdc2d1d4e8b456e": {
-    "H3ID": "868",
-    "ModulGroup": "Grips_AR",
-    "ModulPart": "A2 Pistol Grip"
+    "H3ID": "AR15GripA2",
+	"Note": "MW map Grips_AR:A2 Pistol Grip"
   },
   "571659bb2459771fb2755a12": {
     "H3ID": "868",
@@ -8143,99 +8493,80 @@
     "ModulPart": "Geissele A22 Pistol Grip"
   },
   "602e71bd53a60014f9705bfa": {
-    "H3ID": "868",
-    "ModulGroup": "Grips_AR",
-    "ModulPart": "Magpul K2 Pistol Grip"
+    "H3ID": "AR15GripK2Blk",
+	"Note": "MW map Grips_AR:Magpul K2 Pistol Grip"
   },
   "6113c3586c780c1e710c90bc": {
-    "H3ID": "868",
-    "ModulGroup": "Grips_AR",
-    "ModulPart": "F1 ST1 Pistol Grip"
+    "H3ID": "AR15GripST1",
+	"Note": "MW map Grips_AR:F1 ST1 Pistol Grip"
   },
   "6113cc78d3a39d50044c065a": {
-    "H3ID": "868",
-    "ModulGroup": "Grips_AR",
-    "ModulPart": "F1 ST2 Paracord Pistol Grip"
+    "H3ID": "AR15GripST2PC",
+	"Note": "MW map Grips_AR:F1 ST2 Paracord Pistol Grip"
   },
   "6113cce3d92c473c770200c7": {
-    "H3ID": "868",
-    "ModulGroup": "Grips_AR",
-    "ModulPart": "F1 ST2 Pistol Grip"
+    "H3ID": "AR15GripST2",
+	"Note": "MW map Grips_AR:F1 ST2 Pistol Grip"
   },
   "5cc9bcaed7f00c011c04e179": {
-    "H3ID": "868",
-    "ModulGroup": "Grips_AR",
-    "ModulPart": "Hera Arms HG15 Pistol Grip"
+    "H3ID": "AR15GripHG15",
+	"Note": "MW map Grips_AR:Hera Arms HG15 Pistol Grip"
   },
   "5bb20e18d4351e00320205d5": {
-    "H3ID": "868",
-    "ModulGroup": "Grips_AR",
-    "ModulPart": "HK Battlegrip Pistol Grip"
+    "H3ID": "AR15GripBattleGrip",
+	"Note": "MW map Grips_AR:HK Battlegrip Pistol Grip"
   },
   "5bb20e0ed4351e3bac1212dc": {
-    "H3ID": "868",
-    "ModulGroup": "Grips_AR",
-    "ModulPart": "HK Beavertail Pistol Grip"
+    "H3ID": "AR15GripBeavertail",
+	"Note": "MW map Grips_AR:HK Beavertail Pistol Grip"
   },
   "6193dcd0f8ee7e52e4210a28": {
-    "H3ID": "868",
-    "ModulGroup": "Grips_AR",
-    "ModulPart": "HK Beavertail Pistol Grip"
+    "H3ID": "AR15GripBeavertail",
+	"Note": "MW map Grips_AR:HK Beavertail Pistol Grip"
   },
   "5d025cc1d7ad1a53845279ef": {
-    "H3ID": "868",
-    "ModulGroup": "Grips_AR",
-    "ModulPart": "ERGO PSG1 Pistol Grip"
+    "H3ID": "AR15GripPSG1",
+	"Note": "MW map Grips_AR:ERGO PSG1 Pistol Grip"
   },
   "5c6d7b3d2e221600114c9b7d": {
-    "H3ID": "868",
-    "ModulGroup": "Grips_AR",
-    "ModulPart": "HK v2 Pistol Grip"
+    "H3ID": "AR15GripHKV2",
+	"Note": "MW map Grips_AR:HK v2 Pistol Grip"
   },
   "57c55efc2459772d2c6271e7": {
-    "H3ID": "868",
-    "ModulGroup": "Grips_AR",
-    "ModulPart": "Hogue Overmolded Pistol Grip"
+    "H3ID": "AR10GripHogueBlk",
+	"Note": "MW map Grips_AR:Hogue Overmolded Pistol Grip"
   },
   "57af48872459771f0b2ebf11": {
-    "H3ID": "868",
-    "ModulGroup": "Grips_AR",
-    "ModulPart": "Hogue Overmolded Pistol Grip"
+    "H3ID": "AR10GripHogueDesert",
+	"Note": "MW map Grips_AR:Hogue Overmolded Pistol Grip"
   },
   "57c55f092459772d291a8463": {
-    "H3ID": "868",
-    "ModulGroup": "Grips_AR",
-    "ModulPart": "Hogue Overmolded Pistol Grip"
+    "H3ID": "AR10GripHogueForest",
+	"Note": "MW map Grips_AR:Hogue Overmolded Pistol Grip"
   },
   "57c55f112459772d28133310": {
-    "H3ID": "868",
-    "ModulGroup": "Grips_AR",
-    "ModulPart": "Hogue Overmolded Pistol Grip"
+    "H3ID": "AR10GripHogueForest",
+	"Note": "MW map Grips_AR:Hogue Overmolded Pistol Grip"
   },
   "57c55f172459772d27602381": {
-    "H3ID": "868",
-    "ModulGroup": "Grips_AR",
-    "ModulPart": "Hogue Overmolded Pistol Grip"
+    "H3ID": "AR10GripHogueForest",
+	"Note": "MW map Grips_AR:Hogue Overmolded Pistol Grip"
   },
   "5a339805c4a2826c6e06d73d": {
-    "H3ID": "868",
-    "ModulGroup": "Grips_AR",
-    "ModulPart": "Magpul MIAD Pistol Grip"
+    "H3ID": "AR15GripMIAD",
+	"Note": "MW map Grips_AR:Magpul MIAD Pistol Grip"
   },
   "55802f5d4bdc2dac148b458f": {
-    "H3ID": "868",
-    "ModulGroup": "Grips_AR",
-    "ModulPart": "Magpul MOE Pistol Grip"
+    "H3ID": "Ar15GripMOEBLK",
+	"Note": "MW map Grips_AR:Magpul MOE Pistol Grip"
   },
   "5d15cf3bd7ad1a67e71518b2": {
-    "H3ID": "868",
-    "ModulGroup": "Grips_AR",
-    "ModulPart": "Magpul MOE Pistol Grip"
+    "H3ID": "Ar15GripMOEFDE",
+	"Note": "MW map Grips_AR:Magpul MOE Pistol Grip"
   },
   "59db3a1d86f77429e05b4e92": {
-    "H3ID": "868",
-    "ModulGroup": "Grips_AR",
-    "ModulPart": "Naroh GRAL-S Pistol Grip"
+    "H3ID": "AR15GripGral",
+	"Note": "MW map Grips_AR:Naroh GRAL-S Pistol Grip"
   },
   "5fbcbd6c187fea44d52eda14": {
     "H3ID": "868",
@@ -8243,24 +8574,20 @@
     "ModulPart": "Reptilia CQG Pistol Grip"
   },
   "59db3acc86f7742a2c4ab912": {
-    "H3ID": "868",
-    "ModulGroup": "Grips_AR",
-    "ModulPart": "Stark Pistol Grip"
+    "H3ID": "AR15GripStarkBlack",
+	"Note": "MW map Grips_AR:Stark Pistol Grip"
   },
   "59db3b0886f77429d72fb895": {
-    "H3ID": "868",
-    "ModulGroup": "Grips_AR",
-    "ModulPart": "Stark Pistol Grip"
+    "H3ID": "AR15GripStarkUgly",
+	"Note": "MW map Grips_AR:Stark Pistol Grip"
   },
   "615d8faecabb9b7ad90f4d5d": {
-    "H3ID": "868",
-    "ModulGroup": "Grips_AR",
-    "ModulPart": "Tactical Dynamics Hex Pistol Grip"
+    "H3ID": "AR15GripHex",
+	"Note": "MW map Grips_AR:Tactical Dynamics Hex Pistol Grip"
   },
   "5b07db875acfc40dc528a5f6": {
-    "H3ID": "868",
-    "ModulGroup": "Grips_AR",
-    "ModulPart": "Tactical Dynamics Skeletonized Pistol Grip"
+    "H3ID": "AR15GripSkeleton",
+	"Note": "MW map Grips_AR:Tactical Dynamics Skeletonized Pistol Grip"
   },
   "63f5feead259b42f0b4d6d0f": {
     "H3ID": "868",
@@ -8268,14 +8595,12 @@
     "ModulPart": "Aeroknox Orion Pistol Grip"
   },
   "5ae30db85acfc408fb139a05": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "M4A1 Standard Handguard"
+    "H3ID": "AR15ForeMFore",
+	"Note": "MW map Handguards_AR:M4A1 Standard Handguard"
   },
   "637f57a68d137b27f70c4968": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "M4A1 Standard Handguard"
+    "H3ID": "AR15ForeMFore",
+	"Note": "MW map Handguards_AR:M4A1 Standard Handguard"
   },
   "5c0e2f5cd174af02a012cfc9": {
     "H3ID": "AR15ForeADAR",
@@ -8292,34 +8617,28 @@
     "ModulPart": "Aeroknox 4\" AX15//Handguard"
   },
   "619b5db699fb192e7430664f": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "Aeroknox 10.5\" AX15//Handguard"
+    "H3ID": "AR15ForeAeroknox",
+	"Note": "MW map Handguards_AR:Aeroknox 10.5\" AX15//Handguard"
   },
   "5c78f2492e221600114c9f04": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "SAI QD Carbine Length Handguard"
+    "H3ID": "AR15ForeQDLong",
+	"Note": "MW map Handguards_AR:SAI QD Carbine Length Handguard"
   },
   "5c78f2612e221600114c9f0d": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "SAI QD CQB Length Handguard"
+    "H3ID": "AR15ForeQDShort",
+	"Note": "MW map Handguards_AR:SAI QD CQB Length Handguard"
   },
   "5b2cfa535acfc432ff4db7a0": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "Magpul MOE Carbine Handguard"
+    "H3ID": "AttForeGripMOEOGblkshort",
+	"Note": "MW map Handguards_AR:Magpul MOE Carbine Handguard"
   },
   "5c78f26f2e221601da3581d1": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "Mapgul MOE SL Rifle Handguard"
+    "H3ID": "AR15ForeMOEblk",
+	"Note": "MW map Handguards_AR:Mapgul MOE SL Rifle Handguard"
   },
   "5c78f2792e221600106f4683": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "Mapgul MOE SL Carbine Handguard"
+    "H3ID": "AR15ForeMOEblkshort",
+	"Note": "MW map Handguards_AR:Mapgul MOE SL Carbine Handguard"
   },
   "5d123102d7ad1a004e475fe5": {
     "H3ID": "868",
@@ -8332,64 +8651,52 @@
     "ModulPart": "KAC URX3 8\" Handguard"
   },
   "5d4405f0a4b9361e6a4e6bd9": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "Lone Star Armory TX-15 Handguard"
+    "H3ID": "AR15ForeLoneStar",
+	"Note": "MW map Handguards_AR:Lone Star Armory TX-15 Handguard"
   },
   "55f84c3c4bdc2d5f408b4576": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "Daniel Defense RISII 9.5\" Handguard"
+    "H3ID": "AR15ForeDDRIS95Blk",
+	"Note": "MW map Handguards_AR:Daniel Defense RISII 9.5\" Handguard"
   },
   "638f1ff84822287cad04be9d": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "Daniel Defense RISII 9.5\" Handguard"
+    "H3ID": "AR15ForeDDRIS95Blk",
+	"Note": "MW map Handguards_AR:Daniel Defense RISII 9.5\" Handguard"
   },
   "6396aaa9a52ace83df0840ab": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "Daniel Defense RISII 9.5\" Handguard"
+    "H3ID": "AR15ForeDDRIS95Blk",
+	"Note": "MW map Handguards_AR:Daniel Defense RISII 9.5\" Handguard"
   },
   "588b56d02459771481110ae2": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "Daniel Defense RISII 9.5\" Handguard"
+    "H3ID": "AR15ForeDDRIS95Blk",
+	"Note": "MW map Handguards_AR:Daniel Defense RISII 9.5\" Handguard"
   },
   "5c9a26332e2216001219ea70": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "Daniel Defense RISII 9.5\" FSP Handguard"
+    "H3ID": "AR15ForeDDRIS95FSPFDE",
+	"Note": "MW map Handguards_AR:Daniel Defense RISII 9.5\" FSP Handguard"
   },
   "5c9a25172e2216000f20314e": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "Daniel Defense RISII 12.5\" Handguard"
+    "H3ID": "AR15ForeDDRIS125FDE",
+	"Note": "MW map Handguards_AR:Daniel Defense RISII 12.5\" Handguard"
   },
   "638f2003bbd47aeb9e0ff637": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "Daniel Defense RISII 12.5\" Handguard"
+    "H3ID": "AR15ForeDDRIS125FDE",
+	"Note": "MW map Handguards_AR:Daniel Defense RISII 12.5\" Handguard"
   },
   "5ea16ada09aa976f2e7a51be": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "Geissele MK16 13.5\" Handguard"
+    "H3ID": "AR15ForeMK16",
+	"Note": "MW map Handguards_AR:Geissele MK16 13.5\" Handguard"
   },
   "5ea16acdfadf1d18c87b0784": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "Geissele MK16 9.3\" Handguard"
+    "H3ID": "AR15ForeMK16_95",
+	"Note": "MW map Handguards_AR:Geissele MK16 9.3\" Handguard"
   },
   "55d459824bdc2d892f8b4573": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "KAC M4 RIS Handguard"
+    "H3ID": "AR15ForeKACRIS",
+	"Note": "MW map Handguards_AR:KAC M4 RIS Handguard"
   },
   "637f57b78d137b27f70c496a": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "KAC M4 RIS Handguard"
+    "H3ID": "AR15ForeKACRIS",
+	"Note": "MW map Handguards_AR:KAC M4 RIS Handguard"
   },
   "5d122e7bd7ad1a07102d6d7f": {
     "H3ID": "868",
@@ -8417,59 +8724,48 @@
     "ModulPart": "Aero Precision Enhanced 12\" Handguard"
   },
   "5c6d5d8b2e221644fc630b39": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "STNGR VYPR 10\" Handguard"
+    "H3ID": "AR15ForeSTNGR",
+	"Note": "MW map Handguards_AR:STNGR VYPR 10\" Handguard"
   },
   "5d00e0cbd7ad1a6c6566a42d": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "Strike Industries Carbine Handguard"
+    "H3ID": "AR15ForeStrike",
+	"Note": "MW map Handguards_AR:Strike Industries Carbine Handguard"
   },
   "637f589af5ef8c33840d36d3": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "Strike Industries Carbine Handguard"
+    "H3ID": "AR15ForeStrike",
+	"Note": "MW map Handguards_AR:Strike Industries Carbine Handguard"
   },
   "63969c9019971040b005049b": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "Strike Industries Carbine Handguard"
+    "H3ID": "AR15ForeStrikeFDE",
+	"Note": "MW map Handguards_AR:Strike Industries Carbine Handguard"
   },
   "5d00f63bd7ad1a59283b1c1e": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "Strike Industries Carbine Handguard"
+    "H3ID": "AR15ForeStrikeFDE",
+	"Note": "MW map Handguards_AR:Strike Industries Carbine Handguard"
   },
   "6087e0336d0bd7580617bb7a": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "Unique ARs Wing & Skull Handguard"
+    "H3ID": "AR15ForeSkull",
+	"Note": "MW map Handguards_AR:Unique ARs Wing & Skull Handguard"
   },
   "595cfa8b86f77427437e845b": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "Warsport LVOA-C Handguard"
+    "H3ID": "AR15ForeLVOAC",
+	"Note": "MW map Handguards_AR:Warsport LVOA-C Handguard"
   },
   "595cf16b86f77427440c32e2": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "Warsport LVOA-S Handguard"
+    "H3ID": "AR15ForeLVOAS",
+	"Note": "MW map Handguards_AR:Warsport LVOA-S Handguard"
   },
   "63888bbd28e5cc32cc09d2b6": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "PRI Gen III Handguard"
+    "H3ID": "AR15ForePRIGen3Blk",
+	"Note": "MW map Handguards_AR:PRI Gen III Handguard"
   },
   "5a329052c4a28200741e22d3": {
-    "H3ID": "868",
-    "ModulGroup": "Handguards_AR",
-    "ModulPart": "Remington RSASS Forend"
+    "H3ID": "AR15ForeRSASS",
+	"Note": "MW map Handguards_AR:Remington RSASS Forend"
   },
   "5b0800175acfc400153aebd4": {
-    "H3ID": "868",
-    "ModulGroup": "BufferTubes_AR",
-    "ModulPart": "Ergo F93 Stock"
+    "H3ID": "AR15StockF93",
+	"Note": "MW map BufferTubes_AR:Ergo F93 Stock"
   },
   "5947e98b86f774778f1448bc": {
     "H3ID": "868",
@@ -8482,64 +8778,53 @@
     "ModulPart": "Magpul UBR Gen2"
   },
   "602e3f1254072b51b239f713": {
-    "H3ID": "868",
-    "ModulGroup": "BufferTubes_AR",
-    "ModulPart": "Enhanced Buffertube"
+    "H3ID": "AR15TubeEBT",
+	"Note": "MW map BufferTubes_AR:Enhanced Buffertube"
   },
   "5c793fb92e221644f31bfb64": {
-    "H3ID": "868",
-    "ModulGroup": "BufferTubes_AR",
-    "ModulPart": "Strike Industries Buffertube"
+    "H3ID": "AR15TubeSIBlack",
+	"Note": "MW map BufferTubes_AR:Strike Industries Buffertube"
   },
   "5c793fc42e221600114ca25d": {
-    "H3ID": "868",
-    "ModulGroup": "BufferTubes_AR",
-    "ModulPart": "Strike Industries Buffertube"
+    "H3ID": "AR15TubeSIRed",
+	"Note": "MW map BufferTubes_AR:Strike Industries Buffertube"
   },
   "591aef7986f774139d495f03": {
-    "H3ID": "868",
-    "ModulGroup": "BufferTubes_AR",
-    "ModulPart": "Troy PDW Stock"
+    "H3ID": "AR15StockARPDW",
+	"Note": "MW map BufferTubes_AR:Troy PDW Stock"
   },
   "591af10186f774139d495f0e": {
-    "H3ID": "868",
-    "ModulGroup": "BufferTubes_AR",
-    "ModulPart": "Troy PDW Stock"
+    "H3ID": "AR15StockARPDWFDE",
+	"Note": "MW map BufferTubes_AR:Troy PDW Stock"
   },
   "627254cc9c563e6e442c398f": {
-    "H3ID": "868",
-    "ModulGroup": "BufferTubes_AR",
-    "ModulPart": "Strike Industries PDW Stock"
+    "H3ID": "AR15StockSIPDW",
+	"Note": "MW map BufferTubes_AR:Strike Industries PDW Stock"
   },
   "638de3603a1a4031d8260b8c": {
     "H3ID": "868",
     "ModulGroup": "BufferTubes_AR",
-    "ModulPart": "Enhanced Buffertube"
+    "ModulPart": "Standard Buffer-Tube"
   },
   "5649be884bdc2d79388b4577": {
-    "H3ID": "868",
-    "ModulGroup": "BufferTubes_AR",
-    "ModulPart": "A2 Buffertube"
+    "H3ID": "AR15TubeA2Black",
+	"Note": "MW map BufferTubes_AR:A2 Buffertube"
   },
   "5d120a10d7ad1a4e1026ba85": {
-    "H3ID": "868",
-    "ModulGroup": "BufferTubes_AR",
-    "ModulPart": "DoubleStar SOCOM Stock"
+    "H3ID": "AR15StockSOCOM",
+	"Note": "MW map BufferTubes_AR:DoubleStar SOCOM Stock"
   },
   "5a33ca0fc4a282000d72292f": {
-    "H3ID": "868",
-    "ModulGroup": "BufferTubes_AR",
-    "ModulPart": "A2 Buffertube"
+    "H3ID": "AR15TubeA2Black",
+	"Note": "MW map BufferTubes_AR:A2 Buffertube"
   },
   "5d44069ca4b9361ebd26fc37": {
-    "H3ID": "868",
-    "ModulGroup": "BufferTubes_AR",
-    "ModulPart": "Magpul PRS Gen3"
+    "H3ID": "AR10StockPRSBlk",
+	"Note": "MW map BufferTubes_AR:Magpul PRS Gen3"
   },
   "5d4406a8a4b9361e4f6eb8b7": {
-    "H3ID": "868",
-    "ModulGroup": "BufferTubes_AR",
-    "ModulPart": "Magpul PRS Gen3"
+    "H3ID": "AR10StockPRSBlk",
+	"Note": "MW map BufferTubes_AR:Magpul PRS Gen3"
   },
   "5a33cae9c4a28232980eb086": {
     "H3ID": "868",
@@ -8547,9 +8832,8 @@
     "ModulPart": "Magpul PRS Lite"
   },
   "55d44fd14bdc2d962f8b456e": {
-    "H3ID": "868",
-    "ModulGroup": "Charging_AR15",
-    "ModulPart": "AR15 Charging Handle"
+    "H3ID": "AR15ChargeM4",
+	"Note": "MW map Charging_AR15:AR15 Charging Handle"
   },
   "5bb20dbcd4351e44f824c04e": {
     "H3ID": "868",
@@ -8562,39 +8846,32 @@
     "ModulPart": "C7 Claw Charging Handle"
   },
   "56ea7165d2720b6e518b4583": {
-    "H3ID": "868",
-    "ModulGroup": "Charging_AR15",
-    "ModulPart": "Badger Ordinance Charging Handle"
+    "H3ID": "AR15ChargeBadger",
+	"Note": "MW map Charging_AR15:Badger Ordinance Charging Handle"
   },
   "5ea16d4d5aad6446a939753d": {
-    "H3ID": "868",
-    "ModulGroup": "Charging_AR15",
-    "ModulPart": "Geissele ACH Charging Handle"
+    "H3ID": "AR15ChargeGeissele",
+	"Note": "MW map Charging_AR15:Geissele ACH Charging Handle"
   },
   "6033749e88382f4fab3fd2c5": {
-    "H3ID": "868",
-    "ModulGroup": "Charging_AR15",
-    "ModulPart": "Falkor MACH15 Charging Handle"
+    "H3ID": "AR15ChargeM4MACH15",
+	"Note": "MW map Charging_AR15:Falkor MACH15 Charging Handle"
   },
   "5b2240bf5acfc40dc528af69": {
-    "H3ID": "868",
-    "ModulGroup": "Charging_AR15",
-    "ModulPart": "Radian Raptor Charging Handle"
+    "H3ID": "AR15ChargeRaptor",
+	"Note": "MW map Charging_AR15:Radian Raptor Charging Handle"
   },
   "5d44334ba4b9362b346d1948": {
-    "H3ID": "868",
-    "ModulGroup": "Charging_AR15",
-    "ModulPart": "Radian Raptor Charging Handle"
+    "H3ID": "AR15ChargeRaptorFDE",
+	"Note": "MW map Charging_AR15:Radian Raptor Charging Handle"
   },
   "5f633ff5c444ce7e3c30a006": {
-    "H3ID": "868",
-    "ModulGroup": "Charging_AR15",
-    "ModulPart": "Rainier Arms Avalanche Charging Handle"
+    "H3ID": "AR15ChargeAvalanche",
+	"Note": "MW map Charging_AR15:Rainier Arms Avalanche Charging Handle"
   },
   "55d355e64bdc2d962f8b4569": {
-    "H3ID": "868",
-    "ModulGroup": "Uppers_AR",
-    "ModulPart": "M4A1 Upper"
+    "H3ID": "AR15UpperM4",
+	"Note": "MW map Uppers_AR:M4A1 Upper"
   },
   "5c0e2f26d174af02a9625114": {
     "H3ID": "868",
@@ -8602,19 +8879,16 @@
     "ModulPart": "KAC Upper"
   },
   "5d4405aaa4b9361e6a4e6bd3": {
-    "H3ID": "868",
-    "ModulGroup": "Uppers_AR",
-    "ModulPart": "Lone Star Upper"
+    "H3ID": "AR15UpperLS",
+	"Note": "MW map Uppers_AR:Lone Star Upper"
   },
   "5c07a8770db8340023300450": {
-    "H3ID": "868",
-    "ModulGroup": "Uppers_AR",
-    "ModulPart": "Noveske Gen3 Upper"
+    "H3ID": "AR15UpperGen3",
+	"Note": "MW map Uppers_AR:Noveske Gen3 Upper"
   },
   "59bfe68886f7746004266202": {
-    "H3ID": "868",
-    "ModulGroup": "Uppers_AR",
-    "ModulPart": "VLTOR MUR-1S Upper"
+    "H3ID": "AR15UpperVLTOR",
+	"Note": "MW map Uppers_AR:VLTOR MUR-1S Upper"
   },
   "63f5ed14534b2c3d5479a677": {
     "H3ID": "868",
@@ -8622,24 +8896,20 @@
     "ModulPart": "Aeroknox AX//15 Upper"
   },
   "5ae30e795acfc408fb139a0b": {
-    "H3ID": "868",
-    "ModulGroup": "GasBlocks_AR",
-    "ModulPart": "M4 Front Post Gas Block"
+    "H3ID": "AR15GasBlockM4FS",
+	"Note": "MW map GasBlocks_AR:M4 Front Post Gas Block"
   },
   "56eabcd4d2720b66698b4574": {
-    "H3ID": "868",
-    "ModulGroup": "GasBlocks_AR",
-    "ModulPart": "Daniel Defense Low Profile Gas Block"
+    "H3ID": "GasBlockLowProfileBlk",
+	"Note": "MW map GasBlocks_AR:Daniel Defense Low Profile Gas Block"
   },
   "5d00ec68d7ad1a04a067e5be": {
-    "H3ID": "868",
-    "ModulGroup": "GasBlocks_AR",
-    "ModulPart": "JP Gas Block"
+    "H3ID": "AR15GasBlockJP",
+	"Note": "MW map GasBlocks_AR:JP Gas Block"
   },
   "56ea8d2fd2720b7c698b4570": {
-    "H3ID": "868",
-    "ModulGroup": "GasBlocks_AR",
-    "ModulPart": "Windham Weaponry Railed Gas Block"
+    "H3ID": "AR15GasBlockWindham",
+	"Note": "MW map GasBlocks_AR:Windham Weaponry Railed Gas Block"
   },
   "63d3ce281fe77d0f2801859e": {
     "H3ID": "868",
@@ -8647,14 +8917,12 @@
     "ModulPart": "Ballistic Advantage Gas Block"
   },
   "55d4ae6c4bdc2d8b2f8b456e": {
-    "H3ID": "868",
-    "ModulGroup": "BufferStocks_AR",
-    "ModulPart": "M4A1 Standard Stock"
+    "H3ID": "AR15StockM4SS",
+	"Note": "MW map BufferStocks_AR:M4A1 Standard Stock"
   },
   "5fc2369685fd526b824a5713": {
-    "H3ID": "868",
-    "ModulGroup": "BufferStocks_AR",
-    "ModulPart": "B5 Precision Stock"
+    "H3ID": "AR15StockPrecision",
+	"Note": "MW map BufferStocks_AR:B5 Precision Stock"
   },
   "606587d11246154cad35d635": {
     "H3ID": "868",
@@ -8662,89 +8930,72 @@
     "ModulPart": "MFT BMS"
   },
   "5a9eb32da2750c00171b3f9c": {
-    "H3ID": "868",
-    "ModulGroup": "BufferStocks_AR",
-    "ModulPart": "Fab Defense GL Shock Stock"
+    "H3ID": "AR15StockGLShock",
+	"Note": "MW map BufferStocks_AR:Fab Defense GL Shock Stock"
   },
   "5bfe86df0db834001b734685": {
-    "H3ID": "868",
-    "ModulGroup": "BufferStocks_AR",
-    "ModulPart": "Fab Defense GLR16 Stock"
+    "H3ID": "AR15StockGLR16",
+	"Note": "MW map BufferStocks_AR:Fab Defense GLR16 Stock"
   },
   "5c87a07c2e2216001219d4a2": {
-    "H3ID": "868",
-    "ModulGroup": "BufferStocks_AR",
-    "ModulPart": "HK E1 Stock"
+    "H3ID": "AR15StockHKE1",
+	"Note": "MW map BufferStocks_AR:HK E1 Stock"
   },
   "5bb20e70d4351e0035629f8f": {
-    "H3ID": "868",
-    "ModulGroup": "BufferStocks_AR",
-    "ModulPart": "HK Slimline Stock"
+    "H3ID": "AR15StockHKSlim",
+	"Note": "MW map BufferStocks_AR:HK Slimline Stock"
   },
   "5beec8c20db834001d2c465c": {
-    "H3ID": "868",
-    "ModulGroup": "BufferStocks_AR",
-    "ModulPart": "AK12 Stock"
+    "H3ID": "AR15StockAK12",
+	"Note": "MW map BufferStocks_AR:AK12 Stock"
   },
   "5ae30c9a5acfc408fb139a03": {
-    "H3ID": "868",
-    "ModulGroup": "BufferStocks_AR",
-    "ModulPart": "LMT SOPMOD Stock"
+    "H3ID": "AR15StockSOPMOD",
+	"Note": "MW map BufferStocks_AR:LMT SOPMOD Stock"
   },
   "5d135e83d7ad1a21b83f42d8": {
-    "H3ID": "868",
-    "ModulGroup": "BufferStocks_AR",
-    "ModulPart": "Magpul CTR Stock"
+    "H3ID": "AR15StockCTRBLK",
+	"Note": "MW map BufferStocks_AR:Magpul CTR Stock"
   },
   "5d135ecbd7ad1a21c176542e": {
-    "H3ID": "868",
-    "ModulGroup": "BufferStocks_AR",
-    "ModulPart": "Magpul CTR Stock"
+    "H3ID": "AR15StockCTRFDE",
+	"Note": "MW map BufferStocks_AR:Magpul CTR Stock"
   },
   "56eabf3bd2720b75698b4569": {
-    "H3ID": "868",
-    "ModulGroup": "BufferStocks_AR",
-    "ModulPart": "Magpul MOE Stock"
+    "H3ID": "AR15StockMOE_blk",
+	"Note": "MW map BufferStocks_AR:Magpul MOE Stock"
   },
   "58d2946386f774496974c37e": {
-    "H3ID": "868",
-    "ModulGroup": "BufferStocks_AR",
-    "ModulPart": "Magpul MOE Stock"
+    "H3ID": "AR15StockMOE_fde",
+	"Note": "MW map BufferStocks_AR:Magpul MOE Stock"
   },
   "58d2946c86f7744e271174b5": {
-    "H3ID": "868",
-    "ModulGroup": "BufferStocks_AR",
-    "ModulPart": "Magpul MOE Stock"
+    "H3ID": "AR15StockMOE_od",
+	"Note": "MW map BufferStocks_AR:Magpul MOE Stock"
   },
   "58d2947686f774485c6a1ee5": {
-    "H3ID": "868",
-    "ModulGroup": "BufferStocks_AR",
-    "ModulPart": "Magpul MOE Stock"
+    "H3ID": "AR15StockMOE_od",
+	"Note": "MW map BufferStocks_AR:Magpul MOE Stock"
   },
   "58d2947e86f77447aa070d53": {
-    "H3ID": "868",
-    "ModulGroup": "BufferStocks_AR",
-    "ModulPart": "Magpul MOE Stock"
+    "H3ID": "AR15StockMOE_gry",
+	"Note": "MW map BufferStocks_AR:Magpul MOE Stock"
   },
   "5947c73886f7747701588af5": {
-    "H3ID": "868",
-    "ModulGroup": "BufferStocks_AR",
-    "ModulPart": "MFT BUS"
+    "H3ID": "AR15StockMFTBus",
+	"Note": "MW map BufferStocks_AR:MFT BUS"
   },
   "5c793fde2e221601da358614": {
-    "H3ID": "868",
-    "ModulGroup": "BufferStocks_AR",
-    "ModulPart": "Strike Industries Viper Stock"
+    "H3ID": "AR15StockViperBlk",
+	"Note": "MW map BufferStocks_AR:Strike Industries Viper Stock"
   },
   "5b39f8db5acfc40016387a1b": {
-    "H3ID": "868",
-    "ModulGroup": "BufferStocks_AR",
-    "ModulPart": "VLTOR EMOD Stock"
+    "H3ID": "AR15StockEMOD",
+	"Note": "MW map BufferStocks_AR:VLTOR EMOD Stock"
   },
   "628a85ee6b1d481ff772e9d5": {
-    "H3ID": "868",
-    "ModulGroup": "BufferStocks_AR",
-    "ModulPart": "SBA3 Pistol Brace"
+    "H3ID": "AR15StockSBa3Blk",
+	"Note": "MW map BufferStocks_AR:SBA3 Pistol Brace"
   },
   "602e620f9b513876d4338d9a": {
     "H3ID": "868",
@@ -8752,19 +9003,16 @@
     "ModulPart": "Fab Defense GL-Core CP Stock"
   },
   "5fce16961f152d4312622bc9": {
-    "H3ID": "868",
-    "ModulGroup": "BufferStocks_AR",
-    "ModulPart": "Kriss DS150 Stock"
+    "H3ID": "AR15StockDefianceFDE",
+	"Note": "MW map BufferStocks_AR:Kriss DS150 Stock"
   },
   "5fbbaa86f9986c4cff3fe5f6": {
-    "H3ID": "868",
-    "ModulGroup": "BufferStocks_AR",
-    "ModulPart": "Kriss DS150 Stock"
+    "H3ID": "AR15StockDefianceBlk",
+	"Note": "MW map BufferStocks_AR:Kriss DS150 Stock"
   },
   "5a33e75ac4a2826c6e06d759": {
-    "H3ID": "868",
-    "ModulGroup": "BufferTubes_AR",
-    "ModulPart": "Hera Arms CQR Stock"
+    "H3ID": "AR15StockCQR",
+	"Note": "MW map BufferTubes_AR:Hera Arms CQR Stock"
   },
   "5a26ac0ec4a28200741e1e18": {
     "H3ID": "NW9x21-SP13"
@@ -8913,6 +9161,104 @@
   "5de8eac42a78646d96665d91": {
     "H3ID": "NWMP9Magazine30"
   },
+  "623063e994fc3f7b302a9696": {
+    "H3ID": "NWG36",
+	"Note": "Should be MW"
+  },
+  "622b379bf9cfc87d675d2de5": {
+    "H3ID": "NWG36228Barrel",
+	"Note": "Should be MW"
+  },
+  "622b3858034a3e17ad0b81f5": {
+    "H3ID": "NWG36318Barrel",
+	"Note": "Should be MW"
+  },
+  "622b38c56762c718e457e246": {
+    "H3ID": "NWG36480Barrel",
+	"Note": "Should be MW"
+  },
+  "622b3c081b89c677a33bcda6": {
+    "H3ID": "NWG36CTop",
+	"Note": "Should be MW"
+  },
+  "622b3d5cf9cfc87d675d2de9": {
+    "H3ID": "NWSightTopG36",
+	"Note": "Should be MW"
+  },
+  "622b4d7df9cfc87d675d2ded": {
+    "H3ID": "NW3TimeG36",
+	"Note": "Should be MW"
+  },
+  "622b4f54dc8dcc0ba8742f85": {
+    "H3ID": "NW1TimeG36",
+	"Note": "Should be MW"
+  },
+  "622f039199f4ea1a4d6c9a17": {
+    "H3ID": "NWARMagAdapt",
+	"Note": "Should be MW"
+  },
+  "622f140da5958f63c67f1735": {
+    "H3ID": "NWG36Stock",
+	"Note": "Should be MW"
+  },
+  "622f14e899892a7f9e08f6c5": {
+    "H3ID": "NWG36KVStock",
+	"Note": "Should be MW"
+  },
+  "6231654c71b5bc3baa1078e5": {
+    "H3ID": "NWG366Vent",
+	"Note": "Should be MW"
+  },
+  "62386b7153757417e93a4e9f": {
+    "H3ID": "NWG364Vent",
+	"Note": "Should be MW"
+  },
+  "62386b2adf47d66e835094b2": {
+    "H3ID": "NWG362Vent",
+	"Note": "Should be MW"
+  },
+  "623166e08c43374ca1567195": {
+    "H3ID": "NWG36PicSightF"
+  },
+  "6231670f0b8aa5472d060095": {
+    "H3ID": "NWG36PicSightF"
+  },
+  "62307b7b10d2321fa8741921": {
+    "H3ID": "NWG36Mag"
+  },
+  "622f16a1a5958f63c67f1737": {
+    "H3ID": "NWG36TacStop"
+  },
+  "622f07cfae33bc505b2c4dd5": {
+    "H3ID": "NWG36KMuz"
+  },
+  "622f0ee47762f55aaa68ac87": {
+    "H3ID": "NWG36CMuz"
+  },
+  "622f128cec80d870d349b4e8": {
+    "H3ID": "NWG36Muz"
+  },
+  "622b397c9a3d4327e41843b6": {
+    "H3ID": "NWG36Bipod"
+  },
+  "622efbcb99f4ea1a4d6c9a15": {
+    "H3ID": "NWHKVSight"
+  },
+  "622efdf8ec80d870d349b4e5": {
+    "H3ID": "NWRISTop"
+  },
+  "62444cb99f47004c781903eb": {
+	"Note": "Missing, integrated on handguards"
+  },
+  "62444cd3674028188b052799": {
+	"Note": "Missing, integrated on handguards"
+  },
+  "622b327b267a1b13a44abea3": {
+	"Note": "Missing, integrated on barrels"
+  },
+  "622f02437762f55aaa68ac85": {
+	"Note": "Missing, integrated on barrels"
+  },
   "5fc3e272f8b6a877a729eac5": {
     "H3ID": "UMP45",
 	"Note": "Should be Modul"
@@ -8949,6 +9295,58 @@
   "5fc4b9b17283c4046c5814d7": {
     "H3ID": "SuppressorGepard",
 	"Note": "Should be SilencerCo Omega 45k .45 ACP sound suppressor"
+  },
+  "62e14904c2699c0ec93adc47": {
+    "H3ID": "NWSR2M",
+	"Note": "Should be Modul"
+  },
+  "633a98eab8b0506e48497c1a": {
+    "H3ID": "NWSR2M20"
+  },
+  "62e153bcdb1a5c41971c1b5b": {
+    "H3ID": "NWSR2M30"
+  },
+  "62e281349ecd3f493f6df954": {
+    "H3ID": "NWZenitB17"
+  },
+  "62e2a7138e1ac9380579c122": {
+    "H3ID": "NWSR2SD"
+  },
+  "62ff9920fe938a24c90c10d2": {
+    "H3ID": "NWKPSR2"
+  },
+  "62ff9faffe938a24c90c10df": {
+    "H3ID": "NWSR2Flash"
+  },
+  "637ba29bf7ca6372bf2613db": {
+    "Note": "Missing, Should be modul part of NWSR2M"
+  },
+  "637ba19df7ca6372bf2613d7": {
+    "Note": "Missing, Should be modul part of NWSR2M"
+  },
+  "62ed189fb3608410ef5a2bfc": {
+    "Note": "Missing, Should be modul part of NWSR2M"
+  },
+  "637b9c37b7e3bc41b21ce71a": {
+    "Note": "Missing, integrated on receiver"
+  },
+  "62ed1921b3608410ef5a2c04": {
+    "Note": "Missing, integrated on receiver"
+  },
+  "62e2a754b6c0ee2f230cee0f": {
+    "Note": "Missing, integrated on receiver"
+  },
+  "62e2969582ebf260c20539c2": {
+    "Note": "Missing, integrated on receiver"
+  },
+  "62e292e7b6c0ee2f230cee00": {
+    "Note": "Missing, integrated on receiver"
+  },
+  "62e27a7865f0b1592a49e17b": {
+    "Note": "Missing, integrated on receiver"
+  },
+  "62e15547db1a5c41971c1b5e": {
+    "Note": "Missing, integrated on receiver"
   },
   "5ba26383d4351e00334c93d9": {
     "H3ID": "modulmp7",
@@ -9115,8 +9513,7 @@
 	"Note": "Should be 9x19mm FMJ M882"
   },
   "5c0d56a986f774449d5de529": {
-    "H3ID": "9x19mmCartridgeJHP",
-	"Note": "Should be 9x19mm RIP"
+    "H3ID": "Ammo_9x19mm_RIP"
   },
   "5c3df7d588a4501f290594e5": {
     "H3ID": "9x19mmCartridgeTracer",
@@ -9127,8 +9524,7 @@
 	"Note": "Should be 9x19mm PBP gzh"
   },
   "5efb0e16aeb21837e749c7ff": {
-    "H3ID": "9x19mmCartridge+PJHP",
-	"Note": "Should be 9x19mm QuakeMaker"
+    "H3ID": "Ammo_9x19mm_Quake"
   },
   "5cc80f38e4a949001152b560": {
     "H3ID": "57x28mmCartridgeAP",
@@ -9833,6 +10229,23 @@
   "6193d338de3cdf1d2614a6fc": {
     "H3ID": "NWUSP45StdMag"
   },
+  "624c2e8614da335f1e034d8c": {
+	"Note": "Missing, Rhino 200DS, H3 has no 9x19 revolver that I know of"
+  },
+  "624c3074dbbd335e8e6becf3": {
+	"Note": "Missing, Rhino 200DS, H3 has no 9x19 revolver that I know of"
+  },
+  "633ec7c2a6918cb895019c6c": {
+    "H3ID": "RSH12.Muzz",
+	"Note": "Should be Modul"
+  },
+  "633ec6ee025b096d320a3b15": {
+    "H3ID": "RSH12SL.Muzz",
+	"Note": "Missing, Should be cylinder, using ID for speedloader"
+  },
+  "633ec8e4025b096d320a3b1e": {
+	"Note": "Missing, Should be modul part of RSH-12"
+  },
   "61a4c8884f95bc3b2c5dc96f": {
     "H3ID": "Rhino 50",
 	"Note": "Should be Modul"
@@ -9877,6 +10290,10 @@
     "H3ID": "FlaregunHighPressure",
 	"Note": "Should be ZiD SP-81 26x75 signal pistol"
   },
+  "635267f063651329f75a4ee8": {
+    "H3ID": "12GaugeShellRedFlare",
+	"Note": "Should be 26x75mm distress signal flare (poison green)"
+  },
   "62389aaba63f32501b1b444f": {
     "H3ID": "12GaugeShellRedFlare",
 	"Note": "Should be 26x75mm flare cartridge"
@@ -9894,6 +10311,10 @@
 	"Note": "Should be 26x75mm flare cartridge"
   },
   "6217726288ed9f0845317459": {
+    "H3ID": "Sparkler",
+	"Note": "Should be RSP-30 reactive signal cartridge"
+  },
+  "624c0b3340357b5f566e8766": {
     "H3ID": "Sparkler",
 	"Note": "Should be RSP-30 reactive signal cartridge"
   },
@@ -10090,6 +10511,9 @@
   },
   "5b4736a986f774040571e998": {
     "H3ID": "MLokToPicRail1HalfSlot"
+  },
+  "623c2f4242aee3103f1c44b7": {
+    "H3ID": "MLokToPicRail2HalfSlot"
   },
   "5c0102b20db834001d23eebc": {
     "H3ID": "MLokToPicRail2HalfSlot"
@@ -10748,7 +11172,7 @@
     "H3ID": "SupDeadAirSMSBlk"
   },
   "612e0d3767085e45ef14057f": {
-    "H3ID": "MuzzleBrake_DD"
+    "H3ID": "MuzzleBrake_DD",
 	"Note": "Should be AWC PSR 7.62x51 muzzle brake"
   },
   "5cf6937cd7f00c056c53fb39": {
@@ -10954,6 +11378,9 @@
   "5bead2e00db834001c062938": {
     "H3ID": "ftw.melee.mpl50"
   },
+  "63920105a83e15700a00f168": {
+    "H3ID": "Tactical_Tomahawk"
+  },
   "5c0126f40db834002a125382": {
     "H3ID": "Improvised_ClimbingAxe"
   },
@@ -10973,6 +11400,10 @@
     "H3ID": "GarageTool_SledgeHammer",
 	"Note": "Should be Superfors DB 2020 Dead Blow Hammer"
   },
+  "63a0b208f444d32d6f03ea1e": {
+    "H3ID": "GarageTool_SledgeHammerOld",
+	"Note": "Should be Fierce Blow sledgehammer"
+  },
   "5a1eaa87fcdbcb001865f75e": {
 	"Note": "Missing, waiting for next H3 release with NV and thermals"
   },
@@ -10984,5 +11415,29 @@
   },
   "58ac60eb86f77401897560ff": {
 	"Note": "Dev item, unused"
+  },
+  "63b35f281745dd52341e5da7": {
+	"Note": "Grenade shrapnel item"
+  },
+  "624c0570c9b794431568f5d5": {
+	"Note": "Tarkov unused (?)"
+  },
+  "624c09cfbc2e27219346d955": {
+	"Note": "Tarkov unused (?)"
+  },
+  "624c09da2cec124eb67c1046": {
+	"Note": "Tarkov unused (?)"
+  },
+  "624c09e49b98e019a3315b66": {
+	"Note": "Tarkov unused (?)"
+  },
+  "6241c316234b593b5676b637": {
+	"Note": "Tarkov unused (?)"
+  },
+  "648c1a965043c4052a4f8505": {
+	"Note": "Tarkov unused (?)"
+  },
+  "628120f210e26c1f344e6558": {
+	"Note": "Tarkov unused, named !!!DO_NOT_USE!!!AI AXMC 7.62x51 10-round magazine"
   }
 }

@@ -64,142 +64,17 @@
 60b0f988c4449e4cb624c1da:Evasion armband
 614451b71e5874611e2c7ae5:Bottle of Tarkovskaya vodka
 6331bb0d1aa9f42b804997a6:Secure Flash drive V3
-
-624c0570c9b794431568f5d5:Signal flare (Green)
-624c09cfbc2e27219346d955:Signal flare (Red)
-624c09da2cec124eb67c1046:Signal flare (White)
-624c09e49b98e019a3315b66:Signal flare (Yellow)
-623063e994fc3f7b302a9696:HK G36 5.56x45 assault rifle
-622b327b267a1b13a44abea3:HK G36 gas block
-622b379bf9cfc87d675d2de5:HK G36 5.56x45 228mm barrel
-622b3858034a3e17ad0b81f5:HK G36 5.56x45 318mm barrel
-622b38c56762c718e457e246:HK G36 5.56x45 480mm barrel
-622b397c9a3d4327e41843b6:HK G36 bipod
-622b3c081b89c677a33bcda6:HK G36 sight mount
-622b3d5cf9cfc87d675d2de9:HK G36 optic rail with flip-up sights
-622b4d7df9cfc87d675d2ded:HK G36 Hensoldt HKV 3x carry handle
-622b4f54dc8dcc0ba8742f85:HK G36 Hensoldt HKV ZF 1.5x carry handle
-622f02437762f55aaa68ac85:HK G36 magwell
-622f039199f4ea1a4d6c9a17:HK G36 STANAG magwell
-622f07cfae33bc505b2c4dd5:HK G36 5.56x45 flash hider
-622f0ee47762f55aaa68ac87:HK G36C 5.56x45 4-prong flash hider
-622f128cec80d870d349b4e8:HK G36 5.56x45 4-prong flash hider
-622f140da5958f63c67f1735:HK G36 polymer stock
-622f14e899892a7f9e08f6c5:HK G36 KV adjustable stock
-622f16a1a5958f63c67f1737:HK G36 hand stop
-62307b7b10d2321fa8741921:HK G36 5.56x45 30-round magazine
-6231654c71b5bc3baa1078e5:HK G36 6-vent handguard
-623166e08c43374ca1567195:HK G36 front sight
-6231670f0b8aa5472d060095:HK G36 rear sight
-62386b2adf47d66e835094b2:HK G36 2-vent handguard
-62386b7153757417e93a4e9f:HK G36 4-vent handguard
-62444cb99f47004c781903eb:HK G36 bottom handguard rail
-62444cd3674028188b052799:HK G36 side handguard rail
-622efbcb99f4ea1a4d6c9a15:Hensoldt RV red dot sight
-622efdf8ec80d870d349b4e5:Hensoldt RIS top rail
-623c2f4242aee3103f1c44b7:CNC Guns KeyMod 4 inch rail
-6241c316234b593b5676b637:Airsoft 6mm BB
-624c0b3340357b5f566e8766:RSP-30 reactive signal cartridge (Yellow)
-624c29ce09cd027dff2f8cd7:CNC Guns OV-SV98 M12B stock
-624c2e8614da335f1e034d8c:Chiappa Rhino 200DS 9x19 revolver
-624c3074dbbd335e8e6becf3:Chiappa Rhino 9x19 6-round cylinder
-6259b864ebedf17603599e88:Benelli M3 Super 90 dual-mode 12ga shotgun
-6259bdcabd28e4721447a2aa:Benelli M3 Super 90 12ga 7-shell magazine
-6259c2c1d714855d182bad85:Benelli M3 Super 90 12ga 500mm barrel
-6259c3387d6aab70bc23a18d:Benelli M3 telescopic stock
-6259c3d8012d6678ec38eeb8:Benelli M3 telescopic stock pistol grip
-6259c4347d6aab70bc23a190:Benelli M3 forend
-625eb0faa6e3a82193267ad9:Benelli M3 Mesa Tactical Urbino stock
-625ebcef6f53af4aa66b44dc:Benelli M3 Ghost Ring rear sight
-625ec45bb14d7326ac20f572:Benelli M3 Super 90 charging handle
-625ed7c64d9b6612df732146:Benelli M3 Super 90 upper receiver top rail
-625ff2ccb8c587128c1a01dd:Benelli M3 Super 90 12ga 5-shell magazine cap
-625ff2eb9f5537057932257d:Benelli M3 Super 90 12ga Toni System 9-shell magazine
-625ff3046d721f05d93bf2ee:Benelli M3 Super 90 12ga Toni System 11-shell magazine
-625ff31daaaa8c1130599f64:Benelli M3 Super 90 12ga Toni System 13-shell magazine
-6267c6396b642f77f56f5c1c:Daniel Defense 25mm accessory ring mount
-627bce33f21bc425b06ab967:M32A1 40mm cylinder
-627e14b21713922ded6f2c15:Accuracy International AXMC .338 LM bolt-action sniper rifle
-62811cd7308cb521f87a8f99:AI AXMC .338 LM bolt assembly
-62811e2510e26c1f344e6554:AI AXMC pistol grip
-62811e335631d45211793c95:AI AXMC GTAC AR-type pistol grip adapter
-62811f828193841aca4a45c3:AI AXMC AX buttstock
-62811fbf09427b40ab14e767:AI AXMC upper receiver
-6281204f308cb521f87a8f9b:AI AXMC .338 LM chassis
-628120621d5df4475f46a335:AI AXMC thread protection cap
-62812081d23f207deb0ab216:AI .338 LM Tactical Muzzle Brake 
-6281209662cba23f6c4d7a19:AI AXMC AX KeySlot 16 inch handguard
-628120c21d5df4475f46a337:AI AXMC AT X Top Rail 
-628120d309427b40ab14e76d:AI AXMC Adapter Kit short length rail
-628120dd308cb521f87a8fa1:AI AXMC Adapter Kit medium length rail
-628120f210e26c1f344e6558:!!!DO_NOT_USE!!!AI AXMC 7.62x51 10-round magazine
-628120fd5631d45211793c9f:AI AXMC .338 LM 10-round magazine
-6281212a09427b40ab14e770:AI AXMC padded handguard grip
-628121434fa03b6b6c35dc6a:AI AXMC .338 LM 28 inch barrel
 628393620d8524273e7eb028:Working hard drive
-6284bd5f95250a29bc628a30:Milkor M2A1 grenade launcher reflex sight
-628a60ae6b1d481ff772e9c8:Rifle Dynamics RD-704 7.62x39 assault rifle
-62e14904c2699c0ec93adc47:SR-2M "Veresk" 9x21 submachine gun
-62e153bcdb1a5c41971c1b5b:SR-2M 9x21 30-round magazine
-62e15547db1a5c41971c1b5e:SR-2M polymer handguard
-62e27a7865f0b1592a49e17b:SR-2M dust cover
-62e281349ecd3f493f6df954:SR-2M Zenit B-17 mount
-62e292e7b6c0ee2f230cee00:SR-2M folding stock
-62e2969582ebf260c20539c2:SR-2MP folding stock
-62e2a7138e1ac9380579c122:SR-2M 9x21 sound suppressor (SV-1381)
-62e2a754b6c0ee2f230cee0f:SR-2M 9x21 hand stopper
-62ed189fb3608410ef5a2bfc:SR-2M short side rail
-62ed1921b3608410ef5a2c04:SR-2M side rail
-62ff9920fe938a24c90c10d2:SR-2M KP-SR2 reflex sight
-62ff9faffe938a24c90c10df:KP-SR2 sight shade
-633a98eab8b0506e48497c1a:SR-2M 9x21 20-round magazine
-637b9c37b7e3bc41b21ce71a:SR-2M pistol grip
-637ba19df7ca6372bf2613d7:SR-2M polymer handguard (Black)
-637ba29bf7ca6372bf2613db:SR-2M pistol grip (Black)
-62e7e7bbe6da9612f743f1e0:GP-25 "Kostyor" 40mm underbarrel grenade launcher
-62e7c4fba689e8c9c50dfc38:Steyr AUG A1 5.56x45 assault rifle
-62e7c72df68e7a0676050c77:Steyr AUG A3 5.56x45 receiver
-62e7c7f3c34ea971710c32fc:Steyr AUG A1 5.56x45 20 inch barrel
-62e7c880f68e7a0676050c7c:Steyr AUG A1 charging handle
-62e7c8f91cd3fde4d503d690:Steyr AUG A3 M1 high sight mount
-62e7c98b550c8218d602cbb4:Steyr AUG 5.56x45 30-round magazine
-62ea7c793043d74a0306e19f:Steyr AUG A1 STG77 1.5x optic sight
-62ebba1fb658e07ef9082b5a:Steyr AUG A3 M1 low sight mount
-62ebbc53e3c1e1ec7c02c44f:Steyr AUG A3 charging handle
-62ebd290c427473eff0baafb:Steyr AUG A3 M1 1.5x optic sight
-630e1adbbd357927e4007c09:Steyr AUG 5.56x45 10-round magazine
-630e295c984633f1fb0e7c30:Steyr AUG 5.56x45 42-round magazine
-630e39c3bd357927e4007c15:Steyr AUG A3 5.56x45 16 inch barrel
-630f27f04f3f6281050b94d7:Steyr AUG RAT Worx 5.56x45 muzzle device adapter
-630f2872911356c17d06abc5:Steyr AUG A1 5.56x45 closed flash hider
-630f28f0cadb1fe05e06f004:Steyr AUG A3 5.56x45 closed flash hider
-630f291b9f66a28b37094bb8:Steyr AUG A3 5.56x45 muzzle brake
-630f2982cdb9e392db0cbcc7:Steyr AUG Relfex T4AUG Ranger 5.56x45 sound suppressor
-63171672192e68c5460cebc5:Steyr AUG A3 5.56x45 assault rifle
-6333f05d1bc0e6217a0e9d34:Steyr AUG A1 5.56x45 16 inch barrel
-633ec6ee025b096d320a3b15:RSh-12 12.7x55 5-round cylinder
-633ec7c2a6918cb895019c6c:RSh-12 12.7x55 revolver
-633ec8e4025b096d320a3b1e:RSh-12 pistol grip
-633ffb5d419dbf4bea7004c6:Airdrop weapon crate
+638dfc803083a019d447768e:Working hard drive
 634959225289190e5e773b3b:Pumpkin with sweets
 63495c500c297e20065a08b1:Old hand scythe
-634e61b0767cb15c4601a877:Steyr AUG vertical foregrip
-634eba08f69c710e0108d386:Steyr AUG Ase Utra S Series SL7i 5.56x45 sound suppressor
-635267f063651329f75a4ee8:26x75mm distress signal flare (poison green)
-636270263f2495c26f00b007:Zryachiy's balaclava (folded)
-6374a7e7417239a7bf00f042:PM bakelite side grips
-6374a822e629013b9c0645c8:PM pistol slide
-637784c5f7b3f4ac1a0d1a9a:PM FAB Defense PM-G pistol grip
-637b6d610aef6cfc5e02dd14:PM Tactic Kit pistol grip
 6389c6c7dbfd5e4b95197e68:Aquapeps water purification tablets
 638cbb3ba63f1b49be6a300e:Secure Flash drive
 638cbc68a63f1b49be6a3010:Registered letter
-638db77630c4240f9e06f8b6:SAG Bit low profile dovetail sidemount
-638df4cc7b560b03794a18d2:AG guitar pick
-638dfc803083a019d447768e:Working hard drive
 638e0057ab150a5f56238960:Housing office journal
 638e9d5536b3b72c944e2fc7:Flash drive with recordings
-63920105a83e15700a00f168:SOG Voodoo Hawk tactical tomahawk
+636270263f2495c26f00b007:Zryachiy's balaclava (folded)
+638df4cc7b560b03794a18d2:AG guitar pick
 63927b29c115f907b14700b9:Chemical container with samples
 6393262086e646067c176aa2:Medical observation record
 63989ced706b793c7d60cfef:Informant's journal
@@ -207,41 +82,16 @@
 6398a0861c712b1e1d4dadf1:Forged Lightkeeper intelligence
 6398a4cfb5992f573c6562b3:Secured tape
 6399f54b0a36db13c823ad21:Radio transmitter body
-639af924d0446708ee62294e:FN40GL Mk2 grenade launcher
-639c3fbbd0446708ee622ee9:FN40GL Mk2 grenade launcher
-63a0b208f444d32d6f03ea1e:Fierce Blow sledgehammer
 63a8970d7108f713591149f5:Small Christmas gift
 63a897c6b1ff6e29734fcc95:Large Christmas gift
 63a898a328e385334e0640a5:Christmas gift
 63a943cead5cc12f22161ff7:Accountant's notes
-63b35f281745dd52341e5da7:F1 Shrapnel
-63c6adcfb4ba094317063742:PM rear sight
-63fc449f5bd61c6cf3784a88:Armasight Zeus universal base
 63fc44e2429a8a166c7f61e6:Armasight Zeus-Pro 640 2-16x50 thermal scope
 63fc4533b10b17385349b565:Armasight Zeus Pro scope eyecup
-6410733d5dd49d77bd07847e:Tokarev AVT-40 7.62x54R automatic rifle
-6410745d5dd49d77bd078485:AVT-40 wooden stock 
-641074a07fd350b98c0b3f96:AVT-40 7.62x54R 15-round magazine
-6410758c857473525b08bb77:SVT-40 7.62x54R 625mm barrel
-64119cdbdcf48d656f0aa272:SVT dust cover 
-64119d1f2c6d6f921a0929f8:SVT-40 7.62x54R muzzle brake
-64119d672c6d6f921a0929fb:SVT-40 front sight
-64119d90dcf48d656f0aa275:SVT-40 rear sight
-641dc35e19604f20c800be18:SVT-40 Tokarev PU mount
-6422e1ea3c0f06190302161a:SVT-40 7.62x54R 10-round magazine
-64381b582bb1c5dedd0fc925:WeaponStand_Stash_2
-64381b6e44b37a080d0245b9:WeaponStand_Stash_3
-643ea5b23db6f9f57107d9fd:Tokarev SVT-40 7.62x54R rifle
-64637076203536ad5600c990:Kalashnikov PKM 7.62x54R machine gun
-646371779f5f0ea59a04c204:PK pistol grip
-646371a9f2404ab67905c8e6:PKM wooden stock
-646371faf2404ab67905c8e9:PKM 7.62x54R 658mm barrel
-646372518610c40fc20204e8:PK 7.62x54R 100-round box
-64639a9aab86f8fd4300146c:PKP 7.62x54R 658mm barrel
-6464d870bb2c580352070cc4:PK bipod
-64748cb8de82c85eaf0a273a:MP-43 12ga sawed-off double-barrel shotgun
-64748d02d1c009260702b526:MP-43 12ga sawed-off 310mm barrel
 64897ffc3656831810043165:Sealed weapon case
+64abd93857958b4249003418:Interceptor OTV body armor (UCP)
+64be79c487d1510151095552:NPP KlASS Kora-Kulon body armor
+64be79e2bf8412471d0d9bcc:NPP KlASS Kora-Kulon body armor (Digital Flora)
 648983d6b5a2df1c815a04ec:12.7x55mm PS12B (10 pcs)
 6489848173c462723909a14b:.338 Lapua Magnum AP ammo pack (20 pcs)
 648984b8d5b4df6140000a1a:7.62x54mm R BS ammo pack (20 pcs)
@@ -257,18 +107,6 @@
 6489879db5a2df1c815a04ef:.45 ACP AP ammo pack (50 pcs)
 648987d673c462723909a151:9x19mm PBP ammo pack (50 pcs)
 64898838d5b4df6140000a20:12/70 AP-20 ammo pack (25 pcs)
-648afce7ec6bb25b2608defb:PM FAB Defense PM-G pistol grip (Olive Drab)
-648c1a965043c4052a4f8505:ebudal
-6491c6f6ef312a876705191b:PK Zenit B-50 handguard
-6492c6dd60fdb10a020621a2:PK Zenit B-50 16mm top mount
-6492c8bba6e68e06fb0bae87:PK Zenit B-50 66mm top mount
-6492d7847363b8a52206bc52:PK Zenit PT-2 "Klassika" stock
-6492e3a97df7d749100e29ee:PKP polymer stock
-6492ef63cfcf7c89e701abf1:PK Zenit DTK-1P 7.62x54R muzzle brake
-6492efb8cfcf7c89e701abf3:PKM 7.62x54R slotted flash hider
-6492efe46cc7e29a6f03b2a0:PKM 7.62x54R muzzle brake
-6492fb8253acae0af00a29b6:PK rear sight
-64abd93857958b4249003418:Interceptor OTV body armor (UCP)
 64ace9d9b5bf5e95f50a4c1d:7.62x39mm FMJ ammo pack (20 pcs)
 64ace9f9c4eda9354b0226aa:7.62x39mm PP gzh ammo pack (20 pcs)
 64ace9ff03378853630da538:7.62x39mm SP ammo pack (20 pcs)
@@ -281,10 +119,3 @@
 64aceaecc4eda9354b0226b6:4.6x30mm JSP SX ammo pack (40 pcs)
 64aceafcb5bf5e95f50a4c20:9x19mm FMJ M882 ammo pack (30 pcs)
 64acee6903378853630da544:7.62x54mm R HP BT ammo pack (20 pcs)
-64b8f7968532cf95ee0a0dbf:7.62x54mm R FMJ
-64b8f7b5389d7ffd620ccba2:7.62x54mm R SP BT
-64b8f7c241772715af0f9c3d:7.62x54mm R HP BT
-64be79c487d1510151095552:NPP KlASS Kora-Kulon body armor
-64be79e2bf8412471d0d9bcc:NPP KlASS Kora-Kulon body armor (Digital Flora)
-64ca3d3954fc657e230529cc:Kalashnikov PKP 7.62x54R infantry machine gun
-64cbad529f7cf7f75c077fd5:PK pistol grip (Black)
