@@ -10,7 +10,6 @@ using Valve.Newtonsoft.Json.Linq;
 using Valve.VR;
 using UnityEngine.UI;
 using ModularWorkshop;
-using static UnityEngine.EventSystems.EventTrigger;
 using System.Text.RegularExpressions;
 
 namespace EFM
@@ -898,11 +897,315 @@ namespace EFM
                                 Mod.LogInfo("\tDebug: Loading indoor range");
                                 SteamVR_LoadLevel.Begin("IndoorRange", false, 0.5f, 0f, 0f, 0f, 1f);
                                 break;
+                            case 21: // Generate default item data
+                                Mod.LogInfo("\tDebug: Generate default item data");
+
+                                List<string> logLines = new List<string>();
+                                Dictionary<string, JToken> itemMap = JObject.Parse(File.ReadAllText(path + "/database/ItemMap.json")).ToObject<Dictionary<string, JToken>>();
+                                JObject oldItemData = JObject.Parse(File.ReadAllText(path + "/database/OldDefaultItemData.json"));
+                                JObject locale = JObject.Parse(File.ReadAllText(path + "/database/locales/global/en.json"));
+                                JArray marketDumpDB = JArray.Parse(File.ReadAllText(path + "/database/tarkovMarketItemsDump.json"));
+                                Dictionary<string, JToken> marketDump = new Dictionary<string, JToken>();
+                                for(int i=0; i < marketDumpDB.Count; ++i)
+                                {
+                                    marketDump.Add(marketDumpDB[i]["_id"].ToString(), marketDumpDB[i]);
+                                }
+                                JObject itemDB = JObject.Parse(File.ReadAllText(path + "/database/items.json"));
+
+                                JArray oldCustomItemData = oldItemData["customItemData"] as JArray;
+                                Dictionary<string, JToken> oldVanillaItemData = oldItemData["vanillaItemData"].ToObject<Dictionary<string, JToken>>();
+                                Dictionary<string, Dictionary<string, JToken>> oldModItemData = oldItemData["modItemData"].ToObject<Dictionary<string, Dictionary<string, JToken>>>();
+
+                                logLines.Add("Building old data dict by tarkov ID");
+                                Mod.LogInfo("\tBuilding old data dict by tarkov ID");
+
+                                Dictionary<string, JToken> oldItemDataByTarkovID = new Dictionary<string, JToken>();
+
+                                for(int i=0; i < oldCustomItemData.Count; ++i)
+                                {
+                                    // Skip if don't have tarkov ID
+                                    if(oldCustomItemData[i]["tarkovID"] == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    // Check for duplicate
+                                    if (oldItemDataByTarkovID.TryGetValue(oldCustomItemData[i]["tarkovID"].ToString(), out JToken alreadyContained))
+                                    {
+                                        Mod.LogError("Old custom item data for " + oldCustomItemData[i]["H3ID"].ToString()+" already has its tarkov ID ("+ oldCustomItemData[i]["tarkovID"].ToString() + ") claimed by "+ alreadyContained["H3ID"]);
+                                        continue;
+                                    }
+
+                                    oldItemDataByTarkovID.Add(oldCustomItemData[i]["tarkovID"].ToString(), oldCustomItemData[i]);
+                                }
+
+                                foreach(KeyValuePair<string, JToken> oldVanillaEntry in oldVanillaItemData)
+                                {
+                                    // Check for duplicate
+                                    if (oldItemDataByTarkovID.TryGetValue(oldVanillaEntry.Value["tarkovID"].ToString(), out JToken alreadyContained))
+                                    {
+                                        logLines.Add("ERROR: Old vanilla item data for " + oldVanillaEntry.Key + " already has its tarkov ID (" + oldVanillaEntry.Value["tarkovID"].ToString() + ") claimed by " + alreadyContained["H3ID"]);
+                                        Mod.LogError("Old vanilla item data for " + oldVanillaEntry.Key + " already has its tarkov ID (" + oldVanillaEntry.Value["tarkovID"].ToString() + ") claimed by " + alreadyContained["H3ID"]);
+                                        continue;
+                                    }
+
+                                    oldItemDataByTarkovID.Add(oldVanillaEntry.Value["tarkovID"].ToString(), oldVanillaEntry.Value);
+                                }
+
+                                foreach (KeyValuePair<string, Dictionary<string,JToken>> oldModOuterEntry in oldModItemData)
+                                {
+                                    foreach (KeyValuePair<string, JToken> oldModEntry in oldModOuterEntry.Value)
+                                    {
+                                        // Check for duplicate
+                                        if (oldItemDataByTarkovID.TryGetValue(oldModEntry.Value["tarkovID"].ToString(), out JToken alreadyContained))
+                                        {
+                                            logLines.Add("ERROR: Old mod item data for " + oldModOuterEntry.Key + ":" + oldModEntry.Key + " already has its tarkov ID (" + oldModEntry.Value["tarkovID"].ToString() + ") claimed by " + alreadyContained["H3ID"]);
+                                            Mod.LogError("Old mod item data for " + oldModOuterEntry.Key + ":"+ oldModEntry .Key+ " already has its tarkov ID (" + oldModEntry.Value["tarkovID"].ToString() + ") claimed by " + alreadyContained["H3ID"]);
+                                            continue;
+                                        }
+
+                                        oldItemDataByTarkovID.Add(oldModEntry.Value["tarkovID"].ToString(), oldModEntry.Value);
+                                    }
+                                }
+
+                                logLines.Add("Building new default item data");
+                                Mod.LogInfo("\tBuilding new default item data");
+
+                                JObject defaultItemData = new JObject();
+                                Dictionary<string, List<string>> IDDict = new Dictionary<string, List<string>>();
+
+                                // Rewrite old data
+                                foreach (KeyValuePair<string, JToken> oldEntry in oldItemDataByTarkovID)
+                                {
+                                    // If 868 (ModulWorkshop part), must set data correctly
+                                    if (oldEntry.Value["index"] != null && ((int)oldEntry.Value["index"]) == 868)
+                                    {
+                                        string[] IDSplit = oldEntry.Value["H3ID"].ToString().Split(':');
+                                        oldEntry.Value["modulGroup"] = IDSplit[1];
+                                        oldEntry.Value["modulPart"] = IDSplit[2];
+                                        oldEntry.Value["H3ID"] = "868";
+                                    }
+                                    else
+                                    {
+                                        if (IDDict.TryGetValue(oldEntry.Value["H3ID"].ToString(), out List<string> IDList))
+                                        {
+                                            IDList.Add(oldEntry.Key);
+                                        }
+                                        else
+                                        {
+                                            IDDict.Add(oldEntry.Value["H3ID"].ToString(), new List<string>() { oldEntry.Key });
+                                        }
+                                    }
+
+                                    defaultItemData[oldEntry.Key] = oldEntry.Value;
+                                }
+
+                                // Write new data
+                                foreach(KeyValuePair<string, JToken> itemMapEntry in itemMap)
+                                {
+                                    // Skip any that don't have an H3ID
+                                    if (itemMapEntry.Value["H3ID"] == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    // Custom item data is written manually when I create the asset
+                                    // Non custom items can only be weapon, mod, or generic
+
+                                    // Only process non custom items, or 868
+                                    int parsedID = -1;
+                                    string H3ID = itemMapEntry.Value["H3ID"].ToString();
+                                    if (!int.TryParse(H3ID, out parsedID) || parsedID == 868)
+                                    {
+                                        GameObject prefab = null;
+                                        if(parsedID == 868)
+                                        {
+                                            prefab = GetItemPrefab(868);
+                                        }
+                                        else if(IM.OD.TryGetValue(H3ID, out FVRObject prefabObject))
+                                        {
+                                            prefab = prefabObject.GetGameObject();
+                                        }
+                                        else
+                                        {
+                                            logLines.Add("ERROR: Could not get prefab for "+ H3ID+":"+ itemMapEntry.Key);
+                                            Mod.LogError("Could not get prefab for " + H3ID + ":" + itemMapEntry.Key);
+                                            continue;
+                                        }
+
+                                        GameObject prefabInstance = Instantiate(prefab);
+
+                                        FVRPhysicalObject physObj = prefabInstance.GetComponent<FVRPhysicalObject>();
+
+                                        JObject newItemData = new JObject();
+
+                                        newItemData["tarkovID"] = itemMapEntry.Key;
+                                        newItemData["H3ID"] = H3ID;
+                                        if(physObj.IDSpawnedFrom == null)
+                                        {
+                                            newItemData["H3SpawnerID"] = null;
+                                        }
+                                        else
+                                        {
+                                            newItemData["H3SpawnerID"] = physObj.IDSpawnedFrom.ItemID;
+                                        }
+                                        if(parsedID == 868)
+                                        {
+                                            newItemData["index"] = 868;
+                                        }
+                                        else
+                                        {
+                                            newItemData["index"] = 0;
+                                        }
+                                        if (locale[itemMapEntry.Key+" Name"] == null)
+                                        {
+                                            logLines.Add("WARNING: Could not get tarkov name from locale for "+ H3ID+":"+ itemMapEntry.Key);
+                                            Mod.LogWarning("Could not get tarkov name from locale for " + H3ID + ":" + itemMapEntry.Key);
+
+                                            if(physObj.ObjectWrapper == null)
+                                            {
+                                                newItemData["name"] = H3ID;
+                                            }
+                                            else
+                                            {
+                                                newItemData["name"] = physObj.ObjectWrapper.DisplayName;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            newItemData["name"] = locale[itemMapEntry.Key + " Name"];
+                                        }
+                                        if (locale[itemMapEntry.Key + " Description"] == null)
+                                        {
+                                            logLines.Add("WARNING: Could not get tarkov description from locale for " + H3ID + ":" + itemMapEntry.Key);
+                                            Mod.LogWarning("Could not get tarkov description from locale for " + H3ID + ":" + itemMapEntry.Key);
+
+                                            newItemData["description"] = H3ID;
+                                        }
+                                        else
+                                        {
+                                            newItemData["description"] = locale[itemMapEntry.Key + " Description"];
+                                        }
+                                        if(marketDump.TryGetValue(itemMapEntry.Key, out JToken marketData))
+                                        {
+                                            if (marketData["_props"]["LootExperience"] == null)
+                                            {
+                                                logLines.Add("WARNING: Could not get lootExperience from market dump for " + H3ID + ":" + itemMapEntry.Key);
+                                                Mod.LogWarning("Could not get lootExperience from market dump for " + H3ID + ":" + itemMapEntry.Key);
+
+                                                newItemData["lootExperience"] = 20;
+                                            }
+                                            else
+                                            {
+                                                newItemData["lootExperience"] = marketData["_props"]["LootExperience"];
+                                            }
+                                        }
+                                        else
+                                        {
+                                            logLines.Add("WARNING: Could not get market dump for " + H3ID + ":" + itemMapEntry.Key);
+                                            Mod.LogWarning("Could not get market dump for " + H3ID + ":" + itemMapEntry.Key);
+
+                                            newItemData["lootExperience"] = 20;
+                                        }
+                                        if(itemDB.TryGetValue(itemMapEntry.Key, out JToken itemDBData))
+                                        {
+                                            JArray parents = new JArray();
+                                            JToken currentParent = itemDBData;
+                                            while (!currentParent["_parent"].Equals(""))
+                                            {
+                                                parents.Add(currentParent["_parent"].ToString());
+                                            }
+                                            newItemData["parents"] = parents;
+                                            newItemData["weight"] = itemDBData["Weight"];
+                                        }
+                                        else
+                                        {
+                                            logLines.Add("ERROR: Could not get item DB data for " + H3ID + ":" + itemMapEntry.Key);
+                                            Mod.LogError("Could not get item DB data for " + H3ID + ":" + itemMapEntry.Key);
+
+                                            JArray parents = new JArray();
+                                            parents.Add("54009119af1c881c07000029");
+                                            newItemData["parents"] = parents;
+                                            newItemData["weight"] = 0;
+                                        }
+                                        if(parsedID == 868 || physObj is FVRFireArmAttachment)
+                                        {
+                                            newItemData["itemType"] = "Mod";
+                                        }
+                                        else if(physObj is FVRFireArm || physObj is FVRMeleeWeapon)
+                                        {
+                                            newItemData["itemType"] = "Weapon";
+                                        }
+                                        else
+                                        {
+                                            logLines.Add("WARNING: Item type for " + H3ID + ":" + itemMapEntry.Key+" was set to generic");
+                                            Mod.LogWarning("Item type for " + H3ID + ":" + itemMapEntry.Key+" was set to generic");
+
+                                            newItemData["itemType"] = "Generic";
+                                        }
+
+                                        MeshFilter[] meshFilters = prefabInstance.GetComponentsInChildren<MeshFilter>();
+                                        List<Vector3> vertices = new List<Vector3>();
+                                        for(int i=0; i < meshFilters.Length; ++i)
+                                        {
+                                            if (meshFilters[i].sharedMesh != null)
+                                            {
+                                                int vertexOffset = vertices.Count;
+                                                vertices.AddRange(meshFilters[i].sharedMesh.vertices);
+                                                for (int k = vertexOffset; k < vertices.Count; ++k)
+                                                {
+                                                    vertices[k] += meshFilters[i].transform.position;
+                                                }
+                                            }
+                                        }
+                                        ConvexHullCalculator convexCalc = new ConvexHullCalculator();
+                                        List<Vector3> convexVertices = new List<Vector3>();
+                                        List<int> convexTriangles = new List<int>();
+                                        List<Vector3> convexNormals = new List<Vector3>();
+                                        convexCalc.GenerateHull(vertices, true, ref convexVertices, ref convexTriangles, ref convexNormals);
+
+                                        JArray volumes = new JArray();
+                                        volumes.Add(VolumeOfMesh(convexVertices.ToArray(), convexTriangles.ToArray()));
+                                        newItemData["volumes"] = volumes;
+
+                                        continue from here
+
+                                        defaultItemData[itemMapEntry.Key] = newItemData;
+                                    }
+                                }
+
+                                break;
                         }
                     }
                 }
             }
 #endif
+        }
+
+        public static float SignedVolumeOfTriangle(Vector3 p1, Vector3 p2, Vector3 p3)
+        {
+            float v321 = p3.x * p2.y * p1.z;
+            float v231 = p2.x * p3.y * p1.z;
+            float v312 = p3.x * p1.y * p2.z;
+            float v132 = p1.x * p3.y * p2.z;
+            float v213 = p2.x * p1.y * p3.z;
+            float v123 = p1.x * p2.y * p3.z;
+
+            return (1.0f / 6.0f) * (-v321 + v231 + v312 - v132 - v213 + v123);
+        }
+
+        public static float VolumeOfMesh(Vector3[] vertices, int[] triangles)
+        {
+            float volume = 0;
+
+            for (int i = 0; i < triangles.Length; i += 3)
+            {
+                Vector3 p1 = vertices[triangles[i + 0]];
+                Vector3 p2 = vertices[triangles[i + 1]];
+                Vector3 p3 = vertices[triangles[i + 2]];
+                volume += SignedVolumeOfTriangle(p1, p2, p3);
+            }
+            return Mathf.Abs(volume);
         }
 
         public static float GetHealthCount()

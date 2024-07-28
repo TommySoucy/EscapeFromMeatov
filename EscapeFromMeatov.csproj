@@ -73,6 +73,7 @@
     <Compile Include="src\CategoryTreeNode.cs" />
     <Compile Include="src\ContainerVolume.cs" />
     <Compile Include="src\ContainmentVolume.cs" />
+    <Compile Include="src\ConvexHullCalculator.cs" />
     <Compile Include="src\DevItemSpawner.cs" />
     <Compile Include="src\DevItemSpawnerEntry.cs" />
     <Compile Include="src\EFMWristMenuSection.cs" />
