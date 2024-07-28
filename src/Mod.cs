@@ -11,6 +11,7 @@ using Valve.VR;
 using UnityEngine.UI;
 using ModularWorkshop;
 using System.Text.RegularExpressions;
+using static Assets.Rust.Lodestone.Lodestone;
 
 namespace EFM
 {
@@ -910,7 +911,8 @@ namespace EFM
                                 {
                                     marketDump.Add(marketDumpDB[i]["_id"].ToString(), marketDumpDB[i]);
                                 }
-                                JObject itemDB = JObject.Parse(File.ReadAllText(path + "/database/items.json"));
+                                JObject itemDB = JObject.Parse(File.ReadAllText(path + "/database/templates/items.json"));
+                                JObject pricesDB = JObject.Parse(File.ReadAllText(path + "/database/templates/prices.json"));
 
                                 JArray oldCustomItemData = oldItemData["customItemData"] as JArray;
                                 Dictionary<string, JToken> oldVanillaItemData = oldItemData["vanillaItemData"].ToObject<Dictionary<string, JToken>>();
@@ -1015,6 +1017,16 @@ namespace EFM
                                     // Only process non custom items, or 868
                                     int parsedID = -1;
                                     string H3ID = itemMapEntry.Value["H3ID"].ToString();
+
+                                    if (IDDict.TryGetValue(H3ID, out List<string> IDList))
+                                    {
+                                        IDList.Add(itemMapEntry.Key);
+                                    }
+                                    else
+                                    {
+                                        IDDict.Add(H3ID, new List<string>() { itemMapEntry.Key });
+                                    }
+
                                     if (!int.TryParse(H3ID, out parsedID) || parsedID == 868)
                                     {
                                         GameObject prefab = null;
@@ -1086,55 +1098,179 @@ namespace EFM
                                         {
                                             newItemData["description"] = locale[itemMapEntry.Key + " Description"];
                                         }
-                                        if(marketDump.TryGetValue(itemMapEntry.Key, out JToken marketData))
+                                        JArray parents = new JArray();
+                                        List<string> parentList = new List<string>();
+                                        if (itemDB.TryGetValue(itemMapEntry.Key, out JToken itemDBData))
                                         {
-                                            if (marketData["_props"]["LootExperience"] == null)
-                                            {
-                                                logLines.Add("WARNING: Could not get lootExperience from market dump for " + H3ID + ":" + itemMapEntry.Key);
-                                                Mod.LogWarning("Could not get lootExperience from market dump for " + H3ID + ":" + itemMapEntry.Key);
-
-                                                newItemData["lootExperience"] = 20;
-                                            }
-                                            else
-                                            {
-                                                newItemData["lootExperience"] = marketData["_props"]["LootExperience"];
-                                            }
-                                        }
-                                        else
-                                        {
-                                            logLines.Add("WARNING: Could not get market dump for " + H3ID + ":" + itemMapEntry.Key);
-                                            Mod.LogWarning("Could not get market dump for " + H3ID + ":" + itemMapEntry.Key);
-
-                                            newItemData["lootExperience"] = 20;
-                                        }
-                                        if(itemDB.TryGetValue(itemMapEntry.Key, out JToken itemDBData))
-                                        {
-                                            JArray parents = new JArray();
+                                            newItemData["lootExperience"] = itemDBData["_props"]["LootExperience"];
                                             JToken currentParent = itemDBData;
                                             while (!currentParent["_parent"].Equals(""))
                                             {
                                                 parents.Add(currentParent["_parent"].ToString());
+                                                parentList.Add(currentParent["_parent"].ToString());
                                             }
                                             newItemData["parents"] = parents;
-                                            newItemData["weight"] = itemDBData["Weight"];
+                                            newItemData["weight"] = itemDBData["_props"]["Weight"];
+                                            newItemData["canSellOnRagfair"] = itemDBData["_props"]["CanSellOnRagfair"];
+                                            if(itemDBData["_props"]["RecoilForceUp"] != null)
+                                            {
+                                                newItemData["recoilVertical"] = itemDBData["_props"]["RecoilForceUp"];
+                                            }
+                                            if(itemDBData["_props"]["RecoilForceBack"] != null)
+                                            {
+                                                newItemData["recoilHorizontal"] = itemDBData["_props"]["RecoilForceBack"];
+                                            }
+                                            if(itemDBData["_props"]["SightingRange"] != null)
+                                            {
+                                                newItemData["sightingRange"] = itemDBData["_props"]["SightingRange"];
+                                            }
+                                            if(itemDBData["_props"]["Ergonomics"] != null)
+                                            {
+                                                newItemData["ergonomicsModifier"] = itemDBData["_props"]["Ergonomics"];
+                                            }
+                                            if(itemDBData["_props"]["Recoil"] != null)
+                                            {
+                                                newItemData["recoilModifier"] = itemDBData["_props"]["Recoil"];
+                                            }
                                         }
                                         else
                                         {
                                             logLines.Add("ERROR: Could not get item DB data for " + H3ID + ":" + itemMapEntry.Key);
                                             Mod.LogError("Could not get item DB data for " + H3ID + ":" + itemMapEntry.Key);
 
-                                            JArray parents = new JArray();
+                                            newItemData["lootExperience"] = 20;
                                             parents.Add("54009119af1c881c07000029");
+                                            parentList.Add("54009119af1c881c07000029");
                                             newItemData["parents"] = parents;
                                             newItemData["weight"] = 0;
+                                            newItemData["canSellOnRagfair"] = false;
+                                            newItemData["recoilVertical"] = 0;
+                                            newItemData["recoilHorizontal"] = 0;
+                                            newItemData["sightingRange"] = 0;
+                                            newItemData["ergonomicsModifier"] = 0;
+                                            newItemData["recoilModifier"] = 0;
                                         }
                                         if(parsedID == 868 || physObj is FVRFireArmAttachment)
                                         {
                                             newItemData["itemType"] = "Mod";
+                                            newItemData["compatibilityValue"] = 0;
+
+                                            if(physObj is AttachableFirearmPhysicalObject)
+                                            {
+                                                AttachableFirearmPhysicalObject asAF = physObj as AttachableFirearmPhysicalObject;
+                                                newItemData["usesMags"] = asAF.FA.UsesMagazines;
+                                                newItemData["usesAmmoContainers"] = asAF.FA.UsesMagazines || asAF.FA.UsesClips;
+                                                newItemData["magType"] = asAF.FA.UsesMagazines ? asAF.FA.MagazineType.ToString() : FireArmMagazineType.mNone.ToString();
+                                                newItemData["clipType"] = FireArmClipType.None.ToString();
+                                                newItemData["roundType"] = asAF.FA.RoundType.ToString();
+
+                                                if (parentList.Contains("55818b014bdc2ddc698b456b") || parentList.Contains("5447bedf4bdc2d87278b4568"))
+                                                {
+                                                    newItemData["weaponclass"] = MeatovItem.WeaponClass.AttachedLauncher.ToString();
+                                                }
+                                                else
+                                                {
+                                                    logLines.Add("ERROR: Weapon class for " + H3ID + ":" + itemMapEntry.Key + " was not found");
+                                                    Mod.LogError("Weapon class for " + H3ID + ":" + itemMapEntry.Key + " was not found");
+
+                                                    newItemData["weaponclass"] = "UNKNOWN";
+                                                }
+                                            }
+                                            else
+                                            {
+                                                newItemData["usesMags"] = false;
+                                                newItemData["usesAmmoContainers"] = false;
+                                                newItemData["magType"] = FireArmMagazineType.mNone.ToString();
+                                                newItemData["clipType"] = FireArmClipType.None.ToString();
+                                                newItemData["roundType"] = FireArmRoundType.a106_25mmR.ToString();
+                                                newItemData["weaponclass"] = "None";
+                                            }
                                         }
-                                        else if(physObj is FVRFireArm || physObj is FVRMeleeWeapon)
+                                        else if(physObj is FVRFireArm)
                                         {
                                             newItemData["itemType"] = "Weapon";
+
+                                            FVRFireArm asFireArm = physObj as FVRFireArm;
+                                            newItemData["roundType"] = asFireArm.RoundType.ToString();
+                                            if (asFireArm.UsesMagazines)
+                                            {
+                                                newItemData["compatibilityValue"] = 1;
+                                                newItemData["usesMags"] = true;
+                                                newItemData["usesAmmoContainers"] = true;
+                                                newItemData["magType"] = asFireArm.MagazineType.ToString();
+                                                newItemData["clipType"] = FireArmClipType.None.ToString();
+                                            }
+                                            else if (asFireArm.UsesClips)
+                                            {
+                                                newItemData["compatibilityValue"] = 1;
+                                                newItemData["usesMags"] = false;
+                                                newItemData["usesAmmoContainers"] = true;
+                                                newItemData["magType"] = FireArmMagazineType.mNone.ToString();
+                                                newItemData["clipType"] = asFireArm.ClipType.ToString();
+                                            }
+                                            else
+                                            {
+                                                newItemData["compatibilityValue"] = 2;
+                                                newItemData["usesMags"] = false;
+                                                newItemData["usesAmmoContainers"] = false;
+                                                newItemData["magType"] = FireArmMagazineType.mNone.ToString();
+                                                newItemData["clipType"] = FireArmClipType.None.ToString();
+                                            }
+
+                                            if (parentList.Contains("5447b5cf4bdc2d65278b4567"))
+                                            {
+                                                newItemData["weaponclass"] = MeatovItem.WeaponClass.Pistol.ToString();
+                                            }
+                                            else if (parentList.Contains("617f1ef5e8b54b0998387733"))
+                                            {
+                                                newItemData["weaponclass"] = MeatovItem.WeaponClass.Revolver.ToString();
+                                            }
+                                            else if (parentList.Contains("5447b5e04bdc2d62278b4567"))
+                                            {
+                                                newItemData["weaponclass"] = MeatovItem.WeaponClass.SMG.ToString();
+                                            }
+                                            else if (parentList.Contains("5447b5f14bdc2d61278b4567") || parentList.Contains("5447b5fc4bdc2d87278b4567"))
+                                            {
+                                                newItemData["weaponclass"] = MeatovItem.WeaponClass.Assault.ToString();
+                                            }
+                                            else if (parentList.Contains("5447b5fc4bdc2d87278b4567"))
+                                            {
+                                                newItemData["weaponclass"] = MeatovItem.WeaponClass.Shotgun.ToString();
+                                            }
+                                            else if (parentList.Contains("5447b6254bdc2dc3278b4568"))
+                                            {
+                                                newItemData["weaponclass"] = MeatovItem.WeaponClass.Sniper.ToString();
+                                            }
+                                            else if (parentList.Contains("5447bed64bdc2d97278b4568"))
+                                            {
+                                                newItemData["weaponclass"] = MeatovItem.WeaponClass.LMG.ToString();
+                                            }
+                                            else if (parentList.Contains("55818b014bdc2ddc698b456b") || parentList.Contains("5447bedf4bdc2d87278b4568"))
+                                            {
+                                                newItemData["weaponclass"] = MeatovItem.WeaponClass.Launcher.ToString();
+                                            }
+                                            else if (parentList.Contains("5447b6194bdc2d67278b4567"))
+                                            {
+                                                newItemData["weaponclass"] = MeatovItem.WeaponClass.DMR.ToString();
+                                            }
+                                            else
+                                            {
+                                                logLines.Add("ERROR: Weapon class for " + H3ID + ":" + itemMapEntry.Key + " was not found");
+                                                Mod.LogError("Weapon class for " + H3ID + ":" + itemMapEntry.Key + " was not found");
+
+                                                newItemData["weaponclass"] = "UNKNOWN";
+                                            }
+                                        }
+                                        else if(physObj is FVRMeleeWeapon)
+                                        {
+                                            newItemData["itemType"] = "Weapon";
+                                            newItemData["compatibilityValue"] = 0;
+                                            newItemData["usesMags"] = false;
+                                            newItemData["usesAmmoContainers"] = false;
+                                            newItemData["magType"] = FireArmMagazineType.mNone.ToString();
+                                            newItemData["clipType"] = FireArmClipType.None.ToString();
+                                            newItemData["roundType"] = FireArmRoundType.a106_25mmR.ToString();
+                                            newItemData["weaponclass"] = "None";
                                         }
                                         else
                                         {
@@ -1142,7 +1278,132 @@ namespace EFM
                                             Mod.LogWarning("Item type for " + H3ID + ":" + itemMapEntry.Key+" was set to generic");
 
                                             newItemData["itemType"] = "Generic";
+
+                                            if(physObj is FVRFireArmMagazine)
+                                            {
+                                                newItemData["compatibilityValue"] = 2;
+                                                newItemData["usesMags"] = false;
+                                                newItemData["usesAmmoContainers"] = false;
+                                                FVRFireArmMagazine asMag = physObj as FVRFireArmMagazine;
+                                                newItemData["magType"] = asMag.MagazineType.ToString();
+                                                newItemData["clipType"] = FireArmClipType.None.ToString();
+                                                newItemData["roundType"] = asMag.RoundType.ToString();
+                                            }
+                                            else if(physObj is FVRFireArmClip)
+                                            {
+                                                newItemData["compatibilityValue"] = 2;
+                                                newItemData["usesMags"] = false;
+                                                newItemData["usesAmmoContainers"] = false;
+                                                newItemData["magType"] = FireArmMagazineType.mNone.ToString();
+                                                FVRFireArmClip asClip = physObj as FVRFireArmClip;
+                                                newItemData["clipType"] = asClip.ClipType.ToString();
+                                                newItemData["roundType"] = asClip.RoundType.ToString();
+                                            }
+                                            else
+                                            {
+                                                newItemData["compatibilityValue"] = 0;
+                                                newItemData["usesMags"] = false;
+                                                newItemData["usesAmmoContainers"] = false;
+                                                newItemData["magType"] = FireArmMagazineType.mNone.ToString();
+                                                newItemData["clipType"] = FireArmClipType.None.ToString();
+                                                newItemData["roundType"] = FireArmRoundType.a106_25mmR.ToString();
+                                            }
+
+                                            newItemData["weaponclass"] = "None";
                                         }
+                                        newItemData["blocksEarpiece"] = false;
+                                        newItemData["blocksEyewear"] = false;
+                                        newItemData["blocksFaceCover"] = false;
+                                        newItemData["blocksHeadwear"] = false;
+                                        newItemData["coverage"] = 0f;
+                                        newItemData["damageResist"] = 0f;
+                                        newItemData["maxArmor"] = 0f;
+                                        newItemData["smallSlotCount"] = 0f;
+                                        newItemData["mediumSlotCount"] = 0f;
+                                        newItemData["maxVolume"] = 0f;
+                                        newItemData["cartridge"] = FireArmRoundType.a106_25mmR.ToString();
+                                        newItemData["roundClass"] = FireArmRoundClass.FMJ.ToString();
+                                        newItemData["maxStack"] = 1;
+                                        newItemData["maxAmount"] = 0;
+                                        newItemData["useTime"] = 0f;
+                                        newItemData["amountRate"] = -1f;
+                                        newItemData["consumeEffects"] = new JArray();
+                                        newItemData["buffEffects"] = new JArray();
+                                        JArray colorArray = new JArray();
+                                        if (marketDump.TryGetValue(itemMapEntry.Key, out JToken marketDumpData))
+                                        {
+                                            newItemData["value"] = marketDumpData["_props"]["CreditsPrice"];
+                                            if(parsedID == 868)
+                                            {
+                                                string colorString = marketDumpData["_props"]["BackgroundColor"].ToString();
+                                                switch (colorString)
+                                                {
+                                                    case "default":
+                                                    case "black":
+                                                        colorArray.Add(0.1f);
+                                                        colorArray.Add(0.1f);
+                                                        colorArray.Add(0.1f);
+                                                        break;
+                                                    case "grey":
+                                                        colorArray.Add(0.4f);
+                                                        colorArray.Add(0.4f);
+                                                        colorArray.Add(0.4f);
+                                                        break;
+                                                    case "violet":
+                                                        colorArray.Add(0f);
+                                                        colorArray.Add(0.612f);
+                                                        colorArray.Add(1f);
+                                                        break;
+                                                    case "yellow":
+                                                        colorArray.Add(0.725f);
+                                                        colorArray.Add(0f);
+                                                        colorArray.Add(1f);
+                                                        break;
+                                                    case "orange":
+                                                        colorArray.Add(0.522f);
+                                                        colorArray.Add(0f);
+                                                        colorArray.Add(1f);
+                                                        break;
+                                                    case "blue":
+                                                        colorArray.Add(0.169f);
+                                                        colorArray.Add(0.255f);
+                                                        colorArray.Add(0.67f);
+                                                        break;
+                                                    default:
+                                                        logLines.Add("ERROR: Could not get color \"" + colorString + "\" for " + H3ID + ":" + itemMapEntry.Key);
+                                                        Mod.LogError(" Could not get color \"" + colorString + "\" for " + H3ID + ":" + itemMapEntry.Key);
+                                                        colorArray.Add(0.1f);
+                                                        colorArray.Add(0.1f);
+                                                        colorArray.Add(0.1f);
+                                                        break;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                colorArray.Add(0.1f);
+                                                colorArray.Add(0.1f);
+                                                colorArray.Add(0.1f);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (pricesDB[itemMapEntry.Key] == null)
+                                            {
+                                                logLines.Add("ERROR: Could not get value for " + H3ID + ":" + itemMapEntry.Key);
+                                                Mod.LogError("Could not get value for " + H3ID + ":" + itemMapEntry.Key);
+
+                                                newItemData["value"] = 10000;
+                                            }
+                                            else
+                                            {
+                                                newItemData["value"] = pricesDB[itemMapEntry.Key];
+                                            }
+
+                                            colorArray.Add(0.1f);
+                                            colorArray.Add(0.1f);
+                                            colorArray.Add(0.1f);
+                                        }
+                                        newItemData["value"] = colorArray;
 
                                         MeshFilter[] meshFilters = prefabInstance.GetComponentsInChildren<MeshFilter>();
                                         List<Vector3> vertices = new List<Vector3>();
@@ -1168,12 +1429,50 @@ namespace EFM
                                         volumes.Add(VolumeOfMesh(convexVertices.ToArray(), convexTriangles.ToArray()));
                                         newItemData["volumes"] = volumes;
 
-                                        continue from here
+                                        JArray dimensions = new JArray();
+                                        if (parsedID == 868)
+                                        {
+                                            MeshRenderer mr = physObj.GetComponentInChildren<MeshRenderer>();
+                                            BoxCollider boxCol = mr.gameObject.AddComponent<BoxCollider>();
+                                            
+                                            dimensions.Add(boxCol.size.x);
+                                            dimensions.Add(boxCol.size.y);
+                                            dimensions.Add(boxCol.size.z);
+                                        }
+                                        else
+                                        {
+                                            dimensions.Add(0f);
+                                            dimensions.Add(0f);
+                                            dimensions.Add(0f);
+                                        }
+                                        newItemData["dimensions"] = dimensions;
 
                                         defaultItemData[itemMapEntry.Key] = newItemData;
                                     }
+
+                                    logLines.Add("INFO: Entries with more than 1 usage of an H3ID");
+                                    Mod.LogInfo("Entries with more than 1 usage of an H3ID");
+                                    foreach(KeyValuePair<string, List<string>> entry in IDDict)
+                                    {
+                                        if(entry.Value.Count > 1)
+                                        {
+                                            logLines.Add("\t"+ entry.Key);
+                                            Mod.LogInfo("\t" + entry.Key);
+                                            for(int i=0; i < entry.Value.Count; ++i)
+                                            {
+                                                Mod.LogInfo("\t\t" + entry.Value[i]);
+                                            }
+                                        }
+                                    }
                                 }
 
+                                logLines.Add("INFO: Writing new default item file");
+                                Mod.LogInfo("Writing new default item file");
+
+                                File.WriteAllText(path + "/database/DefaultItemData.json", defaultItemData.ToString());
+
+                                logLines.Add("INFO: New default item file written");
+                                Mod.LogInfo("New default item file written");
                                 break;
                         }
                     }

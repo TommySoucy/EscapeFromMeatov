@@ -43,17 +43,17 @@ namespace EFM
 
         public enum WeaponClass
         {
-            Pistol = 0,
-            Revolver = 1,
-            SMG = 2,
-            Assault = 3,
-            Shotgun = 4,
-            Sniper = 5,
-            LMG = 6,
-            HMG = 7,
-            Launcher = 8,
-            AttachedLauncher = 9,
-            DMR = 10
+            Pistol = 0, // 5447b5cf4bdc2d65278b4567
+            Revolver = 1, // 617f1ef5e8b54b0998387733
+            SMG = 2, // 5447b5e04bdc2d62278b4567
+            Assault = 3, // 5447b5f14bdc2d61278b4567 or 5447b5fc4bdc2d87278b4567
+            Shotgun = 4, // 5447b5fc4bdc2d87278b4567
+            Sniper = 5, // 5447b6254bdc2dc3278b4568
+            LMG = 6, // 5447bed64bdc2d97278b4568
+            HMG = 7, // Skill for this class of weapon apparently doesn't work for stationary weapons, but the only HMG in the game is a stationary weapon. Anyway the only HMG isn't implemented as an item
+            Launcher = 8, // 55818b014bdc2ddc698b456b or 5447bedf4bdc2d87278b4568
+            AttachedLauncher = 9, // Attached launcher have parent Launcher instead of AttachedLauncher
+            DMR = 10 // 5447b6194bdc2d67278b4567
         }
 
         public enum ItemRarity
