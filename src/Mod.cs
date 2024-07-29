@@ -1468,13 +1468,21 @@ namespace EFM
                                         List<Vector3> vertices = new List<Vector3>();
                                         for(int i=0; i < meshFilters.Length; ++i)
                                         {
+                                            // Only count volume of visible meshes
+                                            MeshRenderer mr = meshFilters[i].GetComponent<MeshRenderer>();
+                                            if (mr == null || !mr.enabled)
+                                            {
+                                                continue;
+                                            }
+
                                             if (meshFilters[i].sharedMesh != null)
                                             {
-                                                continue from here // must consider scale
                                                 int vertexOffset = vertices.Count;
                                                 vertices.AddRange(meshFilters[i].sharedMesh.vertices);
                                                 for (int k = vertexOffset; k < vertices.Count; ++k)
                                                 {
+                                                    Vector3 newVertex = new Vector3(vertices[k].x * meshFilters[i].transform.localScale.x, vertices[k].y * meshFilters[i].transform.localScale.y, vertices[k].z * meshFilters[i].transform.localScale.z);
+                                                    vertices[k] = newVertex;
                                                     vertices[k] += meshFilters[i].transform.position;
                                                 }
                                             }
@@ -1494,7 +1502,11 @@ namespace EFM
                                         JArray volumes = new JArray();
                                         if (generatedHull)
                                         {
-                                            volumes.Add((int)(VolumeOfMesh(convexVertices.ToArray(), convexTriangles.ToArray()) * 1000));
+                                            float calculatedVolume = VolumeOfMesh(convexVertices.ToArray(), convexTriangles.ToArray());
+                                            Mod.LogInfo("Calculated volume: " + calculatedVolume);
+                                            Mod.LogInfo("Calculated volume * 1000000: " + (calculatedVolume * 1000000));
+                                            Mod.LogInfo("Calculated volume as int: " + (int)(calculatedVolume * 1000000));
+                                            volumes.Add((int)(calculatedVolume * 1000000));
                                         }
                                         else
                                         {
