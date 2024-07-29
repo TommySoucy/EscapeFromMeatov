@@ -904,8 +904,13 @@ namespace EFM
                                 List<string> logLines = new List<string>();
                                 Dictionary<string, JToken> itemMap = JObject.Parse(File.ReadAllText(path + "/database/ItemMap.json")).ToObject<Dictionary<string, JToken>>();
                                 JObject oldItemData = JObject.Parse(File.ReadAllText(path + "/database/OldDefaultItemData.json"));
+                                JObject previousNewItemData = null;
+                                if(File.Exists(path + "/database/NewDefaultItemData.json"))
+                                {
+                                    previousNewItemData = JObject.Parse(File.ReadAllText(path + "/database/NewDefaultItemData.json"));
+                                }
                                 JObject locale = JObject.Parse(File.ReadAllText(path + "/database/locales/global/en.json"));
-                                JArray marketDumpDB = JArray.Parse(File.ReadAllText(path + "/database/tarkovMarketItemsDump.json"));
+                                JArray marketDumpDB = JArray.Parse(File.ReadAllText(path + "/database/templates/tarkovMarketItemsDump.json"));
                                 Dictionary<string, JToken> marketDump = new Dictionary<string, JToken>();
                                 for(int i=0; i < marketDumpDB.Count; ++i)
                                 {
@@ -974,40 +979,65 @@ namespace EFM
                                 Mod.LogInfo("\tBuilding new default item data");
 
                                 JObject defaultItemData = new JObject();
+                                if(previousNewItemData != null)
+                                {
+                                    defaultItemData = previousNewItemData;
+                                }
                                 Dictionary<string, List<string>> IDDict = new Dictionary<string, List<string>>();
 
-                                // Rewrite old data
-                                foreach (KeyValuePair<string, JToken> oldEntry in oldItemDataByTarkovID)
+                                // Rewrite old data if necessary
+                                if(previousNewItemData == null)
                                 {
-                                    // If 868 (ModulWorkshop part), must set data correctly
-                                    if (oldEntry.Value["index"] != null && ((int)oldEntry.Value["index"]) == 868)
+                                    foreach (KeyValuePair<string, JToken> oldEntry in oldItemDataByTarkovID)
                                     {
-                                        string[] IDSplit = oldEntry.Value["H3ID"].ToString().Split(':');
-                                        oldEntry.Value["modulGroup"] = IDSplit[1];
-                                        oldEntry.Value["modulPart"] = IDSplit[2];
-                                        oldEntry.Value["H3ID"] = "868";
-                                    }
-                                    else
-                                    {
-                                        if (IDDict.TryGetValue(oldEntry.Value["H3ID"].ToString(), out List<string> IDList))
+                                        Mod.LogInfo("\t\tRewriting old: " + oldEntry.Key);
+                                        // If 868 (ModulWorkshop part), must set data correctly
+                                        if (oldEntry.Value["index"] != null && ((int)oldEntry.Value["index"]) == 868 && !oldEntry.Value["H3ID"].ToString().Equals("868"))
                                         {
-                                            IDList.Add(oldEntry.Key);
+                                            string[] IDSplit = oldEntry.Value["H3ID"].ToString().Split(':');
+                                            oldEntry.Value["modulGroup"] = IDSplit[1];
+                                            oldEntry.Value["modulPart"] = IDSplit[2];
+                                            oldEntry.Value["H3ID"] = "868";
                                         }
                                         else
                                         {
-                                            IDDict.Add(oldEntry.Value["H3ID"].ToString(), new List<string>() { oldEntry.Key });
+                                            if (IDDict.TryGetValue(oldEntry.Value["H3ID"].ToString(), out List<string> IDList))
+                                            {
+                                                IDList.Add(oldEntry.Key);
+                                            }
+                                            else
+                                            {
+                                                IDDict.Add(oldEntry.Value["H3ID"].ToString(), new List<string>() { oldEntry.Key });
+                                            }
                                         }
-                                    }
 
-                                    defaultItemData[oldEntry.Key] = oldEntry.Value;
+                                        defaultItemData[oldEntry.Key] = oldEntry.Value;
+                                    }
                                 }
 
                                 // Write new data
+                                int newIteration = 0;
+                                int tempIt = 0;
                                 foreach(KeyValuePair<string, JToken> itemMapEntry in itemMap)
                                 {
+                                    ++tempIt;
+                                    if (newIteration >= 1000)
+                                    {
+                                        break;
+                                    }
+
+                                    // Skip any entries we already wrote a new default item data entry for
+                                    if (previousNewItemData != null && previousNewItemData[itemMapEntry.Key] != null)
+                                    {
+                                        Mod.LogInfo("\t\t\tSkipped");
+                                        continue;
+                                    }
+                                    ++newIteration;
+                                    Mod.LogInfo("\t\tWriting new: " + itemMapEntry.Key+": "+(++tempIt) +"/"+itemMap.Count);
                                     // Skip any that don't have an H3ID
                                     if (itemMapEntry.Value["H3ID"] == null)
                                     {
+                                        Mod.LogInfo("\t\t\tSkipped");
                                         continue;
                                     }
 
@@ -1018,17 +1048,18 @@ namespace EFM
                                     int parsedID = -1;
                                     string H3ID = itemMapEntry.Value["H3ID"].ToString();
 
-                                    if (IDDict.TryGetValue(H3ID, out List<string> IDList))
-                                    {
-                                        IDList.Add(itemMapEntry.Key);
-                                    }
-                                    else
-                                    {
-                                        IDDict.Add(H3ID, new List<string>() { itemMapEntry.Key });
-                                    }
-
                                     if (!int.TryParse(H3ID, out parsedID) || parsedID == 868)
                                     {
+                                        if (IDDict.TryGetValue(H3ID, out List<string> IDList))
+                                        {
+                                            IDList.Add(itemMapEntry.Key);
+                                        }
+                                        else
+                                        {
+                                            IDDict.Add(H3ID, new List<string>() { itemMapEntry.Key });
+                                        }
+
+                                        Mod.LogInfo("\t\t\tNot custom");
                                         GameObject prefab = null;
                                         if(parsedID == 868)
                                         {
@@ -1044,6 +1075,7 @@ namespace EFM
                                             Mod.LogError("Could not get prefab for " + H3ID + ":" + itemMapEntry.Key);
                                             continue;
                                         }
+                                        Mod.LogInfo("\t\t\tGot prefab");
 
                                         GameObject prefabInstance = Instantiate(prefab);
 
@@ -1051,11 +1083,22 @@ namespace EFM
 
                                         JObject newItemData = new JObject();
 
+                                        Mod.LogInfo("\t\t\tWriting data");
                                         newItemData["tarkovID"] = itemMapEntry.Key;
                                         newItemData["H3ID"] = H3ID;
                                         if(physObj.IDSpawnedFrom == null)
                                         {
-                                            newItemData["H3SpawnerID"] = null;
+                                            if (IM.HasSpawnedID(H3ID))
+                                            {
+                                                newItemData["H3SpawnerID"] = IM.GetSpawnerID(H3ID).ItemID;
+                                            }
+                                            else
+                                            {
+                                                logLines.Add("ERROR: Could not get spawner ID for " + H3ID + ":" + itemMapEntry.Key);
+                                                Mod.LogError("Could not get spawner ID for " + H3ID + ":" + itemMapEntry.Key);
+
+                                                newItemData["H3SpawnerID"] = null;
+                                            }
                                         }
                                         else
                                         {
@@ -1067,7 +1110,7 @@ namespace EFM
                                         }
                                         else
                                         {
-                                            newItemData["index"] = 0;
+                                            newItemData["index"] = -1;
                                         }
                                         if (locale[itemMapEntry.Key+" Name"] == null)
                                         {
@@ -1102,15 +1145,19 @@ namespace EFM
                                         List<string> parentList = new List<string>();
                                         if (itemDB.TryGetValue(itemMapEntry.Key, out JToken itemDBData))
                                         {
+                                            Mod.LogInfo("\t\t\t\tGetting data from itemDB");
                                             newItemData["lootExperience"] = itemDBData["_props"]["LootExperience"];
                                             JToken currentParent = itemDBData;
-                                            while (!currentParent["_parent"].Equals(""))
+                                            while (!currentParent["_parent"].ToString().Equals(""))
                                             {
+                                                Mod.LogInfo("\t\t\t\t\tAdding parent "+ currentParent["_parent"].ToString());
                                                 parents.Add(currentParent["_parent"].ToString());
                                                 parentList.Add(currentParent["_parent"].ToString());
+                                                currentParent = itemDB[currentParent["_parent"].ToString()];
                                             }
                                             newItemData["parents"] = parents;
-                                            newItemData["weight"] = itemDBData["_props"]["Weight"];
+                                            Mod.LogInfo("\t\t\t\t\tWrote parents");
+                                            newItemData["weight"] = (int)(((float)itemDBData["_props"]["Weight"])*1000);
                                             newItemData["canSellOnRagfair"] = itemDBData["_props"]["CanSellOnRagfair"];
                                             if(itemDBData["_props"]["RecoilForceUp"] != null)
                                             {
@@ -1150,12 +1197,14 @@ namespace EFM
                                             newItemData["ergonomicsModifier"] = 0;
                                             newItemData["recoilModifier"] = 0;
                                         }
-                                        if(parsedID == 868 || physObj is FVRFireArmAttachment)
+                                        Mod.LogInfo("\t\t\t\t\t0");
+                                        if (parsedID == 868 || physObj is FVRFireArmAttachment)
                                         {
                                             newItemData["itemType"] = "Mod";
                                             newItemData["compatibilityValue"] = 0;
 
-                                            if(physObj is AttachableFirearmPhysicalObject)
+                                            Mod.LogInfo("\t\t\t\t\t1");
+                                            if (physObj is AttachableFirearmPhysicalObject)
                                             {
                                                 AttachableFirearmPhysicalObject asAF = physObj as AttachableFirearmPhysicalObject;
                                                 newItemData["usesMags"] = asAF.FA.UsesMagazines;
@@ -1188,6 +1237,7 @@ namespace EFM
                                         }
                                         else if(physObj is FVRFireArm)
                                         {
+                                            Mod.LogInfo("\t\t\t\t\t2");
                                             newItemData["itemType"] = "Weapon";
 
                                             FVRFireArm asFireArm = physObj as FVRFireArm;
@@ -1263,6 +1313,7 @@ namespace EFM
                                         }
                                         else if(physObj is FVRMeleeWeapon)
                                         {
+                                            Mod.LogInfo("\t\t\t\t\t3");
                                             newItemData["itemType"] = "Weapon";
                                             newItemData["compatibilityValue"] = 0;
                                             newItemData["usesMags"] = false;
@@ -1274,6 +1325,7 @@ namespace EFM
                                         }
                                         else
                                         {
+                                            Mod.LogInfo("\t\t\t\t\t4");
                                             logLines.Add("WARNING: Item type for " + H3ID + ":" + itemMapEntry.Key+" was set to generic");
                                             Mod.LogWarning("Item type for " + H3ID + ":" + itemMapEntry.Key+" was set to generic");
 
@@ -1311,6 +1363,7 @@ namespace EFM
 
                                             newItemData["weaponclass"] = "None";
                                         }
+                                        Mod.LogInfo("\t\t\t\t\t0");
                                         newItemData["blocksEarpiece"] = false;
                                         newItemData["blocksEyewear"] = false;
                                         newItemData["blocksFaceCover"] = false;
@@ -1329,9 +1382,12 @@ namespace EFM
                                         newItemData["amountRate"] = -1f;
                                         newItemData["consumeEffects"] = new JArray();
                                         newItemData["buffEffects"] = new JArray();
+                                        Mod.LogInfo("\t\t\t\t\t0");
                                         JArray colorArray = new JArray();
                                         if (marketDump.TryGetValue(itemMapEntry.Key, out JToken marketDumpData))
                                         {
+                                            Mod.LogInfo("\t\t\t\t\t1");
+                                            newItemData["rarity"] = marketDumpData["_props"]["Rarity"];
                                             newItemData["value"] = marketDumpData["_props"]["CreditsPrice"];
                                             if(parsedID == 868)
                                             {
@@ -1387,6 +1443,8 @@ namespace EFM
                                         }
                                         else
                                         {
+                                            Mod.LogInfo("\t\t\t\t\t2");
+                                            newItemData["rarity"] = MeatovItem.ItemRarity.Common.ToString(); ;
                                             if (pricesDB[itemMapEntry.Key] == null)
                                             {
                                                 logLines.Add("ERROR: Could not get value for " + H3ID + ":" + itemMapEntry.Key);
@@ -1403,14 +1461,16 @@ namespace EFM
                                             colorArray.Add(0.1f);
                                             colorArray.Add(0.1f);
                                         }
-                                        newItemData["value"] = colorArray;
+                                        newItemData["color"] = colorArray;
 
+                                        Mod.LogInfo("\t\t\t\t\t0");
                                         MeshFilter[] meshFilters = prefabInstance.GetComponentsInChildren<MeshFilter>();
                                         List<Vector3> vertices = new List<Vector3>();
                                         for(int i=0; i < meshFilters.Length; ++i)
                                         {
                                             if (meshFilters[i].sharedMesh != null)
                                             {
+                                                continue from here // must consider scale
                                                 int vertexOffset = vertices.Count;
                                                 vertices.AddRange(meshFilters[i].sharedMesh.vertices);
                                                 for (int k = vertexOffset; k < vertices.Count; ++k)
@@ -1423,12 +1483,27 @@ namespace EFM
                                         List<Vector3> convexVertices = new List<Vector3>();
                                         List<int> convexTriangles = new List<int>();
                                         List<Vector3> convexNormals = new List<Vector3>();
-                                        convexCalc.GenerateHull(vertices, true, ref convexVertices, ref convexTriangles, ref convexNormals);
+                                        bool generatedHull = false;
+                                        try
+                                        {
+                                            generatedHull = convexCalc.GenerateHull(vertices, true, ref convexVertices, ref convexTriangles, ref convexNormals);
+                                        }
+                                        catch { }
 
+                                        Mod.LogInfo("\t\t\t\t\t0");
                                         JArray volumes = new JArray();
-                                        volumes.Add(VolumeOfMesh(convexVertices.ToArray(), convexTriangles.ToArray()));
+                                        if (generatedHull)
+                                        {
+                                            volumes.Add((int)(VolumeOfMesh(convexVertices.ToArray(), convexTriangles.ToArray()) * 1000));
+                                        }
+                                        else
+                                        {
+                                            volumes.Add(1);
+                                            logLines.Add("ERROR: Reached max hull iterations for " + H3ID + ":" + itemMapEntry.Key);
+                                        }
                                         newItemData["volumes"] = volumes;
 
+                                        Mod.LogInfo("\t\t\t\t\t0");
                                         JArray dimensions = new JArray();
                                         if (parsedID == 868)
                                         {
@@ -1447,21 +1522,24 @@ namespace EFM
                                         }
                                         newItemData["dimensions"] = dimensions;
 
+                                        Mod.LogInfo("\t\t\t\t\t0");
                                         defaultItemData[itemMapEntry.Key] = newItemData;
-                                    }
 
-                                    logLines.Add("INFO: Entries with more than 1 usage of an H3ID");
-                                    Mod.LogInfo("Entries with more than 1 usage of an H3ID");
-                                    foreach(KeyValuePair<string, List<string>> entry in IDDict)
+                                        Destroy(prefabInstance);
+                                    }
+                                }
+
+                                logLines.Add("INFO: Entries with more than 1 usage of an H3ID");
+                                Mod.LogInfo("Entries with more than 1 usage of an H3ID");
+                                foreach (KeyValuePair<string, List<string>> entry in IDDict)
+                                {
+                                    if (entry.Value.Count > 1)
                                     {
-                                        if(entry.Value.Count > 1)
+                                        logLines.Add("\t" + entry.Key);
+                                        Mod.LogInfo("\t" + entry.Key);
+                                        for (int i = 0; i < entry.Value.Count; ++i)
                                         {
-                                            logLines.Add("\t"+ entry.Key);
-                                            Mod.LogInfo("\t" + entry.Key);
-                                            for(int i=0; i < entry.Value.Count; ++i)
-                                            {
-                                                Mod.LogInfo("\t\t" + entry.Value[i]);
-                                            }
+                                            Mod.LogInfo("\t\t" + entry.Value[i]);
                                         }
                                     }
                                 }
@@ -1469,7 +1547,8 @@ namespace EFM
                                 logLines.Add("INFO: Writing new default item file");
                                 Mod.LogInfo("Writing new default item file");
 
-                                File.WriteAllText(path + "/database/DefaultItemData.json", defaultItemData.ToString());
+                                File.WriteAllText(path + "/database/NewDefaultItemData.json", defaultItemData.ToString());
+                                File.WriteAllLines(path + "/database/DefaultItemDataGenerationLog.txt", logLines.ToArray());
 
                                 logLines.Add("INFO: New default item file written");
                                 Mod.LogInfo("New default item file written");
@@ -1479,6 +1558,43 @@ namespace EFM
                 }
             }
 #endif
+        }
+
+        public static float DebugCalcVolumeOfObject(GameObject prefabInstance)
+        {
+            Mod.LogInfo("DebugCalcVolumeOfObject");
+            MeshFilter[] meshFilters = prefabInstance.GetComponentsInChildren<MeshFilter>();
+            Mod.LogInfo("\t0");
+            List<Vector3> vertices = new List<Vector3>();
+            Mod.LogInfo("\t0");
+            for (int i = 0; i < meshFilters.Length; ++i)
+            {
+                Mod.LogInfo("\t1");
+                if (meshFilters[i].sharedMesh != null)
+                {
+                    Mod.LogInfo("\t2");
+                    int vertexOffset = vertices.Count;
+                    vertices.AddRange(meshFilters[i].sharedMesh.vertices);
+                    for (int k = vertexOffset; k < vertices.Count; ++k)
+                    {
+                        Mod.LogInfo("\t3");
+                        vertices[k] += meshFilters[i].transform.position;
+                    }
+                }
+            }
+            Mod.LogInfo("\t0");
+            ConvexHullCalculator convexCalc = new ConvexHullCalculator();
+            Mod.LogInfo("\t0");
+            List<Vector3> convexVertices = new List<Vector3>();
+            Mod.LogInfo("\t0");
+            List<int> convexTriangles = new List<int>();
+            Mod.LogInfo("\t0");
+            List<Vector3> convexNormals = new List<Vector3>();
+            Mod.LogInfo("\t0");
+            convexCalc.GenerateHull(vertices, true, ref convexVertices, ref convexTriangles, ref convexNormals);
+            Mod.LogInfo("\t0");
+
+            return VolumeOfMesh(convexVertices.ToArray(), convexTriangles.ToArray());
         }
 
         public static float SignedVolumeOfTriangle(Vector3 p1, Vector3 p2, Vector3 p3)

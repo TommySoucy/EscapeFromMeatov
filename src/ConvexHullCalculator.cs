@@ -26,6 +26,7 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using System;
 
 namespace EFM
 {
@@ -275,13 +276,15 @@ namespace EFM
         ///   true, the the verts will be split, if false, the same vert will be
         ///   used for more than one triangle.
         /// </summary>
-        public void GenerateHull(
+        public bool GenerateHull(
             List<Vector3> points,
             bool splitVerts,
             ref List<Vector3> verts,
             ref List<int> tris,
             ref List<Vector3> normals)
         {
+            bool success = true;
+
             if (points.Count < 4)
             {
                 throw new System.ArgumentException("Need at least 4 points to generate a convex hull");
@@ -291,13 +294,23 @@ namespace EFM
 
             GenerateInitialHull(points);
 
+            int maxIterations = 1000;
+            int iteration = 0;
             while (openSetTail >= 0)
             {
                 GrowHull(points);
+                iteration++;
+                if (iteration >= maxIterations)
+                {
+                    success = false;
+                    break;
+                }
             }
 
             ExportMesh(points, splitVerts, ref verts, ref tris, ref normals);
             VerifyMesh(points, ref verts, ref tris);
+
+            return success;
         }
 
         /// <summary>
@@ -489,12 +502,24 @@ namespace EFM
         /// </summary>
         void FindInitialHullIndices(List<Vector3> points, out int b0, out int b1, out int b2, out int b3)
         {
+            DateTime time = DateTime.Now;
+
             var count = points.Count;
 
             for (int i0 = 0; i0 < count - 3; i0++)
             {
+                if ((DateTime.Now - time).TotalSeconds > 10)
+                {
+                    throw new System.ArgumentException("Hull generation timed out");
+                }
+
                 for (int i1 = i0 + 1; i1 < count - 2; i1++)
                 {
+                    if ((DateTime.Now - time).TotalSeconds > 10)
+                    {
+                        throw new System.ArgumentException("Hull generation timed out");
+                    }
+
                     var p0 = points[i0];
                     var p1 = points[i1];
 
@@ -502,12 +527,22 @@ namespace EFM
 
                     for (int i2 = i1 + 1; i2 < count - 1; i2++)
                     {
+                        if ((DateTime.Now - time).TotalSeconds > 10)
+                        {
+                            throw new System.ArgumentException("Hull generation timed out");
+                        }
+
                         var p2 = points[i2];
 
                         if (AreCollinear(p0, p1, p2)) continue;
 
                         for (int i3 = i2 + 1; i3 < count - 0; i3++)
                         {
+                            if ((DateTime.Now - time).TotalSeconds > 10)
+                            {
+                                throw new System.ArgumentException("Hull generation timed out");
+                            }
+
                             var p3 = points[i3];
 
                             if (AreCoplanar(p0, p1, p2, p3)) continue;
