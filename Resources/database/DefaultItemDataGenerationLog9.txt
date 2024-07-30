@@ -1,0 +1,5 @@
+Building old data dict by tarkov ID
+Building new default item data
+ERROR: Could not get prefab for AR-10 Lancer LCH7 12.5 inch M-LOK handguard:5f6336bbda967c74a42e9932
+INFO: Entries with more than 1 usage of an H3ID
+INFO: Writing new default item file

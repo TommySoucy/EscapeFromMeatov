@@ -1,0 +1,164 @@
+Building old data dict by tarkov ID
+Building new default item data
+ERROR: Could not get prefab for AR-10 Lancer LCH7 12.5 inch M-LOK handguard:5f6336bbda967c74a42e9932
+WARNING: Item type for FTW.gun.Mag20:5c920e902e221644f31c3c99 was set to generic
+ERROR: Reached max hull iterations for FTW.gun.Mag20:5c920e902e221644f31c3c99
+ERROR: Could not get spawner ID for RailAdapterHandgunShort:5b3a08b25acfc4001754880c
+ERROR: Reached max hull iterations for RailAdapterHandgunShort:5b3a08b25acfc4001754880c
+WARNING: Item type for FTW.gun.Mag15:56d59948d2720bb7418b4582 was set to generic
+ERROR: Reached max hull iterations for FTW.gun.Mag15:56d59948d2720bb7418b4582
+ERROR: Could not get value for FTW.gun.StdBlk:56d5a2bbd2720bb8418b456a
+ERROR: Could not get value for FTW.gun.StdSight:56d5a77ed2720b90418b4568
+ERROR: Reached max hull iterations for FTW.gun.PicRail:56ea7293d2720b8d4b8b45ba
+ERROR: Could not get spawner ID for AttachableBipodH:5888961624597754281f93f3
+ERROR: Could not get spawner ID for MLokToPicRail2HalfSlot:5a9d6d00a2750c5c985b5305
+ERROR: Could not get spawner ID for MLokToPicRail2Slot:6388c4ac8d895f557a0c6515
+ERROR: Could not get spawner ID for MLokToPicRail3Slot:6388c5d19c00405f4717c0f0
+ERROR: Could not get spawner ID for MLokToPicRail1HalfSlot:5c0102aa0db834001b734ba1
+ERROR: Reached max hull iterations for MLokToPicRail1HalfSlot:5c0102aa0db834001b734ba1
+ERROR: Could not get spawner ID for MLokToPicRail1HalfSlot:6388c4478d895f557a0c6512
+ERROR: Reached max hull iterations for MLokToPicRail1HalfSlot:6388c4478d895f557a0c6512
+ERROR: Could not get spawner ID for MLokToPicRail1HalfSlot:623c2f652febb22c2777d8d7
+ERROR: Reached max hull iterations for MLokToPicRail1HalfSlot:623c2f652febb22c2777d8d7
+ERROR: Could not get spawner ID for MLokToPicRail2Slot:59e0be5d86f7742d48765bd2
+ERROR: Could not get spawner ID for MLokToPicRail1HalfSlot:59e0bdb186f774156f04ce82
+ERROR: Reached max hull iterations for MLokToPicRail1HalfSlot:59e0bdb186f774156f04ce82
+ERROR: Could not get spawner ID for MLokToPicRail1HalfSlot:5b7be4575acfc400161d0832
+ERROR: Reached max hull iterations for MLokToPicRail1HalfSlot:5b7be4575acfc400161d0832
+ERROR: Could not get spawner ID for MLokToPicRail1HalfSlot:5b800ed086f7747baf6e2f9e
+ERROR: Reached max hull iterations for MLokToPicRail1HalfSlot:5b800ed086f7747baf6e2f9e
+ERROR: Could not get spawner ID for MLokToPicRail1HalfSlot:5b84038986f774774913b0c1
+ERROR: Reached max hull iterations for MLokToPicRail1HalfSlot:5b84038986f774774913b0c1
+ERROR: Could not get spawner ID for MLokToPicRail3Slot:59e0bed186f774156f04ce84
+ERROR: Could not get spawner ID for MLokToPicRail3Slot:5b7be46e5acfc400170e2dcf
+ERROR: Could not get spawner ID for MLokToPicRail3Slot:5b800ebc86f774394e230a90
+ERROR: Could not get spawner ID for MLokToPicRail3Slot:5b8403a086f7747ff856f4e2
+ERROR: Could not get spawner ID for MLokToPicRail1HalfSlot:5b4736a986f774040571e998
+ERROR: Reached max hull iterations for MLokToPicRail1HalfSlot:5b4736a986f774040571e998
+ERROR: Could not get spawner ID for MLokToPicRail2HalfSlot:623c2f4242aee3103f1c44b7
+ERROR: Could not get spawner ID for MLokToPicRail2HalfSlot:5c0102b20db834001d23eebc
+ERROR: Could not get spawner ID for MLokToPicRail2HalfSlot:5b4736b986f77405cb415c10
+ERROR: Could not get spawner ID for MLokToPicRail2HalfSlot:5b7be4645acfc400170e2dcc
+ERROR: Could not get spawner ID for MLokToPicRail3Slot:5a9d6d13a2750c00164f6b03
+ERROR: Could not get spawner ID for RailExtenderLong:5a9d6d21a2750c00137fa649
+ERROR: Could not get spawner ID for HandstopKAG:5d123b7dd7ad1a004f01b262
+ERROR: Could not get spawner ID for HandstopKAG:5d124c1ad7ad1a12227c53a7
+ERROR: Could not get spawner ID for MLokToPicRail2Slot:5d133067d7ad1a33013f95b4
+ERROR: Could not get spawner ID for RailCoverLong:5d123b70d7ad1a0ee35e0754
+ERROR: Could not get spawner ID for RailCoverLong:5d124c0ed7ad1a10d168dd9b
+ERROR: Could not get spawner ID for RailCoverShort:5d123a3cd7ad1a004e476058
+ERROR: Could not get spawner ID for RailCoverShort:5d124c01d7ad1a115c7d59fb
+ERROR: Could not get spawner ID for MLokToPicRail1HalfSlot:5b30bc165acfc40016387293
+ERROR: Reached max hull iterations for MLokToPicRail1HalfSlot:5b30bc165acfc40016387293
+ERROR: Could not get spawner ID for MLokToPicRail3Slot:5b30bc285acfc47a8608615d
+ERROR: Could not get spawner ID for ForegripSG:5a7dbfc1159bd40016548fde
+ERROR: Could not get spawner ID for ForegripVector45:558032614bdc2de7118b4585
+ERROR: Could not get spawner ID for ForegripVector45:58c157c886f774032749fb06
+ERROR: Could not get spawner ID for ForegripVector45:58c157be86f77403c74b2bb6
+ERROR: Could not get spawner ID for ForegripAngledBlack:5c791e872e2216001219c40a
+ERROR: Could not get spawner ID for ForegripThompson:5b057b4f5acfc4771e1bd3e9
+ERROR: Could not get spawner ID for ForegripRKO:5cf4fb76d7f00c065703d3ac
+ERROR: Could not get spawner ID for ForegripMX4:59fc48e086f77463b1118392
+ERROR: Could not get spawner ID for ForegripMX4:5fce0cf655375d18a253eff0
+ERROR: Could not get spawner ID for ForegripAngledBlack:588226d124597767ad33f787
+ERROR: Could not get spawner ID for ForegripAngledTan:588226ef24597767af46e39c
+ERROR: Could not get spawner ID for ForegripAngledBlack:588226e62459776e3e094af7
+ERROR: Could not get spawner ID for ForegripAngledTan:588226dd24597767ad33f789
+ERROR: Could not get spawner ID for ForegripKTVertBlack:5c87ca002e221600114cb150
+ERROR: Reached max hull iterations for ForegripKTVertBlack:5c87ca002e221600114cb150
+ERROR: Could not get spawner ID for ForegripTStyle:619386379fb0c665d5490dbe
+ERROR: Could not get spawner ID for ForegripShift:59f8a37386f7747af3328f06
+ERROR: Could not get spawner ID for ForegripShift:5f6340d3ca442212f4047eb2
+ERROR: Could not get spawner ID for ForegripKTVertBlack:5cda9bcfd7f00c0c0b53e900
+ERROR: Reached max hull iterations for ForegripKTVertBlack:5cda9bcfd7f00c0c0b53e900
+ERROR: Could not get spawner ID for ForegripMX4:5c7fc87d2e221644f31c0298
+ERROR: Could not get spawner ID for MLokToPicRail2HalfSlot:5b7be4895acfc400170e2dd5
+ERROR: Could not get spawner ID for ForeGripMPLokAngledBlack:57cffce524597763b31685d8
+ERROR: Could not get spawner ID for ForeGripMPLokAngledFDE:57cffcdd24597763f5110006
+ERROR: Could not get spawner ID for ForeGripMPLokAngledFDE:57cffcd624597763133760c5
+ERROR: Could not get spawner ID for ForeGripMPLokAngledBlack:57cffb66245977632f391a99
+ERROR: Could not get spawner ID for ForegripShiftShorty:591af28e86f77414a27a9e1d
+ERROR: Could not get spawner ID for ForegripOffset:5c1cd46f2e22164bef5cfedb
+ERROR: Could not get spawner ID for ForegripRKO:5c1bc4812e22164bef5cfde7
+ERROR: Could not get spawner ID for ForegripRKO:5c1bc5612e221602b5429350
+ERROR: Could not get spawner ID for ForegripStand:5c1bc5af2e221602b412949b
+ERROR: Could not get spawner ID for ForegripAPC:5c1bc5fb2e221602b1779b32
+ERROR: Could not get spawner ID for ForegripValk:5c1bc7432e221602b412949d
+ERROR: Could not get spawner ID for ForegripLDAG:5c1bc7752e221602b1779b34
+ERROR: Could not get spawner ID for RailAdapterCantedSingle:5649a2464bdc2d91118b45a8
+ERROR: Could not get spawner ID for RailAdapterCantedSingle:6269545d0e57f218e4548ca2
+ERROR: Could not get spawner ID for MLokToPicRail1Slot:6269220d70b6c02e665f2635
+ERROR: Reached max hull iterations for MLokToPicRail1Slot:6269220d70b6c02e665f2635
+ERROR: Could not get spawner ID for TacticalLaser4:644a3df63b0b6f03e101e065
+ERROR: Could not get value for TacticalLaser4:644a3df63b0b6f03e101e065
+ERROR: Could not get spawner ID for SureglowLight:5a7b483fe899ef0016170d15
+ERROR: Reached max hull iterations for SureglowLight:5a7b483fe899ef0016170d15
+ERROR: Could not get spawner ID for SureglowLight:626becf9582c3e319310b837
+ERROR: Reached max hull iterations for SureglowLight:626becf9582c3e319310b837
+ERROR: Could not get spawner ID for TacticalFlashlight:59d790f486f77403cb06aec6
+ERROR: Could not get spawner ID for Perst3Laser:5c5952732e2216398b5abda2
+ERROR: Could not get spawner ID for KlashLight:5b3a337e5acfc4704b4a19a0
+ERROR: Could not get spawner ID for KlashLight:560d657b4bdc2da74d8b4572
+ERROR: Could not get spawner ID for Perst3Laser:5a5f1ce64f39f90b401987bc
+ERROR: Could not get spawner ID for TacticalLaser4:5d2369418abbc306c62e0c80
+ERROR: Could not get spawner ID for Perst3Laser:5c06595c0db834001a66af6c
+ERROR: Could not get spawner ID for ANPEQ15:544909bb4bdc2d6f028b4577
+ERROR: Reached max hull iterations for ANPEQ15:544909bb4bdc2d6f028b4577
+ERROR: Could not get spawner ID for ANPEQ15:57fd23e32459772d0805bcf1
+ERROR: Reached max hull iterations for ANPEQ15:57fd23e32459772d0805bcf1
+ERROR: Could not get spawner ID for ANPEQ15:5d10b49bd7ad1a1a560708b0
+ERROR: Reached max hull iterations for ANPEQ15:5d10b49bd7ad1a1a560708b0
+ERROR: Could not get spawner ID for MLokToPicRail1HalfSlot:5b7be47f5acfc400170e2dd2
+ERROR: Reached max hull iterations for MLokToPicRail1HalfSlot:5b7be47f5acfc400170e2dd2
+ERROR: Could not get spawner ID for M203Classic:6357c98711fb55120211f7e1
+ERROR: Could not get value for M203Classic:6357c98711fb55120211f7e1
+ERROR: Reached max hull iterations for Sight_Rear_KACMicro:5dfa3d7ac41b2312ea33362a
+ERROR: Could not get spawner ID for MTRearSight:5bb20e49d4351e3bac1212de
+ERROR: Reached max hull iterations for MTRearSight:5bb20e49d4351e3bac1212de
+ERROR: Could not get spawner ID for MPIronsRear:5894a81786f77427140b8347
+ERROR: Could not get spawner ID for MPIronsFront:5894a73486f77426d259076c
+ERROR: Reached max hull iterations for MPIronsFront:5894a73486f77426d259076c
+ERROR: Reached max hull iterations for Sight_Rear_MagpulMBUSFDE:5c18b9192e2216398b5a8104
+ERROR: Reached max hull iterations for Sight_Front_MagpulMBUS:5bc09a30d4351e00367fb7c8
+ERROR: Reached max hull iterations for Sight_Rear_Saint:5ba26b17d4351e00367f9bdd
+ERROR: Could not get value for Sight_Front_Saint:5ba26b01d4351e0085325a51
+ERROR: Reached max hull iterations for Sight_Front_KACMicro:5dfa3d950dee1b22f862eae0
+ERROR: Could not get spawner ID for MagazineStanagHBoat30rnd:55d4887d4bdc2d962f8b4570
+WARNING: Item type for MagazineStanagHBoat30rnd:55d4887d4bdc2d962f8b4570 was set to generic
+ERROR: Reached max hull iterations for MagazineStanagHBoat30rnd:55d4887d4bdc2d962f8b4570
+ERROR: Could not get spawner ID for MagazineStanagUSGI30rnd:61840bedd92c473c77021635
+WARNING: Item type for MagazineStanagUSGI30rnd:61840bedd92c473c77021635 was set to generic
+ERROR: Could not get spawner ID for MagazineStanagUSGI30rnd:61840d85568c120fdd2962a5
+WARNING: Item type for MagazineStanagUSGI30rnd:61840d85568c120fdd2962a5 was set to generic
+ERROR: Could not get spawner ID for MagazineStanagHBoat30rnd:5c05413a0db834001c390617
+WARNING: Item type for MagazineStanagHBoat30rnd:5c05413a0db834001c390617 was set to generic
+ERROR: Reached max hull iterations for MagazineStanagHBoat30rnd:5c05413a0db834001c390617
+WARNING: Item type for Magazine_HK_Gen2:5c6d450c2e221600114c997d was set to generic
+ERROR: Reached max hull iterations for Magazine_HK_Gen2:5c6d450c2e221600114c997d
+INFO: Entries with more than 1 usage of an H3ID
+	FTW.gun.StdSight
+	MLokToPicRail2HalfSlot
+	MLokToPicRail2Slot
+	MLokToPicRail3Slot
+	MLokToPicRail1HalfSlot
+	HandstopKAG
+	RailCoverLong
+	RailCoverShort
+	ForegripVector45
+	ForegripAngledBlack
+	ForegripRKO
+	ForegripMX4
+	ForegripAngledTan
+	ForegripKTVertBlack
+	ForegripShift
+	ForeGripMPLokAngledBlack
+	ForeGripMPLokAngledFDE
+	RailAdapterCantedSingle
+	TacticalLaser4
+	SureglowLight
+	Perst3Laser
+	KlashLight
+	ANPEQ15
+	MagazineStanagHBoat30rnd
+	MagazineStanagUSGI30rnd
+INFO: Writing new default item file

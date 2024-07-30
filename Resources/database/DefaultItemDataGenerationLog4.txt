@@ -1,0 +1,245 @@
+Building old data dict by tarkov ID
+Building new default item data
+ERROR: Could not get prefab for AR-10 Lancer LCH7 12.5 inch M-LOK handguard:5f6336bbda967c74a42e9932
+ERROR: Could not get spawner ID for AR15StockSIPDW:627254cc9c563e6e442c398f
+ERROR: Could not get spawner ID for 868:638de3603a1a4031d8260b8c
+ERROR: Could not get spawner ID for AR15StockSOCOM:5d120a10d7ad1a4e1026ba85
+ERROR: Reached max hull iterations for AR15StockSOCOM:5d120a10d7ad1a4e1026ba85
+ERROR: Could not get spawner ID for AR15TubeA2Black:5a33ca0fc4a282000d72292f
+ERROR: Could not get spawner ID for 868:5a33cae9c4a28232980eb086
+ERROR: Could not get spawner ID for 868:5bb20dbcd4351e44f824c04e
+ERROR: Could not get spawner ID for 868:5c0faf68d174af02a96260b8
+ERROR: Could not get spawner ID for AR15ChargeBadger:56ea7165d2720b6e518b4583
+ERROR: Could not get spawner ID for AR15ChargeGeissele:5ea16d4d5aad6446a939753d
+ERROR: Could not get spawner ID for AR15ChargeM4MACH15:6033749e88382f4fab3fd2c5
+ERROR: Could not get spawner ID for AR15ChargeRaptor:5b2240bf5acfc40dc528af69
+ERROR: Could not get spawner ID for AR15ChargeRaptorFDE:5d44334ba4b9362b346d1948
+ERROR: Could not get spawner ID for AR15ChargeAvalanche:5f633ff5c444ce7e3c30a006
+ERROR: Could not get spawner ID for 868:5c0e2f26d174af02a9625114
+ERROR: Could not get spawner ID for AR15UpperLS:5d4405aaa4b9361e6a4e6bd3
+ERROR: Could not get spawner ID for AR15UpperGen3:5c07a8770db8340023300450
+ERROR: Could not get spawner ID for AR15UpperVLTOR:59bfe68886f7746004266202
+ERROR: Could not get spawner ID for 868:63f5ed14534b2c3d5479a677
+ERROR: Could not get value for 868:63f5ed14534b2c3d5479a677
+ERROR: Could not get spawner ID for AR15GasBlockJP:5d00ec68d7ad1a04a067e5be
+ERROR: Could not get spawner ID for AR15GasBlockWindham:56ea8d2fd2720b7c698b4570
+ERROR: Reached max hull iterations for AR15GasBlockWindham:56ea8d2fd2720b7c698b4570
+ERROR: Could not get spawner ID for 868:63d3ce281fe77d0f2801859e
+ERROR: Could not get value for 868:63d3ce281fe77d0f2801859e
+ERROR: Could not get spawner ID for AR15StockPrecision:5fc2369685fd526b824a5713
+ERROR: Could not get spawner ID for 868:606587d11246154cad35d635
+ERROR: Could not get spawner ID for AR15StockGLShock:5a9eb32da2750c00171b3f9c
+ERROR: Could not get spawner ID for AR15StockGLR16:5bfe86df0db834001b734685
+ERROR: Could not get spawner ID for AR15StockHKE1:5c87a07c2e2216001219d4a2
+ERROR: Could not get spawner ID for AR15StockHKSlim:5bb20e70d4351e0035629f8f
+ERROR: Could not get spawner ID for AR15StockAK12:5beec8c20db834001d2c465c
+ERROR: Reached max hull iterations for AR15StockAK12:5beec8c20db834001d2c465c
+ERROR: Could not get spawner ID for AR15StockSOPMOD:5ae30c9a5acfc408fb139a03
+ERROR: Could not get spawner ID for AR15StockCTRBLK:5d135e83d7ad1a21b83f42d8
+ERROR: Could not get spawner ID for AR15StockCTRFDE:5d135ecbd7ad1a21c176542e
+ERROR: Could not get spawner ID for AR15StockMOE_blk:56eabf3bd2720b75698b4569
+ERROR: Could not get spawner ID for AR15StockMOE_fde:58d2946386f774496974c37e
+ERROR: Could not get spawner ID for AR15StockMOE_od:58d2946c86f7744e271174b5
+ERROR: Could not get spawner ID for AR15StockMOE_od:58d2947686f774485c6a1ee5
+ERROR: Could not get spawner ID for AR15StockMOE_gry:58d2947e86f77447aa070d53
+ERROR: Could not get spawner ID for AR15StockMFTBus:5947c73886f7747701588af5
+ERROR: Could not get spawner ID for AR15StockViperBlk:5c793fde2e221601da358614
+ERROR: Could not get spawner ID for AR15StockEMOD:5b39f8db5acfc40016387a1b
+ERROR: Could not get spawner ID for AR15StockSBa3Blk:628a85ee6b1d481ff772e9d5
+ERROR: Reached max hull iterations for AR15StockSBa3Blk:628a85ee6b1d481ff772e9d5
+ERROR: Could not get spawner ID for 868:602e620f9b513876d4338d9a
+ERROR: Could not get spawner ID for AR15StockDefianceFDE:5fce16961f152d4312622bc9
+ERROR: Could not get spawner ID for AR15StockDefianceBlk:5fbbaa86f9986c4cff3fe5f6
+ERROR: Could not get spawner ID for NW9x21-SP13:5a26ac0ec4a28200741e1e18
+WARNING: Item type for NW9x21-SP13:5a26ac0ec4a28200741e1e18 was set to generic
+ERROR: Reached max hull iterations for NW9x21-SP13:5a26ac0ec4a28200741e1e18
+ERROR: Could not get spawner ID for NW9x21-SP12:5a26ac06c4a282000c5a90a8
+WARNING: Item type for NW9x21-SP12:5a26ac06c4a282000c5a90a8 was set to generic
+ERROR: Could not get spawner ID for NW9x21-SP11:5a26abfac4a28232980eabff
+WARNING: Item type for NW9x21-SP11:5a26abfac4a28232980eabff was set to generic
+ERROR: Could not get spawner ID for NW9x21-SP10:5a269f97c4a282000b151807
+WARNING: Item type for NW9x21-SP10:5a269f97c4a282000b151807 was set to generic
+WARNING: Item type for pdswmag:5cc70093e4a949033c734312 was set to generic
+ERROR: Reached max hull iterations for pdswmag:5cc70093e4a949033c734312
+ERROR: Could not get spawner ID for SuppressorG19:5cebec00d7f00c065c53522a
+ERROR: Could not get spawner ID for 868:5cc701d7e4a94900100ac4e7
+ERROR: Could not get value for 868:5cc701d7e4a94900100ac4e7
+ERROR: Could not get spawner ID for 868:5cc701aae4a949000e1ea45c
+ERROR: Could not get value for 868:5cc701aae4a949000e1ea45c
+ERROR: Could not get spawner ID for 868:5cf7acfcd7f00c1084477cf2
+ERROR: Could not get spawner ID for 868:5cc700ede4a949033c734315
+ERROR: Could not get spawner ID for 868:5cc70102e4a949035e43ba74
+ERROR: Could not get spawner ID for 868:5cc700d4e4a949000f0f0f28
+ERROR: Could not get spawner ID for 868:5cc700cae4a949035e43ba72
+ERROR: Could not get spawner ID for 868:5cc70146e4a949000d73bf6b
+ERROR: Could not get spawner ID for 868:5cc7015ae4a949001152b4c6
+ERROR: Could not get value for NWMP9SDMount:5de8f237bbaf010b10528a70
+ERROR: Reached max hull iterations for NWMP9SDMount:5de8f237bbaf010b10528a70
+ERROR: Reached max hull iterations for NWMP9ForeB:5de8fbad2fbe23140d3ee9c4
+ERROR: Reached max hull iterations for NWMP9Stock:5de910da8b6c4240ba2651b5
+WARNING: Item type for NWMP9Magazine15:5de8e8dafd6b4e6e2276dc32 was set to generic
+ERROR: Reached max hull iterations for NWMP9Magazine15:5de8e8dafd6b4e6e2276dc32
+WARNING: Item type for NWMP9Magazine20:5de8ea8ffd6b4e6e2276dc35 was set to generic
+WARNING: Item type for NWMP9Magazine25:5de8eaadbbaf010b10528a6d was set to generic
+WARNING: Item type for NWMP9Magazine30:5de8eac42a78646d96665d91 was set to generic
+ERROR: Could not get value for NWG36CTop:622b3c081b89c677a33bcda6
+ERROR: Could not get value for NWSightTopG36:622b3d5cf9cfc87d675d2de9
+ERROR: Could not get value for NW1TimeG36:622b4f54dc8dcc0ba8742f85
+ERROR: Could not get value for NWG366Vent:6231654c71b5bc3baa1078e5
+ERROR: Could not get value for NWG364Vent:62386b7153757417e93a4e9f
+ERROR: Could not get spawner ID for NWG36PicSightF:623166e08c43374ca1567195
+ERROR: Could not get value for NWG36PicSightF:623166e08c43374ca1567195
+ERROR: Could not get spawner ID for NWG36PicSightF:6231670f0b8aa5472d060095
+ERROR: Could not get value for NWG36PicSightF:6231670f0b8aa5472d060095
+WARNING: Item type for NWG36Mag:62307b7b10d2321fa8741921 was set to generic
+ERROR: Could not get value for NWG36TacStop:622f16a1a5958f63c67f1737
+ERROR: Could not get value for NWG36KMuz:622f07cfae33bc505b2c4dd5
+ERROR: Could not get value for NWG36CMuz:622f0ee47762f55aaa68ac87
+ERROR: Reached max hull iterations for NWG36CMuz:622f0ee47762f55aaa68ac87
+ERROR: Could not get value for NWRISTop:622efdf8ec80d870d349b4e5
+ERROR: Could not get spawner ID for UMP45:5fc3e272f8b6a877a729eac5
+ERROR: Could not get spawner ID for MagazineUMP45:5fc3e466187fea44d52eda90
+WARNING: Item type for MagazineUMP45:5fc3e466187fea44d52eda90 was set to generic
+ERROR: Could not get spawner ID for SuppressorBoxy:6130c4d51cb55961fa0fd49f
+ERROR: Could not get spawner ID for SuppressorGepard:5fc4b9b17283c4046c5814d7
+WARNING: Item type for NWSR2M20:633a98eab8b0506e48497c1a was set to generic
+ERROR: Reached max hull iterations for NWSR2M20:633a98eab8b0506e48497c1a
+WARNING: Item type for NWSR2M30:62e153bcdb1a5c41971c1b5b was set to generic
+ERROR: Reached max hull iterations for NWSR2M30:62e153bcdb1a5c41971c1b5b
+ERROR: Could not get value for NWZenitB17:62e281349ecd3f493f6df954
+ERROR: Could not get value for NWSR2Flash:62ff9faffe938a24c90c10df
+ERROR: Reached max hull iterations for NWSR2Flash:62ff9faffe938a24c90c10df
+ERROR: Could not get value for MP7TelStockFDE:5bd704e7209c4d00d7167c31
+WARNING: Item type for modulmp720:5ba264f6d4351e0034777d52 was set to generic
+WARNING: Item type for modulmp730:5ba2657ed4351e0035628ff2 was set to generic
+WARNING: Item type for modulhkmp740:5ba26586d4351e44f824b340 was set to generic
+ERROR: Could not get spawner ID for 46x30mmCartridgeAP:5ba2678ad4351e44f824b344
+WARNING: Item type for 46x30mmCartridgeAP:5ba2678ad4351e44f824b344 was set to generic
+ERROR: Reached max hull iterations for 46x30mmCartridgeAP:5ba2678ad4351e44f824b344
+ERROR: Could not get spawner ID for 46x30mmCartridgeAP:5ba26835d4351e0035628ff5
+WARNING: Item type for 46x30mmCartridgeAP:5ba26835d4351e0035628ff5 was set to generic
+ERROR: Could not get value for 46x30mmCartridgeAP:5ba26835d4351e0035628ff5
+ERROR: Reached max hull iterations for 46x30mmCartridgeAP:5ba26835d4351e0035628ff5
+ERROR: Could not get spawner ID for 46x30mmCartridgeFMJ:5ba26812d4351e003201fef1
+WARNING: Item type for 46x30mmCartridgeFMJ:5ba26812d4351e003201fef1 was set to generic
+ERROR: Reached max hull iterations for 46x30mmCartridgeFMJ:5ba26812d4351e003201fef1
+ERROR: Could not get spawner ID for 46x30mmCartridgeTracer:5ba26844d4351e00334c9475
+WARNING: Item type for 46x30mmCartridgeTracer:5ba26844d4351e00334c9475 was set to generic
+ERROR: Could not get value for 46x30mmCartridgeTracer:5ba26844d4351e00334c9475
+ERROR: Reached max hull iterations for 46x30mmCartridgeTracer:5ba26844d4351e00334c9475
+ERROR: Could not get spawner ID for 46x30mmCartridgeJHP:64b6979341772715af0f9c39
+WARNING: Item type for 46x30mmCartridgeJHP:64b6979341772715af0f9c39 was set to generic
+ERROR: Could not get value for 46x30mmCartridgeJHP:64b6979341772715af0f9c39
+ERROR: Reached max hull iterations for 46x30mmCartridgeJHP:64b6979341772715af0f9c39
+ERROR: Could not get spawner ID for MP5KA4:5d2f0d8048f0356c925bc3b0
+ERROR: Could not get spawner ID for MP5Fore_RIS:5d19cd96d7ad1a4a992c9f52
+ERROR: Could not get spawner ID for MP5Fore_RIS:5d010d1cd7ad1a59283b1ce7
+ERROR: Could not get spawner ID for AR15MuzzleKAC556:615d8df08004cc50514c3236
+ERROR: Could not get spawner ID for MagazineMp515rnd:5d2f213448f0355009199284
+WARNING: Item type for MagazineMp515rnd:5d2f213448f0355009199284 was set to generic
+ERROR: Could not get spawner ID for MP5A4:5926bb2186f7744b1c6c6e60
+ERROR: Could not get spawner ID for MP5SD5:5926f2e086f7745aae644231
+ERROR: Weapon class for MP5SD5:5926f2e086f7745aae644231 was not found
+ERROR: Could not get spawner ID for MP5Fore_RIS:5a9548c9159bd400133e97b3
+ERROR: Could not get spawner ID for MP5PicatinnyAdapter:5926dad986f7741f82604363
+ERROR: Could not get spawner ID for MP5PicatinnyAdapter:5a966ec8a2750c00171b3f36
+ERROR: Could not get spawner ID for MagazineMp530rnd:5926c3b286f774640d189b6b
+WARNING: Item type for MagazineMp530rnd:5926c3b286f774640d189b6b was set to generic
+ERROR: Could not get spawner ID for MagazineMp5100rnd:5a351711c4a282000b1521a4
+WARNING: Item type for MagazineMp5100rnd:5a351711c4a282000b1521a4 was set to generic
+ERROR: Could not get spawner ID for 9x19mmCartridge+PFMJ:5c925fa22e221601da359b7b
+WARNING: Item type for 9x19mmCartridge+PFMJ:5c925fa22e221601da359b7b was set to generic
+ERROR: Could not get value for 9x19mmCartridge+PFMJ:5c925fa22e221601da359b7b
+ERROR: Could not get spawner ID for 9x19mmCartridgeJHP:5a3c16fe86f77452b62de32a
+WARNING: Item type for 9x19mmCartridgeJHP:5a3c16fe86f77452b62de32a was set to generic
+ERROR: Could not get spawner ID for 9x19mmCartridgeFMJ:56d59d3ad2720bdb418b4577
+WARNING: Item type for 9x19mmCartridgeFMJ:56d59d3ad2720bdb418b4577 was set to generic
+ERROR: Could not get spawner ID for 9x19mmCartridgeFMJ:58864a4f2459770fcc257101
+WARNING: Item type for 9x19mmCartridgeFMJ:58864a4f2459770fcc257101 was set to generic
+ERROR: Could not get spawner ID for 9x19mmCartridgeFMJ:64b7bbb74b75259c590fa897
+WARNING: Item type for 9x19mmCartridgeFMJ:64b7bbb74b75259c590fa897 was set to generic
+ERROR: Could not get value for 9x19mmCartridgeFMJ:64b7bbb74b75259c590fa897
+ERROR: Could not get spawner ID for Ammo_9x19mm_RIP:5c0d56a986f774449d5de529
+WARNING: Item type for Ammo_9x19mm_RIP:5c0d56a986f774449d5de529 was set to generic
+ERROR: Could not get spawner ID for 9x19mmCartridgeTracer:5c3df7d588a4501f290594e5
+WARNING: Item type for 9x19mmCartridgeTracer:5c3df7d588a4501f290594e5 was set to generic
+ERROR: Could not get spawner ID for 9x19mmCartridge+PAPI:5efb0da7a29a85116f6ea05f
+WARNING: Item type for 9x19mmCartridge+PAPI:5efb0da7a29a85116f6ea05f was set to generic
+ERROR: Could not get value for 9x19mmCartridge+PAPI:5efb0da7a29a85116f6ea05f
+ERROR: Reached max hull iterations for 9x19mmCartridge+PAPI:5efb0da7a29a85116f6ea05f
+ERROR: Could not get spawner ID for Ammo_9x19mm_Quake:5efb0e16aeb21837e749c7ff
+WARNING: Item type for Ammo_9x19mm_Quake:5efb0e16aeb21837e749c7ff was set to generic
+ERROR: Reached max hull iterations for Ammo_9x19mm_Quake:5efb0e16aeb21837e749c7ff
+ERROR: Could not get spawner ID for 57x28mmCartridgeAP:5cc80f38e4a949001152b560
+WARNING: Item type for 57x28mmCartridgeAP:5cc80f38e4a949001152b560 was set to generic
+ERROR: Could not get value for 57x28mmCartridgeAP:5cc80f38e4a949001152b560
+ERROR: Reached max hull iterations for 57x28mmCartridgeAP:5cc80f38e4a949001152b560
+ERROR: Could not get spawner ID for 57x28mmCartridgeTracer:5cc80f53e4a949000e1ea4f8
+WARNING: Item type for 57x28mmCartridgeTracer:5cc80f53e4a949000e1ea4f8 was set to generic
+ERROR: Reached max hull iterations for 57x28mmCartridgeTracer:5cc80f53e4a949000e1ea4f8
+ERROR: Could not get spawner ID for 57x28mmCartridgeFMJ:5cc80f67e4a949035e43bbba
+WARNING: Item type for 57x28mmCartridgeFMJ:5cc80f67e4a949035e43bbba was set to generic
+ERROR: Could not get value for 57x28mmCartridgeFMJ:5cc80f67e4a949035e43bbba
+ERROR: Reached max hull iterations for 57x28mmCartridgeFMJ:5cc80f67e4a949035e43bbba
+ERROR: Could not get spawner ID for 57x28mmCartridgeFMJ:5cc80f79e4a949033c7343b2
+WARNING: Item type for 57x28mmCartridgeFMJ:5cc80f79e4a949033c7343b2 was set to generic
+ERROR: Reached max hull iterations for 57x28mmCartridgeFMJ:5cc80f79e4a949033c7343b2
+ERROR: Could not get spawner ID for 57x28mmCartridgeFMJ:5cc80f8fe4a949033b0224a2
+WARNING: Item type for 57x28mmCartridgeFMJ:5cc80f8fe4a949033b0224a2 was set to generic
+ERROR: Reached max hull iterations for 57x28mmCartridgeFMJ:5cc80f8fe4a949033b0224a2
+ERROR: Could not get spawner ID for 57x28mmCartridgeJHP:5cc86832d7f00c000d3a6e6c
+WARNING: Item type for 57x28mmCartridgeJHP:5cc86832d7f00c000d3a6e6c was set to generic
+ERROR: Reached max hull iterations for 57x28mmCartridgeJHP:5cc86832d7f00c000d3a6e6c
+ERROR: Could not get spawner ID for 57x28mmCartridgeJHP:5cc86840d7f00c002412c56c
+WARNING: Item type for 57x28mmCartridgeJHP:5cc86840d7f00c002412c56c was set to generic
+ERROR: Reached max hull iterations for 57x28mmCartridgeJHP:5cc86840d7f00c002412c56c
+WARNING: Item type for NWGrach18:576a5ed62459771e9c2096cb was set to generic
+ERROR: Reached max hull iterations for NWGrach18:576a5ed62459771e9c2096cb
+ERROR: Could not get spawner ID for APS:5a17f98cfcdbcb0980087290
+ERROR: Reached max hull iterations for APS:5a17f98cfcdbcb0980087290
+ERROR: Could not get spawner ID for APS:5abccb7dd8ce87001773e277
+ERROR: Reached max hull iterations for APS:5abccb7dd8ce87001773e277
+ERROR: Could not get spawner ID for SuppressorAPS:5abcc328d8ce8700194394f3
+ERROR: Reached max hull iterations for SuppressorAPS:5abcc328d8ce8700194394f3
+ERROR: Could not get spawner ID for StockAPSWire:5a17fb9dfcdbcbcae6687291
+ERROR: Could not get spawner ID for MagazineAPS:5a17fb03fcdbcbcae668728f
+WARNING: Item type for MagazineAPS:5a17fb03fcdbcbcae668728f was set to generic
+ERROR: Reached max hull iterations for MagazineAPS:5a17fb03fcdbcbcae668728f
+ERROR: Reached max hull iterations for SR1MP:59f98b4986f7746f546d2cef
+ERROR: Could not get spawner ID for 45ACPCartridgeFMJ:5e81f423763d9f754677bf2e
+WARNING: Item type for 45ACPCartridgeFMJ:5e81f423763d9f754677bf2e was set to generic
+ERROR: Reached max hull iterations for 45ACPCartridgeFMJ:5e81f423763d9f754677bf2e
+ERROR: Could not get spawner ID for 45ACPCartridge+PJHP:5ea2a8e200685063ec28c05a
+WARNING: Item type for 45ACPCartridge+PJHP:5ea2a8e200685063ec28c05a was set to generic
+ERROR: Could not get spawner ID for 45ACPCartridgeJHP:5efb0fc6aeb21837e749c801
+WARNING: Item type for 45ACPCartridgeJHP:5efb0fc6aeb21837e749c801 was set to generic
+ERROR: Could not get spawner ID for 45ACPCartridge+PFMJ:5efb0cabfb3e451d70735af5
+WARNING: Item type for 45ACPCartridge+PFMJ:5efb0cabfb3e451d70735af5 was set to generic
+ERROR: Could not get value for 45ACPCartridge+PFMJ:5efb0cabfb3e451d70735af5
+ERROR: Reached max hull iterations for 45ACPCartridge+PFMJ:5efb0cabfb3e451d70735af5
+ERROR: Could not get spawner ID for 45ACPCartridgeTracer:5efb0d4f4bc50b58e81710f3
+WARNING: Item type for 45ACPCartridgeTracer:5efb0d4f4bc50b58e81710f3 was set to generic
+ERROR: Reached max hull iterations for 45ACPCartridgeTracer:5efb0d4f4bc50b58e81710f3
+ERROR: Reached max hull iterations for FTWBTADPTV:5fb655b748c711690e3a8d5a
+ERROR: Reached max hull iterations for FTWVectorMK5:5fbb978207e8a97d1f0902d3
+ERROR: Could not get spawner ID for MagazineG41:5fb651b52b1b027b1f50bcff
+WARNING: Item type for MagazineG41:5fb651b52b1b027b1f50bcff was set to generic
+WARNING: Item type for ftw.mag.v45blk:5fb651dc85f90547f674b6f4 was set to generic
+ERROR: Reached max hull iterations for ftw.mag.v45blk:5fb651dc85f90547f674b6f4
+ERROR: Could not get spawner ID for G19:63088377b5cd696784087147
+INFO: Entries with more than 1 usage of an H3ID
+	868
+	AR10StockPRSBlk
+	AR15StockMOE_od
+	NWG36PicSightF
+	46x30mmCartridgeAP
+	MP5Fore_RIS
+	MP5PicatinnyAdapter
+	9x19mmCartridgeFMJ
+	57x28mmCartridgeFMJ
+	57x28mmCartridgeJHP
+	APS
+	FTW6BarrelV
+	ftw.flashhider.vector
+	ftw.threadproc.vector
+INFO: Writing new default item file

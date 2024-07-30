@@ -78,6 +78,7 @@ namespace EFM
     /// </summary>
     public class ConvexHullCalculator
     {
+        public int MAX_GROW_ITERATIONS = 1000;
 
         /// <summary>
         ///   Constant representing a point that has yet to be assigned to a
@@ -294,13 +295,12 @@ namespace EFM
 
             GenerateInitialHull(points);
 
-            int maxIterations = 1000;
             int iteration = 0;
             while (openSetTail >= 0)
             {
                 GrowHull(points);
                 iteration++;
-                if (iteration >= maxIterations)
+                if (iteration >= MAX_GROW_ITERATIONS)
                 {
                     success = false;
                     break;

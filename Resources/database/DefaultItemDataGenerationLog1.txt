@@ -1,0 +1,249 @@
+ERROR: Reached max hull iterations for AKGripSAWblk:5947f92f86f77427344a76b1
+ERROR: Reached max hull iterations for AKGripSAWFDE:5947fa2486f77425b47c1a9b
+ERROR: Reached max hull iterations for AKForeMOEblk:57cff947245977638e6f2a19
+ERROR: Reached max hull iterations for AKForeMOEFDE:57cffd8224597763b03fc609
+ERROR: Reached max hull iterations for AKForeMOEod:57cffddc24597763133760c6
+ERROR: Reached max hull iterations for AKForeMOEplm:57cffe0024597763b03fc60b
+ERROR: Reached max hull iterations for AKForeMOEgry:57cffe20245977632f391a9d
+ERROR: Could not get spawner ID for AKDustcover74:59d6507c86f7741b846413a2
+ERROR: Could not get spawner ID for AKDustcover74m:5ac50da15acfc4001718d287
+ERROR: Could not get spawner ID for AR15StockUltralite:57ade1442459771557167e15
+ERROR: Could not get spawner ID for AKMiscAKRS:57acb6222459771ec34b5cb0
+ERROR: Could not get spawner ID for RailAdapterRussianToPicatinny:591ee00d86f774592f7b841e
+ERROR: Could not get spawner ID for MuzzleSpike:5a9ea27ca2750c00137fa672
+ERROR: Could not get spawner ID for MuzzleVenom:5c7951452e221644f31bfd5c
+ERROR: Could not get spawner ID for AKForeCMRD:5c17664f2e2216398b5a7e3c
+ERROR: Could not get spawner ID for AKStockHexRed:5e217ba4c1434648c13568cd
+ERROR: Could not get spawner ID for AKGripMG47Gold:5cf54404d7f00c108840b2ef
+ERROR: Could not get spawner ID for AKGripMG47Red:5e2192a498a36665e8337386
+ERROR: Could not get spawner ID for AKSForeAlfa:5d15ce51d7ad1a1eff619092
+ERROR: Could not get spawner ID for AKForeAKMLblk:5d1b198cd7ad1a604869ad72
+ERROR: Could not get spawner ID for AKForeAKML:5d4aaa54a4b9365392071170
+ERROR: Could not get spawner ID for AKDustcoverPDC:5d2c770c48f0354b4a07c100
+ERROR: Could not get spawner ID for AKDustcoverDogleg:5d2c772c48f0355d95672c25
+ERROR: Reached max hull iterations for AKDustcoverDogleg:5d2c772c48f0355d95672c25
+ERROR: Could not get spawner ID for AKForeAKMLgld:5d4aaa73a4b9365392071175
+ERROR: Could not get spawner ID for MuzzleAK74Adapter:5e21ca18e4d47f0da15e77dd
+ERROR: Could not get spawner ID for MuzzleRRD762:5f633f68f5750b524b45f112
+ERROR: Could not get spawner ID for MuzzleRRD545:5f633f791b231926f2329f13
+ERROR: Could not get spawner ID for AKGripScorpius:5f6341043ada5942720e2dc5
+ERROR: Could not get spawner ID for AKGripBattleGripBlk:628a664bccaab13006640e47
+ERROR: Could not get spawner ID for AKGripAGR47FDE:623c3be0484b5003161840dc
+ERROR: Could not get value for AKGripAGR47FDE:623c3be0484b5003161840dc
+ERROR: Could not get spawner ID for AKStockCQR AK:619b69037b9de8162902673e
+ERROR: Could not get spawner ID for AKDustcoverBastion:5d2c76ed48f03532f2136169
+ERROR: Could not get spawner ID for AKForeB31c:5efaf417aeb21837e749c7f2
+ERROR: Could not get spawner ID for AKDustcoverEnhanced:628a665a86cbd9750d2ff5e5
+ERROR: Could not get spawner ID for AKMiscCSS:6130ca3fd92c473c77020dbd
+ERROR: Could not get spawner ID for MuzzleAKHex:615d8f5dd92c473c770212ef
+ERROR: Could not get spawner ID for MagazineAK74_20rnd:64b9e265c94d0d15c5027e35
+ERROR: Could not get value for MagazineAK74_20rnd:64b9e265c94d0d15c5027e35
+ERROR: Reached max hull iterations for MagazineAK74_20rnd:64b9e265c94d0d15c5027e35
+ERROR: Could not get spawner ID for MagazineAKMTactical20rnd:64b9cf0ac12b9c38db26923a
+ERROR: Could not get value for MagazineAKMTactical20rnd:64b9cf0ac12b9c38db26923a
+ERROR: Reached max hull iterations for MagazineAKMTactical20rnd:64b9cf0ac12b9c38db26923a
+ERROR: Could not get spawner ID for MagazineRPKBakelite:5b1fb3e15acfc4001637f068
+ERROR: Could not get value for MagazineX47:5cfe8010d7ad1a59283b14c6
+ERROR: Could not get spawner ID for MagazineAKMDrum:5c6175362e221600133e3b94
+ERROR: Could not get value for MagazineAKMDrum:5c6175362e221600133e3b94
+ERROR: Reached max hull iterations for MagazineAKMDrum:5c6175362e221600133e3b94
+ERROR: Could not get spawner ID for MagazineAKMDrum:5cbdc23eae9215001136a407
+ERROR: Reached max hull iterations for MagazineAKMDrum:5cbdc23eae9215001136a407
+ERROR: Could not get spawner ID for MagazineArsenalMag:5c0548ae0db834001966a3c2
+ERROR: Reached max hull iterations for MagazineArsenalMag:5c0548ae0db834001966a3c2
+ERROR: Could not get spawner ID for MagazineAK12mag:5bed61680db834001d2c45ab
+ERROR: Could not get spawner ID for MagazineRPK16Drum:5bed625c0db834001c062946
+ERROR: Reached max hull iterations for Magazine6L23Plum:5cbdaf89ae9215000e5b9c94
+ERROR: Could not get spawner ID for Magazine74Pmag:5aaa4194e5b5b055d06310a5
+ERROR: Could not get spawner ID for MagazineAKMAluminum:5a0060fc86f7745793204432
+ERROR: Could not get spawner ID for MagazineAKMStd:59d625f086f774661516605d
+ERROR: Could not get spawner ID for MagazineRPK40:59e5f5a486f7746c530b3ce2
+ERROR: Could not get spawner ID for 545x39mmCartridgeIncendiary:61962b617c6c7b169525f168
+ERROR: Could not get value for 545x39mmCartridgeIncendiary:61962b617c6c7b169525f168
+ERROR: Reached max hull iterations for 545x39mmCartridgeIncendiary:61962b617c6c7b169525f168
+ERROR: Could not get spawner ID for 545x39mmCartridgeAPIncendiary:5c0d5e4486f77478390952fe
+ERROR: Could not get value for 545x39mmCartridgeAPIncendiary:5c0d5e4486f77478390952fe
+ERROR: Reached max hull iterations for 545x39mmCartridgeAPIncendiary:5c0d5e4486f77478390952fe
+ERROR: Could not get spawner ID for 545x39mmCartridgeAP:56dfef82d2720bbd668b4567
+ERROR: Reached max hull iterations for 545x39mmCartridgeAP:56dfef82d2720bbd668b4567
+ERROR: Could not get spawner ID for 545x39mmCartridgeAP:56dff026d2720bb8668b4567
+ERROR: Could not get value for 545x39mmCartridgeAP:56dff026d2720bb8668b4567
+ERROR: Reached max hull iterations for 545x39mmCartridgeAP:56dff026d2720bb8668b4567
+ERROR: Could not get spawner ID for 545x39mmCartridgeTracer:56dff061d2720bb5668b4567
+ERROR: Reached max hull iterations for 545x39mmCartridgeTracer:56dff061d2720bb5668b4567
+ERROR: Could not get spawner ID for 545x39mmCartridgeJHP:56dff216d2720bbd668b4568
+ERROR: Could not get spawner ID for 545x39mmCartridgeFMJ:56dff2ced2720bb4668b4567
+ERROR: Reached max hull iterations for 545x39mmCartridgeFMJ:56dff2ced2720bb4668b4567
+ERROR: Could not get spawner ID for 545x39mmCartridgeFMJ:56dff338d2720bbd668b4569
+ERROR: Reached max hull iterations for 545x39mmCartridgeFMJ:56dff338d2720bbd668b4569
+ERROR: Could not get spawner ID for 545x39mmCartridgeFMJ:56dff3afd2720bba668b4567
+ERROR: Reached max hull iterations for 545x39mmCartridgeFMJ:56dff3afd2720bba668b4567
+ERROR: Could not get spawner ID for 545x39mmCartridgeJHP:56dff421d2720b5f5a8b4567
+ERROR: Could not get spawner ID for 545x39mmCartridgeTracer:56dff4a2d2720bbd668b456a
+ERROR: Reached max hull iterations for 545x39mmCartridgeTracer:56dff4a2d2720bbd668b456a
+ERROR: Could not get spawner ID for 545x39mmCartridgeFMJ:56dff4ecd2720b5f5a8b4568
+ERROR: Reached max hull iterations for 545x39mmCartridgeFMJ:56dff4ecd2720b5f5a8b4568
+ERROR: Reached max hull iterations for Magazine6L18:564ca9df4bdc2d35148b4569
+ERROR: Reached max hull iterations for Magazine6L23:55d480c04bdc2d1d4e8b456a
+ERROR: Could not get spawner ID for MuzzleAKLantac:5c878ebb2e2216001219d48a
+ERROR: Could not get spawner ID for MuzzleAKLantac:5c878e9d2e2216000f201903
+ERROR: Could not get spawner ID for MuzzleAK104:5ac72e945acfc43f3b691116
+ERROR: Could not get spawner ID for MuzzleAK104:5ac72e895acfc43b321d4bd5
+ERROR: Could not get spawner ID for MuzzleAK104:5ac72e725acfc400180ae701
+ERROR: Could not get spawner ID for MuzzleAK74m:5ac72e615acfc43f67248aa0
+ERROR: Could not get value for MuzzleAK74m:5ac72e615acfc43f67248aa0
+ERROR: Could not get spawner ID for MuzzleAK74m:5ac7655e5acfc40016339a19
+ERROR: Could not get spawner ID for MuzzleAK74m:5ac72e7d5acfc40016339a02
+ERROR: Could not get spawner ID for MuzzleAK74m:5649aa744bdc2ded0b8b457e
+ERROR: Could not get spawner ID for MuzzleBrakeCharon:5649ab884bdc2ded0b8b457f
+ERROR: Could not get spawner ID for AKMiscRP1:5648ac824bdc2ded0b8b457d
+ERROR: Could not get spawner ID for AKForeZhukovblk:5c9a07572e221644f31c4b32
+ERROR: Reached max hull iterations for AKForeZhukovblk:5c9a07572e221644f31c4b32
+ERROR: Could not get spawner ID for AKForeZhukovOD:5c9a1c3a2e2216000e69fb6a
+ERROR: Reached max hull iterations for AKForeZhukovOD:5c9a1c3a2e2216000e69fb6a
+ERROR: Could not get spawner ID for AKForeZhukovPlm:5c9a1c422e221600106f69f0
+ERROR: Reached max hull iterations for AKForeZhukovPlm:5c9a1c422e221600106f69f0
+ERROR: Could not get spawner ID for AKForeAK100:5cbda392ae92155f3c17c39f
+ERROR: Could not get spawner ID for AKForePlum:5cbda9f4ae9215000e5b9bfc
+ERROR: Could not get spawner ID for AKForeAggressor:5cf4e3f3d7f00c06595bc7f0
+ERROR: Could not get spawner ID for AKForeB10:5c617a5f2e2216000f1e81b3
+ERROR: Could not get spawner ID for AKForeQuadRail:5648ae314bdc2d3d1c8b457f
+ERROR: Could not get spawner ID for AKForePlastic:5648b1504bdc2d9d488b4584
+ERROR: Could not get spawner ID for AKForeB19:5648b4534bdc2d3d1c8b4580
+ERROR: Could not get spawner ID for AKGripAK12:5beec8ea0db834001a6f9dbf
+ERROR: Could not get spawner ID for AKGripStrikeblk:5cf50850d7f00c056e24104c
+ERROR: Could not get spawner ID for AKGripStrike:5cf508bfd7f00c056e24104e
+ERROR: Could not get spawner ID for AKGrip74Bakelite:59e6318286f77444dd62c4cc
+ERROR: Could not get spawner ID for AKGripPalm:5c6bf4aa2e2216001219b0ae
+ERROR: Could not get spawner ID for AKGripBorderGreen:5649ad3f4bdc2df8348b4585
+ERROR: Could not get value for AKGripBorderGreen:5649ad3f4bdc2df8348b4585
+ERROR: Could not get spawner ID for AKGrip74Polymer:5649ade84bdc2d1b2b8b4587
+ERROR: Could not get spawner ID for AKGripRK3:5649ae4a4bdc2d1b2b8b4588
+ERROR: Reached max hull iterations for AKGripRK3:5649ae4a4bdc2d1b2b8b4588
+ERROR: Could not get value for AKGripAKSBL:57e3dba62459770f0c32322b
+ERROR: Could not get spawner ID for AKGripGlossWood:59e62cc886f77440d40b52a1
+ERROR: Could not get spawner ID for AKDustcover74:5649af094bdc2df8348b4586
+ERROR: Could not get spawner ID for AKDustcover74:59e6449086f7746c9f75e822
+ERROR: Could not get spawner ID for AKDustcoverB33:5649af884bdc2d1b2b8b4589
+ERROR: Reached max hull iterations for AKDustcoverB33:5649af884bdc2d1b2b8b4589
+ERROR: Could not get spawner ID for AKStock74plm:5cbdb1b0ae9215000d50e105
+ERROR: Could not get spawner ID for AKStock74blk:5649b0fc4bdc2d17108b4588
+ERROR: Could not get spawner ID for AKDustcoverRail:5649d9a14bdc2d79388b4580
+ERROR: Could not get spawner ID for ReflexKobra:5947db3f86f77447880cf76f
+ERROR: Could not get spawner ID for ReflexKobra:57486e672459770abd687134
+ERROR: Could not get spawner ID for Cartridge_40x46Grenade_M381:5ede4739e0350d05467f73e8
+ERROR: Could not get spawner ID for Cartridge_40x46Grenade_M381:5f0c892565703e5c461894e9
+ERROR: Could not get value for Cartridge_40x46Grenade_M381:5f0c892565703e5c461894e9
+ERROR: Could not get spawner ID for Cartridge_40x46Grenade_M381:5ede47405b097655935d7d16
+ERROR: Could not get value for Cartridge_40x46Grenade_M381:5ede47405b097655935d7d16
+ERROR: Could not get spawner ID for Cartridge_40x46Grenade_M381:5ede475b549eed7c6d5c18fb
+ERROR: Could not get spawner ID for Cartridge_40x46Grenade_M381:5ede474b0c226a66f5402622
+ERROR: Could not get spawner ID for Cartridge_40x46Grenade_M576:5ede475339ee016e8c534742
+ERROR: Could not get spawner ID for Cartridge_40mmCaseless_HEF:5656eb674bdc2d35148b457c
+ERROR: Could not get spawner ID for Ammo_12,7x55LP:5cadf6ddae9215051e1c23b2
+ERROR: Could not get spawner ID for Ammo_12,7x55TP:5cadf6e5ae921500113bb973
+ERROR: Could not get spawner ID for Ammo_12,7x55BP:5cadf6eeae921500134b2799
+ERROR: Could not get spawner ID for 762x39mmCartridgeFMJ:5656d7c34bdc2d9d198b4587
+ERROR: Reached max hull iterations for 762x39mmCartridgeFMJ:5656d7c34bdc2d9d198b4587
+ERROR: Could not get spawner ID for 762x39mmCartridgeFMJ:64b7af5a8532cf95ee0a0dbd
+ERROR: Could not get value for 762x39mmCartridgeFMJ:64b7af5a8532cf95ee0a0dbd
+ERROR: Reached max hull iterations for 762x39mmCartridgeFMJ:64b7af5a8532cf95ee0a0dbd
+ERROR: Could not get spawner ID for 762x39mmCartridgeAPIncendiary:601aa3d2b2bcb34913271e6d
+ERROR: Could not get value for 762x39mmCartridgeAPIncendiary:601aa3d2b2bcb34913271e6d
+ERROR: Reached max hull iterations for 762x39mmCartridgeAPIncendiary:601aa3d2b2bcb34913271e6d
+ERROR: Could not get spawner ID for 762x39mmCartridgeAP:64b7af434b75259c590fa893
+ERROR: Could not get value for 762x39mmCartridgeAP:64b7af434b75259c590fa893
+ERROR: Reached max hull iterations for 762x39mmCartridgeAP:64b7af434b75259c590fa893
+ERROR: Could not get spawner ID for 762x39mmCartridgeTracer:64b7af734b75259c590fa895
+ERROR: Could not get value for 762x39mmCartridgeTracer:64b7af734b75259c590fa895
+ERROR: Reached max hull iterations for 762x39mmCartridgeTracer:64b7af734b75259c590fa895
+ERROR: Could not get spawner ID for ftw.366.ap:5f0596629e22f464da6bbdd9
+ERROR: Could not get spawner ID for ftw.366.eko:59e655cb86f77411dc52a77b
+ERROR: Could not get spawner ID for ftw.366.geksa:59e6658b86f77411d949b250
+ERROR: Reached max hull iterations for ftw.366.geksa:59e6658b86f77411d949b250
+ERROR: Could not get spawner ID for ftw.366.fmj:59e6542b86f77411dc52a77a
+ERROR: Reached max hull iterations for ftw.366.fmj:59e6542b86f77411dc52a77a
+ERROR: Could not get spawner ID for BreakActionShorty:64748cb8de82c85eaf0a273a
+ERROR: Weapon class for BreakActionShorty:64748cb8de82c85eaf0a273a was not found
+ERROR: Could not get value for BreakActionShorty:64748cb8de82c85eaf0a273a
+ERROR: Reached max hull iterations for BreakActionShorty:64748cb8de82c85eaf0a273a
+ERROR: Could not get spawner ID for HammerlessLong:5580223e4bdc2d1c128b457f
+ERROR: Weapon class for HammerlessLong:5580223e4bdc2d1c128b457f was not found
+ERROR: Weapon class for FSCE.ModulToz106TOZ:5a38e6bac4a2826c6e06d79b was not found
+ERROR: Could not get value for FSCE.FoldStockTOZ:5a38ef1fc4a282000b1521f6
+ERROR: Could not get spawner ID for AKMiscB13:5e569a2e56edd02abe09f280
+ERROR: Could not get spawner ID for AKMiscAKRS:5dff8db859400025ea5150d4
+ERROR: Could not get spawner ID for AKMiscAKRS:63d114019e35b334d82302f7
+ERROR: Could not get value for AKMiscAKRS:63d114019e35b334d82302f7
+ERROR: Could not get spawner ID for AKGripRK3FDE:63f4da90f31d4a33b87bd054
+ERROR: Could not get value for AKGripRK3FDE:63f4da90f31d4a33b87bd054
+ERROR: Could not get spawner ID for 868:5dfce88fe9dc277128008b2e
+ERROR: Could not get spawner ID for 868:5c471ba12e221602b3137d76
+ERROR: Could not get spawner ID for 868:5e01ea19e9dc277128008c0b
+ERROR: Could not get spawner ID for 868:5dfcd0e547101c39625f66f9
+ERROR: Could not get spawner ID for 868:5c471c6c2e221602b66cd9ae
+ERROR: Could not get spawner ID for 868:5e5699df2161e06ac158df6f
+ERROR: Could not get spawner ID for 868:5c471bd12e221602b4129c3a
+ERROR: Could not get spawner ID for 868:5e569a132642e66b0b68015c
+ERROR: Could not get spawner ID for 868:5c471cb32e221602b177afaa
+ERROR: Could not get spawner ID for 868:5c471be12e221602b66cd9ac
+ERROR: Could not get spawner ID for 868:5c471bfc2e221602b21d4e17
+ERROR: Could not get spawner ID for 868:5c471b5d2e221602b21d4e14
+ERROR: Could not get spawner ID for 868:62811e2510e26c1f344e6554
+ERROR: Could not get value for 868:62811e2510e26c1f344e6554
+ERROR: Could not get spawner ID for 868:62811e335631d45211793c95
+ERROR: Could not get value for 868:62811e335631d45211793c95
+ERROR: Could not get spawner ID for 868:62811f828193841aca4a45c3
+ERROR: Could not get spawner ID for 868:62811fbf09427b40ab14e767
+ERROR: Could not get spawner ID for 868:6281204f308cb521f87a8f9b
+ERROR: Could not get value for 868:6281204f308cb521f87a8f9b
+ERROR: Could not get spawner ID for 868:6281209662cba23f6c4d7a19
+ERROR: Could not get spawner ID for 868:628121434fa03b6b6c35dc6a
+ERROR: Could not get value for 868:628121434fa03b6b6c35dc6a
+ERROR: Could not get value for NWAIKeymod6:628120d309427b40ab14e76d
+ERROR: Reached max hull iterations for NWAI338Mag:628120fd5631d45211793c9f
+ERROR: Reached max hull iterations for m700stdnorail:5bfeb32b0db834001a6694d9
+ERROR: Could not get value for m700heavylong:5d2702e88abbc31ed91efc44
+ERROR: Could not get value for m700heavylong:5d2703038abbc3105103d94c
+ERROR: Reached max hull iterations for m700remmount:5bfebc5e0db834001a6694e5
+ERROR: Could not get spawner ID for AbGuardB:5cde7afdd7f00c000d36b89d
+INFO: Entries with more than 1 usage of an H3ID
+	AKMiscAKRS
+	FTW.Gun.20rnd
+	NWValBuilt
+	NWValSup
+	NWValRS
+	NWVSSDust
+	9x39mmCartridgeFMJ
+	9x39mmCartridgeAP
+	sksbasedupe
+	promag35
+	PP91KEDR
+	MagazinePP91
+	NWFAL30
+	NWKeymodRifle
+	ModulAKSDupe
+	AKStockAKS
+	AKForeX47
+	SuppressorMk2Hex
+	AKSDustcover2
+	ModulAK74MDupe
+	ModulAKMSNDupe
+	AKMiscB13
+	AKDustcover74
+	MagazineAKM10
+	MagazineAKMDrum
+	545x39mmCartridgeAP
+	545x39mmCartridgeTracer
+	545x39mmCartridgeJHP
+	545x39mmCartridgeFMJ
+	MuzzleAKLantac
+	MuzzleAK104
+	MuzzleAK74m
+	AKStockAKTSFold
+	ReflexKobra
+	Cartridge_40x46Grenade_M381
+	762x39mmCartridgeFMJ
+	868
+	m700heavylong
+INFO: Writing new default item file

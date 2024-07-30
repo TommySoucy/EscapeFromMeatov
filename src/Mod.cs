@@ -11,7 +11,6 @@ using Valve.VR;
 using UnityEngine.UI;
 using ModularWorkshop;
 using System.Text.RegularExpressions;
-using static Assets.Rust.Lodestone.Lodestone;
 
 namespace EFM
 {
@@ -1021,23 +1020,24 @@ namespace EFM
                                 foreach(KeyValuePair<string, JToken> itemMapEntry in itemMap)
                                 {
                                     ++tempIt;
-                                    if (newIteration >= 1000)
+                                    if (newIteration >= 500)
                                     {
                                         break;
                                     }
 
+                                    Mod.LogInfo("\t\tWriting new: " + itemMapEntry.Key + ": " + tempIt + "/" + itemMap.Count);
+
                                     // Skip any entries we already wrote a new default item data entry for
                                     if (previousNewItemData != null && previousNewItemData[itemMapEntry.Key] != null)
                                     {
-                                        Mod.LogInfo("\t\t\tSkipped");
+                                        Mod.LogInfo("\t\t\tSkipped, Already written");
                                         continue;
                                     }
                                     ++newIteration;
-                                    Mod.LogInfo("\t\tWriting new: " + itemMapEntry.Key+": "+(++tempIt) +"/"+itemMap.Count);
                                     // Skip any that don't have an H3ID
                                     if (itemMapEntry.Value["H3ID"] == null)
                                     {
-                                        Mod.LogInfo("\t\t\tSkipped");
+                                        Mod.LogInfo("\t\t\tSkipped, no ID");
                                         continue;
                                     }
 
@@ -1047,6 +1047,8 @@ namespace EFM
                                     // Only process non custom items, or 868
                                     int parsedID = -1;
                                     string H3ID = itemMapEntry.Value["H3ID"].ToString();
+
+                                    Mod.LogInfo("\t\t\tH3ID: " + H3ID);
 
                                     if (!int.TryParse(H3ID, out parsedID) || parsedID == 868)
                                     {
@@ -1186,8 +1188,8 @@ namespace EFM
                                             Mod.LogError("Could not get item DB data for " + H3ID + ":" + itemMapEntry.Key);
 
                                             newItemData["lootExperience"] = 20;
-                                            parents.Add("54009119af1c881c07000029");
-                                            parentList.Add("54009119af1c881c07000029");
+                                            parents.Add(Mod.itemParentID);
+                                            parentList.Add(Mod.itemParentID);
                                             newItemData["parents"] = parents;
                                             newItemData["weight"] = 0;
                                             newItemData["canSellOnRagfair"] = false;
@@ -1481,9 +1483,15 @@ namespace EFM
                                                 vertices.AddRange(meshFilters[i].sharedMesh.vertices);
                                                 for (int k = vertexOffset; k < vertices.Count; ++k)
                                                 {
-                                                    Vector3 newVertex = new Vector3(vertices[k].x * meshFilters[i].transform.localScale.x, vertices[k].y * meshFilters[i].transform.localScale.y, vertices[k].z * meshFilters[i].transform.localScale.z);
-                                                    vertices[k] = newVertex;
-                                                    vertices[k] += meshFilters[i].transform.position;
+                                                    Vector3 vertex = vertices[k];
+
+                                                    vertex = new Vector3(vertex.x * meshFilters[i].transform.localScale.x, vertex.y * meshFilters[i].transform.localScale.y, vertex.z * meshFilters[i].transform.localScale.z);
+                                                    vertex = meshFilters[i].transform.localRotation * vertex;
+                                                    vertex += meshFilters[i].transform.localPosition;
+
+                                                    ApplyTransform(ref vertex, meshFilters[i].transform.parent);
+
+                                                    vertices[k] = vertex;
                                                 }
                                             }
                                         }
@@ -1572,41 +1580,56 @@ namespace EFM
 #endif
         }
 
+        static void ApplyTransform(ref Vector3 v, Transform t)
+        {
+            if (t == null)
+            {
+                return;
+            }
+
+            v = new Vector3(v.x * t.localScale.x, v.y * t.localScale.y, v.z * t.localScale.z);
+            v = t.localRotation * v;
+            v += t.localPosition;
+
+            ApplyTransform(ref v, t.parent);
+        }
+
         public static float DebugCalcVolumeOfObject(GameObject prefabInstance)
         {
-            Mod.LogInfo("DebugCalcVolumeOfObject");
+            Mod.LogInfo("DebugCalcVolumeOfObject: "+prefabInstance.name);
             MeshFilter[] meshFilters = prefabInstance.GetComponentsInChildren<MeshFilter>();
-            Mod.LogInfo("\t0");
             List<Vector3> vertices = new List<Vector3>();
-            Mod.LogInfo("\t0");
             for (int i = 0; i < meshFilters.Length; ++i)
             {
-                Mod.LogInfo("\t1");
                 if (meshFilters[i].sharedMesh != null)
                 {
-                    Mod.LogInfo("\t2");
                     int vertexOffset = vertices.Count;
                     vertices.AddRange(meshFilters[i].sharedMesh.vertices);
                     for (int k = vertexOffset; k < vertices.Count; ++k)
                     {
-                        Mod.LogInfo("\t3");
-                        vertices[k] += meshFilters[i].transform.position;
+                        Vector3 vertex = vertices[k];
+
+                        vertex = new Vector3(vertex.x * meshFilters[i].transform.localScale.x, vertex.y * meshFilters[i].transform.localScale.y, vertex.z * meshFilters[i].transform.localScale.z);
+                        vertex = meshFilters[i].transform.localRotation * vertex;
+                        vertex += meshFilters[i].transform.localPosition;
+
+                        ApplyTransform(ref vertex, meshFilters[i].transform.parent);
+
+                        vertices[k] = vertex;
                     }
                 }
             }
-            Mod.LogInfo("\t0");
             ConvexHullCalculator convexCalc = new ConvexHullCalculator();
-            Mod.LogInfo("\t0");
             List<Vector3> convexVertices = new List<Vector3>();
-            Mod.LogInfo("\t0");
             List<int> convexTriangles = new List<int>();
-            Mod.LogInfo("\t0");
             List<Vector3> convexNormals = new List<Vector3>();
-            Mod.LogInfo("\t0");
+            Mod.LogInfo("\tGenerating hull");
             convexCalc.GenerateHull(vertices, true, ref convexVertices, ref convexTriangles, ref convexNormals);
-            Mod.LogInfo("\t0");
 
-            return VolumeOfMesh(convexVertices.ToArray(), convexTriangles.ToArray());
+            float volume = VolumeOfMesh(convexVertices.ToArray(), convexTriangles.ToArray());
+            Mod.LogInfo("\tVolume: "+ volume);
+
+            return volume;
         }
 
         public static float SignedVolumeOfTriangle(Vector3 p1, Vector3 p2, Vector3 p3)
@@ -3694,6 +3717,7 @@ namespace EFM
                     if (sprite == null)
                     {
                         Mod.LogError("DEV: Could not get icon for " + itemID);
+                        icon.sprite = Mod.questionMarkIcon;
                     }
                     else
                     {
