@@ -546,6 +546,7 @@ namespace EFM
                 Mod.SetIcon(H3ID, modIcon);
                 modBox.localScale = data.dimensions;
                 modInteractive.localScale = data.dimensions;
+                volumes[0] = (int)(data.dimensions.x * data.dimensions.y * data.dimensions.z * 1000000);
                 modRenderer.material.color = data.color;
                 UpdateInventories();
             }

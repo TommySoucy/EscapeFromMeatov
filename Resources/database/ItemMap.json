@@ -6063,11 +6063,6 @@
     "ModulGroup": "NWSVDDust",
     "ModulPart": "SVDS"
   },
-  "5dfce88fe9dc277128008b2e": {
-    "H3ID": "868",
-    "ModulGroup": "NWSVDDust",
-    "ModulPart": ""
-  },
   "5e569a132642e66b0b68015c": {
     "H3ID": "868",
     "ModulGroup": "NWSVDLowRail",
@@ -7982,7 +7977,7 @@
 	"Note": "Should be AR-10 CMMG SV Brake 7.62x51 muzzle brake"
   },
   "5f6336bbda967c74a42e9932": {
-    "H3ID": "AR-10 Lancer LCH7 12.5 inch M-LOK handguard",
+    "H3ID": "AR10ForeLancer12",
 	"Note": "Should be MW"
   },
   "6065dc8a132d4d12c81fd8e3": {

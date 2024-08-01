@@ -11,6 +11,8 @@ using Valve.VR;
 using UnityEngine.UI;
 using ModularWorkshop;
 using System.Text.RegularExpressions;
+using System.Linq;
+using static UnityEngine.EventSystems.EventTrigger;
 
 namespace EFM
 {
@@ -1090,16 +1092,40 @@ namespace EFM
                                         newItemData["H3ID"] = H3ID;
                                         if(physObj.IDSpawnedFrom == null)
                                         {
-                                            if (IM.HasSpawnedID(H3ID))
+                                            if(physObj.ObjectWrapper == null)
                                             {
-                                                newItemData["H3SpawnerID"] = IM.GetSpawnerID(H3ID).ItemID;
+                                                if (IM.HasSpawnedID(H3ID))
+                                                {
+                                                    newItemData["H3SpawnerID"] = IM.GetSpawnerID(H3ID).ItemID;
+                                                }
+                                                else
+                                                {
+                                                    logLines.Add("ERROR: Could not get spawner ID for " + H3ID + ":" + itemMapEntry.Key);
+                                                    Mod.LogError("Could not get spawner ID for " + H3ID + ":" + itemMapEntry.Key);
+
+                                                    newItemData["H3SpawnerID"] = null;
+                                                }
                                             }
                                             else
                                             {
-                                                logLines.Add("ERROR: Could not get spawner ID for " + H3ID + ":" + itemMapEntry.Key);
-                                                Mod.LogError("Could not get spawner ID for " + H3ID + ":" + itemMapEntry.Key);
+                                                if(physObj.ObjectWrapper.SpawnedFromId == null || physObj.ObjectWrapper.SpawnedFromId.Equals(""))
+                                                {
+                                                    if (IM.HasSpawnedID(H3ID))
+                                                    {
+                                                        newItemData["H3SpawnerID"] = IM.GetSpawnerID(H3ID).ItemID;
+                                                    }
+                                                    else
+                                                    {
+                                                        logLines.Add("ERROR: Could not get spawner ID for " + H3ID + ":" + itemMapEntry.Key);
+                                                        Mod.LogError("Could not get spawner ID for " + H3ID + ":" + itemMapEntry.Key);
 
-                                                newItemData["H3SpawnerID"] = null;
+                                                        newItemData["H3SpawnerID"] = null;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    newItemData["H3SpawnerID"] = physObj.ObjectWrapper.SpawnedFromId;
+                                                }
                                             }
                                         }
                                         else
@@ -1527,20 +1553,178 @@ namespace EFM
                                         JArray dimensions = new JArray();
                                         if (parsedID == 868)
                                         {
-                                            MeshRenderer mr = physObj.GetComponentInChildren<MeshRenderer>();
-                                            BoxCollider boxCol = mr.gameObject.AddComponent<BoxCollider>();
-                                            
-                                            dimensions.Add(boxCol.size.x);
-                                            dimensions.Add(boxCol.size.y);
-                                            dimensions.Add(boxCol.size.z);
+                                            if (itemMapEntry.Value["ModulGroup"] != null)
+                                            {
+                                                Mod.LogInfo("\t\t\t\tGot modul group");
+                                                newItemData["modulGroup"] = itemMapEntry.Value["ModulGroup"].ToString();
+                                                newItemData["modulPart"] = itemMapEntry.Value["ModulPart"].ToString();
+
+                                                if (ModularWorkshopManager.ModularWorkshopPartsGroupsDictionary.TryGetValue(newItemData["modulGroup"].ToString(), out ModularWorkshopPartsDefinition parts)
+                                                    && parts.PartsDictionary.TryGetValue(newItemData["modulPart"].ToString(), out GameObject partPrefab))
+                                                {
+                                                    Mod.LogInfo("\t\t\t\t\tModul part prefab for " + newItemData["modulGroup"].ToString() + ":" + newItemData["modulPart"].ToString() + " -> " + (partPrefab == null ? "null" : partPrefab.name));
+                                                    if (partPrefab == null)
+                                                    {
+                                                        Mod.LogError("Entry for part prefab in dicts but prefab null");
+                                                    }
+                                                    else
+                                                    {
+                                                        GameObject parentGameObject = new GameObject();
+                                                        GameObject partInstance = Instantiate(partPrefab, parentGameObject.transform);
+
+                                                        Mod.LogInfo("\t\t\t\t\t0");
+                                                        MeshFilter[] meshfilters = parentGameObject.GetComponentsInChildren<MeshFilter>();
+
+                                                        Mod.LogInfo("\t\t\t\t\t0");
+                                                        Vector2 x = new Vector2(float.MaxValue, float.MinValue);
+                                                        Vector2 y = new Vector2(float.MaxValue, float.MinValue);
+                                                        Vector2 z = new Vector2(float.MaxValue, float.MinValue);
+                                                        for (int j = 0; j < meshfilters.Length; ++j)
+                                                        {
+                                                            Vector3[] verts = meshfilters[j].mesh.vertices;
+                                                            for (int i = 0; i < verts.Length; ++i)
+                                                            {
+                                                                if (verts[i].x < x.x)
+                                                                {
+                                                                    x.x = verts[i].x;
+                                                                }
+                                                                else if (verts[i].x > x.y)
+                                                                {
+                                                                    x.y = verts[i].x;
+                                                                }
+                                                                if (verts[i].y < y.x)
+                                                                {
+                                                                    y.x = verts[i].y;
+                                                                }
+                                                                else if (verts[i].y > y.y)
+                                                                {
+                                                                    y.y = verts[i].y;
+                                                                }
+                                                                if (verts[i].z < z.x)
+                                                                {
+                                                                    z.x = verts[i].z;
+                                                                }
+                                                                else if (verts[i].z > z.y)
+                                                                {
+                                                                    z.y = verts[i].z;
+                                                                }
+                                                            }
+                                                        }
+
+                                                        Mod.LogInfo("\t\t\t\t\t0");
+                                                        dimensions.Add(x.y - x.x);
+                                                        dimensions.Add(y.y - y.x);
+                                                        dimensions.Add(z.y - z.x);
+
+                                                        Destroy(parentGameObject);
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    Mod.LogError("Could not get part " + itemMapEntry.Key + ":" + itemMapEntry.Value["ModulGroup"].ToString() + ":" + itemMapEntry.Value["ModulPart"].ToString() + " to set dimensions");
+                                                    logLines.Add("ERROR: Could not get part " + itemMapEntry.Key + ":" + itemMapEntry.Value["ModulGroup"].ToString() + ":" + itemMapEntry.Value["ModulPart"].ToString() + " to set dimensions");
+                                                }
+                                            }
+                                            else if (itemMapEntry.Value["Note"] != null)
+                                            {
+                                                string note = itemMapEntry.Value["Note"].ToString();
+                                                int mapIndex = note.IndexOf("MW map");
+                                                if (mapIndex != -1)
+                                                {
+                                                    string sub = note.Substring(mapIndex + 7);
+                                                    string[] split = sub.Split(':');
+
+                                                    newItemData["modulGroup"] = split[0];
+                                                    newItemData["modulPart"] = split[1];
+
+                                                    if (ModularWorkshopManager.ModularWorkshopPartsGroupsDictionary.TryGetValue(split[0], out ModularWorkshopPartsDefinition parts)
+                                                        && parts.PartsDictionary.TryGetValue(split[1], out GameObject partPrefab))
+                                                    {
+                                                        Mod.LogInfo("\t\t\t\t\tModul part prefab for " + split[0] + ":" + split[1] + " -> " + (partPrefab == null ? "null" : partPrefab.name));
+                                                        if (partPrefab == null)
+                                                        {
+                                                            Mod.LogError("Entry for part prefab in dicts but prefab null");
+                                                        }
+                                                        else
+                                                        {
+                                                            GameObject parentGameObject = new GameObject();
+                                                            GameObject partInstance = Instantiate(partPrefab, parentGameObject.transform);
+
+                                                            Mod.LogInfo("\t\t\t\t\t0");
+                                                            MeshFilter[] meshfilters = parentGameObject.GetComponentsInChildren<MeshFilter>();
+
+                                                            Mod.LogInfo("\t\t\t\t\t0");
+                                                            Vector2 x = new Vector2(float.MaxValue, float.MinValue);
+                                                            Vector2 y = new Vector2(float.MaxValue, float.MinValue);
+                                                            Vector2 z = new Vector2(float.MaxValue, float.MinValue);
+                                                            for (int j = 0; j < meshfilters.Length; ++j)
+                                                            {
+                                                                Vector3[] verts = meshfilters[j].mesh.vertices;
+                                                                for (int i = 0; i < verts.Length; ++i)
+                                                                {
+                                                                    if (verts[i].x < x.x)
+                                                                    {
+                                                                        x.x = verts[i].x;
+                                                                    }
+                                                                    else if (verts[i].x > x.y)
+                                                                    {
+                                                                        x.y = verts[i].x;
+                                                                    }
+                                                                    if (verts[i].y < y.x)
+                                                                    {
+                                                                        y.x = verts[i].y;
+                                                                    }
+                                                                    else if (verts[i].y > y.y)
+                                                                    {
+                                                                        y.y = verts[i].y;
+                                                                    }
+                                                                    if (verts[i].z < z.x)
+                                                                    {
+                                                                        z.x = verts[i].z;
+                                                                    }
+                                                                    else if (verts[i].z > z.y)
+                                                                    {
+                                                                        z.y = verts[i].z;
+                                                                    }
+                                                                }
+                                                            }
+
+                                                            Mod.LogInfo("\t\t\t\t\t0");
+                                                            dimensions.Add(x.y - x.x);
+                                                            dimensions.Add(y.y - y.x);
+                                                            dimensions.Add(z.y - z.x);
+
+                                                            Destroy(parentGameObject);
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        Mod.LogError("Could not get part " + itemMapEntry.Key + ":" + split[0] + ":" + split[1] + " to set dimensions");
+                                                        logLines.Add("ERROR: Could not get part " + itemMapEntry.Key + ":" + split[0] + ":" + split[1] + " to set dimensions");
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                newItemData["modulGroup"] = null;
+                                                newItemData["modulPart"] = null;
+
+                                                dimensions.Add(0f);
+                                                dimensions.Add(0f);
+                                                dimensions.Add(0f);
+                                            }
                                         }
                                         else
                                         {
+                                            newItemData["modulGroup"] = null;
+                                            newItemData["modulPart"] = null;
+
                                             dimensions.Add(0f);
                                             dimensions.Add(0f);
                                             dimensions.Add(0f);
                                         }
                                         newItemData["dimensions"] = dimensions;
+                                        
 
                                         Mod.LogInfo("\t\t\t\t\t0");
                                         defaultItemData[itemMapEntry.Key] = newItemData;
@@ -1572,6 +1756,269 @@ namespace EFM
 
                                 logLines.Add("INFO: New default item file written");
                                 Mod.LogInfo("New default item file written");
+                                break;
+                            case 22:// Fix new default item data
+                                Mod.LogInfo("\tDebug: Fix new default item data");
+                                JObject newItemDataToFix = JObject.Parse(File.ReadAllText(path + "/database/NewDefaultItemData.json"));
+                                Dictionary<string, JToken> newItemDataDict = newItemDataToFix.ToObject<Dictionary<string, JToken>>();
+                                Dictionary<string, JToken> fixItemMap = JObject.Parse(File.ReadAllText(path + "/database/ItemMap.json")).ToObject<Dictionary<string, JToken>>();
+                                foreach (KeyValuePair<string, JToken> entry in newItemDataDict)
+                                {
+                                    string H3ID = entry.Value["H3ID"].ToString();
+                                    Mod.LogInfo("\t\tEntry: " + entry.Key + ":" + H3ID+", spawner ID: "+(entry.Value["H3SpawnerID"] == null ? "null" : entry.Value["H3SpawnerID"].ToString()));
+
+                                    if (entry.Value["H3SpawnerID"] != null && entry.Value["H3SpawnerID"].Type == JTokenType.Null)
+                                    {
+                                        Mod.LogInfo("\t\t\tNo spawn ID");
+                                        int parsed = 0;
+                                        if (!int.TryParse(H3ID, out parsed))
+                                        {
+                                            Mod.LogInfo("\t\t\t\tNot custom");
+                                            FVRPhysicalObject physObj = null;
+                                            if (IM.OD.TryGetValue(H3ID, out FVRObject prefabObject))
+                                            {
+                                                Mod.LogInfo("\t\t\t\t\tGot prefab");
+                                                GameObject prefab = prefabObject.GetGameObject();
+                                                physObj = Instantiate(prefab).GetComponentInChildren<FVRPhysicalObject>();
+                                                if (physObj == null)
+                                                {
+                                                    Mod.LogError("Could not get physobj to fix spawn ID on " + H3ID + ":" + entry.Key);
+                                                }
+                                                else
+                                                {
+                                                    Mod.LogInfo("\t\t\t\t\t\tGot physobj");
+                                                    if (physObj.IDSpawnedFrom == null)
+                                                    {
+                                                        if (physObj.ObjectWrapper == null)
+                                                        {
+                                                            if (IM.HasSpawnedID(H3ID))
+                                                            {
+                                                                entry.Value["H3SpawnerID"] = IM.GetSpawnerID(H3ID).ItemID;
+                                                            }
+                                                            else
+                                                            {
+                                                                Mod.LogError("Could not get spawner ID for " + H3ID + ":" + entry.Key);
+
+                                                                entry.Value["H3SpawnerID"] = null;
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            if (physObj.ObjectWrapper.SpawnedFromId == null || physObj.ObjectWrapper.SpawnedFromId.Equals(""))
+                                                            {
+                                                                if (IM.HasSpawnedID(H3ID))
+                                                                {
+                                                                    entry.Value["H3SpawnerID"] = IM.GetSpawnerID(H3ID).ItemID;
+                                                                }
+                                                                else
+                                                                {
+                                                                    Mod.LogError("Could not get spawner ID for " + H3ID + ":" + entry.Key);
+
+                                                                    entry.Value["H3SpawnerID"] = null;
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                entry.Value["H3SpawnerID"] = physObj.ObjectWrapper.SpawnedFromId;
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        entry.Value["H3SpawnerID"] = physObj.IDSpawnedFrom.ItemID;
+                                                    }
+
+                                                    Destroy(physObj.gameObject);
+                                                }
+                                            }
+                                            else
+                                            {
+                                                Mod.LogError("Could not get prefab to fix spawn ID on " + H3ID + ":" + entry.Key);
+                                            }
+                                        }
+                                    }
+
+                                    if(fixItemMap.TryGetValue(entry.Key, out JToken itemMapEntry))
+                                    {
+                                        if (H3ID.Equals("868"))
+                                        {
+                                            Mod.LogInfo("\t\t\tIs 868");
+                                            if (itemMapEntry["ModulGroup"] != null)
+                                            {
+                                                if (entry.Value["modulGroup"] == null)
+                                                {
+                                                    Mod.LogInfo("\t\t\t\tGot modul group");
+                                                    entry.Value["modulGroup"] = itemMapEntry["ModulGroup"].ToString();
+                                                    entry.Value["modulPart"] = itemMapEntry["ModulPart"].ToString();
+
+                                                    if (ModularWorkshopManager.ModularWorkshopPartsGroupsDictionary.TryGetValue(entry.Value["modulGroup"].ToString(), out ModularWorkshopPartsDefinition parts)
+                                                        && parts.PartsDictionary.TryGetValue(entry.Value["modulPart"].ToString(), out GameObject partPrefab))
+                                                    {
+                                                        Mod.LogInfo("\t\t\t\t\tModul part prefab for " + entry.Value["modulGroup"].ToString() + ":" + entry.Value["modulPart"].ToString() + " -> " + (partPrefab == null ? "null" : partPrefab.name));
+                                                        if (partPrefab == null)
+                                                        {
+                                                            Mod.LogError("Entry for part prefab in dicts but prefab null");
+                                                        }
+                                                        else
+                                                        {
+                                                            GameObject parentGameObject = new GameObject();
+                                                            GameObject partInstance = Instantiate(partPrefab, parentGameObject.transform);
+
+                                                            Mod.LogInfo("\t\t\t\t\t0");
+                                                            MeshFilter[] meshfilters = parentGameObject.GetComponentsInChildren<MeshFilter>();
+
+                                                            Mod.LogInfo("\t\t\t\t\t0");
+                                                            Vector2 x = new Vector2(float.MaxValue, float.MinValue);
+                                                            Vector2 y = new Vector2(float.MaxValue, float.MinValue);
+                                                            Vector2 z = new Vector2(float.MaxValue, float.MinValue);
+                                                            for (int j = 0; j < meshfilters.Length; ++j)
+                                                            {
+                                                                Vector3[] verts = meshfilters[j].mesh.vertices;
+                                                                for (int i = 0; i < verts.Length; ++i)
+                                                                {
+                                                                    if (verts[i].x < x.x)
+                                                                    {
+                                                                        x.x = verts[i].x;
+                                                                    }
+                                                                    else if (verts[i].x > x.y)
+                                                                    {
+                                                                        x.y = verts[i].x;
+                                                                    }
+                                                                    if (verts[i].y < y.x)
+                                                                    {
+                                                                        y.x = verts[i].y;
+                                                                    }
+                                                                    else if (verts[i].y > y.y)
+                                                                    {
+                                                                        y.y = verts[i].y;
+                                                                    }
+                                                                    if (verts[i].z < z.x)
+                                                                    {
+                                                                        z.x = verts[i].z;
+                                                                    }
+                                                                    else if (verts[i].z > z.y)
+                                                                    {
+                                                                        z.y = verts[i].z;
+                                                                    }
+                                                                }
+                                                            }
+
+                                                            Mod.LogInfo("\t\t\t\t\t0");
+                                                            entry.Value["dimensions"][0] = x.y - x.x;
+                                                            entry.Value["dimensions"][1] = y.y - y.x;
+                                                            entry.Value["dimensions"][2] = z.y - z.x;
+
+                                                            Destroy(parentGameObject);
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        Mod.LogError("Could not get part " + entry.Key + ":" + entry.Value["modulGroup"].ToString() + ":" + entry.Value["modulPart"].ToString() + " to fix dimensions");
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                Mod.LogInfo("\t\t\t\tNo modul group ERROR not supposed to have 868 item map entry without modulGroup, only reason this could happen is that new data is wrong, remove this entry from new data and regenerate");
+                                                entry.Value["modulGroup"] = null;
+                                                entry.Value["modulPart"] = null;
+                                            }
+                                        }
+                                        else if (itemMapEntry["Note"] != null)
+                                        {
+                                            if (entry.Value["modulGroup"] == null)
+                                            {
+                                                Mod.LogInfo("\t\t\tGot note");
+                                                string note = itemMapEntry["Note"].ToString();
+                                                int mapIndex = note.IndexOf("MW map");
+                                                if (mapIndex != -1)
+                                                {
+                                                    Mod.LogInfo("\t\t\t\tHas mod mapping");
+                                                    string sub = note.Substring(mapIndex + 7);
+                                                    string[] split = sub.Split(':');
+
+                                                    entry.Value["modulGroup"] = split[0];
+                                                    entry.Value["modulPart"] = split[1];
+
+                                                    if (ModularWorkshopManager.ModularWorkshopPartsGroupsDictionary.TryGetValue(entry.Value["modulGroup"].ToString(), out ModularWorkshopPartsDefinition parts)
+                                                        && parts.PartsDictionary.TryGetValue(entry.Value["modulPart"].ToString(), out GameObject partPrefab))
+                                                    {
+                                                        Mod.LogInfo("\t\t\t\t\tModul part prefab for " + entry.Value["modulGroup"].ToString() + ":" + entry.Value["modulPart"].ToString() + " -> " + (partPrefab == null ? "null" : partPrefab.name));
+                                                        if (partPrefab == null)
+                                                        {
+                                                            Mod.LogError("Entry for part prefab in dicts but prefab null");
+                                                        }
+                                                        else
+                                                        {
+                                                            GameObject parentGameObject = new GameObject();
+                                                            GameObject partInstance = Instantiate(partPrefab, parentGameObject.transform);
+
+                                                            Mod.LogInfo("\t\t\t\t\t0");
+                                                            MeshFilter[] meshfilters = parentGameObject.GetComponentsInChildren<MeshFilter>();
+
+                                                            Mod.LogInfo("\t\t\t\t\t0");
+                                                            Vector2 x = new Vector2(float.MaxValue, float.MinValue);
+                                                            Vector2 y = new Vector2(float.MaxValue, float.MinValue);
+                                                            Vector2 z = new Vector2(float.MaxValue, float.MinValue);
+                                                            for (int j = 0; j < meshfilters.Length; ++j)
+                                                            {
+                                                                Vector3[] verts = meshfilters[j].mesh.vertices;
+                                                                for (int i = 0; i < verts.Length; ++i)
+                                                                {
+                                                                    if (verts[i].x < x.x)
+                                                                    {
+                                                                        x.x = verts[i].x;
+                                                                    }
+                                                                    else if (verts[i].x > x.y)
+                                                                    {
+                                                                        x.y = verts[i].x;
+                                                                    }
+                                                                    if (verts[i].y < y.x)
+                                                                    {
+                                                                        y.x = verts[i].y;
+                                                                    }
+                                                                    else if (verts[i].y > y.y)
+                                                                    {
+                                                                        y.y = verts[i].y;
+                                                                    }
+                                                                    if (verts[i].z < z.x)
+                                                                    {
+                                                                        z.x = verts[i].z;
+                                                                    }
+                                                                    else if (verts[i].z > z.y)
+                                                                    {
+                                                                        z.y = verts[i].z;
+                                                                    }
+                                                                }
+                                                            }
+
+                                                            Mod.LogInfo("\t\t\t\t\t0");
+                                                            entry.Value["dimensions"][0] = x.y - x.x;
+                                                            entry.Value["dimensions"][1] = y.y - y.x;
+                                                            entry.Value["dimensions"][2] = z.y - z.x;
+
+                                                            Destroy(parentGameObject);
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        Mod.LogError("Could not get part " + entry.Key + ":" + entry.Value["modulGroup"].ToString() + ":" + entry.Value["modulPart"].ToString() + " to fix dimensions");
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Mod.LogInfo("\t\t\tNot mod item");
+                                            entry.Value["modulGroup"] = null;
+                                            entry.Value["modulPart"] = null;
+                                        }
+                                    }
+
+                                    newItemDataToFix[entry.Key] = entry.Value;
+                                }
+
+                                File.WriteAllText(path + "/database/NewDefaultItemData.json", newItemDataToFix.ToString());
                                 break;
                         }
                     }
