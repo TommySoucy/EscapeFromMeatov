@@ -614,12 +614,31 @@ namespace EFM
                         // In case item is vanilla, in which case we use the vault system to save it,
                         // we will only be getting the instantiated item later
                         // We must write a delegate in order to add it to the area volume later
+                        JToken vanillaCustomData = toolRequirements[i].serializedTool["vanillaCustomData"];
                         VaultSystem.ReturnObjectListDelegate del = objs =>
                         {
                             // Here, assume objs[0] is the root item
                             MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
                             if (meatovItem != null)
                             {
+                                // Set live data
+                                meatovItem.SetData(Mod.defaultItemData[vanillaCustomData["tarkovID"].ToString()]);
+                                meatovItem.insured = (bool)vanillaCustomData["insured"];
+                                meatovItem.looted = (bool)vanillaCustomData["looted"];
+                                meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
+
+                                for (int j = 1; j < objs.Count; ++j)
+                                {
+                                    MeatovItem childMeatovItem = objs[j].GetComponent<MeatovItem>();
+                                    if (childMeatovItem != null)
+                                    {
+                                        childMeatovItem.SetData(Mod.defaultItemData[vanillaCustomData["children"][j - 1]["tarkovID"].ToString()]);
+                                        childMeatovItem.insured = (bool)vanillaCustomData["children"][j - 1]["insured"];
+                                        childMeatovItem.looted = (bool)vanillaCustomData["children"][j - 1]["looted"];
+                                        childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][j - 1]["foundInRaid"];
+                                    }
+                                }
+
                                 if (levels[currentLevel].areaVolumes != null && levels[currentLevel].areaVolumes.Length > 0)
                                 {
                                     levels[currentLevel].areaVolumes[0].AddItem(meatovItem);
@@ -2054,12 +2073,31 @@ namespace EFM
                     // In case item is vanilla, in which case we use the vault system to save it,
                     // we will only be getting the instantiated item later
                     // We must write a delegate in order to add it to the area volume later
+                    JToken vanillaCustomData = requirements[i].serializedTool["vanillaCustomData"];
                     VaultSystem.ReturnObjectListDelegate del = objs =>
                     {
                         // Here, assume objs[0] is the root item
                         MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
                         if (meatovItem != null)
                         {
+                            // Set live data
+                            meatovItem.SetData(Mod.defaultItemData[vanillaCustomData["tarkovID"].ToString()]);
+                            meatovItem.insured = (bool)vanillaCustomData["insured"];
+                            meatovItem.looted = (bool)vanillaCustomData["looted"];
+                            meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
+
+                            for (int j = 1; j < objs.Count; ++j)
+                            {
+                                MeatovItem childMeatovItem = objs[j].GetComponent<MeatovItem>();
+                                if (childMeatovItem != null)
+                                {
+                                    childMeatovItem.SetData(Mod.defaultItemData[vanillaCustomData["children"][j - 1]["tarkovID"].ToString()]);
+                                    childMeatovItem.insured = (bool)vanillaCustomData["children"][j - 1]["insured"];
+                                    childMeatovItem.looted = (bool)vanillaCustomData["children"][j - 1]["looted"];
+                                    childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][j - 1]["foundInRaid"];
+                                }
+                            }
+
                             // Note that despite this being a production, output could be a slot so we might not have a volume
                             if (area.levels[area.currentLevel].areaVolumes != null && area.levels[area.currentLevel].areaVolumes.Length > 0)
                             {

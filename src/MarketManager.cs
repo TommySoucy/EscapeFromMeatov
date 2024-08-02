@@ -184,7 +184,7 @@ namespace EFM
 
         public void Start()
         {
-            Mod.GetItemData("203", out roubleItemData);
+            roubleItemData = Mod.customItemData[203];
 
             // Process items loaded in trade volume
             foreach (KeyValuePair<string, List<MeatovItem>> itemEntry in tradeVolume.inventoryItems)
@@ -288,11 +288,31 @@ namespace EFM
         {
             // Reload serialized item from listing and readd it to trade volume
             JToken tradeItemData = ragFairListings[index].serializedItem;
+            JToken vanillaCustomData = tradeItemData["vanillaCustomData"];
             VaultSystem.ReturnObjectListDelegate del = objs =>
             {
+                // Here, assume objs[0] is the root item
                 MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
                 if (meatovItem != null)
                 {
+                    // Set live data
+                    meatovItem.SetData(Mod.defaultItemData[vanillaCustomData["tarkovID"].ToString()]);
+                    meatovItem.insured = (bool)vanillaCustomData["insured"];
+                    meatovItem.looted = (bool)vanillaCustomData["looted"];
+                    meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
+
+                    for (int m = 1; m < objs.Count; ++m)
+                    {
+                        MeatovItem childMeatovItem = objs[m].GetComponent<MeatovItem>();
+                        if (childMeatovItem != null)
+                        {
+                            childMeatovItem.SetData(Mod.defaultItemData[vanillaCustomData["children"][m - 1]["tarkovID"].ToString()]);
+                            childMeatovItem.insured = (bool)vanillaCustomData["children"][m - 1]["insured"];
+                            childMeatovItem.looted = (bool)vanillaCustomData["children"][m - 1]["looted"];
+                            childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][m - 1]["foundInRaid"];
+                        }
+                    }
+
                     tradeVolume.AddItem(meatovItem);
                     meatovItem.transform.localPosition = Vector3.zero;
                 }
@@ -1397,15 +1417,15 @@ namespace EFM
             Trader trader = Mod.traders[index];
             if (trader.currency == 0)
             {
-                Mod.GetItemData("203", out currencyItemData);
+                currencyItemData = Mod.customItemData[203];
             }
             else if (trader.currency == 1)
             {
-                Mod.GetItemData("201", out currencyItemData);
+                currencyItemData = Mod.customItemData[201];
             }
             else // 2
             {
-                Mod.GetItemData("202", out currencyItemData);
+                currencyItemData = Mod.customItemData[202];
             }
 
             Mod.LogInfo("0");
@@ -1947,9 +1967,9 @@ namespace EFM
 
             // Add sold for item to trade volume
             Trader trader = Mod.traders[currentTraderIndex];
-            string currencyID = trader.currency == 0 ? "203" : (trader.currency == 1 ? "201" : "202");
-            MeatovItemData currencyItemData;
-            Mod.GetItemData(currencyID, out currencyItemData);
+            int currencyIndex = trader.currency == 0 ? 203 : (trader.currency == 1 ? 201 : 202);
+            MeatovItemData currencyItemData = Mod.customItemData[currencyIndex];
+
             tradeVolume.SpawnItem(currencyItemData, currentTotalSellingPrice);
 
             // Update the whole thing

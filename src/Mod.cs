@@ -4174,22 +4174,14 @@ namespace EFM
             }
             else
             {
-                if (Mod.vanillaItemData.TryGetValue(itemID, out MeatovItemData itemData) && itemData.H3SpawnerID != null && IM.HasSpawnedID(itemData.H3SpawnerID))
+                if (itemData.H3SpawnerID != null && IM.HasSpawnedID(itemData.H3SpawnerID))
                 {
                     icon.sprite = IM.GetSpawnerID(itemData.H3SpawnerID).Sprite;
                 }
                 else // Could not get icon from item data (spawner ID)
                 {
-                    Sprite sprite = Mod.itemIconsBundle.LoadAsset<Sprite>("Item" + itemID + "_Icon");
-                    if (sprite == null)
-                    {
-                        Mod.LogError("DEV: Could not get icon for " + itemID);
-                        icon.sprite = Mod.questionMarkIcon;
-                    }
-                    else
-                    {
-                        icon.sprite = sprite;
-                    }
+                    Mod.LogError("Could not get icon for " + itemData.tarkovID+":"+ itemData.H3ID);
+                    icon.sprite = Mod.questionMarkIcon;
                 }
             }
         }

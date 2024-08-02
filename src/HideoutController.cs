@@ -1533,11 +1533,31 @@ namespace EFM
                 for (int i = 0; i < looseItems.Count; ++i)
                 {
                     JToken looseItemData = looseItems[i];
+                    JToken vanillaCustomData = looseItemData["vanillaCustomData"];
                     VaultSystem.ReturnObjectListDelegate del = objs =>
                     {
+                        // Here, assume objs[0] is the root item
                         MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
                         if (meatovItem != null)
                         {
+                            // Set live data
+                            meatovItem.SetData(Mod.defaultItemData[vanillaCustomData["tarkovID"].ToString()]);
+                            meatovItem.insured = (bool)vanillaCustomData["insured"];
+                            meatovItem.looted = (bool)vanillaCustomData["looted"];
+                            meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
+
+                            for (int j = 1; j < objs.Count; ++j)
+                            {
+                                MeatovItem childMeatovItem = objs[j].GetComponent<MeatovItem>();
+                                if (childMeatovItem != null)
+                                {
+                                    childMeatovItem.SetData(Mod.defaultItemData[vanillaCustomData["children"][j - 1]["tarkovID"].ToString()]);
+                                    childMeatovItem.insured = (bool)vanillaCustomData["children"][j - 1]["insured"];
+                                    childMeatovItem.looted = (bool)vanillaCustomData["children"][j - 1]["looted"];
+                                    childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][j - 1]["foundInRaid"];
+                                }
+                            }
+
                             meatovItem.transform.position = new Vector3((float)looseItemData["posX"], (float)looseItemData["posY"], (float)looseItemData["posZ"]);
                             meatovItem.transform.rotation = Quaternion.Euler((float)looseItemData["rotX"], (float)looseItemData["rotY"], (float)looseItemData["rotZ"]);
                         }
@@ -1558,11 +1578,31 @@ namespace EFM
                 for (int i = 0; i < tradeItems.Count; ++i)
                 {
                     JToken tradeItemData = tradeItems[i];
+                    JToken vanillaCustomData = tradeItemData["vanillaCustomData"];
                     VaultSystem.ReturnObjectListDelegate del = objs =>
                     {
+                        // Here, assume objs[0] is the root item
                         MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
                         if (meatovItem != null)
                         {
+                            // Set live data
+                            meatovItem.SetData(Mod.defaultItemData[vanillaCustomData["tarkovID"].ToString()]);
+                            meatovItem.insured = (bool)vanillaCustomData["insured"];
+                            meatovItem.looted = (bool)vanillaCustomData["looted"];
+                            meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
+
+                            for (int j = 1; j < objs.Count; ++j)
+                            {
+                                MeatovItem childMeatovItem = objs[j].GetComponent<MeatovItem>();
+                                if (childMeatovItem != null)
+                                {
+                                    childMeatovItem.SetData(Mod.defaultItemData[vanillaCustomData["children"][j - 1]["tarkovID"].ToString()]);
+                                    childMeatovItem.insured = (bool)vanillaCustomData["children"][j - 1]["insured"];
+                                    childMeatovItem.looted = (bool)vanillaCustomData["children"][j - 1]["looted"];
+                                    childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][j - 1]["foundInRaid"];
+                                }
+                            }
+
                             marketManager.tradeVolume.AddItem(meatovItem);
                             meatovItem.transform.localPosition = new Vector3((float)tradeItemData["posX"], (float)tradeItemData["posY"], (float)tradeItemData["posZ"]);
                             meatovItem.transform.localRotation = Quaternion.Euler((float)tradeItemData["rotX"], (float)tradeItemData["rotY"], (float)tradeItemData["rotZ"]);
@@ -1600,11 +1640,31 @@ namespace EFM
                                     for (int l = 0; l < volumeItems.Count; ++l)
                                     {
                                         JToken volumeItemData = volumeItems[i];
+                                        JToken vanillaCustomData = volumeItemData["vanillaCustomData"];
                                         VaultSystem.ReturnObjectListDelegate del = objs =>
                                         {
+                                            // Here, assume objs[0] is the root item
                                             MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
                                             if (meatovItem != null)
                                             {
+                                                // Set live data
+                                                meatovItem.SetData(Mod.defaultItemData[vanillaCustomData["tarkovID"].ToString()]);
+                                                meatovItem.insured = (bool)vanillaCustomData["insured"];
+                                                meatovItem.looted = (bool)vanillaCustomData["looted"];
+                                                meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
+
+                                                for (int m = 1; m < objs.Count; ++m)
+                                                {
+                                                    MeatovItem childMeatovItem = objs[m].GetComponent<MeatovItem>();
+                                                    if (childMeatovItem != null)
+                                                    {
+                                                        childMeatovItem.SetData(Mod.defaultItemData[vanillaCustomData["children"][m - 1]["tarkovID"].ToString()]);
+                                                        childMeatovItem.insured = (bool)vanillaCustomData["children"][m - 1]["insured"];
+                                                        childMeatovItem.looted = (bool)vanillaCustomData["children"][m - 1]["looted"];
+                                                        childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][m - 1]["foundInRaid"];
+                                                    }
+                                                }
+
                                                 areaController.areas[i].levels[j].areaVolumes[k].AddItem(meatovItem);
                                                 meatovItem.transform.localPosition = new Vector3((float)volumeItemData["posX"], (float)volumeItemData["posY"], (float)volumeItemData["posZ"]);
                                                 meatovItem.transform.localRotation = Quaternion.Euler((float)volumeItemData["rotX"], (float)volumeItemData["rotY"], (float)volumeItemData["rotZ"]);
@@ -1631,11 +1691,31 @@ namespace EFM
                                     for (int l = 0; l < slotItems.Count; ++l)
                                     {
                                         JToken slotItemData = slotItems[i];
+                                        JToken vanillaCustomData = slotItemData["vanillaCustomData"];
                                         VaultSystem.ReturnObjectListDelegate del = objs =>
                                         {
+                                            // Here, assume objs[0] is the root item
                                             MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
                                             if (meatovItem != null)
                                             {
+                                                // Set live data
+                                                meatovItem.SetData(Mod.defaultItemData[vanillaCustomData["tarkovID"].ToString()]);
+                                                meatovItem.insured = (bool)vanillaCustomData["insured"];
+                                                meatovItem.looted = (bool)vanillaCustomData["looted"];
+                                                meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
+
+                                                for (int m = 1; m < objs.Count; ++m)
+                                                {
+                                                    MeatovItem childMeatovItem = objs[m].GetComponent<MeatovItem>();
+                                                    if (childMeatovItem != null)
+                                                    {
+                                                        childMeatovItem.SetData(Mod.defaultItemData[vanillaCustomData["children"][m - 1]["tarkovID"].ToString()]);
+                                                        childMeatovItem.insured = (bool)vanillaCustomData["children"][m - 1]["insured"];
+                                                        childMeatovItem.looted = (bool)vanillaCustomData["children"][m - 1]["looted"];
+                                                        childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][m - 1]["foundInRaid"];
+                                                    }
+                                                }
+
                                                 objs[0].SetQuickBeltSlot(areaController.areas[i].levels[j].areaSlots[k]);
                                             }
                                         };
@@ -1659,11 +1739,31 @@ namespace EFM
                 for (int i = 0; i < scavItems.Count; ++i)
                 {
                     JToken scavItemData = scavItems[i];
+                    JToken vanillaCustomData = scavItemData["vanillaCustomData"];
                     VaultSystem.ReturnObjectListDelegate del = objs =>
                     {
+                        // Here, assume objs[0] is the root item
                         MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
                         if (meatovItem != null)
                         {
+                            // Set live data
+                            meatovItem.SetData(Mod.defaultItemData[vanillaCustomData["tarkovID"].ToString()]);
+                            meatovItem.insured = (bool)vanillaCustomData["insured"];
+                            meatovItem.looted = (bool)vanillaCustomData["looted"];
+                            meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
+
+                            for (int m = 1; m < objs.Count; ++m)
+                            {
+                                MeatovItem childMeatovItem = objs[m].GetComponent<MeatovItem>();
+                                if (childMeatovItem != null)
+                                {
+                                    childMeatovItem.SetData(Mod.defaultItemData[vanillaCustomData["children"][m - 1]["tarkovID"].ToString()]);
+                                    childMeatovItem.insured = (bool)vanillaCustomData["children"][m - 1]["insured"];
+                                    childMeatovItem.looted = (bool)vanillaCustomData["children"][m - 1]["looted"];
+                                    childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][m - 1]["foundInRaid"];
+                                }
+                            }
+
                             meatovItem.transform.parent = scavReturnNode;
                         }
                     };
@@ -1685,12 +1785,31 @@ namespace EFM
                 // In case item is vanilla, in which case we use the vault system to save it,
                 // we will only be getting the instantiated item later
                 // We must write a delegate in order to put it in the correct hand once we do
+                JToken vanillaCustomData = loadedData["leftHand"]["vanillaCustomData"];
                 VaultSystem.ReturnObjectListDelegate del = objs =>
                 {
                     // Here, assume objs[0] is the root item
                     MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
                     if (meatovItem != null)
                     {
+                        // Set live data
+                        meatovItem.SetData(Mod.defaultItemData[vanillaCustomData["tarkovID"].ToString()]);
+                        meatovItem.insured = (bool)vanillaCustomData["insured"];
+                        meatovItem.looted = (bool)vanillaCustomData["looted"];
+                        meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
+
+                        for (int m = 1; m < objs.Count; ++m)
+                        {
+                            MeatovItem childMeatovItem = objs[m].GetComponent<MeatovItem>();
+                            if (childMeatovItem != null)
+                            {
+                                childMeatovItem.SetData(Mod.defaultItemData[vanillaCustomData["children"][m - 1]["tarkovID"].ToString()]);
+                                childMeatovItem.insured = (bool)vanillaCustomData["children"][m - 1]["insured"];
+                                childMeatovItem.looted = (bool)vanillaCustomData["children"][m - 1]["looted"];
+                                childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][m - 1]["foundInRaid"];
+                            }
+                        }
+
                         Mod.leftHand.fvrHand.ForceSetInteractable(objs[0]);
                         meatovItem.UpdateInventories();
                     }
@@ -1707,11 +1826,31 @@ namespace EFM
             }
             if(loadedData["rightHand"] != null)
             {
+                JToken vanillaCustomData = loadedData["rightHand"]["vanillaCustomData"];
                 VaultSystem.ReturnObjectListDelegate del = objs =>
                 {
+                    // Here, assume objs[0] is the root item
                     MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
                     if (meatovItem != null)
                     {
+                        // Set live data
+                        meatovItem.SetData(Mod.defaultItemData[vanillaCustomData["tarkovID"].ToString()]);
+                        meatovItem.insured = (bool)vanillaCustomData["insured"];
+                        meatovItem.looted = (bool)vanillaCustomData["looted"];
+                        meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
+
+                        for (int m = 1; m < objs.Count; ++m)
+                        {
+                            MeatovItem childMeatovItem = objs[m].GetComponent<MeatovItem>();
+                            if (childMeatovItem != null)
+                            {
+                                childMeatovItem.SetData(Mod.defaultItemData[vanillaCustomData["children"][m - 1]["tarkovID"].ToString()]);
+                                childMeatovItem.insured = (bool)vanillaCustomData["children"][m - 1]["insured"];
+                                childMeatovItem.looted = (bool)vanillaCustomData["children"][m - 1]["looted"];
+                                childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][m - 1]["foundInRaid"];
+                            }
+                        }
+
                         Mod.rightHand.fvrHand.ForceSetInteractable(objs[0]);
                         meatovItem.UpdateInventories();
                     }
@@ -1731,11 +1870,31 @@ namespace EFM
             {
                 if (loadedData["equipment"+i] != null)
                 {
+                    JToken vanillaCustomData = loadedData["equipment" + i]["vanillaCustomData"];
                     VaultSystem.ReturnObjectListDelegate del = objs =>
                     {
+                        // Here, assume objs[0] is the root item
                         MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
                         if (meatovItem != null)
                         {
+                            // Set live data
+                            meatovItem.SetData(Mod.defaultItemData[vanillaCustomData["tarkovID"].ToString()]);
+                            meatovItem.insured = (bool)vanillaCustomData["insured"];
+                            meatovItem.looted = (bool)vanillaCustomData["looted"];
+                            meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
+
+                            for (int m = 1; m < objs.Count; ++m)
+                            {
+                                MeatovItem childMeatovItem = objs[m].GetComponent<MeatovItem>();
+                                if (childMeatovItem != null)
+                                {
+                                    childMeatovItem.SetData(Mod.defaultItemData[vanillaCustomData["children"][m - 1]["tarkovID"].ToString()]);
+                                    childMeatovItem.insured = (bool)vanillaCustomData["children"][m - 1]["insured"];
+                                    childMeatovItem.looted = (bool)vanillaCustomData["children"][m - 1]["looted"];
+                                    childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][m - 1]["foundInRaid"];
+                                }
+                            }
+
                             objs[0].SetQuickBeltSlot(StatusUI.instance.equipmentSlots[i]);
                             meatovItem.UpdateInventories();
                         }
@@ -1766,11 +1925,31 @@ namespace EFM
             {
                 if (loadedData["slot"+i] != null)
                 {
+                    JToken vanillaCustomData = loadedData["slot" + i]["vanillaCustomData"];
                     VaultSystem.ReturnObjectListDelegate del = objs =>
                     {
+                        // Here, assume objs[0] is the root item
                         MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
                         if (meatovItem != null)
                         {
+                            // Set live data
+                            meatovItem.SetData(Mod.defaultItemData[vanillaCustomData["tarkovID"].ToString()]);
+                            meatovItem.insured = (bool)vanillaCustomData["insured"];
+                            meatovItem.looted = (bool)vanillaCustomData["looted"];
+                            meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
+
+                            for (int m = 1; m < objs.Count; ++m)
+                            {
+                                MeatovItem childMeatovItem = objs[m].GetComponent<MeatovItem>();
+                                if (childMeatovItem != null)
+                                {
+                                    childMeatovItem.SetData(Mod.defaultItemData[vanillaCustomData["children"][m - 1]["tarkovID"].ToString()]);
+                                    childMeatovItem.insured = (bool)vanillaCustomData["children"][m - 1]["insured"];
+                                    childMeatovItem.looted = (bool)vanillaCustomData["children"][m - 1]["looted"];
+                                    childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][m - 1]["foundInRaid"];
+                                }
+                            }
+
                             objs[0].SetQuickBeltSlot(GM.CurrentPlayerBody.QBSlots_Internal[i]);
                             meatovItem.UpdateInventories();
                         }

@@ -77,6 +77,7 @@ namespace EFM
         [Header("General")]
         [NonSerialized]
         public MeatovItemData itemData;
+        public bool itemDataSet = false;
         public string H3ID;
         public string tarkovID;
         public string H3SpawnerID;
@@ -443,6 +444,8 @@ namespace EFM
         }
 
         // Events
+        public delegate void OnItemDataSetDelegate(MeatovItemData itemData);
+        public event OnItemDataSetDelegate OnItemDataSet;
         public delegate void OnInsuredChangedDelegate();
         public event OnInsuredChangedDelegate OnInsuredChanged;
         public delegate void OnCurrentWeightChangedDelegate(MeatovItem item, int preValue);
@@ -464,21 +467,50 @@ namespace EFM
         public delegate void OnSightingRangeChangedDelegate();
         public event OnSightingRangeChangedDelegate OnSightingRangeChanged;
 
+        private void Awake()
+		{
+            Mod.LogInfo("Meatov item " + H3ID + " awake");
+            if(physObj == null)
+            {
+                physObj = gameObject.GetComponent<FVRPhysicalObject>();
+            }
+
+            Mod.LogInfo("\t0");
+
+            Mod.meatovItemByInteractive.Add(physObj, this);
+
+            // Quantities/Contents gets set to max on awake and will be overriden as necessary
+            if(physObj is FVRFireArmMagazine)
+            {
+                FVRFireArmMagazine asMagazine = physObj as FVRFireArmMagazine;
+                asMagazine.ReloadMagWithType(roundClass);
+            }
+            if(physObj is FVRFireArmClip)
+            {
+                FVRFireArmClip asClip = physObj as FVRFireArmClip;
+                asClip.ReloadClipWithType(roundClass);
+            }
+            Mod.LogInfo("\t0");
+        }
+
         public static void Setup(FVRPhysicalObject physicalObject)
         {
-            // Just need to add component, data actually gets set in Awake()
             physicalObject.gameObject.AddComponent<MeatovItem>();
         }
 
+        /// <summary>
+        /// SetData is called after an item gets instantiated to set its data
+        /// Call should happen on:
+        ///      AreaSlot SpawnItem (Area production completion into slot output)
+        ///      ContainmentVolume SpawnItem (Trader buy, Task reward, Area production completion into volume output, etc.)
+        ///      Item deserialize (Save loading, Insurance return, etc.)
+        ///      Dev item spawner spawn
+        /// </summary>
+        /// <param name="data">Data to set</param>
         public void SetData(MeatovItemData data)
         {
             itemData = data;
 
-            // NOTE: We are setting these values in the item itself (instead of just keeping them in itemData and keeping a reference to that)
-            //       because these values may be changed live. 
-            //       This is important for the Mod item, which is a single item, that can describe any mod in the game.
-            //       For that specific case, the item's description may be changed, in which case we obviously want to display that instead of the 
-            //       default itemData one
             tarkovID = data.tarkovID;
             H3ID = data.H3ID;
             H3SpawnerID = data.H3SpawnerID;
@@ -487,6 +519,7 @@ namespace EFM
             rarity = data.rarity;
             parents = new List<string>(data.parents);
             weight = data.weight;
+            currentWeight = weight;
             volumes = data.volumes;
             lootExperience = data.lootExperience;
             itemName = data.name;
@@ -515,6 +548,10 @@ namespace EFM
             coverage = data.coverage;
             damageResist = data.damageResist;
             maxArmor = data.maxArmor;
+            if (maxArmor > 0)
+            {
+                armor = maxArmor;
+            }
 
             maxVolume = data.maxVolume;
             whiteList = data.whiteList;
@@ -526,6 +563,10 @@ namespace EFM
             maxStack = data.maxStack;
 
             maxAmount = data.maxAmount;
+            if (maxAmount > 0)
+            {
+                amount = maxAmount;
+            }
 
             useTime = data.useTime;
             amountRate = data.amountRate;
@@ -538,106 +579,50 @@ namespace EFM
             modGroup = data.modGroup;
             modPart = data.modPart;
 
-            if(containerVolume != null)
+            if (containerVolume != null)
             {
                 containerVolume.maxVolume = data.maxVolume;
                 containerVolume.whitelist = data.whiteList;
                 containerVolume.blacklist = data.blackList;
                 containerVolume.OnVolumeChanged += OnVolumeChanged;
             }
-            if(index == 868)
+            if (index == 868)
             {
                 Mod.SetIcon(data, modIcon);
                 modBox.localScale = data.dimensions;
                 modInteractive.localScale = data.dimensions;
                 volumes[0] = (int)(data.dimensions.x * data.dimensions.y * data.dimensions.z * 1000000);
                 modRenderer.material.color = data.color;
-                UpdateInventories();
             }
-        }
-
-        private void Awake()
-		{
-            Mod.LogInfo("Meatov item " + H3ID + " awake");
-            if(physObj == null)
-            {
-                physObj = gameObject.GetComponent<FVRPhysicalObject>();
-            }
-
-            // Set data based on default data
-            if (index == -1) // Vanilla, index will not be set
-            {
-                int parsedIndex = -1;
-                if(int.TryParse(H3ID, out parsedIndex))
-                {
-                    index = parsedIndex;
-                    SetData(Mod.customItemData[index]);
-                }
-                else
-                {
-                    SetData(Mod.vanillaItemData[physObj.ObjectWrapper.ItemID]);
-                }
-            }
-            else // Custom, index will already have been set in asset
-            {
-                SetData(Mod.customItemData[index]);
-            }
-
-            currentWeight = weight;
-            Mod.LogInfo("\t0");
-
-            Mod.meatovItemByInteractive.Add(physObj, this);
 
             if (itemType != ItemType.LootContainer)
-			{
-				_mode = volumes.Length - 1; // Set default mode to the last index of volumes, closed empty for containers and rigs
-			}
-			modeInitialized = true;
-            Mod.LogInfo("\t0");
+            {
+                _mode = volumes.Length - 1; // Set default mode to the last index of volumes, closed empty for containers and rigs
+            }
+            modeInitialized = true;
 
             if (itemType == ItemType.Rig || itemType == ItemType.ArmoredRig)
             {
-                if(!Mod.quickbeltConfigurationIndices.TryGetValue(index, out configurationIndex))
+                if (!Mod.quickbeltConfigurationIndices.TryGetValue(index, out configurationIndex))
                 {
                     configurationIndex = GM.Instance.QuickbeltConfigurations.Length;
-                    GM.Instance.QuickbeltConfigurations = GM.Instance.QuickbeltConfigurations.AddToArray(Mod.playerBundle.LoadAsset<GameObject>("Item"+index+"Configuration"));
+                    GM.Instance.QuickbeltConfigurations = GM.Instance.QuickbeltConfigurations.AddToArray(Mod.playerBundle.LoadAsset<GameObject>("Item" + index + "Configuration"));
                 }
             }
-            Mod.LogInfo("\t0");
-
-            // Quantities/Contents gets set to max on awake and will be overriden as necessary
-            if (maxAmount > 0)
-            {
-                amount = maxAmount;
-            }
-            if(maxArmor > 0)
-            {
-                armor = maxArmor;
-            }
-            if(physObj is FVRFireArmMagazine)
-            {
-                FVRFireArmMagazine asMagazine = physObj as FVRFireArmMagazine;
-                asMagazine.ReloadMagWithType(roundClass);
-            }
-            if(physObj is FVRFireArmClip)
-            {
-                FVRFireArmClip asClip = physObj as FVRFireArmClip;
-                asClip.ReloadClipWithType(roundClass);
-            }
-            Mod.LogInfo("\t0");
 
             // Calculate weapon stats based on current attachments (recoil, ergonomics, sightingRange)
             UpdateRecoil();
             UpdateErgonomics();
             UpdateSightingRange();
 
-            // Update inventory
-            // Special case: 868 (Generic Moddul mod item), we don't want to manage inventory of the generic 868, we will instead do it on SetData
-            if(index == 868)
+            UpdateInventories();
+
+            itemDataSet = true;
+            if(OnItemDataSet != null)
             {
-                UpdateInventories();
+                OnItemDataSet(data);
             }
-		}
+        }
 
         public void UpdateRecoil()
         {
@@ -2350,8 +2335,8 @@ namespace EFM
         {
             JObject serialized = new JObject();
 
-            // Store ID, from which we can get all static data about this item
-            serialized["H3ID"] = H3ID;
+            // Store tarkov ID, from which we can get all static data about this item
+            serialized["tarkovID"] = tarkovID;
 
             // Store live data
             serialized["insured"] = insured;
@@ -2380,8 +2365,9 @@ namespace EFM
                 serialized["ammo"] = ammo;
             }
 
-            // Store children
-            // Custom types
+            // Serialize children of custom item types
+            TODO: // Serialize attachments, we want to be able to have custom item with attachments, main problem is that the system currently assumes a vanilla item can only
+            // ever have vanilla items attached to it (Or what we could do is just make attachment items like vanilla items (Put them in OD, give them a wrapper and spawner ID, etc.))
             JArray serializedChildren = new JArray();
             switch (itemType)
             {
@@ -2419,15 +2405,17 @@ namespace EFM
                     }
                     break;
             }
-            // Vanilla types (Using vault system)
+
+            // Serialize vanilla items using vault system
             if (vanilla)
             {
                 VaultFile vaultFile = new VaultFile();
                 VaultSystem.ScanObjectToVaultFile(vaultFile, physObj);
                 serialized["vanillaData"] = JObject.FromObject(vaultFile);
                 // Store all live meatov item data necessary for vanilla items in the entire hierarchy of this item, including this item's
-                serialized["vanillaCustomData"] = GetAllSerializedVanillaCustomData(); 
+                serialized["vanillaCustomData"] = GetAllSerializedVanillaCustomData();
             }
+
             serialized["children"] = serializedChildren;
 
             return serialized;
@@ -2455,6 +2443,7 @@ namespace EFM
         {
             JObject serialized = new JObject();
 
+            serialized["tarkovID"] = tarkovID;
             serialized["insured"] = insured;
             serialized["looted"] = looted;
             serialized["foundInRaid"] = foundInRaid;
@@ -2464,13 +2453,13 @@ namespace EFM
 
         public static MeatovItem Deserialize(JToken serialized, VaultSystem.ReturnObjectListDelegate del = null)
         {
-            if(serialized["H3ID"] == null)
+            if(serialized["tarkovID"] == null || serialized["tarkovID"].Type == JTokenType.Null)
             {
                 Mod.LogError("Attempted to deserialize item but data missing H3ID property");
                 return null;
             }
 
-            if (Mod.GetItemData(serialized["H3ID"].ToString(), out MeatovItemData itemData))
+            if (Mod.defaultItemData.TryGetValue(serialized["tarkovID"].ToString(), out MeatovItemData itemData))
             {
                 if(itemData.index == -1)
                 {
@@ -2484,11 +2473,7 @@ namespace EFM
                     GameObject itemPrefab = Mod.GetItemPrefab(itemData.index);
                     GameObject itemInstance = Instantiate(itemPrefab);
                     MeatovItem item = itemInstance.GetComponent<MeatovItem>();
-
-                    if(itemData.index == 868)
-                    {
-                        item.SetData(itemData);
-                    }
+                    item.SetData(itemData);
 
                     item.insured = (bool)serialized["insured"];
                     item.looted = (bool)serialized["looted"];
@@ -2531,7 +2516,6 @@ namespace EFM
                                     if (childItem != null)
                                     {
                                         childItem.physObj.SetQuickBeltSlot(item.rigSlots[slotIndex]);
-                                        childItem.UpdateInventories();
                                     }
                                 }
                                 else
@@ -2544,23 +2528,26 @@ namespace EFM
                                         MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
                                         if (meatovItem != null)
                                         {
-                                            objs[0].SetQuickBeltSlot(item.rigSlots[slotIndex]);
-                                            meatovItem.UpdateInventories();
-
                                             // Set live data
+                                            meatovItem.SetData(Mod.defaultItemData[vanillaCustomData["tarkovID"].ToString()]);
                                             meatovItem.insured = (bool)vanillaCustomData["insured"];
                                             meatovItem.looted = (bool)vanillaCustomData["looted"];
                                             meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
-                                            for(int j=1; j < objs.Count; ++j)
+
+                                            for (int j=1; j < objs.Count; ++j)
                                             {
                                                 MeatovItem childMeatovItem = objs[j].GetComponent<MeatovItem>();
                                                 if(childMeatovItem != null)
                                                 {
-                                                    childMeatovItem.insured = (bool)vanillaCustomData["children"][j-1]["insured"];
+                                                    childMeatovItem.SetData(Mod.defaultItemData[vanillaCustomData["children"][j - 1]["tarkovID"].ToString()]);
+                                                    childMeatovItem.insured = (bool)vanillaCustomData["children"][j - 1]["insured"];
                                                     childMeatovItem.looted = (bool)vanillaCustomData["children"][j - 1]["looted"];
                                                     childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][j - 1]["foundInRaid"];
                                                 }
                                             }
+                                            
+                                            // Set QBS at the end so root item and children all have their data set
+                                            objs[0].SetQuickBeltSlot(item.rigSlots[slotIndex]);
                                         }
                                     }; 
                                     
@@ -2582,7 +2569,6 @@ namespace EFM
                                     if (childItem != null)
                                     {
                                         item.containerVolume.AddItem(childItem);
-                                        childItem.UpdateInventories();
                                         childItem.transform.localPosition = localPos;
                                         childItem.transform.localRotation = localRot;
                                     }
@@ -2597,25 +2583,28 @@ namespace EFM
                                         MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
                                         if (meatovItem != null)
                                         {
-                                            item.containerVolume.AddItem(meatovItem);
-                                            meatovItem.UpdateInventories();
-                                            objs[0].transform.localPosition = localPos;
-                                            objs[0].transform.localRotation = localRot;
-
                                             // Set live data
+                                            meatovItem.SetData(Mod.defaultItemData[vanillaCustomData["tarkovID"].ToString()]);
                                             meatovItem.insured = (bool)vanillaCustomData["insured"];
                                             meatovItem.looted = (bool)vanillaCustomData["looted"];
                                             meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
+
                                             for (int j = 1; j < objs.Count; ++j)
                                             {
                                                 MeatovItem childMeatovItem = objs[j].GetComponent<MeatovItem>();
                                                 if (childMeatovItem != null)
                                                 {
+                                                    meatovItem.SetData(Mod.defaultItemData[vanillaCustomData["tarkovID"].ToString()]);
                                                     childMeatovItem.insured = (bool)vanillaCustomData["children"][j - 1]["insured"];
                                                     childMeatovItem.looted = (bool)vanillaCustomData["children"][j - 1]["looted"];
                                                     childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][j - 1]["foundInRaid"];
                                                 }
                                             }
+
+                                            // At to volume at the end so root item and children all have their data set
+                                            item.containerVolume.AddItem(meatovItem);
+                                            objs[0].transform.localPosition = localPos;
+                                            objs[0].transform.localRotation = localRot;
                                         }
                                     };
 
@@ -2630,7 +2619,7 @@ namespace EFM
             }
             else
             {
-                Mod.LogError("Attempted to deserialize item but could not get item data for H3ID: "+ serialized["H3ID"].ToString());
+                Mod.LogError("Attempted to deserialize item but could not get item data for H3ID: "+ serialized["tarkovID"].ToString());
                 return null;
             }
         }

@@ -17,16 +17,14 @@ namespace EFM
             if(item.index != -1)
             {
                 spawnedItem = Instantiate(Mod.GetItemPrefab(item.index), spawner.transform.position + spawner.transform.forward * -0.2f, Quaternion.identity).GetComponent<MeatovItem>();
-                if(item.index == 868)
-                {
-                    spawnedItem.SetData(item);
-                }
+                spawnedItem.SetData(item);
             }
             else // Vanilla
             {
                 if(IM.OD.TryGetValue(item.H3ID, out FVRObject v))
                 {
                     spawnedItem = Instantiate(v.GetGameObject(), spawner.transform.position + spawner.transform.forward * -0.2f, Quaternion.identity).GetComponent<MeatovItem>();
+                    spawnedItem.SetData(item);
                 }
                 else
                 {

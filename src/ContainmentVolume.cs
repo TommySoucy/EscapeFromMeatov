@@ -227,10 +227,7 @@ namespace EFM
                 {
                     GameObject spawnedItem = Instantiate(itemPrefab);
                     MeatovItem meatovItem = spawnedItem.GetComponent<MeatovItem>();
-                    if(itemData.index == 868)
-                    {
-                        meatovItem.SetData(itemData);
-                    }
+                    meatovItem.SetData(itemData);
                     meatovItem.foundInRaid = foundInRaid;
                     objectsList.Add(spawnedItem);
 
@@ -306,6 +303,7 @@ namespace EFM
                     }
 
                     MeatovItem meatovItem = itemObject.GetComponent<MeatovItem>();
+                    meatovItem.SetData(itemData);
                     meatovItem.foundInRaid = foundInRaid;
                     FVRFireArmMagazine asMagazine = meatovItem.physObj as FVRFireArmMagazine;
                     FVRFireArmRound round = physObj as FVRFireArmRound;
@@ -334,6 +332,7 @@ namespace EFM
                     itemObject = GameObject.Instantiate(itemPrefab);
 
                     MeatovItem meatovItem = itemObject.GetComponent<MeatovItem>();
+                    meatovItem.SetData(itemData);
                     meatovItem.foundInRaid = foundInRaid;
 
                     // Add item to volume

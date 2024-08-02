@@ -82,10 +82,7 @@ namespace EFM
                 {
                     GameObject spawnedItem = Instantiate(itemPrefab);
                     MeatovItem meatovItem = spawnedItem.GetComponent<MeatovItem>();
-                    if(itemData.index == 868)
-                    {
-                        meatovItem.SetData(itemData);
-                    }
+                    meatovItem.SetData(itemData);
                     meatovItem.foundInRaid = foundInRaid;
                     objectsList.Add(spawnedItem);
 
@@ -129,7 +126,7 @@ namespace EFM
             GameObject itemPrefab = IM.OD[itemData.H3ID].GetGameObject();
             if (itemPrefab == null)
             {
-                Mod.LogError("Failed to get vanilla prefab for " + itemData.H3ID + " to spawn in slot " + name);
+                Mod.LogError("Failed to get vanilla prefab for " + itemData.tarkovID + ":" + itemData.H3ID + " to spawn in slot " + name);
                 yield break;
             }
             FVRPhysicalObject physObj = itemPrefab.GetComponent<FVRPhysicalObject>();
@@ -166,6 +163,7 @@ namespace EFM
 
                     MeatovItem meatovItem = itemObject.GetComponent<MeatovItem>();
                     meatovItem.foundInRaid = foundInRaid;
+                    meatovItem.SetData(itemData);
                     FVRFireArmMagazine asMagazine = meatovItem.physObj as FVRFireArmMagazine;
                     FVRFireArmRound round = physObj as FVRFireArmRound;
                     asMagazine.RoundType = round.RoundType;
@@ -198,6 +196,15 @@ namespace EFM
 
                     MeatovItem meatovItem = itemObject.GetComponent<MeatovItem>();
                     meatovItem.foundInRaid = foundInRaid;
+                    meatovItem.SetData(itemData);
+
+                    // Remove current slot item if there already is one
+                    // This probably shouldn't happen, we should assume that if a slot is output of an area,
+                    // there is only one production and the production is limited to only one ready item at once
+                    if (CurObject != null)
+                    {
+                        CurObject.SetQuickBeltSlot(null);
+                    }
 
                     // Add item to QBS
                     meatovItem.physObj.SetQuickBeltSlot(this);
