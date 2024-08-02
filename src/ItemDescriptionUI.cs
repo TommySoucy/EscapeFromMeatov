@@ -379,7 +379,7 @@ namespace EFM
                 ItemDescriptionListEntryUI entry = Instantiate(contentsEntryPrefab, contentsParent.transform).GetComponent<ItemDescriptionListEntryUI>();
                 entry.gameObject.SetActive(true);
 
-                Mod.GetItemData(contentEntry.Key, out MeatovItemData itemData);
+                MeatovItemData itemData = Mod.defaultItemData[contentEntry.Key];
                 entry.entryName.text = itemData.name;
                 entry.amount.text = "x" + contentEntry.Value;
             }

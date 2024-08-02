@@ -19,6 +19,8 @@ namespace EFM
         public string H3ID; // ID of the item in IM.OD or the index in string form in case of a custom EFM item
         public string H3SpawnerID; // ID of the item in IM.SpawnerIDDic (Vanilla/Non-EFM Modded item only)
         public int index = -1; // Custom EFM item index
+        public int defaultItemDataIndex; // Live, index of this data in the list of Mod.defaultItemDataByH3ID
+        public int vanillaItemDataIndex; // Live, index of this data in the list of Mod.vanillaItemDataByH3ID
 
         public MeatovItem.ItemType itemType;
         public MeatovItem.ItemRarity rarity;
@@ -42,6 +44,9 @@ namespace EFM
         public int recoilHorizontal;
         public int sightingRange; // Max
         // Mod
+        public string modGroup;
+        public string modPart;
+        public int modDictIndex; // Live, index in list of Mod.modItemsByPartByGroup
         public int ergonomicsModifier; // Addition
         public int recoilModifier; // Percentage
         public Vector3 dimensions;
@@ -232,18 +237,7 @@ namespace EFM
             name = Regex.Unescape(data["name"].ToString());
             description = Regex.Unescape(data["description"].ToString());
             canSellOnRagfair = (bool)data["canSellOnRagfair"];
-            bool gotValue = Mod.itemValues.TryGetValue(tarkovID, out value);
-            if(!gotValue)
-            {
-                if (data["value"] == null)
-                {
-                    Mod.LogError("DEV: Could not find value for item " + H3ID + " with tarkovID " + tarkovID);
-                }
-                else
-                {
-                    value = (int)data["value"];
-                }
-            }
+            value = (int)data["value"];
 
             compatibilityValue = (int)data["compatibilityValue"];
             usesMags = (bool)data["usesMags"];
@@ -380,6 +374,12 @@ namespace EFM
                 buffEffect.duration = (float)buffEffectData[i]["duration"];
                 buffEffect.absolute = (bool)buffEffectData[i]["absolute"];
                 buffEffect.skillIndex = (int)buffEffectData[i]["skillIndex"];
+            }
+
+            if (data["modulGroup"] != null && data["modulGroup"].Type != JTokenType.Null)
+            {
+                modGroup = data["modulGroup"].ToString();
+                modPart = data["modulPart"].ToString();
             }
         }
 

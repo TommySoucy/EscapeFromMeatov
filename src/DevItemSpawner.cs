@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
+using Valve.Newtonsoft.Json.Linq;
 
 namespace EFM
 {
@@ -47,49 +49,13 @@ namespace EFM
                 items.Clear();
             }
 
-            // Handle custom ID
-            int parsedID = 0;
-            if(int.TryParse(s, out parsedID))
+            foreach (KeyValuePair<string, MeatovItemData> defaultItemDataEntry in Mod.defaultItemData)
             {
-                if(parsedID < Mod.customItemData.Length && Mod.customItemData[parsedID] != null)
+                if (defaultItemDataEntry.Key.IndexOf(s, StringComparison.OrdinalIgnoreCase) >= 0 || defaultItemDataEntry.Value.name.IndexOf(s, StringComparison.OrdinalIgnoreCase) >= 0
+                    || defaultItemDataEntry.Value.H3ID.IndexOf(s, StringComparison.OrdinalIgnoreCase) >= 0 || (defaultItemDataEntry.Value.modGroup != null && defaultItemDataEntry.Value.modGroup.IndexOf(s, StringComparison.OrdinalIgnoreCase) >= 0)
+                    || (defaultItemDataEntry.Value.modPart != null && defaultItemDataEntry.Value.modPart.IndexOf(s, StringComparison.OrdinalIgnoreCase) >= 0))
                 {
-                    items.Add(Mod.customItemData[parsedID]);
-                }
-            }
-
-            // Handle vanilla IDs and names
-            for(int i = 0; i < Mod.customItemData.Length; ++i)
-            {
-                if(Mod.customItemData[i] != null && Mod.customItemData[i].name != null && Mod.customItemData[i].name.IndexOf(s, StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    items.Add(Mod.customItemData[i]);
-                }
-            }
-            foreach (KeyValuePair<string, MeatovItemData> dataEntry in Mod.vanillaItemData)
-            {
-                if (dataEntry.Value != null && (dataEntry.Key.IndexOf(s, StringComparison.OrdinalIgnoreCase) >= 0 || dataEntry.Value.name.IndexOf(s, StringComparison.OrdinalIgnoreCase) >= 0))
-                {
-                    items.Add(dataEntry.Value);
-                }
-            }
-            foreach (KeyValuePair<string, Dictionary<string, MeatovItemData>> dataEntry in Mod.modItemData)
-            {
-                if (dataEntry.Key.IndexOf(s, StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    foreach(KeyValuePair<string, MeatovItemData> innerDataEntry in dataEntry.Value)
-                    {
-                        items.Add(innerDataEntry.Value);
-                    }
-                }
-                else
-                {
-                    foreach (KeyValuePair<string, MeatovItemData> innerDataEntry in dataEntry.Value)
-                    {
-                        if (innerDataEntry.Key.IndexOf(s, StringComparison.OrdinalIgnoreCase) >= 0)
-                        {
-                            items.Add(innerDataEntry.Value);
-                        }
-                    }
+                    items.Add(defaultItemDataEntry.Value);
                 }
             }
         }

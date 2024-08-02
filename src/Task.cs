@@ -1953,14 +1953,13 @@ namespace EFM
                     itemIDs = new List<MeatovItemData>();
                     for (int i=0; i < itemsArray.Count; ++i)
                     {
-                        string itemID = Mod.TarkovIDtoH3ID(itemsArray[i]["_tpl"].ToString());
-                        if (Mod.GetItemData(itemID, out MeatovItemData rewardItem))
+                        if (Mod.defaultItemData.TryGetValue(itemsArray[i]["_tpl"].ToString(), out MeatovItemData rewardItem))
                         {
                             itemIDs.Add(rewardItem);
                         }
                         else
                         {
-                            Mod.LogError("DEV: Task " + task.ID + " reward " + ID + " targets item " + itemID + " for which we do not have data");
+                            Mod.LogError("DEV: Task " + task.ID + " reward " + ID + " targets item " + itemsArray[i]["_tpl"].ToString() + " for which we do not have data");
                         }
                     }
                     amount = (int)data["value"];
@@ -2003,10 +2002,9 @@ namespace EFM
                     if(productionItemsArray != null && productionItemsArray.Count > 0)
                     {
                         // Note that here we just take the first item in the array
-                        string itemID = Mod.TarkovIDtoH3ID(productionItemsArray[0]["_tpl"].ToString());
-                        if (!Mod.GetItemData(itemID, out productionProduct))
+                        if (!Mod.defaultItemData.TryGetValue(productionItemsArray[0]["_tpl"].ToString(), out productionProduct))
                         {
-                            Mod.LogError("DEV: Task " + task.ID + " reward " + ID + " targets item " + itemID + " for which we do not have data");
+                            Mod.LogError("DEV: Task " + task.ID + " reward " + ID + " targets item " + productionItemsArray[0]["_tpl"].ToString() + " for which we do not have data");
                         }
                     }
                     break;

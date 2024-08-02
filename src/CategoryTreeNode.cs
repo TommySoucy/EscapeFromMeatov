@@ -27,7 +27,7 @@ namespace EFM
             this.name = name;
 
             barters = new List<Barter>();
-            Mod.GetItemData("203", out MeatovItemData roubleData);
+            MeatovItemData roubleData = Mod.customItemData[203];
             if (Mod.itemsByParents.TryGetValue(ID, out List<MeatovItemData> items))
             {
                 for (int i = 0; i < items.Count; ++i)

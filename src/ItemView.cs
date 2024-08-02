@@ -168,7 +168,7 @@ namespace EFM
             else
             {
                 // Set static data
-                Mod.SetIcon(itemData.H3ID, itemIcon);
+                Mod.SetIcon(itemData, itemIcon);
                 infoSpecial.SetActive(itemData.itemType == MeatovItem.ItemType.Pouch);
                 if (itemData.GetCheckmark(out Color color))
                 {

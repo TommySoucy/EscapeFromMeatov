@@ -368,6 +368,8 @@ namespace EFM
         public Transform modBox;
         public Transform modInteractive;
         public MeshRenderer modRenderer;
+        public string modGroup;
+        public string modPart;
         public int ergonomicsModifier;
         public int recoilModifier;
 
@@ -533,6 +535,8 @@ namespace EFM
             dogtagLevel = data.dogtagLevel;
             dogtagName = data.dogtagName;
 
+            modGroup = data.modGroup;
+            modPart = data.modPart;
 
             if(containerVolume != null)
             {
@@ -543,7 +547,7 @@ namespace EFM
             }
             if(index == 868)
             {
-                Mod.SetIcon(H3ID, modIcon);
+                Mod.SetIcon(data, modIcon);
                 modBox.localScale = data.dimensions;
                 modInteractive.localScale = data.dimensions;
                 volumes[0] = (int)(data.dimensions.x * data.dimensions.y * data.dimensions.z * 1000000);

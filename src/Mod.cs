@@ -11,8 +11,6 @@ using Valve.VR;
 using UnityEngine.UI;
 using ModularWorkshop;
 using System.Text.RegularExpressions;
-using System.Linq;
-using static UnityEngine.EventSystems.EventTrigger;
 
 namespace EFM
 {
@@ -599,7 +597,6 @@ namespace EFM
         public static JObject hideoutsettingsDB;
         public static JObject localeDB;
         public static JObject itemDB;
-        public static Dictionary<string, ItemMapEntry> itemMap;
         public static JObject[] traderBaseDB;
         public static JObject[] traderAssortDB;
         public static JObject[] traderQuestAssortDB;
@@ -611,10 +608,11 @@ namespace EFM
         public static JArray lootContainerDB;
         public static JObject dynamicLootTable;
         public static JObject staticLootTable;
-        public static Dictionary<string, int> itemValues;
-        public static MeatovItemData[] customItemData;
-        public static Dictionary<string, MeatovItemData> vanillaItemData;
-        public static Dictionary<string, Dictionary<string, MeatovItemData>> modItemData;
+        public static Dictionary<string, MeatovItemData> defaultItemData; // All item data by tarkov ID
+        public static Dictionary<string, List<MeatovItemData>> defaultItemDataByH3ID; // All item data by H3ID, note that this is a list, because multiple Tarkov IDs can point to the same H3ID
+        public static MeatovItemData[] customItemData; // Custom item data by index
+        public static Dictionary<string, List<MeatovItemData>> vanillaItemData; // Vanilla item data by H3ID
+        public static Dictionary<string, Dictionary<string, List<MeatovItemData>>> modItemsByPartByGroup; // Item data by mod group and part. This is a list of data because multiple mod items may point to the same part
         public static Dictionary<string, JObject> lootContainersByName;
         public static Dictionary<string, AudioClip[]> itemSounds;
 
@@ -2667,7 +2665,6 @@ namespace EFM
             localeDB = JObject.Parse(File.ReadAllText(path + "/database/locales/global/en.json"));
             itemDB = JObject.Parse(File.ReadAllText(path + "/database/templates/items.json"));
             ParseDefaultItemData();
-            ParseItemMap();
 
             traders = new Trader[9];
             traderBaseDB = new JObject[9];
@@ -2927,67 +2924,112 @@ namespace EFM
 
         private void ParseDefaultItemData()
         {
+            JObject data = JObject.Parse(File.ReadAllText(path + "/database/DefaultItemData.json"));
+            Dictionary<string, JToken> defaultItemDataDB = data.ToObject<Dictionary<string, JToken>>();
+            defaultItemData = new Dictionary<string, MeatovItemData>();
+            defaultItemDataByH3ID = new Dictionary<string, List<MeatovItemData>>();
 
-            JObject data = JObject.Parse(File.ReadAllText(path + "/database/templates/prices.json"));
-            itemValues = data.ToObject<Dictionary<string, int>>();
-
-            data = JObject.Parse(File.ReadAllText(path + "/database/DefaultItemData.json"));
-
+            modItemsByPartByGroup = new Dictionary<string, Dictionary<string, List<MeatovItemData>>>();
             itemsByParents = new Dictionary<string, List<MeatovItemData>>();
             itemsByRarity = new Dictionary<MeatovItem.ItemRarity, List<MeatovItemData>>();
+            List<MeatovItemData> customItemDataList = new List<MeatovItemData>();
+            int highestCustomIndex = 0;
+            vanillaItemData = new Dictionary<string, List<MeatovItemData>>();
 
-            JArray customData = data["customItemData"] as JArray;
-            customItemData = new MeatovItemData[customData.Count];
-            // Here, we start at 3 because previous are placeholder for test items
-            for (int i=3; i < customData.Count; ++i)
+            foreach (KeyValuePair<string, JToken> defaultItemDataEntry in defaultItemDataDB)
             {
-                customItemData[i] = new MeatovItemData(customData[i]);
-            }
-
-            Dictionary<string,JToken> vanillaData = data["vanillaItemData"].ToObject<Dictionary<string, JToken>>();
-            vanillaItemData = new Dictionary<string, MeatovItemData>();
-            foreach(KeyValuePair<string,JToken> entry in vanillaData)
-            {
-                vanillaItemData.Add(entry.Key, new MeatovItemData(entry.Value));
-            }
-
-            Dictionary<string, JToken> partGroupData = data["modItemData"].ToObject<Dictionary<string, JToken>>();
-            modItemData = new Dictionary<string, Dictionary<string, MeatovItemData>>();
-            foreach (KeyValuePair<string, JToken> groupEntry in partGroupData) 
-            {
-                Dictionary<string, MeatovItemData> currentDict = new Dictionary<string, MeatovItemData>();
-                modItemData.Add(Regex.Unescape(groupEntry.Key), currentDict);
-
-                Dictionary<string, JToken> partData = groupEntry.Value.ToObject<Dictionary<string, JToken>>();
-                foreach (KeyValuePair<string, JToken> partEntry in partData)
+                MeatovItemData currentItemData = new MeatovItemData(defaultItemDataEntry.Value);
+                defaultItemData.Add(defaultItemDataEntry.Key, currentItemData);
+                if(defaultItemDataByH3ID.TryGetValue(currentItemData.H3ID, out List<MeatovItemData> itemDataList))
                 {
-                    currentDict.Add(Regex.Unescape(partEntry.Key), new MeatovItemData(partEntry.Value));
+                    currentItemData.defaultItemDataIndex = itemDataList.Count;
+                    itemDataList.Add(currentItemData);
                 }
-            }
-        }
-
-        private void ParseItemMap()
-        {
-            itemMap = new Dictionary<string, ItemMapEntry>();
-
-            Dictionary<string, JObject> itemMapData = JObject.Parse(File.ReadAllText(Mod.path + "/database/ItemMap.json")).ToObject<Dictionary<string, JObject>>();
-
-            foreach(KeyValuePair<string, JObject> item in itemMapData)
-            {
-                if (item.Value["H3ID"] != null)
+                else
                 {
-                    ItemMapEntry newEntry = new ItemMapEntry();
-                    newEntry.ID = item.Value["H3ID"].ToString();
+                    currentItemData.defaultItemDataIndex = 0;
+                    defaultItemDataByH3ID.Add(currentItemData.H3ID, new List<MeatovItemData>() { currentItemData });
+                }
 
-                    newEntry.modul = newEntry.ID.Equals("868");
-                    if (newEntry.modul)
+                int parsedID = -1;
+                if(int.TryParse(currentItemData.H3ID, out parsedID))
+                {
+                    if (defaultItemDataEntry.Value["modulGroup"] == null || defaultItemDataEntry.Value["modulGroup"].Type == JTokenType.Null)
                     {
-                        newEntry.modulGroup = item.Value["ModulGroup"].ToString();
-                        newEntry.modulPart = item.Value["ModulPart"].ToString();
+                        // Custom item
+                        customItemDataList.Add(new MeatovItemData(defaultItemDataEntry.Value));
+                        if(currentItemData.index > highestCustomIndex)
+                        {
+                            highestCustomIndex = currentItemData.index;
+                        }
+                    }
+                    else
+                    {
+                        // 868 mod item
+                        if (modItemsByPartByGroup.TryGetValue(currentItemData.modGroup, out Dictionary<string, List<MeatovItemData>> partDict))
+                        {
+                            if(partDict.TryGetValue(currentItemData.modPart, out List<MeatovItemData> partList))
+                            {
+                                currentItemData.modDictIndex = partList.Count;
+                                partList.Add(currentItemData);
+                            }
+                            else
+                            {
+                                currentItemData.modDictIndex = 0;
+                                partDict.Add(currentItemData.modPart, new List<MeatovItemData>() { currentItemData });
+                            }
+                        }
+                        else
+                        {
+                            currentItemData.modDictIndex = 0;
+                            modItemsByPartByGroup.Add(currentItemData.modGroup, new Dictionary<string, List<MeatovItemData>>() { { currentItemData.modPart, new List<MeatovItemData>() { currentItemData } } });
+                        }
+                    }
+                }
+                else
+                {
+                    // Vanilla item
+                    if (vanillaItemData.TryGetValue(currentItemData.H3ID, out List<MeatovItemData> vanillaItemDataList))
+                    {
+                        currentItemData.vanillaItemDataIndex = itemDataList.Count;
+                        itemDataList.Add(currentItemData);
+                    }
+                    else
+                    {
+                        currentItemData.defaultItemDataIndex = 0;
+                        vanillaItemData.Add(currentItemData.H3ID, new List<MeatovItemData>() { currentItemData });
                     }
 
-                    itemMap.Add(item.Key, newEntry);
+                    if (defaultItemDataEntry.Value["modulGroup"] != null && defaultItemDataEntry.Value["modulGroup"].Type != JTokenType.Null)
+                    {
+                        // Also mod item
+                        if (modItemsByPartByGroup.TryGetValue(currentItemData.modGroup, out Dictionary<string, List<MeatovItemData>> partDict))
+                        {
+                            if (partDict.TryGetValue(currentItemData.modPart, out List<MeatovItemData> partList))
+                            {
+                                currentItemData.modDictIndex = partList.Count;
+                                partList.Add(currentItemData);
+                            }
+                            else
+                            {
+                                currentItemData.modDictIndex = 0;
+                                partDict.Add(currentItemData.modPart, new List<MeatovItemData>() { currentItemData });
+                            }
+                        }
+                        else
+                        {
+                            currentItemData.modDictIndex = 0;
+                            modItemsByPartByGroup.Add(currentItemData.modGroup, new Dictionary<string, List<MeatovItemData>>() { { currentItemData.modPart, new List<MeatovItemData>() { currentItemData } } });
+                        }
+                    }
                 }
+            }
+
+            // Set custom item data array
+            customItemData = new MeatovItemData[highestCustomIndex + 1];
+            for(int i=0; i < customItemDataList.Count; ++i)
+            {
+                customItemData[customItemDataList[i].index] = customItemDataList[i];
             }
         }
 
@@ -3893,36 +3935,13 @@ namespace EFM
             return itemsBundles[bundleIndex].LoadAsset<GameObject>("Item" + index);
         }
 
-        public static bool GetItemData(string H3ID, out MeatovItemData itemData)
-        {
-            string[] split = H3ID.Split(':');
-
-            int index = -1;
-            if (int.TryParse(split[0], out index))
-            {
-                if(index == 868)
-                {
-                    itemData = null;
-                    return modItemData.TryGetValue(split[1], out Dictionary<string, MeatovItemData> partsDict) && partsDict.TryGetValue(split[2], out itemData);
-                }
-                else
-                {
-                    itemData = customItemData[index];
-                }
-                return itemData != null;
-            }
-            else
-            {
-                return vanillaItemData.TryGetValue(H3ID, out itemData);
-            }
-        }
-
         public static int GetRoundWeight(FireArmRoundType roundType)
         {
             FVRFireArmRoundDisplayData.DisplayDataClass displayClass = AM.SRoundDisplayDataDic[roundType].GetDisplayClass(AM.GetDefaultRoundClass(roundType));
-            if(GetItemData(displayClass.ObjectID.ItemID, out MeatovItemData itemData))
+            if(defaultItemDataByH3ID.TryGetValue(displayClass.ObjectID.ItemID, out List<MeatovItemData> itemDataList))
             {
-                return itemData.weight;
+                // Take first, all in the list whould be the same
+                return itemDataList[0].weight;
             }
             else
             {
@@ -4113,18 +4132,17 @@ namespace EFM
             return described;
         }
 
-        public static void SetIcon(string itemID, Image icon)
+        public static void SetIcon(MeatovItemData itemData, Image icon)
         {
-            string[] split = itemID.Split(':');
             int parsedID = -1;
-            if (int.TryParse(split[0], out parsedID))
+            if (int.TryParse(itemData.H3ID, out parsedID))
             {
                 if(parsedID == 868)
                 {
                     bool gotIcon = false;
-                    if(ModularWorkshopManager.ModularWorkshopPartsGroupsDictionary.TryGetValue(split[1], out ModularWorkshopPartsDefinition partDef))
+                    if(ModularWorkshopManager.ModularWorkshopPartsGroupsDictionary.TryGetValue(itemData.modGroup, out ModularWorkshopPartsDefinition partDef))
                     {
-                        if (partDef.PartsDictionary.TryGetValue(split[2], out GameObject weaponPart))
+                        if (partDef.PartsDictionary.TryGetValue(itemData.modPart, out GameObject weaponPart))
                         {
                             ModularWeaponPart weaponPartScript = weaponPart.GetComponent<ModularWeaponPart>();
                             if(weaponPartScript != null)
@@ -4136,7 +4154,8 @@ namespace EFM
                     }
                     if (!gotIcon)
                     {
-                        Mod.LogError("Mod.SetIcon could not load modul mod " + itemID + " icon");
+                        Mod.LogError("Mod.SetIcon could not load modul mod " + itemData.tarkovID + ":" + itemData.H3ID + " icon");
+                        icon.sprite = Mod.questionMarkIcon;
                     }
                 }
                 else
@@ -4144,7 +4163,8 @@ namespace EFM
                     Sprite sprite = Mod.itemIconsBundle.LoadAsset<Sprite>("Item" + parsedID + "_Icon");
                     if (sprite == null)
                     {
-                        Mod.LogError("Mod.SetIcon could not load custom item " + itemID + " icon");
+                        Mod.LogError("Mod.SetIcon could not load custom item " + itemData.tarkovID + ":" + parsedID + " icon");
+                        icon.sprite = Mod.questionMarkIcon;
                     }
                     else
                     {
@@ -4222,16 +4242,9 @@ namespace EFM
 
         public static string TarkovIDtoH3ID(string tarkovID)
         {
-            if(itemMap.TryGetValue(tarkovID, out ItemMapEntry entry))
+            if(defaultItemData.TryGetValue(tarkovID, out MeatovItemData itemData))
             {
-                if (entry.modul)
-                {
-                    return "868:"+entry.modulGroup+":"+entry.modulPart;
-                }
-                else
-                {
-                    return entry.ID;
-                }
+                return itemData.H3ID;
             }
             else
             {
@@ -4299,15 +4312,6 @@ namespace EFM
             long num4 = amount / 100000L % 10L;
             return num3 + ((num4 != 0L) ? ("." + num4) : "") + "M";
         }
-    }
-
-    public class ItemMapEntry
-    {
-        public string ID;
-
-        public bool modul;
-        public string modulGroup;
-        public string modulPart;
     }
 
     public class Vector2Int

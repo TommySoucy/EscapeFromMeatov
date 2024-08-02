@@ -1077,10 +1077,9 @@ namespace EFM
                 switch (requirementType)
                 {
                     case RequirementType.Item:
-                        string itemID = Mod.TarkovIDtoH3ID(requirementData["templateId"].ToString());
-                        if(!Mod.GetItemData(itemID, out item))
+                        if(!Mod.defaultItemData.TryGetValue(requirementData["templateId"].ToString(), out item))
                         {
-                            Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " item requirement targets item " + itemID + " for which we do not have data");
+                            Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " item requirement targets item "+ requirementData["templateId"].ToString() + " for which we do not have data");
                             fulfilled = true;
                             return;
                         }
@@ -1123,10 +1122,9 @@ namespace EFM
                         trader.OnTraderLevelChanged += OnTraderLevelChanged;
                         break;
                     case RequirementType.Tool:
-                        string toolItemID = Mod.TarkovIDtoH3ID(requirementData["templateId"].ToString());
-                        if (!Mod.GetItemData(toolItemID, out item))
+                        if (!Mod.defaultItemData.TryGetValue(requirementData["templateId"].ToString(), out item))
                         {
-                            Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " tool requirement targets item " + toolItemID + " for which we do not have data");
+                            Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " tool requirement targets item " + requirementData["templateId"].ToString() + " for which we do not have data");
                             fulfilled = true;
                             return;
                         }
@@ -1135,10 +1133,9 @@ namespace EFM
                         item.OnPlayerItemInventoryChanged += OnInventoryChanged;
                         break;
                     case RequirementType.Resource:
-                        string resourceItemID = Mod.TarkovIDtoH3ID(requirementData["templateId"].ToString());
-                        if (!Mod.GetItemData(resourceItemID, out item))
+                        if (!Mod.defaultItemData.TryGetValue(requirementData["templateId"].ToString(), out item))
                         {
-                            Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " item requirement targets item " + resourceItemID + " for which we do not have data");
+                            Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " item requirement targets item " + requirementData["templateId"].ToString() + " for which we do not have data");
                             fulfilled = true;
                             return;
                         }
@@ -1804,7 +1801,7 @@ namespace EFM
             }
             else
             {
-                if(!Mod.GetItemData(Mod.TarkovIDtoH3ID(data["endProduct"].ToString()), out endProduct))
+                if(!Mod.defaultItemData.TryGetValue(data["endProduct"].ToString(), out endProduct))
                 {
                     Mod.LogError("DEV: Production "+ID+" end product with ID "+ Mod.TarkovIDtoH3ID(data["endProduct"].ToString())+" is missing item data");
                 }
