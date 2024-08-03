@@ -37,7 +37,7 @@ namespace EFM
                     // Find trader barters for this item
                     for (int j = 0; j < Mod.traders.Length; ++j)
                     {
-                        if (Mod.traders[j].bartersByItemID.TryGetValue(items[i].H3ID, out List<Barter> traderBarters))
+                        if (Mod.traders[j].bartersByItemID.TryGetValue(items[i].tarkovID, out List<Barter> traderBarters))
                         {
                             for (int k = 0; k < traderBarters.Count; ++k)
                             {

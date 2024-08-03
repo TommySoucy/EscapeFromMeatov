@@ -39,8 +39,8 @@ namespace EFM
                     }
 
                     List<MeatovItem> itemList;
-                    if ((condition.onlyFoundInRaid && HideoutController.instance.marketManager.tradeVolume.FIRInventoryItems.TryGetValue(item.H3ID, out itemList))
-                        ||(!condition.onlyFoundInRaid && HideoutController.instance.marketManager.tradeVolume.inventoryItems.TryGetValue(item.H3ID, out itemList)))
+                    if ((condition.onlyFoundInRaid && HideoutController.instance.marketManager.tradeVolume.FIRInventoryItems.TryGetValue(item.tarkovID, out itemList))
+                        ||(!condition.onlyFoundInRaid && HideoutController.instance.marketManager.tradeVolume.inventoryItems.TryGetValue(item.tarkovID, out itemList)))
                     {
                         // Consume items in the list
                         for(int i = 0; i < itemList.Count; ++i)
@@ -154,7 +154,7 @@ namespace EFM
 
         public void OnTradeVolumeItemsChanged(MeatovItem item)
         {
-            if(Mod.IDDescribedInList(item.H3ID, item.parents, condition.targetItemIDs, null))
+            if(Mod.IDDescribedInList(item.tarkovID, item.parents, condition.targetItemIDs, null))
             {
                 UpdateTurnInButton();
             }
@@ -174,8 +174,8 @@ namespace EFM
             {
                 foreach (MeatovItemData item in condition.targetItems)
                 {
-                    if ((condition.onlyFoundInRaid && HideoutController.instance.marketManager.tradeVolume.FIRInventory.ContainsKey(item.H3ID))
-                        || (!condition.onlyFoundInRaid && HideoutController.instance.marketManager.tradeVolume.inventory.ContainsKey(item.H3ID)))
+                    if ((condition.onlyFoundInRaid && HideoutController.instance.marketManager.tradeVolume.FIRInventory.ContainsKey(item.tarkovID))
+                        || (!condition.onlyFoundInRaid && HideoutController.instance.marketManager.tradeVolume.inventory.ContainsKey(item.tarkovID)))
                     {
                         needHandOverButton = true;
                         break;
@@ -187,8 +187,8 @@ namespace EFM
                 foreach (MeatovItemData item in condition.targetItems)
                 {
                     List<MeatovItem> itemList;
-                    if ((condition.onlyFoundInRaid && HideoutController.instance.marketManager.tradeVolume.FIRInventoryItems.TryGetValue(item.H3ID, out itemList))
-                        || (!condition.onlyFoundInRaid && HideoutController.instance.marketManager.tradeVolume.inventoryItems.TryGetValue(item.H3ID, out itemList)))
+                    if ((condition.onlyFoundInRaid && HideoutController.instance.marketManager.tradeVolume.FIRInventoryItems.TryGetValue(item.tarkovID, out itemList))
+                        || (!condition.onlyFoundInRaid && HideoutController.instance.marketManager.tradeVolume.inventoryItems.TryGetValue(item.tarkovID, out itemList)))
                     {
                         for (int i = 0; i < itemList.Count; ++i)
                         {

@@ -57,7 +57,7 @@ namespace EFM
         public GameObject buyShowcaseItemViewPrefab;
         public Text buyItemName;
         public PriceItemView buyItemView;
-        public Dictionary<string, List<PriceItemView>> buyItemPriceViewsByH3ID;
+        public Dictionary<string, List<PriceItemView>> buyItemPriceViewsByID;
         public Text buyItemCount;
         public Transform buyPricesContent;
         public HoverScrollProcessor buyPricesHoverScrollProcessor;
@@ -99,7 +99,7 @@ namespace EFM
         public HoverScrollProcessor ragFairPricesHoverScrollProcessor;
         public GameObject ragFairBuyPricePrefab;
         public GameObject ragFairBuyDealButton;
-        public Dictionary<string, List<PriceItemView>> ragFairBuyItemPriceViewsByH3ID;
+        public Dictionary<string, List<PriceItemView>> ragFairBuyItemPriceViewsByID;
         public Text ragFairBuyItemCount;
         public Collider ragFairBuyAmountButtonCollider;
 
@@ -692,14 +692,14 @@ namespace EFM
 
         public void UpdateBuyPriceForItem(MeatovItemData itemData)
         {
-            if (buyItemPriceViewsByH3ID.TryGetValue(itemData.H3ID, out List<PriceItemView> itemViews))
+            if (buyItemPriceViewsByID.TryGetValue(itemData.tarkovID, out List<PriceItemView> itemViews))
             {
                 for(int j=0; j< itemViews.Count; ++j)
                 {
                     PriceItemView itemView = itemViews[j];
                     bool prefulfilled = itemView.fulfilledIcon.activeSelf;
                     int count = 0;
-                    tradeVolume.inventory.TryGetValue(itemData.H3ID, out count);
+                    tradeVolume.inventory.TryGetValue(itemData.tarkovID, out count);
                     itemView.amount.text = Mathf.Min(itemView.price.count, count).ToString() + "/" + (itemView.price.count * cartItemCount).ToString();
                     if (count >= itemView.price.count * cartItemCount)
                     {
@@ -712,7 +712,7 @@ namespace EFM
                             for (int i = 0; i < buyPrices.Count; ++i)
                             {
                                 int currentCount = 0;
-                                allFulfilled |= tradeVolume.inventory.TryGetValue(buyPrices[i].itemData.H3ID, out currentCount) && currentCount >= buyPrices[i].count * cartItemCount;
+                                allFulfilled |= tradeVolume.inventory.TryGetValue(buyPrices[i].itemData.tarkovID, out currentCount) && currentCount >= buyPrices[i].count * cartItemCount;
                             }
                             buyDealButton.SetActive(allFulfilled);
                         }
@@ -732,7 +732,7 @@ namespace EFM
             if (currencyItemData == itemData)
             {
                 int count = 0;
-                tradeVolume.inventory.TryGetValue(itemData.H3ID, out count);
+                tradeVolume.inventory.TryGetValue(itemData.tarkovID, out count);
                 insureItemView.amount.text = count.ToString() + "/" + currentTotalInsurePrice.ToString();
                 if (count >= currentTotalInsurePrice)
                 {
@@ -759,21 +759,21 @@ namespace EFM
             // StackOnly should be true if not item location was changed, but the stack count has
             if (stackOnly)
             {
-                if (inventory.ContainsKey(item.H3ID))
+                if (inventory.ContainsKey(item.tarkovID))
                 {
-                    inventory[item.H3ID] += stackDifference;
+                    inventory[item.tarkovID] += stackDifference;
                     if (item.foundInRaid)
                     {
-                        FIRInventory[item.H3ID] += stackDifference;
+                        FIRInventory[item.tarkovID] += stackDifference;
                     }
 
-                    if (inventory[item.H3ID] <= 0)
+                    if (inventory[item.tarkovID] <= 0)
                     {
                         Mod.LogError("DEV: Market AddToInventory stackonly with difference " + stackDifference + " for " + item.name + " reached 0 count:\n" + Environment.StackTrace);
-                        inventory.Remove(item.H3ID);
-                        inventoryItems.Remove(item.H3ID);
-                        FIRInventory.Remove(item.H3ID);
-                        FIRInventoryItems.Remove(item.H3ID);
+                        inventory.Remove(item.tarkovID);
+                        inventoryItems.Remove(item.tarkovID);
+                        FIRInventory.Remove(item.tarkovID);
+                        FIRInventoryItems.Remove(item.tarkovID);
                     }
                 }
                 else
@@ -785,28 +785,28 @@ namespace EFM
             }
             else
             {
-                if (inventory.ContainsKey(item.H3ID))
+                if (inventory.ContainsKey(item.tarkovID))
                 {
-                    inventory[item.H3ID] += item.stack;
-                    inventoryItems[item.H3ID].Add(item);
+                    inventory[item.tarkovID] += item.stack;
+                    inventoryItems[item.tarkovID].Add(item);
                 }
                 else
                 {
-                    inventory.Add(item.H3ID, item.stack);
-                    inventoryItems.Add(item.H3ID, new List<MeatovItem> { item });
+                    inventory.Add(item.tarkovID, item.stack);
+                    inventoryItems.Add(item.tarkovID, new List<MeatovItem> { item });
                 }
 
                 if (item.foundInRaid)
                 {
-                    if (FIRInventory.ContainsKey(item.H3ID))
+                    if (FIRInventory.ContainsKey(item.tarkovID))
                     {
-                        FIRInventory[item.H3ID] += item.stack;
-                        FIRInventoryItems[item.H3ID].Add(item);
+                        FIRInventory[item.tarkovID] += item.stack;
+                        FIRInventoryItems[item.tarkovID].Add(item);
                     }
                     else
                     {
-                        FIRInventory.Add(item.H3ID, item.stack);
-                        FIRInventoryItems.Add(item.H3ID, new List<MeatovItem> { item });
+                        FIRInventory.Add(item.tarkovID, item.stack);
+                        FIRInventoryItems.Add(item.tarkovID, new List<MeatovItem> { item });
                     }
                 }
 
@@ -840,33 +840,33 @@ namespace EFM
 
         public void RemoveFromInventory(MeatovItem item)
         {
-            if (inventory.ContainsKey(item.H3ID))
+            if (inventory.ContainsKey(item.tarkovID))
             {
-                inventory[item.H3ID] -= item.stack;
-                inventoryItems[item.H3ID].Remove(item);
+                inventory[item.tarkovID] -= item.stack;
+                inventoryItems[item.tarkovID].Remove(item);
             }
             else
             {
-                Mod.LogError("Attempting to remove " + item.H3ID + " from market inventory but key was not found in it:\n" + Environment.StackTrace);
+                Mod.LogError("Attempting to remove "+item.tarkovID + ":" + item.H3ID + " from market inventory but key was not found in it:\n" + Environment.StackTrace);
                 return;
             }
-            if (inventory[item.H3ID] == 0)
+            if (inventory[item.tarkovID] == 0)
             {
-                inventory.Remove(item.H3ID);
-                inventoryItems.Remove(item.H3ID);
+                inventory.Remove(item.tarkovID);
+                inventoryItems.Remove(item.tarkovID);
             }
 
             if (item.foundInRaid)
             {
-                if (FIRInventory.ContainsKey(item.H3ID))
+                if (FIRInventory.ContainsKey(item.tarkovID))
                 {
-                    FIRInventory[item.H3ID] -= item.stack;
-                    FIRInventoryItems[item.H3ID].Remove(item);
+                    FIRInventory[item.tarkovID] -= item.stack;
+                    FIRInventoryItems[item.tarkovID].Remove(item);
                 }
-                if (FIRInventory[item.H3ID] == 0)
+                if (FIRInventory[item.tarkovID] == 0)
                 {
-                    FIRInventory.Remove(item.H3ID);
-                    FIRInventoryItems.Remove(item.H3ID);
+                    FIRInventory.Remove(item.tarkovID);
+                    FIRInventoryItems.Remove(item.tarkovID);
                 }
             }
 
@@ -888,13 +888,13 @@ namespace EFM
             ragFairCartItem = ragFairBarter.itemData;
             ragFairCartBarter = ragFairBarter;
 
-            if (ragFairBuyItemPriceViewsByH3ID == null)
+            if (ragFairBuyItemPriceViewsByID == null)
             {
-                ragFairBuyItemPriceViewsByH3ID = new Dictionary<string, List<PriceItemView>>();
+                ragFairBuyItemPriceViewsByID = new Dictionary<string, List<PriceItemView>>();
             }
             else
             { 
-                ragFairBuyItemPriceViewsByH3ID.Clear();
+                ragFairBuyItemPriceViewsByID.Clear();
             }
 
             ragFairBuyCart.SetActive(true);
@@ -936,7 +936,7 @@ namespace EFM
                 }
 
                 int count = 0;
-                tradeVolume.inventory.TryGetValue(price.itemData.H3ID, out count);
+                tradeVolume.inventory.TryGetValue(price.itemData.tarkovID, out count);
                 currentPriceView.amount.text = Mathf.Min(price.count, count).ToString() + "/" + price.count.ToString();
 
                 if (count >= price.count)
@@ -954,13 +954,13 @@ namespace EFM
                 // Note that there should only be a single price of a specific item
                 // but items like dogtags will be counted as different if the price is of different level
                 // So there may be multiple price views per item ID
-                if(ragFairBuyItemPriceViewsByH3ID.TryGetValue(price.itemData.H3ID, out List<PriceItemView> priceItemViewList))
+                if(ragFairBuyItemPriceViewsByID.TryGetValue(price.itemData.tarkovID, out List<PriceItemView> priceItemViewList))
                 {
                     priceItemViewList.Add(currentPriceView);
                 }
                 else
                 {
-                    ragFairBuyItemPriceViewsByH3ID.Add(price.itemData.H3ID, new List<PriceItemView> { currentPriceView });
+                    ragFairBuyItemPriceViewsByID.Add(price.itemData.tarkovID, new List<PriceItemView> { currentPriceView });
                 }
             }
 
@@ -982,7 +982,7 @@ namespace EFM
             {
                 if (category.barters[i].trader == null 
                     || (category.barters[i].level <= category.barters[i].trader.level
-                        && (!category.barters[i].trader.rewardBarters.TryGetValue(category.barters[i].itemData.H3ID, out bool unlocked)
+                        && (!category.barters[i].trader.rewardBarters.TryGetValue(category.barters[i].itemData.tarkovID, out bool unlocked)
                             || unlocked)))
                 {
                     Transform buyItemElement = Instantiate(ragFairBuyItemPrefab, ragFairBuyItemParent).transform;
@@ -1042,14 +1042,14 @@ namespace EFM
 
         public void UpdateRagFairBuyPriceForItem(MeatovItemData itemData)
         {
-            if (ragFairBuyItemPriceViewsByH3ID.TryGetValue(itemData.H3ID, out List<PriceItemView> itemViews))
+            if (ragFairBuyItemPriceViewsByID.TryGetValue(itemData.tarkovID, out List<PriceItemView> itemViews))
             {
                 for(int j=0; j< itemViews.Count; ++j)
                 {
                     PriceItemView itemView = itemViews[j];
                     bool prefulfilled = itemView.fulfilledIcon.activeSelf;
                     int count = 0;
-                    tradeVolume.inventory.TryGetValue(itemData.H3ID, out count);
+                    tradeVolume.inventory.TryGetValue(itemData.tarkovID, out count);
                     itemView.amount.text = Mathf.Min(itemView.price.count, count).ToString() + "/" + (itemView.price.count * ragFairCartItemCount).ToString();
                     if (count >= itemView.price.count * ragFairCartItemCount)
                     {
@@ -1062,7 +1062,7 @@ namespace EFM
                             for (int i = 0; i < ragFairBuyPrices.Count; ++i)
                             {
                                 int currentCount = 0;
-                                allFulfilled |= tradeVolume.inventory.TryGetValue(ragFairBuyPrices[i].itemData.H3ID, out currentCount) && currentCount >= ragFairBuyPrices[i].count * ragFairCartItemCount;
+                                allFulfilled |= tradeVolume.inventory.TryGetValue(ragFairBuyPrices[i].itemData.tarkovID, out currentCount) && currentCount >= ragFairBuyPrices[i].count * ragFairCartItemCount;
                             }
                             ragFairBuyDealButton.SetActive(allFulfilled);
                         }
@@ -1124,7 +1124,7 @@ namespace EFM
             int foundValue = 0;
             for(int i=0; i < Mod.traders.Length; ++i)
             {
-                if (Mod.traders[i].bartersByItemID.TryGetValue(item.H3ID, out List<Barter> barters))
+                if (Mod.traders[i].bartersByItemID.TryGetValue(item.tarkovID, out List<Barter> barters))
                 {
                     for(int j=0; j < barters.Count; ++j)
                     {
@@ -1192,7 +1192,7 @@ namespace EFM
             ragFairSellTax.text = "Tax (5%): " + currentRagFairSellTax;
 
             int amount = 0;
-            if(tradeVolume.inventory.TryGetValue(roubleItemData.H3ID, out amount))
+            if(tradeVolume.inventory.TryGetValue(roubleItemData.tarkovID, out amount))
             {
                 ragFairSellListButton.SetActive(amount >= currentRagFairSellTax);
             }
@@ -1565,7 +1565,7 @@ namespace EFM
                         }
 
                         // Skip if this barter is locked
-                        if (currentBarter.needUnlock && !trader.rewardBarters[currentBarter.itemData.H3ID])
+                        if (currentBarter.needUnlock && !trader.rewardBarters[currentBarter.itemData.tarkovID])
                         {
                             continue;
                         }
@@ -1595,7 +1595,7 @@ namespace EFM
                         }
                         else
                         {
-                            if (!Mod.ItemIDToCurrencyIndex(currentBarter.prices[firstValidPrice].itemData.H3ID, out currencyToUse))
+                            if (!Mod.ItemIDToCurrencyIndex(currentBarter.prices[firstValidPrice].itemData.tarkovID, out currencyToUse))
                             {
                                 currencyToUse = 3;
                             }
@@ -1749,7 +1749,7 @@ namespace EFM
                         MeatovItemData randomItem = items[UnityEngine.Random.Range(0, items.Count)];
 
                         // Note that fence should only ever have a single barter for a specific item since they would all have the same price anyway
-                        if (!fence.bartersByItemID.ContainsKey(randomItem.H3ID))
+                        if (!fence.bartersByItemID.ContainsKey(randomItem.tarkovID))
                         {
                             Barter barter = new Barter();
                             barter.itemData = randomItem;
@@ -1769,7 +1769,7 @@ namespace EFM
                                 fence.bartersByLevel.Add(1, new List<Barter>() { barter });
                             }
 
-                            fence.bartersByItemID.Add(randomItem.H3ID, new List<Barter>() { barter });
+                            fence.bartersByItemID.Add(randomItem.tarkovID, new List<Barter>() { barter });
                         }
                     }
                 }
@@ -1801,13 +1801,13 @@ namespace EFM
         {
             cartItem = item;
 
-            if (buyItemPriceViewsByH3ID == null)
+            if (buyItemPriceViewsByID == null)
             {
-                buyItemPriceViewsByH3ID = new Dictionary<string, List<PriceItemView>>();
+                buyItemPriceViewsByID = new Dictionary<string, List<PriceItemView>>();
             }
             else
             {
-                buyItemPriceViewsByH3ID.Clear();
+                buyItemPriceViewsByID.Clear();
             }
 
             if (item == null)
@@ -1832,7 +1832,7 @@ namespace EFM
             {
                 cartItemCount = 1;
                 buyPrices = new List<BarterPrice>(priceList);
-                Mod.LogInfo("on buy item click called, with ID: " + item.H3ID);
+                Mod.LogInfo("on buy item click called, with ID: " + item.tarkovID+":"+item.H3ID);
                 Mod.LogInfo("Got item name: " + item.name);
 
                 buyItemView.itemView.SetItemData(item);
@@ -1855,7 +1855,7 @@ namespace EFM
                         continue;
                     }
 
-                    Mod.LogInfo("\tSetting price: " + price.itemData.H3ID);
+                    Mod.LogInfo("\tSetting price: "+price.itemData.tarkovID + ":" + price.itemData.H3ID);
                     Transform priceElement = Instantiate(buyPricePrefab, buyPricesContent).transform;
                     priceElement.gameObject.SetActive(true);
                     PriceItemView currentPriceView = priceElement.GetComponentInChildren<PriceItemView>();
@@ -1874,7 +1874,7 @@ namespace EFM
                     }
 
                     int count = 0;
-                    tradeVolume.inventory.TryGetValue(price.itemData.H3ID, out count);
+                    tradeVolume.inventory.TryGetValue(price.itemData.tarkovID, out count);
                     currentPriceView.amount.text = Mathf.Min(price.count, count).ToString() + "/" + price.count.ToString();
 
                     if (count >= price.count)
@@ -1889,13 +1889,13 @@ namespace EFM
                         canDeal = false;
                     }
 
-                    if(buyItemPriceViewsByH3ID.TryGetValue(price.itemData.H3ID, out List<PriceItemView> itemViews))
+                    if(buyItemPriceViewsByID.TryGetValue(price.itemData.tarkovID, out List<PriceItemView> itemViews))
                     {
                         itemViews.Add(currentPriceView);
                     }
                     else
                     {
-                        buyItemPriceViewsByH3ID.Add(price.itemData.H3ID, new List<PriceItemView> { currentPriceView });
+                        buyItemPriceViewsByID.Add(price.itemData.tarkovID, new List<PriceItemView> { currentPriceView });
                     }
                 }
 
@@ -2384,7 +2384,7 @@ namespace EFM
                 {
                     inventoryItemsToUse = tradeVolume.inventoryItems;
                 }
-                if (inventoryItemsToUse.TryGetValue(itemData.H3ID, out List<MeatovItem> items))
+                if (inventoryItemsToUse.TryGetValue(itemData.tarkovID, out List<MeatovItem> items))
                 {
                     int lowestStack = -1;
                     for (int i = 0; i < items.Count; ++i)
@@ -2398,7 +2398,7 @@ namespace EFM
                 }
                 if(item == null)
                 {
-                    Mod.LogError("DEV: Market RemoveItemFromTrade did not find suitable FIR item for " + itemData.H3ID + " with " + amountToRemove + " amount left to remove");
+                    Mod.LogError("DEV: Market RemoveItemFromTrade did not find suitable FIR item for "+itemData.tarkovID + ":" + itemData.H3ID + " with " + amountToRemove + " amount left to remove");
                     break;
                 }
 

@@ -384,12 +384,12 @@ namespace EFM
 
         public void InitCheckmarkData()
         {
-            if(H3ID == null)
+            if(tarkovID == null)
             {
                 return;
             }
 
-            Mod.LogInfo("InitCheckmarkData for "+H3ID);
+            Mod.LogInfo("InitCheckmarkData for "+ tarkovID+":"+H3ID);
             if (HideoutController.instance == null)
             {
                 Mod.LogError("MeatovItemData.UpdateCheckmarkData called but missing hideout instance!");
@@ -883,7 +883,7 @@ namespace EFM
                                 {
                                     for (int k = 0; k < condition.counters[j].equipmentWhitelists.Count; ++k)
                                     {
-                                        if (condition.counters[j].equipmentWhitelists[k].Contains(H3ID))
+                                        if (condition.counters[j].equipmentWhitelists[k].Contains(tarkovID))
                                         {
                                             KeyValuePair<int, bool> currentCount;
                                             if (neededForTasks.TryGetValue(taskEntry.Value, out currentCount))
@@ -1033,7 +1033,7 @@ namespace EFM
 
         public void OnAreaLevelChanged(Area area)
         {
-            Mod.LogInfo("OnAreaLevelChanged on item " + H3ID);
+            Mod.LogInfo("OnAreaLevelChanged on item "+ tarkovID + ":" + H3ID);
             bool preNeededForArea = neededFor[1];
             bool preNeededForProduction = neededFor[4];
 
@@ -1092,7 +1092,7 @@ namespace EFM
                         {
                             if(neededForProductionByLevelByAreaCurrent.TryGetValue(area.index, out Dictionary<int, Dictionary<Production, int>> neededForLevelsCurrent))
                             {
-                                Mod.LogInfo("Adding " + area.index + " production to currently needed for level " + area.currentLevel + " on item " + H3ID);
+                                Mod.LogInfo("Adding " + area.index + " production to currently needed for level " + area.currentLevel + " on item "+ tarkovID + ":" + H3ID);
                                 neededForLevelsCurrent.Add(area.currentLevel, neededForProductions);
                                 Mod.LogInfo("0");
                             }
@@ -1195,7 +1195,7 @@ namespace EFM
                     }
                     else // This should never happen, if not in neededForBarterByLevelByTrader, it should never be in current
                     {
-                        Mod.LogError("Item "+H3ID+ " in neededForBarterByLevelByTraderCurrent not in neededForBarterByLevelByTrader, for trader "+ trader.index);
+                        Mod.LogError("Item "+ tarkovID + ":"+H3ID+ " in neededForBarterByLevelByTraderCurrent not in neededForBarterByLevelByTrader, for trader "+ trader.index);
                         neededForBarterByLevelByTraderCurrent.Remove(trader.index);
                         trader.OnTraderLevelChanged -= OnTraderLevelChanged;
                     }
@@ -1252,7 +1252,7 @@ namespace EFM
                 // Handle special case of areas
                 if (currentNeeded == 1)
                 {
-                    long itemCount = Mod.GetItemCountInInventories(H3ID);
+                    long itemCount = Mod.GetItemCountInInventories(tarkovID);
                     if (Mod.checkmarkAreaFulfillledMinimum)
                     {
                         if (itemCount >= minimumUpgradeAmount)

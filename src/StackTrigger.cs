@@ -25,7 +25,7 @@ namespace EFM
                 MeatovItem otherItemWrapper = otherStackTrigger.stackableWrapper;
 
                 // Make sure the items have same ID
-                if (stackableWrapper.H3ID == otherItemWrapper.H3ID)
+                if (stackableWrapper.tarkovID == otherItemWrapper.tarkovID)
                 {
                     // Check that both are held
                     if (stackableWrapper.physObj.m_hand != null && otherItemWrapper.physObj.m_hand != null)

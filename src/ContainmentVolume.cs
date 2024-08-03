@@ -53,10 +53,9 @@ namespace EFM
             staticVolume.SetActive(true);
             activeVolume.SetActive(false);
 
-            bool fits = Mod.IDDescribedInList(item.H3ID, item.parents, whitelist, blacklist) && (!hasMaxVolume || item.volumes[item.mode] <= (maxVolume - volume));
+            bool fits = Mod.IDDescribedInList(item.tarkovID, item.parents, whitelist, blacklist) && (!hasMaxVolume || item.volumes[item.mode] <= (maxVolume - volume));
             if (fits)
             {
-                TODO: // Consider only toggling cols if we are not a container's, it could be realistic to not disable them in a backpack and forcing players to manage position of the items
                 item.physObj.SetAllCollidersToLayer(false, "NoCol");
                 item.physObj.StoreAndDestroyRigidbody();
                 item.physObj.SetParentage(itemRoot.transform);
@@ -73,40 +72,40 @@ namespace EFM
                 volume += item.volumes[item.mode];
 
                 int count = 0;
-                if(inventory.TryGetValue(item.H3ID, out count))
+                if(inventory.TryGetValue(item.tarkovID, out count))
                 {
-                    inventory[item.H3ID] = count + item.stack;
+                    inventory[item.tarkovID] = count + item.stack;
                 }
                 else
                 {
-                    inventory.Add(item.H3ID, item.stack);
+                    inventory.Add(item.tarkovID, item.stack);
                 }
-                if(inventoryItems.TryGetValue(item.H3ID, out List<MeatovItem> items))
+                if(inventoryItems.TryGetValue(item.tarkovID, out List<MeatovItem> items))
                 {
                     items.Add(item);
                 }
                 else
                 {
-                    inventoryItems.Add(item.H3ID, new List<MeatovItem>() { item });
+                    inventoryItems.Add(item.tarkovID, new List<MeatovItem>() { item });
                 }
 
                 if (item.foundInRaid)
                 {
-                    if (FIRInventory.TryGetValue(item.H3ID, out count))
+                    if (FIRInventory.TryGetValue(item.tarkovID, out count))
                     {
-                        FIRInventory[item.H3ID] = count + item.stack;
+                        FIRInventory[item.tarkovID] = count + item.stack;
                     }
                     else
                     {
-                        FIRInventory.Add(item.H3ID, item.stack);
+                        FIRInventory.Add(item.tarkovID, item.stack);
                     }
-                    if (FIRInventoryItems.TryGetValue(item.H3ID, out List<MeatovItem> FIRItems))
+                    if (FIRInventoryItems.TryGetValue(item.tarkovID, out List<MeatovItem> FIRItems))
                     {
                         FIRItems.Add(item);
                     }
                     else
                     {
-                        FIRInventoryItems.Add(item.H3ID, new List<MeatovItem>() { item });
+                        FIRInventoryItems.Add(item.tarkovID, new List<MeatovItem>() { item });
                     }
                 }
 
@@ -119,28 +118,28 @@ namespace EFM
 
         public void RemoveItem(MeatovItem item)
         {
-            if (inventoryItems.TryGetValue(item.H3ID, out List<MeatovItem> items) && items.Remove(item))
+            if (inventoryItems.TryGetValue(item.tarkovID, out List<MeatovItem> items) && items.Remove(item))
             {
                 if(inventoryItems.Count == 0)
                 {
-                    inventoryItems.Remove(item.H3ID);
+                    inventoryItems.Remove(item.tarkovID);
                 }
-                inventory[item.H3ID] -= item.stack;
-                if(inventory[item.H3ID] <= 0)
+                inventory[item.tarkovID] -= item.stack;
+                if(inventory[item.tarkovID] <= 0)
                 {
-                    inventory.Remove(item.H3ID);
+                    inventory.Remove(item.tarkovID);
                 }
 
-                if (item.foundInRaid && FIRInventoryItems.TryGetValue(item.H3ID, out List<MeatovItem> FIRItems) && FIRItems.Remove(item))
+                if (item.foundInRaid && FIRInventoryItems.TryGetValue(item.tarkovID, out List<MeatovItem> FIRItems) && FIRItems.Remove(item))
                 {
                     if (FIRInventoryItems.Count == 0)
                     {
-                        FIRInventoryItems.Remove(item.H3ID);
+                        FIRInventoryItems.Remove(item.tarkovID);
                     }
-                    FIRInventory[item.H3ID] -= item.stack;
-                    if (FIRInventory[item.H3ID] <= 0)
+                    FIRInventory[item.tarkovID] -= item.stack;
+                    if (FIRInventory[item.tarkovID] <= 0)
                     {
-                        FIRInventory.Remove(item.H3ID);
+                        FIRInventory.Remove(item.tarkovID);
                     }
                 }
 
@@ -155,13 +154,13 @@ namespace EFM
 
         public void AdjustStack(MeatovItem item, int difference)
         {
-            if(inventoryItems.TryGetValue(item.H3ID, out List<MeatovItem> items) && items.Contains(item))
+            if(inventoryItems.TryGetValue(item.tarkovID, out List<MeatovItem> items) && items.Contains(item))
             {
-                inventory[item.H3ID] += difference;
+                inventory[item.tarkovID] += difference;
 
-                if(item.foundInRaid && FIRInventoryItems.TryGetValue(item.H3ID, out List<MeatovItem> FIRItems) && FIRItems.Contains(item))
+                if(item.foundInRaid && FIRInventoryItems.TryGetValue(item.tarkovID, out List<MeatovItem> FIRItems) && FIRItems.Contains(item))
                 {
-                    FIRInventory[item.H3ID] += difference;
+                    FIRInventory[item.tarkovID] += difference;
                 }
 
                 OnItemStackChangedInvoke(item, difference);
@@ -173,37 +172,37 @@ namespace EFM
             if (item.foundInRaid)
             {
                 int count = 0;
-                if (FIRInventory.TryGetValue(item.H3ID, out count))
+                if (FIRInventory.TryGetValue(item.tarkovID, out count))
                 {
-                    FIRInventory[item.H3ID] = count + item.stack;
+                    FIRInventory[item.tarkovID] = count + item.stack;
                 }
                 else
                 {
-                    FIRInventory.Add(item.H3ID, item.stack);
+                    FIRInventory.Add(item.tarkovID, item.stack);
                 }
-                if (FIRInventoryItems.TryGetValue(item.H3ID, out List<MeatovItem> FIRItems))
+                if (FIRInventoryItems.TryGetValue(item.tarkovID, out List<MeatovItem> FIRItems))
                 {
                     FIRItems.Add(item);
                 }
                 else
                 {
-                    FIRInventoryItems.Add(item.H3ID, new List<MeatovItem>() { item });
+                    FIRInventoryItems.Add(item.tarkovID, new List<MeatovItem>() { item });
                 }
             }
         }
 
         public void RemoveItemFIR(MeatovItem item)
         {
-            if (item.foundInRaid && FIRInventoryItems.TryGetValue(item.H3ID, out List<MeatovItem> FIRItems) && FIRItems.Remove(item))
+            if (item.foundInRaid && FIRInventoryItems.TryGetValue(item.tarkovID, out List<MeatovItem> FIRItems) && FIRItems.Remove(item))
             {
                 if (FIRInventoryItems.Count == 0)
                 {
-                    FIRInventoryItems.Remove(item.H3ID);
+                    FIRInventoryItems.Remove(item.tarkovID);
                 }
-                FIRInventory[item.H3ID] -= item.stack;
-                if (FIRInventory[item.H3ID] <= 0)
+                FIRInventory[item.tarkovID] -= item.stack;
+                if (FIRInventory[item.tarkovID] <= 0)
                 {
-                    FIRInventory.Remove(item.H3ID);
+                    FIRInventory.Remove(item.tarkovID);
                 }
             }
         }
@@ -267,7 +266,7 @@ namespace EFM
             GameObject itemPrefab = IM.OD[itemData.H3ID].GetGameObject();
             if (itemPrefab == null)
             {
-                Mod.LogError("Failed to get vanilla prefab for " + itemData.H3ID + " to spawn in containment volume "+name);
+                Mod.LogError("Failed to get vanilla prefab for "+itemData.tarkovID+":" + itemData.H3ID + " to spawn in containment volume "+name);
                 yield break;
             }
             FVRPhysicalObject physObj = itemPrefab.GetComponent<FVRPhysicalObject>();
@@ -350,7 +349,7 @@ namespace EFM
 
         public bool Offer(MeatovItem item)
         {
-            bool fits = Mod.IDDescribedInList(item.H3ID, item.parents, whitelist, blacklist) && (!hasMaxVolume || item.volumes[item.mode] <= (maxVolume - volume));
+            bool fits = Mod.IDDescribedInList(item.tarkovID, item.parents, whitelist, blacklist) && (!hasMaxVolume || item.volumes[item.mode] <= (maxVolume - volume));
             Mod.LogInfo("\t\tItem " + item.itemName + " offered to volume " + name+", fits: "+ fits);
             staticVolume.SetActive(!fits);
             activeVolume.SetActive(fits);

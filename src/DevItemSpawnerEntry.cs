@@ -28,7 +28,7 @@ namespace EFM
                 }
                 else
                 {
-                    Mod.LogError("DEV: Could not get prefab for " + item.H3ID + " : " + item.name);
+                    Mod.LogError("DEV: Could not get prefab for "+item.tarkovID + ":" + item.H3ID + " : " + item.name);
                 }
             }
 

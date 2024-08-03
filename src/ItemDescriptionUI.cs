@@ -231,7 +231,7 @@ namespace EFM
 
         public void UpdateSummaryTotalNeeded()
         {
-            summaryNeededText.text = Mod.GetItemCountInInventories(descriptionPack.itemData.H3ID).ToString() + "/" + descriptionPack.itemData.GetCurrentNeededForTotal();
+            summaryNeededText.text = Mod.GetItemCountInInventories(descriptionPack.itemData.tarkovID).ToString() + "/" + descriptionPack.itemData.GetCurrentNeededForTotal();
         }
 
         public void OnToggleAreasClicked()
@@ -816,8 +816,8 @@ namespace EFM
             {
                 neededForQuests.SetActive(true);
                 int total = 0;
-                long currentCount = Mod.GetItemCountInInventories(descriptionPack.itemData.H3ID);
-                long currentFIRCount = Mod.GetFIRItemCountInInventories(descriptionPack.itemData.H3ID);
+                long currentCount = Mod.GetItemCountInInventories(descriptionPack.itemData.tarkovID);
+                long currentFIRCount = Mod.GetFIRItemCountInInventories(descriptionPack.itemData.tarkovID);
                 foreach (KeyValuePair<Task, KeyValuePair<int, bool>> entry in descriptionPack.itemData.neededForTasksCurrent) 
                 {
                     GameObject newEntry = Instantiate(neededForQuestsEntryPrefab, neededForQuestsParent.transform);
@@ -851,7 +851,7 @@ namespace EFM
             {
                 neededForAreas.SetActive(true);
                 int total = 0;
-                long currentCount = Mod.GetItemCountInInventories(descriptionPack.itemData.H3ID);
+                long currentCount = Mod.GetItemCountInInventories(descriptionPack.itemData.tarkovID);
                 foreach (KeyValuePair<int, Dictionary<int,int>> areaEntry in descriptionPack.itemData.neededForLevelByAreaCurrent)
                 {
                     foreach(KeyValuePair<int, int> entry in areaEntry.Value)
@@ -867,11 +867,11 @@ namespace EFM
                 Color areasColor = Color.red;
                 if (Mod.checkmarkAreaFulfillledMinimum)
                 {
-                    areasColor = Mod.GetItemCountInInventories(descriptionPack.itemData.H3ID) >= descriptionPack.itemData.minimumUpgradeAmount ? Mod.neededForAreaFulfilledColor : Mod.neededForColors[1];
+                    areasColor = Mod.GetItemCountInInventories(descriptionPack.itemData.tarkovID) >= descriptionPack.itemData.minimumUpgradeAmount ? Mod.neededForAreaFulfilledColor : Mod.neededForColors[1];
                 }
                 else
                 {
-                    areasColor = Mod.GetItemCountInInventories(descriptionPack.itemData.H3ID) >= descriptionPack.itemData.neededForAreaTotal ? Mod.neededForAreaFulfilledColor : Mod.neededForColors[1];
+                    areasColor = Mod.GetItemCountInInventories(descriptionPack.itemData.tarkovID) >= descriptionPack.itemData.neededForAreaTotal ? Mod.neededForAreaFulfilledColor : Mod.neededForColors[1];
                 }
                 neededForAreasTitle.color = areasColor;
                 neededForAreasTotal.color = areasColor;
@@ -917,7 +917,7 @@ namespace EFM
             {
                 neededForBarters.SetActive(true);
                 int total = 0;
-                long currentCount = Mod.GetItemCountInInventories(descriptionPack.itemData.H3ID);
+                long currentCount = Mod.GetItemCountInInventories(descriptionPack.itemData.tarkovID);
                 foreach (KeyValuePair<int, Dictionary<int, Dictionary<Barter, int>>> traderEntry in descriptionPack.itemData.neededForBarterByLevelByTraderCurrent)
                 {
                     foreach (KeyValuePair<int, Dictionary<Barter, int>> traderLevelEntry in traderEntry.Value)
@@ -957,7 +957,7 @@ namespace EFM
             {
                 neededForProductions.SetActive(true);
                 int total = 0;
-                long currentCount = Mod.GetItemCountInInventories(descriptionPack.itemData.H3ID);
+                long currentCount = Mod.GetItemCountInInventories(descriptionPack.itemData.tarkovID);
                 foreach (KeyValuePair<int, Dictionary<int, Dictionary<Production, int>>> areaEntry in descriptionPack.itemData.neededForProductionByLevelByAreaCurrent)
                 {
                     foreach (KeyValuePair<int, Dictionary<Production, int>> areaLevelEntry in areaEntry.Value)

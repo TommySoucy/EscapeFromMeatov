@@ -3171,16 +3171,16 @@ namespace EFM
 
             if (stackOnly)
             {
-                if (playerInventory.ContainsKey(item.H3ID))
+                if (playerInventory.ContainsKey(item.tarkovID))
                 {
-                    playerInventory[item.H3ID] += stackDifference;
+                    playerInventory[item.tarkovID] += stackDifference;
                     // Note that we don't update player weight here, it will instead be updated on item's OnCurrentWeightChanged event when its stack changes
 
-                    if(playerInventory[item.H3ID] <= 0)
+                    if(playerInventory[item.tarkovID] <= 0)
                     {
                         Mod.LogError("DEV: AddToPlayerInventory stackonly with difference " + stackDifference + " for " + item.name + " reached 0 count:\n" + Environment.StackTrace);
-                        playerInventory.Remove(item.H3ID);
-                        playerInventoryItems.Remove(item.H3ID);
+                        playerInventory.Remove(item.tarkovID);
+                        playerInventoryItems.Remove(item.tarkovID);
                     }
                 }
                 else
@@ -3190,15 +3190,15 @@ namespace EFM
 
                 if (item.foundInRaid)
                 {
-                    if (playerFIRInventory.ContainsKey(item.H3ID))
+                    if (playerFIRInventory.ContainsKey(item.tarkovID))
                     {
-                        playerFIRInventory[item.H3ID] += stackDifference;
+                        playerFIRInventory[item.tarkovID] += stackDifference;
 
-                        if (playerFIRInventory[item.H3ID] <= 0)
+                        if (playerFIRInventory[item.tarkovID] <= 0)
                         {
                             Mod.LogError("DEV: AddToPlayerInventory stackonly with difference " + stackDifference + " for " + item.name + " reached 0 count:\n" + Environment.StackTrace);
-                            playerFIRInventory.Remove(item.H3ID);
-                            playerFIRInventoryItems.Remove(item.H3ID);
+                            playerFIRInventory.Remove(item.tarkovID);
+                            playerFIRInventoryItems.Remove(item.tarkovID);
                         }
                     }
                     else
@@ -3210,30 +3210,30 @@ namespace EFM
             else
             {
                 difference = item.stack;
-                if (playerInventory.ContainsKey(item.H3ID))
+                if (playerInventory.ContainsKey(item.tarkovID))
                 {
-                    playerInventory[item.H3ID] += item.stack;
-                    playerInventoryItems[item.H3ID].Add(item);
+                    playerInventory[item.tarkovID] += item.stack;
+                    playerInventoryItems[item.tarkovID].Add(item);
                 }
                 else
                 {
-                    playerInventory.Add(item.H3ID, item.stack);
-                    playerInventoryItems.Add(item.H3ID, new List<MeatovItem> { item });
+                    playerInventory.Add(item.tarkovID, item.stack);
+                    playerInventoryItems.Add(item.tarkovID, new List<MeatovItem> { item });
                 }
                 weight += item.currentWeight;
                 item.OnCurrentWeightChanged += OnItemCurrentWeightChanged;
 
                 if (item.foundInRaid)
                 {
-                    if (playerFIRInventory.ContainsKey(item.H3ID))
+                    if (playerFIRInventory.ContainsKey(item.tarkovID))
                     {
-                        playerFIRInventory[item.H3ID] += item.stack;
-                        playerFIRInventoryItems[item.H3ID].Add(item);
+                        playerFIRInventory[item.tarkovID] += item.stack;
+                        playerFIRInventoryItems[item.tarkovID].Add(item);
                     }
                     else
                     {
-                        playerFIRInventory.Add(item.H3ID, item.stack);
-                        playerFIRInventoryItems.Add(item.H3ID, new List<MeatovItem> { item });
+                        playerFIRInventory.Add(item.tarkovID, item.stack);
+                        playerFIRInventoryItems.Add(item.tarkovID, new List<MeatovItem> { item });
                     }
                 }
 
@@ -3290,57 +3290,57 @@ namespace EFM
                 return;
             }
 
-            if (playerFIRInventory.ContainsKey(item.H3ID))
+            if (playerFIRInventory.ContainsKey(item.tarkovID))
             {
-                playerFIRInventory[item.H3ID] += item.stack;
-                playerFIRInventoryItems[item.H3ID].Add(item);
+                playerFIRInventory[item.tarkovID] += item.stack;
+                playerFIRInventoryItems[item.tarkovID].Add(item);
             }
             else
             {
-                playerFIRInventory.Add(item.H3ID, item.stack);
-                playerFIRInventoryItems.Add(item.H3ID, new List<MeatovItem> { item });
+                playerFIRInventory.Add(item.tarkovID, item.stack);
+                playerFIRInventoryItems.Add(item.tarkovID, new List<MeatovItem> { item });
             }
         }
 
         public static void RemoveFromPlayerInventory(MeatovItem item)
         {
-            Mod.LogInfo("\tRemoving item " + item.H3ID + " with IID: " + item.GetInstanceID()+" from player inventory");
+            Mod.LogInfo("\tRemoving item " + item.tarkovID + " with IID: " + item.GetInstanceID()+" from player inventory");
             int difference = -item.stack;
 
-            if (playerInventory.ContainsKey(item.H3ID))
+            if (playerInventory.ContainsKey(item.tarkovID))
             {
-                playerInventory[item.H3ID] -= item.stack;
-                playerInventoryItems[item.H3ID].Remove(item);
+                playerInventory[item.tarkovID] -= item.stack;
+                playerInventoryItems[item.tarkovID].Remove(item);
             }
             else
             {
-                Mod.LogError("Attempting to remove " + item.H3ID + " from player inventory but key was not found in it:\n" + Environment.StackTrace);
+                Mod.LogError("Attempting to remove " + item.tarkovID + " from player inventory but key was not found in it:\n" + Environment.StackTrace);
                 return;
             }
-            if (playerInventory[item.H3ID] == 0)
+            if (playerInventory[item.tarkovID] == 0)
             {
-                playerInventory.Remove(item.H3ID);
-                playerInventoryItems.Remove(item.H3ID);
+                playerInventory.Remove(item.tarkovID);
+                playerInventoryItems.Remove(item.tarkovID);
             }
             weight -= item.currentWeight;
             item.OnCurrentWeightChanged -= OnItemCurrentWeightChanged;
 
             if (item.foundInRaid)
             {
-                if (playerFIRInventory.ContainsKey(item.H3ID))
+                if (playerFIRInventory.ContainsKey(item.tarkovID))
                 {
-                    playerFIRInventory[item.H3ID] -= item.stack;
-                    playerFIRInventoryItems[item.H3ID].Remove(item);
+                    playerFIRInventory[item.tarkovID] -= item.stack;
+                    playerFIRInventoryItems[item.tarkovID].Remove(item);
                 }
                 else
                 {
-                    Mod.LogError("Attempting to remove " + item.H3ID + " from player inventory but key was not found in it:\n" + Environment.StackTrace);
+                    Mod.LogError("Attempting to remove " + item.tarkovID + " from player inventory but key was not found in it:\n" + Environment.StackTrace);
                     return;
                 }
-                if (playerFIRInventory[item.H3ID] == 0)
+                if (playerFIRInventory[item.tarkovID] == 0)
                 {
-                    playerFIRInventory.Remove(item.H3ID);
-                    playerFIRInventoryItems.Remove(item.H3ID);
+                    playerFIRInventory.Remove(item.tarkovID);
+                    playerFIRInventoryItems.Remove(item.tarkovID);
                 }
             }
 
@@ -3380,20 +3380,20 @@ namespace EFM
                 return;
             }
 
-            if (playerFIRInventory.ContainsKey(item.H3ID))
+            if (playerFIRInventory.ContainsKey(item.tarkovID))
             {
-                playerFIRInventory[item.H3ID] -= item.stack;
-                playerFIRInventoryItems[item.H3ID].Remove(item);
+                playerFIRInventory[item.tarkovID] -= item.stack;
+                playerFIRInventoryItems[item.tarkovID].Remove(item);
             }
             else
             {
-                Mod.LogError("Attempting to remove " + item.H3ID + " from player inventory but key was not found in it:\n" + Environment.StackTrace);
+                Mod.LogError("Attempting to remove " + item.tarkovID + " from player inventory but key was not found in it:\n" + Environment.StackTrace);
                 return;
             }
-            if (playerFIRInventory[item.H3ID] == 0)
+            if (playerFIRInventory[item.tarkovID] == 0)
             {
-                playerFIRInventory.Remove(item.H3ID);
-                playerFIRInventoryItems.Remove(item.H3ID);
+                playerFIRInventory.Remove(item.tarkovID);
+                playerFIRInventoryItems.Remove(item.tarkovID);
             }
         }
 
@@ -4015,25 +4015,25 @@ namespace EFM
             return String.Format("{0:00}:{1:00}:{2:00}", hours, minutes, seconds);
         }
 
-        public static long GetItemCountInInventories(string H3ID)
+        public static long GetItemCountInInventories(string tarkovID)
         {
             long count = 0;
             int intCount = 0;
-            HideoutController.inventory.TryGetValue(H3ID, out intCount);
+            HideoutController.inventory.TryGetValue(tarkovID, out intCount);
             count += intCount;
-            playerInventory.TryGetValue(H3ID, out intCount);
+            playerInventory.TryGetValue(tarkovID, out intCount);
             count += intCount;
 
             return count;
         }
 
-        public static long GetFIRItemCountInInventories(string H3ID)
+        public static long GetFIRItemCountInInventories(string tarkovID)
         {
             long count = 0;
             int intCount = 0;
-            HideoutController.FIRInventory.TryGetValue(H3ID, out intCount);
+            HideoutController.FIRInventory.TryGetValue(tarkovID, out intCount);
             count += intCount;
-            playerFIRInventory.TryGetValue(H3ID, out intCount);
+            playerFIRInventory.TryGetValue(tarkovID, out intCount);
             count += intCount;
 
             return count;

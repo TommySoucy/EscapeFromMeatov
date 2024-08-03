@@ -449,7 +449,7 @@ namespace EFM
 
                                     itemRequirement.itemView.SetItemData(currentProduction.requirements[k].item);
 
-                                    long itemInventoryCount = Mod.GetItemCountInInventories(currentProduction.requirements[k].item.H3ID);
+                                    long itemInventoryCount = Mod.GetItemCountInInventories(currentProduction.requirements[k].item.tarkovID);
                                     itemRequirement.amount.text = Extensions.Min(itemInventoryCount, currentProduction.requirements[k].itemCount).ToString() + "/" + currentProduction.requirements[k].itemCount;
                                     itemRequirement.fulfilledIcon.SetActive(currentProduction.requirements[k].fulfilled);
                                     itemRequirement.unfulfilledIcon.SetActive(!currentProduction.requirements[k].fulfilled);
@@ -541,7 +541,7 @@ namespace EFM
                                     }
                                     itemRequirement.amount.text = itemCount.ToString()+"\n(INSTALLED)";
 
-                                    long itemInventoryCount = Mod.GetItemCountInInventories(currentProduction.requirements[0].item.H3ID);
+                                    long itemInventoryCount = Mod.GetItemCountInInventories(currentProduction.requirements[0].item.tarkovID);
                                     itemRequirementStash.amount.text = itemInventoryCount.ToString()+"\n(INVENTORY)";
 
                                     itemRequirement.gameObject.SetActive(true);
@@ -602,7 +602,7 @@ namespace EFM
 
                                         itemRequirement.itemView.SetItemData(currentProduction.requirements[k].item, hasToolOveride: true, isToolOverride: currentProduction.requirements[k].requirementType == Requirement.RequirementType.Tool);
 
-                                        long itemInventoryCount = Mod.GetItemCountInInventories(currentProduction.requirements[k].item.H3ID);
+                                        long itemInventoryCount = Mod.GetItemCountInInventories(currentProduction.requirements[k].item.tarkovID);
                                         itemRequirement.amount.text = Extensions.Min(itemInventoryCount, currentProduction.requirements[k].itemCount).ToString() + "/" + currentProduction.requirements[k].itemCount;
                                         itemRequirement.fulfilledIcon.SetActive(currentProduction.requirements[k].fulfilled);
                                         itemRequirement.unfulfilledIcon.SetActive(!currentProduction.requirements[k].fulfilled);
@@ -1013,7 +1013,7 @@ namespace EFM
 
                         itemRequirement.itemView.SetItemData(itemRequirements[i].item, hasToolOveride: true, isToolOverride: itemRequirements[i].requirementType == Requirement.RequirementType.Tool);
 
-                        long itemInventoryCount = Mod.GetItemCountInInventories(itemRequirements[i].item.H3ID);
+                        long itemInventoryCount = Mod.GetItemCountInInventories(itemRequirements[i].item.tarkovID);
                         itemRequirement.amount.text = Extensions.Min(itemInventoryCount, itemRequirements[i].itemCount).ToString() + "/" + itemRequirements[i].itemCount;
                         itemRequirement.fulfilledIcon.SetActive(itemRequirements[i].fulfilled);
                         itemRequirement.unfulfilledIcon.SetActive(!itemRequirements[i].fulfilled);
@@ -1171,7 +1171,7 @@ namespace EFM
 
                         itemRequirement.itemView.SetItemData(itemRequirements[i].item, hasToolOveride: true, isToolOverride: itemRequirements[i].requirementType == Requirement.RequirementType.Tool);
 
-                        long itemInventoryCount = Mod.GetItemCountInInventories(itemRequirements[i].item.H3ID);
+                        long itemInventoryCount = Mod.GetItemCountInInventories(itemRequirements[i].item.tarkovID);
                         itemRequirement.amount.text = Extensions.Min(itemInventoryCount, itemRequirements[i].itemCount).ToString() + "/" + itemRequirements[i].itemCount;
                         itemRequirement.fulfilledIcon.SetActive(itemRequirements[i].fulfilled);
                         itemRequirement.unfulfilledIcon.SetActive(!itemRequirements[i].fulfilled);

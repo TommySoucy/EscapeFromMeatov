@@ -110,7 +110,7 @@ namespace EFM
             else
             {
                 button.gameObject.SetActive(true);
-                string containerID = containerData.H3ID;
+                string containerID = containerData.tarkovID;
                 bool mag = isMag;
                 button.onClick.AddListener(() => OnLoadAmmoContainerClicked(containerID, mag));
             }
@@ -196,7 +196,7 @@ namespace EFM
                 }
                 else // Not an item we can load ammo container in anyway
                 {
-                    Mod.LogError("Attempted to description ammo fill " + roundData.H3ID + " into " + owner.descriptionPack.item.name + " which is not magazine, clip, or speedloader");
+                    Mod.LogError("Attempted to description ammo fill "+roundData.tarkovID + ":" + roundData.H3ID + " into " + owner.descriptionPack.item.name + " which is not magazine, clip, or speedloader");
                     return;
                 }
             }
@@ -211,7 +211,7 @@ namespace EFM
             }
 
             // Loose rounds on player
-            if(Mod.playerInventoryItems.TryGetValue(roundData.H3ID, out List<MeatovItem> roundList))
+            if(Mod.playerInventoryItems.TryGetValue(roundData.tarkovID, out List<MeatovItem> roundList))
             {
                 if(typeIndex == 0)
                 {
@@ -271,7 +271,7 @@ namespace EFM
             }
 
             // Loose rounds in hideout
-            if(HideoutController.instance != null && HideoutController.instance.inventoryItems.TryGetValue(roundData.H3ID, out List<MeatovItem> hideoutRoundList))
+            if(HideoutController.instance != null && HideoutController.instance.inventoryItems.TryGetValue(roundData.tarkovID, out List<MeatovItem> hideoutRoundList))
             {
                 if(typeIndex == 0)
                 {

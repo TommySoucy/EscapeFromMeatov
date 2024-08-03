@@ -60,7 +60,7 @@ namespace EFM
             }
             else
             {
-                if (!Mod.ItemIDToCurrencyIndex(barter.prices[firstValidPrice].itemData.H3ID, out currencyToUse))
+                if (!Mod.ItemIDToCurrencyIndex(barter.prices[firstValidPrice].itemData.tarkovID, out currencyToUse))
                 {
                     currencyToUse = 3;
                 }

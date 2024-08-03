@@ -814,7 +814,7 @@ namespace EFM
                     int countLeft = itemRequirement.itemCount;
                     while (countLeft > 0)
                     {
-                        MeatovItem item = GetClosestItem(itemRequirement.item.H3ID);
+                        MeatovItem item = GetClosestItem(itemRequirement.item.tarkovID);
                         if (item.stack > countLeft)
                         {
                             item.stack -= countLeft;
@@ -838,7 +838,7 @@ namespace EFM
                     int countLeft = toolRequirement.itemCount;
                     while (countLeft > 0)
                     {
-                        MeatovItem item = GetClosestItem(toolRequirement.item.H3ID);
+                        MeatovItem item = GetClosestItem(toolRequirement.item.tarkovID);
                         if (item.stack > countLeft)
                         {
                             item.stack -= countLeft;
@@ -866,7 +866,7 @@ namespace EFM
                     int countLeft = resourceRequirement.resourceCount;
                     while (countLeft > 0)
                     {
-                        MeatovItem item = GetClosestItem(resourceRequirement.item.H3ID);
+                        MeatovItem item = GetClosestItem(resourceRequirement.item.tarkovID);
                         if (item.amount > countLeft)
                         {
                             item.amount -= countLeft;
@@ -884,9 +884,9 @@ namespace EFM
             }
         }
 
-        public MeatovItem GetClosestItem(string H3ID)
+        public MeatovItem GetClosestItem(string tarkovID)
         {
-            if(HideoutController.instance.inventoryItems.TryGetValue(H3ID, out List<MeatovItem> items))
+            if(HideoutController.instance.inventoryItems.TryGetValue(tarkovID, out List<MeatovItem> items))
             {
                 MeatovItem closest = null;
                 float closestDistance = float.MaxValue;
@@ -910,7 +910,7 @@ namespace EFM
 
                 return closest;
             }
-            else if (Mod.playerInventoryItems.TryGetValue(H3ID, out List<MeatovItem> playerItems))
+            else if (Mod.playerInventoryItems.TryGetValue(tarkovID, out List<MeatovItem> playerItems))
             {
                 MeatovItem closest = null;
                 float closestDistance = float.MaxValue;
@@ -1230,7 +1230,7 @@ namespace EFM
             switch (requirementType)
             {
                 case RequirementType.Item:
-                    long count = Mod.GetItemCountInInventories(item.H3ID);
+                    long count = Mod.GetItemCountInInventories(item.tarkovID);
                     fulfilled = count >= itemCount;
                     if (itemRequirementUI != null)
                     {
@@ -1248,7 +1248,7 @@ namespace EFM
                     }
                     break;
                 case RequirementType.Tool:
-                    long toolCount = Mod.GetItemCountInInventories(item.H3ID);
+                    long toolCount = Mod.GetItemCountInInventories(item.tarkovID);
                     fulfilled = toolCount >= 1;
                     if (itemRequirementUI != null)
                     {
@@ -1262,7 +1262,7 @@ namespace EFM
                     }
                     break;
                 case RequirementType.Resource:
-                    long totalAmount = Mod.GetItemCountInInventories(item.H3ID);
+                    long totalAmount = Mod.GetItemCountInInventories(item.tarkovID);
                     fulfilled = totalAmount >= resourceCount;
                     if (itemRequirementUI != null)
                     {
@@ -1822,7 +1822,7 @@ namespace EFM
             {
                 if(!Mod.defaultItemData.TryGetValue(data["endProduct"].ToString(), out endProduct))
                 {
-                    Mod.LogError("DEV: Production "+ID+" end product with ID "+ Mod.TarkovIDtoH3ID(data["endProduct"].ToString())+" is missing item data");
+                    Mod.LogError("DEV: Production "+ID+" end product with ID "+ data["endProduct"].ToString()+":" + Mod.TarkovIDtoH3ID(data["endProduct"].ToString())+" is missing item data");
                 }
                 needFuelForAllProductionTime = (bool)data["needFuelForAllProductionTime"];
                 continuous = (bool)data["continuous"];
@@ -1833,13 +1833,13 @@ namespace EFM
 
                 if(endProduct != null)
                 {
-                    if (area.productionsByProductID.TryGetValue(endProduct.H3ID, out List<Production> productionList))
+                    if (area.productionsByProductID.TryGetValue(endProduct.tarkovID, out List<Production> productionList))
                     {
                         productionList.Add(this);
                     }
                     else
                     {
-                        area.productionsByProductID.Add(endProduct.H3ID, new List<Production>() { this });
+                        area.productionsByProductID.Add(endProduct.tarkovID, new List<Production>() { this });
                     }
                 }
             }
@@ -2191,7 +2191,7 @@ namespace EFM
                     int countLeft = itemRequirement.resourceCount;
                     while (countLeft > 0)
                     {
-                        MeatovItem item = area.GetClosestItem(itemRequirement.item.H3ID);
+                        MeatovItem item = area.GetClosestItem(itemRequirement.item.tarkovID);
                         if (item.amount > countLeft)
                         {
                             item.amount -= countLeft;
@@ -2212,7 +2212,7 @@ namespace EFM
                     int countLeft = itemRequirement.itemCount;
                     while (countLeft > 0)
                     {
-                        MeatovItem item = area.GetClosestItem(itemRequirement.item.H3ID);
+                        MeatovItem item = area.GetClosestItem(itemRequirement.item.tarkovID);
                         if (item.stack > countLeft)
                         {
                             item.stack -= countLeft;

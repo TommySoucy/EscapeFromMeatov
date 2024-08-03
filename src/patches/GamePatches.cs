@@ -345,13 +345,13 @@ namespace EFM
             // ModularWeaponPartPatch
             MethodInfo modularWeaponPartEnableOriginal = typeof(ModularWeaponPart).GetMethod("EnablePart", BindingFlags.Public | BindingFlags.Instance);
             MethodInfo modularWeaponPartEnablePrefix = typeof(ModularWeaponPartPatch).GetMethod("EnablePrefix", BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo modularWeaponPartDisableOriginal = typeof(ModularWeaponPart).GetMethod("DisablePart", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo modularWeaponPartDisablePrefix = typeof(ModularWeaponPartPatch).GetMethod("DisablePrefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //MethodInfo modularWeaponPartDisableOriginal = typeof(ModularWeaponPart).GetMethod("DisablePart", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo modularWeaponPartDisablePrefix = typeof(ModularWeaponPartPatch).GetMethod("DisablePrefix", BindingFlags.NonPublic | BindingFlags.Static);
 
             PatchController.Verify(modularWeaponPartEnableOriginal, harmony, true);
-            PatchController.Verify(modularWeaponPartDisableOriginal, harmony, true);
+            //PatchController.Verify(modularWeaponPartDisableOriginal, harmony, true);
             harmony.Patch(modularWeaponPartEnableOriginal, new HarmonyMethod(modularWeaponPartEnablePrefix));
-            harmony.Patch(modularWeaponPartDisableOriginal, new HarmonyMethod(modularWeaponPartDisablePrefix));
+            //harmony.Patch(modularWeaponPartDisableOriginal, new HarmonyMethod(modularWeaponPartDisablePrefix));
 
             //// EntityCheckPatch
             //MethodInfo entityCheckPatchOriginal = typeof(AIManager).GetMethod("EntityCheck", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -1260,7 +1260,7 @@ namespace EFM
                         else if (fvrquickBeltSlot is AreaSlot)
                         {
                             AreaSlot asAreaSlot = fvrquickBeltSlot as AreaSlot;
-                            if(Mod.IDDescribedInList(item.H3ID, item.parents, asAreaSlot.filter, null))
+                            if(Mod.IDDescribedInList(item.tarkovID, item.parents, asAreaSlot.filter, null))
                             {
                                 __instance.CurrentHoveredQuickbeltSlot = fvrquickBeltSlot;
                             }
@@ -4235,6 +4235,8 @@ namespace EFM
     // Patches ModularWeaponPart
     class ModularWeaponPartPatch
     {
+        public static MeatovItem overrideItem;
+
         // To track activation to apply stats to weapon
         // Note that by now, we assume the part's attachment point's selectedPart and modularWeaponPartsAttachmentPoint.ModularPartPoint fields have been set
         static void EnablePrefix(ModularWeaponPart __instance)
@@ -4244,9 +4246,6 @@ namespace EFM
                 return;
             }
 
-            TODO: // This is way too complicated, having ModularWeaponPart just keep a ref to the point it is currently attached to would
-            //       let us skip having to find the point by iterating over all of them, fix it, make pull request
-
             // First find the first weapon meatov item in our hierarchy
             MeatovItem item = __instance.GetComponentInParent<MeatovItem>();
             while (item != null && item.itemType != ItemType.Weapon)
@@ -4255,33 +4254,75 @@ namespace EFM
             }
             if (item != null)
             {
-                // Get the modular weapon this part is attached to
-                IModularWeapon modularWeapon = __instance.GetComponentInParent<IModularWeapon>();
-                if (modularWeapon != null)
+                // EnablePrefix will be called on a modul part when the part is selected in workshop UI or when the weapon spawns
+                // If on weapon spawn, we don't have the specific data to give the part so jsut take the first one in its list
+                // If from workshop ui selection, we will have the data here as override, we can just set it directly
+                if(overrideItem == null)
                 {
-                    // Go through all of the attachment points to find which one this part is attached to
-                    foreach (KeyValuePair<string, ModularWeaponPartsAttachmentPoint> pointEntry in modularWeapon.AllAttachmentPoints)
+                    TODO: // This is way too complicated, having ModularWeaponPart just keep a ref to the point it is currently attached to would
+                    //       let us skip having to find the point by iterating over all of them, fix it, make pull request
+                    //       The problem is that the part doesn't store which group it is a part of 
+                    //       But we need this to get its data
+                    //       Our next best option is to find which point it is attached to, which stores that data
+
+                    // Get the modular weapon this part is attached to
+                    IModularWeapon modularWeapon = __instance.GetComponentInParent<IModularWeapon>();
+                    if (modularWeapon != null)
                     {
-                        // Find data for this part
-                        if (pointEntry.Value.ModularPartPoint == __instance.transform
-                            && Mod.modItemData.TryGetValue(pointEntry.Key, out Dictionary<string, MeatovItemData> groupDict)
-                            && groupDict.TryGetValue(pointEntry.Value.SelectedModularWeaponPart, out MeatovItemData partData))
+                        // Go through all of the attachment points to find which one this part is attached to
+                        foreach (KeyValuePair<string, ModularWeaponPartsAttachmentPoint> pointEntry in modularWeapon.AllAttachmentPoints)
                         {
-                            if (partData.recoilModifier != 0)
+                            // Find data for this part
+                            if (pointEntry.Value.ModularPartPoint == __instance.transform
+                                && Mod.modItemsByPartByGroup.TryGetValue(pointEntry.Key, out Dictionary<string, List<MeatovItemData>> groupDict)
+                                && groupDict.TryGetValue(pointEntry.Value.SelectedModularWeaponPart, out List<MeatovItemData> partList))
                             {
-                                item.currentRecoilHorizontal += (int)(item.baseRecoilHorizontal / 100.0f * partData.recoilModifier);
+                                // Here, we assume the first part in the list is the default a modul weapon would spawn with
+                                MeatovItemData partData = partList[0];
+                                MeatovItem partItem = __instance.gameObject.AddComponent<MeatovItem>();
+                                partItem.SetData(partData);
+                                // Since the item got instantiated directly on an already parented object, we want to make sure we set the meatov parenting properly
+                                partItem.OnTransformParentChanged();
+
+                                //if (partData.recoilModifier != 0)
+                                //{
+                                //    item.currentRecoilHorizontal += (int)(item.baseRecoilHorizontal / 100.0f * partData.recoilModifier);
+                                //}
+                                //if (partData.ergonomicsModifier != 0)
+                                //{
+                                //    item.ergonomics += partData.ergonomicsModifier;
+                                //}
+                                //if (partData.sightingRange > item.currentSightingRange)
+                                //{
+                                //    item.currentSightingRange = partData.sightingRange;
+                                //}
+                                break;
                             }
-                            if (partData.ergonomicsModifier != 0)
-                            {
-                                item.ergonomics += partData.ergonomicsModifier;
-                            }
-                            if (partData.sightingRange > item.currentSightingRange)
-                            {
-                                item.currentSightingRange = partData.sightingRange;
-                            }
-                            break;
                         }
                     }
+                }
+                else
+                {
+                    MeatovItem partItem = __instance.gameObject.AddComponent<MeatovItem>();
+                    partItem.SetData(overrideItem.itemData);
+
+                    MeatovItem.Copy(overrideItem, partItem);
+
+                    // Since the item got instantiated directly on an already parented object, we want to make sure we set the meatov parenting properly
+                    partItem.OnTransformParentChanged();
+
+                    //if (overrideItem.itemData.recoilModifier != 0)
+                    //{
+                    //    item.currentRecoilHorizontal += (int)(item.baseRecoilHorizontal / 100.0f * overrideItem.itemData.recoilModifier);
+                    //}
+                    //if (overrideItem.itemData.ergonomicsModifier != 0)
+                    //{
+                    //    item.ergonomics += overrideItem.itemData.ergonomicsModifier;
+                    //}
+                    //if (overrideItem.itemData.sightingRange > item.currentSightingRange)
+                    //{
+                    //    item.currentSightingRange = overrideItem.itemData.sightingRange;
+                    //}
                 }
             }
         }
@@ -4294,41 +4335,26 @@ namespace EFM
                 return;
             }
 
-            // First find the first weapon meatov item in our hierarchy
-            MeatovItem item = __instance.GetComponentInParent<MeatovItem>();
-            while (item != null && item.itemType != ItemType.Weapon)
+            MeatovItem parentWeaponItem = __instance.GetComponentInParents<MeatovItem>(false);
+            while (parentWeaponItem != null && parentWeaponItem.itemType != ItemType.Weapon)
             {
-                item = item.parent;
+                parentWeaponItem = parentWeaponItem.parent;
             }
-            if (item != null)
+            MeatovItem partItem = __instance.GetComponent<MeatovItem>();
+            if (parentWeaponItem != null && partItem != null)
             {
-                // Get the modular weapon this part is attached to
-                IModularWeapon modularWeapon = __instance.GetComponentInParent<IModularWeapon>();
-                if (modularWeapon != null)
+                MeatovItemData partData = partItem.itemData;
+                if (partData.recoilModifier != 0)
                 {
-                    // Go through all of the attachment points to find which one this part is attached to
-                    foreach (KeyValuePair<string, ModularWeaponPartsAttachmentPoint> pointEntry in modularWeapon.AllAttachmentPoints)
-                    {
-                        // Find data for this part
-                        if (pointEntry.Value.ModularPartPoint == __instance.transform
-                            && Mod.modItemData.TryGetValue(pointEntry.Key, out Dictionary<string, MeatovItemData> groupDict)
-                            && groupDict.TryGetValue(pointEntry.Value.SelectedModularWeaponPart, out MeatovItemData partData))
-                        {
-                            if (partData.recoilModifier != 0)
-                            {
-                                item.currentRecoilHorizontal -= (int)(item.baseRecoilHorizontal / 100.0f * partData.recoilModifier);
-                            }
-                            if (partData.ergonomicsModifier != 0)
-                            {
-                                item.ergonomics -= partData.ergonomicsModifier;
-                            }
-                            if (partData.sightingRange == item.currentSightingRange)
-                            {
-                                item.UpdateSightingRange(partData);
-                            }
-                            break;
-                        }
-                    }
+                    parentWeaponItem.currentRecoilHorizontal -= (int)(parentWeaponItem.baseRecoilHorizontal / 100.0f * partData.recoilModifier);
+                }
+                if (partData.ergonomicsModifier != 0)
+                {
+                    parentWeaponItem.ergonomics -= partData.ergonomicsModifier;
+                }
+                if (partData.sightingRange == parentWeaponItem.currentSightingRange)
+                {
+                    parentWeaponItem.UpdateSightingRange(partData);
                 }
             }
         }

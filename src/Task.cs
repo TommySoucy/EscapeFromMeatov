@@ -514,11 +514,10 @@ namespace EFM
                     targetItemIDs = new List<string>();
                     for (int i = 0; i < handoverItemTargetItemIDs.Count; ++i)
                     {
-                        string itemID = Mod.TarkovIDtoH3ID(handoverItemTargetItemIDs[i]);
-                        if (Mod.GetItemData(itemID, out MeatovItemData handoverTargetItem))
+                        if (Mod.defaultItemData.TryGetValue(handoverItemTargetItemIDs[i], out MeatovItemData handoverTargetItem))
                         {
                             targetItems.Add(handoverTargetItem);
-                            targetItemIDs.Add(itemID);
+                            targetItemIDs.Add(handoverItemTargetItemIDs[i]);
                         }
                         else
                         {
@@ -542,8 +541,8 @@ namespace EFM
                     targetItemIDs = new List<string>();
                     for (int i = 0; i < findItemTargetItemIDs.Count; ++i)
                     {
-                        string itemID = Mod.TarkovIDtoH3ID(findItemTargetItemIDs[i]);
-                        if (Mod.GetItemData(itemID, out MeatovItemData findTargetItem))
+                        string itemID = findItemTargetItemIDs[i];
+                        if (Mod.defaultItemData.TryGetValue(itemID, out MeatovItemData findTargetItem))
                         {
                             targetItems.Add(findTargetItem);
                             targetItemIDs.Add(itemID);
@@ -595,8 +594,8 @@ namespace EFM
                     targetItemIDs = new List<string>();
                     for (int i = 0; i < leaveItemTargetItemIDs.Count; ++i)
                     {
-                        string itemID = Mod.TarkovIDtoH3ID(leaveItemTargetItemIDs[i]);
-                        if (Mod.GetItemData(itemID, out MeatovItemData leaveTargetItem))
+                        string itemID = leaveItemTargetItemIDs[i];
+                        if (Mod.defaultItemData.TryGetValue(itemID, out MeatovItemData leaveTargetItem))
                         {
                             targetItems.Add(leaveTargetItem);
                             targetItemIDs.Add(itemID);
@@ -616,8 +615,8 @@ namespace EFM
                     targetItemIDs = new List<string>();
                     for (int i = 0; i < leaveBeaconTargetItemIDs.Count; ++i)
                     {
-                        string itemID = Mod.TarkovIDtoH3ID(leaveBeaconTargetItemIDs[i]);
-                        if (Mod.GetItemData(itemID, out MeatovItemData beaconItem))
+                        string itemID = leaveBeaconTargetItemIDs[i];
+                        if (Mod.defaultItemData.TryGetValue(itemID, out MeatovItemData beaconItem))
                         {
                             targetItems.Add(beaconItem);
                             targetItemIDs.Add(itemID);
@@ -670,8 +669,8 @@ namespace EFM
                     targetItemIDs = new List<string>();
                     for (int i = 0; i < weaponAssemblyTargetItemIDs.Count; ++i)
                     {
-                        string itemID = Mod.TarkovIDtoH3ID(weaponAssemblyTargetItemIDs[i]);
-                        if (Mod.GetItemData(itemID, out MeatovItemData assemblyItem))
+                        string itemID = weaponAssemblyTargetItemIDs[i];
+                        if (Mod.defaultItemData.TryGetValue(itemID, out MeatovItemData assemblyItem))
                         {
                             targetItems.Add(assemblyItem);
                             targetItemIDs.Add(itemID);
@@ -685,8 +684,8 @@ namespace EFM
                     containsItems = new List<MeatovItemData>();
                     for (int i = 0; i < weaponAssemblyContainsTargetItemIDs.Count; ++i)
                     {
-                        string itemID = Mod.TarkovIDtoH3ID(weaponAssemblyContainsTargetItemIDs[i]);
-                        if (Mod.GetItemData(itemID, out MeatovItemData assemblyItem))
+                        string itemID = weaponAssemblyContainsTargetItemIDs[i];
+                        if (Mod.defaultItemData.TryGetValue(itemID, out MeatovItemData assemblyItem))
                         {
                             containsItems.Add(assemblyItem);
                         }
@@ -696,10 +695,6 @@ namespace EFM
                         }
                     }
                     hasItemFromCategories = properties["hasItemFromCategory"].ToObject<List<string>>();
-                    for (int i = 0; i < hasItemFromCategories.Count; ++i)
-                    {
-                        hasItemFromCategories[i] = Mod.TarkovIDtoH3ID(hasItemFromCategories[i]);
-                    }
                     weaponAccuracy = (float)properties["baseAccuracy"]["value"];
                     weaponAccuracyCompareMethod = CompareMethodFromString(properties["baseAccuracy"]["compareMethod"].ToString());
                     weaponDurability = (float)properties["durability"]["value"];
@@ -1339,10 +1334,6 @@ namespace EFM
                     if(weaponArray != null)
                     {
                         killWeaponWhitelist = weaponArray.ToObject<List<string>>();
-                        for(int i=0; i < killWeaponWhitelist.Count; ++i)
-                        {
-                            killWeaponWhitelist[i] = Mod.TarkovIDtoH3ID(killWeaponWhitelist[i]);
-                        }
                     }
                     JArray weaponModArray = properties["weaponModsInclusive"] as JArray;
                     if(weaponModArray != null)
@@ -1351,10 +1342,6 @@ namespace EFM
                         for(int i=0; i < weaponModArray.Count; ++i)
                         {
                             List<string> newSubList = weaponModArray[i].ToObject<List<string>>();
-                            for(int j=0; j < newSubList.Count; ++j)
-                            {
-                                newSubList[j] = Mod.TarkovIDtoH3ID(newSubList[j]);
-                            }
                             killWeaponModWhitelists.Add(newSubList);
                         }
                     }
@@ -1365,10 +1352,6 @@ namespace EFM
                         for(int i=0; i < weaponModArray.Count; ++i)
                         {
                             List<string> newSubList = weaponModArray[i].ToObject<List<string>>();
-                            for(int j=0; j < newSubList.Count; ++j)
-                            {
-                                newSubList[j] = Mod.TarkovIDtoH3ID(newSubList[j]);
-                            }
                             killWeaponModBlacklists.Add(newSubList);
                         }
                     }
@@ -1431,10 +1414,6 @@ namespace EFM
                         for (int i = 0; i < equipmentArray.Count; ++i)
                         {
                             List<string> newSubList = equipmentArray[i].ToObject<List<string>>();
-                            for (int j = 0; j < newSubList.Count; ++j)
-                            {
-                                newSubList[j] = Mod.TarkovIDtoH3ID(newSubList[j]);
-                            }
                             equipmentWhitelists.Add(newSubList);
                         }
                     }
@@ -1445,10 +1424,6 @@ namespace EFM
                         for (int i = 0; i < equipmentArray.Count; ++i)
                         {
                             List<string> newSubList = equipmentArray[i].ToObject<List<string>>();
-                            for (int j = 0; j < newSubList.Count; ++j)
-                            {
-                                newSubList[j] = Mod.TarkovIDtoH3ID(newSubList[j]);
-                            }
                             equipmentBlacklists.Add(newSubList);
                         }
                     }
@@ -1475,10 +1450,6 @@ namespace EFM
                     if (shotWeaponArray != null)
                     {
                         shotWeaponWhitelist = shotWeaponArray.ToObject<List<string>>();
-                        for (int i = 0; i < shotWeaponWhitelist.Count; ++i)
-                        {
-                            shotWeaponWhitelist[i] = Mod.TarkovIDtoH3ID(shotWeaponWhitelist[i]);
-                        }
                     }
                     JArray shotWeaponModArray = properties["weaponModsInclusive"] as JArray;
                     if (shotWeaponModArray != null)
@@ -1487,10 +1458,6 @@ namespace EFM
                         for (int i = 0; i < shotWeaponModArray.Count; ++i)
                         {
                             List<string> newSubList = shotWeaponModArray[i].ToObject<List<string>>();
-                            for (int j = 0; j < newSubList.Count; ++j)
-                            {
-                                newSubList[j] = Mod.TarkovIDtoH3ID(newSubList[j]);
-                            }
                             shotWeaponModWhitelists.Add(newSubList);
                         }
                     }
@@ -1501,10 +1468,6 @@ namespace EFM
                         for (int i = 0; i < shotWeaponModArray.Count; ++i)
                         {
                             List<string> newSubList = shotWeaponModArray[i].ToObject<List<string>>();
-                            for (int j = 0; j < newSubList.Count; ++j)
-                            {
-                                newSubList[j] = Mod.TarkovIDtoH3ID(newSubList[j]);
-                            }
                             shotWeaponModBlacklists.Add(newSubList);
                         }
                     }
@@ -1537,8 +1500,8 @@ namespace EFM
                     useItemTargets = new List<MeatovItemData>();
                     for (int i = 0; i < useItemTargetItemIDs.Count; ++i)
                     {
-                        string itemID = Mod.TarkovIDtoH3ID(useItemTargetItemIDs[i]);
-                        if (Mod.GetItemData(itemID, out MeatovItemData useItem))
+                        string itemID = useItemTargetItemIDs[i];
+                        if (Mod.defaultItemData.TryGetValue(itemID, out MeatovItemData useItem))
                         {
                             useItemTargets.Add(useItem);
                         }
@@ -1635,7 +1598,7 @@ namespace EFM
             {
                 if (Condition.CompareFloat(killDistanceCompareMethod, killData.distance, killDistance)
                     && DoesEnemyTargetMatch(killTarget, killData.enemyTarget, killSavageRoles, killData.savageRole)
-                    && Mod.IDDescribedInList(killData.weaponData.H3ID, new List<string>(killData.weaponData.parents), killWeaponWhitelist, null)
+                    && Mod.IDDescribedInList(killData.weaponData.tarkovID, new List<string>(killData.weaponData.parents), killWeaponWhitelist, null)
                     && (killWeaponModWhitelists == null || killWeaponModWhitelists.Count == 0 || IDsDescribedInMultipleLists(killData.weaponChildrenData, killWeaponModWhitelists))
                     && (killWeaponModBlacklists == null || killWeaponModBlacklists.Count == 0 || !IDsDescribedInMultipleLists(killData.weaponChildrenData, killWeaponModBlacklists))
                     && MatchesHealthEffectList(killData.enemyHealthEffects, killEnemyHealthEffects)
@@ -1653,7 +1616,7 @@ namespace EFM
             {
                 if (Condition.CompareFloat(killDistanceCompareMethod, shotData.distance, killDistance)
                     && DoesEnemyTargetMatch(killTarget, shotData.enemyTarget, killSavageRoles, shotData.savageRole)
-                    && Mod.IDDescribedInList(shotData.weaponData.H3ID, new List<string>(shotData.weaponData.parents), killWeaponWhitelist, null)
+                    && Mod.IDDescribedInList(shotData.weaponData.tarkovID, new List<string>(shotData.weaponData.parents), killWeaponWhitelist, null)
                     && (killWeaponModWhitelists == null || killWeaponModWhitelists.Count == 0 || IDsDescribedInMultipleLists(shotData.weaponChildrenData, killWeaponModWhitelists))
                     && (killWeaponModBlacklists == null || killWeaponModBlacklists.Count == 0 || !IDsDescribedInMultipleLists(shotData.weaponChildrenData, killWeaponModBlacklists))
                     && MatchesHealthEffectList(shotData.enemyHealthEffects, killEnemyHealthEffects)
@@ -1745,7 +1708,7 @@ namespace EFM
             {
                 for(int j=0; j < items.Count; ++j)
                 {
-                    if (list[i].Contains(items[j].H3ID))
+                    if (list[i].Contains(items[j].tarkovID))
                     {
                         return true;
                     }
@@ -1977,7 +1940,7 @@ namespace EFM
                     JArray assortItemsArray = data["items"] as JArray;
                     for (int i = 0; i < assortItemsArray.Count; ++i)
                     {
-                        string itemID = Mod.TarkovIDtoH3ID(assortItemsArray[i]["_tpl"].ToString());
+                        string itemID = assortItemsArray[i]["_tpl"].ToString();
                         if (trader.bartersByItemID.TryGetValue(itemID, out List<Barter> currentBarters))
                         {
                             if (!trader.rewardBarters.ContainsKey(itemID))
@@ -2053,9 +2016,9 @@ namespace EFM
                     // This is what we need to update here
                     for (int i = 0; i < barters.Count; ++i)
                     {
-                        if (trader.rewardBarters.ContainsKey(barters[i].itemData.H3ID))
+                        if (trader.rewardBarters.ContainsKey(barters[i].itemData.tarkovID))
                         {
-                            trader.rewardBarters[barters[i].itemData.H3ID] = true;
+                            trader.rewardBarters[barters[i].itemData.tarkovID] = true;
                         }
                     }
                     break;

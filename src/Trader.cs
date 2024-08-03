@@ -123,15 +123,10 @@ namespace EFM
             insuranceAvailable = Mod.traderBaseDB[index]["insurance"] == null ? false : (bool)Mod.traderBaseDB[index]["insurance"]["availability"];
             if (insuranceAvailable)
             {
-                List<string> tempInsuranceExcluded = new List<string>();
                 JArray insuranceExcludedArray = Mod.traderBaseDB[index]["insurance"]["excluded_category"] as JArray;
                 if (insuranceExcludedArray != null)
                 {
-                    for (int i = 0; i < insuranceExcludedArray.Count; ++i)
-                    {
-                        tempInsuranceExcluded.Add(Mod.TarkovIDtoH3ID(insuranceExcludedArray[i].ToString()));
-                    }
-                    insuranceExcluded = tempInsuranceExcluded.ToArray();
+                    insuranceExcluded = insuranceExcludedArray.ToObject<string[]>();
                 }
                 insuranceMinReturnTime = (int)Mod.traderBaseDB[index]["insurance"]["min_return_hour"];
                 insuranceMaxReturnTime = (int)Mod.traderBaseDB[index]["insurance"]["max_return_hour"];
@@ -149,7 +144,7 @@ namespace EFM
                 {
                     for (int i = 0; i < repairExcludedArray.Count; ++i)
                     {
-                        tempRepairExcludedList.Add(Mod.TarkovIDtoH3ID(repairExcludedArray[i].ToString()));
+                        tempRepairExcludedList.Add(repairExcludedArray[i].ToString());
                     }
                 }
                 JArray repairExcludedIDsArray = Mod.traderBaseDB[index]["repair"]["excluded_category"] as JArray;
@@ -157,7 +152,7 @@ namespace EFM
                 {
                     for (int i = 0; i < repairExcludedIDsArray.Count; ++i)
                     {
-                        tempRepairExcludedList.Add(Mod.TarkovIDtoH3ID(repairExcludedIDsArray[i].ToString()));
+                        tempRepairExcludedList.Add(repairExcludedIDsArray[i].ToString());
                     }
                 }
                 repairExcluded = tempRepairExcludedList.ToArray();
@@ -186,7 +181,7 @@ namespace EFM
             {
                 for (int i = 0; i < buyCategoriesArray.Count; ++i)
                 {
-                    tempBuyCategoriesList.Add(Mod.TarkovIDtoH3ID(buyCategoriesArray[i].ToString()));
+                    tempBuyCategoriesList.Add(buyCategoriesArray[i].ToString());
                 }
             }
             JArray buyCategoriesIDsArray = Mod.traderBaseDB[index]["items_buy"]["id_list"] as JArray;
@@ -194,7 +189,7 @@ namespace EFM
             {
                 for (int i = 0; i < buyCategoriesIDsArray.Count; ++i)
                 {
-                    tempBuyCategoriesList.Add(Mod.TarkovIDtoH3ID(buyCategoriesIDsArray[i].ToString()));
+                    tempBuyCategoriesList.Add(buyCategoriesIDsArray[i].ToString());
                 }
             }
             buyCategories = tempBuyCategoriesList.ToArray();
@@ -204,7 +199,7 @@ namespace EFM
             {
                 for (int i = 0; i < buyBlacklistArray.Count; ++i)
                 {
-                    tempBuyBlacklist.Add(Mod.TarkovIDtoH3ID(buyBlacklistArray[i].ToString()));
+                    tempBuyBlacklist.Add(buyBlacklistArray[i].ToString());
                 }
             }
             JArray buyBlacklistIDsArray = Mod.traderBaseDB[index]["items_buy_prohibited"]["id_list"] as JArray;
@@ -212,7 +207,7 @@ namespace EFM
             {
                 for (int i = 0; i < buyBlacklistIDsArray.Count; ++i)
                 {
-                    tempBuyBlacklist.Add(Mod.TarkovIDtoH3ID(buyBlacklistIDsArray[i].ToString()));
+                    tempBuyBlacklist.Add(buyBlacklistIDsArray[i].ToString());
                 }
             }
             buyBlacklist = tempBuyBlacklist.ToArray();
@@ -247,7 +242,7 @@ namespace EFM
                     {
                         if (itemsArray[i]["_id"].ToString().Equals(barterLevelEntry.Key))
                         {
-                            barterItemID = Mod.TarkovIDtoH3ID(itemsArray[i]["_tpl"].ToString());
+                            barterItemID = itemsArray[i]["_tpl"].ToString();
                             break;
                         }
                     }
@@ -263,13 +258,13 @@ namespace EFM
                         Barter currentBarter = new Barter();
                         currentBarter.level = barterLevelEntry.Value;
                         currentBarter.trader = this;
-                        Mod.GetItemData(barterItemID, out currentBarter.itemData);
+                        Mod.defaultItemData.TryGetValue(barterItemID, out currentBarter.itemData);
 
                         List<BarterPrice> tempBarterPrices = new List<BarterPrice>();
                         JArray currentScheme = schemes[i] as JArray;
                         for(int j=0; j < currentScheme.Count; ++j)
                         {
-                            Mod.GetItemData(Mod.TarkovIDtoH3ID(currentScheme[j]["_tpl"].ToString()), out MeatovItemData barterPriceItemData);
+                            Mod.defaultItemData.TryGetValue(currentScheme[j]["_tpl"].ToString(), out MeatovItemData barterPriceItemData);
                             if(barterPriceItemData == null)
                             {
                                 Mod.LogWarning("DEV: Trader " + index + ": " + ID + ": Couldn't get price "+j+" Item ID for barter with ID: " + barterLevelEntry.Key);
@@ -522,12 +517,12 @@ namespace EFM
 
         public bool ItemSellable(MeatovItemData itemData)
         {
-            return !Mod.IDDescribedInList(itemData.H3ID, new List<string>(itemData.parents), new List<string>(buyCategories), new List<string>(buyBlacklist));
+            return !Mod.IDDescribedInList(itemData.tarkovID, new List<string>(itemData.parents), new List<string>(buyCategories), new List<string>(buyBlacklist));
         }
 
         public bool ItemInsureable(MeatovItemData itemData)
         {
-            return insuranceAvailable && !Mod.IDDescribedInList(itemData.H3ID, new List<string>(itemData.parents), new List<string>() { Mod.itemParentID }, new List<string>(insuranceExcluded));
+            return insuranceAvailable && !Mod.IDDescribedInList(itemData.tarkovID, new List<string>(itemData.parents), new List<string>() { Mod.itemParentID }, new List<string>(insuranceExcluded));
         }
     }
 

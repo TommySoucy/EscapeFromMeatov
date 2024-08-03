@@ -475,22 +475,22 @@ namespace EFM
                 physObj = gameObject.GetComponent<FVRPhysicalObject>();
             }
 
-            Mod.LogInfo("\t0");
-
-            Mod.meatovItemByInteractive.Add(physObj, this);
-
-            // Quantities/Contents gets set to max on awake and will be overriden as necessary
-            if(physObj is FVRFireArmMagazine)
+            if(physObj != null)
             {
-                FVRFireArmMagazine asMagazine = physObj as FVRFireArmMagazine;
-                asMagazine.ReloadMagWithType(roundClass);
+                Mod.meatovItemByInteractive.Add(physObj, this);
+
+                // Quantities/Contents gets set to max on awake and will be overriden as necessary
+                if (physObj is FVRFireArmMagazine)
+                {
+                    FVRFireArmMagazine asMagazine = physObj as FVRFireArmMagazine;
+                    asMagazine.ReloadMagWithType(roundClass);
+                }
+                if (physObj is FVRFireArmClip)
+                {
+                    FVRFireArmClip asClip = physObj as FVRFireArmClip;
+                    asClip.ReloadClipWithType(roundClass);
+                }
             }
-            if(physObj is FVRFireArmClip)
-            {
-                FVRFireArmClip asClip = physObj as FVRFireArmClip;
-                asClip.ReloadClipWithType(roundClass);
-            }
-            Mod.LogInfo("\t0");
         }
 
         public static void Setup(FVRPhysicalObject physicalObject)
@@ -505,6 +505,7 @@ namespace EFM
         ///      ContainmentVolume SpawnItem (Trader buy, Task reward, Area production completion into volume output, etc.)
         ///      Item deserialize (Save loading, Insurance return, etc.)
         ///      Dev item spawner spawn
+        ///      ModularWeaponPart EnablePrefix
         /// </summary>
         /// <param name="data">Data to set</param>
         public void SetData(MeatovItemData data)
@@ -628,17 +629,19 @@ namespace EFM
         {
             int currentHorizontal = baseRecoilHorizontal;
             int currentVertical = baseRecoilVertical;
-            IModularWeapon modularWeaponInterface = GetComponent<IModularWeapon>();
-            foreach(KeyValuePair<string, ModularWeaponPartsAttachmentPoint> pointEntry in modularWeaponInterface.AllAttachmentPoints)
-            {
-                if (Mod.modItemData.TryGetValue(pointEntry.Key, out Dictionary<string, MeatovItemData> group)
-                    && group.TryGetValue(pointEntry.Value.SelectedModularWeaponPart, out MeatovItemData itemData)
-                    && itemData.recoilModifier != 0)
-                {
-                    currentHorizontal = currentHorizontal + (int)(baseRecoilHorizontal / 100.0f * itemData.recoilModifier);
-                    currentVertical = currentVertical + (int)(baseRecoilVertical / 100.0f * itemData.recoilModifier);
-                }
-            }
+
+            // Modul parts stat effects now applied like physical children since they actually have a meatov item and get processed like children
+            //IModularWeapon modularWeaponInterface = GetComponent<IModularWeapon>();
+            //foreach(KeyValuePair<string, ModularWeaponPartsAttachmentPoint> pointEntry in modularWeaponInterface.AllAttachmentPoints)
+            //{
+            //    if (Mod.modItemData.TryGetValue(pointEntry.Key, out Dictionary<string, MeatovItemData> group)
+            //        && group.TryGetValue(pointEntry.Value.SelectedModularWeaponPart, out MeatovItemData itemData)
+            //        && itemData.recoilModifier != 0)
+            //    {
+            //        currentHorizontal = currentHorizontal + (int)(baseRecoilHorizontal / 100.0f * itemData.recoilModifier);
+            //        currentVertical = currentVertical + (int)(baseRecoilVertical / 100.0f * itemData.recoilModifier);
+            //    }
+            //}
 
             if(children != null)
             {
@@ -678,16 +681,18 @@ namespace EFM
         public void UpdateErgonomics()
         {
             int current = 0;
-            IModularWeapon modularWeaponInterface = GetComponent<IModularWeapon>();
-            foreach (KeyValuePair<string, ModularWeaponPartsAttachmentPoint> pointEntry in modularWeaponInterface.AllAttachmentPoints)
-            {
-                if (Mod.modItemData.TryGetValue(pointEntry.Key, out Dictionary<string, MeatovItemData> group)
-                    && group.TryGetValue(pointEntry.Value.SelectedModularWeaponPart, out MeatovItemData itemData)
-                    && itemData.ergonomicsModifier != 0)
-                {
-                    current += itemData.ergonomicsModifier;
-                }
-            }
+
+            // Modul parts stat effects now applied like physical children since they actually have a meatov item and get processed like children
+            //IModularWeapon modularWeaponInterface = GetComponent<IModularWeapon>();
+            //foreach (KeyValuePair<string, ModularWeaponPartsAttachmentPoint> pointEntry in modularWeaponInterface.AllAttachmentPoints)
+            //{
+            //    if (Mod.modItemData.TryGetValue(pointEntry.Key, out Dictionary<string, MeatovItemData> group)
+            //        && group.TryGetValue(pointEntry.Value.SelectedModularWeaponPart, out MeatovItemData itemData)
+            //        && itemData.ergonomicsModifier != 0)
+            //    {
+            //        current += itemData.ergonomicsModifier;
+            //    }
+            //}
 
             if (children != null)
             {
@@ -726,22 +731,24 @@ namespace EFM
         {
             int current = baseSightingRange;
             bool excluded = false;
-            IModularWeapon modularWeaponInterface = GetComponent<IModularWeapon>();
-            foreach (KeyValuePair<string, ModularWeaponPartsAttachmentPoint> pointEntry in modularWeaponInterface.AllAttachmentPoints)
-            {
-                if (Mod.modItemData.TryGetValue(pointEntry.Key, out Dictionary<string, MeatovItemData> group)
-                    && group.TryGetValue(pointEntry.Value.SelectedModularWeaponPart, out MeatovItemData itemData))
-                {
-                    if(!excluded && itemData == exclude)
-                    {
-                        excluded = true;
-                    }
-                    else
-                    {
-                        current = Mathf.Max(current, itemData.sightingRange);
-                    }
-                }
-            }
+
+            // Modul parts stat effects now applied like physical children since they actually have a meatov item and get processed like children
+            //IModularWeapon modularWeaponInterface = GetComponent<IModularWeapon>();
+            //foreach (KeyValuePair<string, ModularWeaponPartsAttachmentPoint> pointEntry in modularWeaponInterface.AllAttachmentPoints)
+            //{
+            //    if (Mod.modItemData.TryGetValue(pointEntry.Key, out Dictionary<string, MeatovItemData> group)
+            //        && group.TryGetValue(pointEntry.Value.SelectedModularWeaponPart, out MeatovItemData itemData))
+            //    {
+            //        if(!excluded && itemData == exclude)
+            //        {
+            //            excluded = true;
+            //        }
+            //        else
+            //        {
+            //            current = Mathf.Max(current, itemData.sightingRange);
+            //        }
+            //    }
+            //}
 
             if (children != null)
             {
@@ -790,8 +797,7 @@ namespace EFM
             }
             else
             {
-                if (physObj.m_hand != null
-                    || (physObj.QuickbeltSlot != null && physObj.QuickbeltSlot.IsPlayer))
+                if (physObj != null && (physObj.m_hand != null || (physObj.QuickbeltSlot != null && physObj.QuickbeltSlot.IsPlayer)))
                 {
                     newLocation = 0;
                 }
@@ -2039,22 +2045,6 @@ namespace EFM
 			return newPack;
         }
 
-		public int GetValue()
-        {
-			return physObj.ObjectWrapper.CreditCost;
-
-			// TODO: Maybe add all values of sub items attached to this one too but will have to adapt  market for it, for example, when we insure, we only ensure the root item not sub items
-        }
-
-		public int GetInsuranceValue()
-        {
-			// Thsi inureability of the current item will be checked by the calling method
-			return physObj.ObjectWrapper.CreditCost;
-
-			// TODO: WE DONT CHECK FOR INSUREABILITY HERE FOR THIS OBJECT, BUT WE MUST FOR SUB OBJECTS WHEN WE IMPLEMENT THAT
-			// TODO: Maybe add all values of sub items attached to this one too but will have to adapt  market for it, for example, when we insure, we only ensure the root item not sub items
-		}
-
 		public void Highlight(Color color)
         {
             if (highlightRenderers == null)
@@ -2237,7 +2227,7 @@ namespace EFM
 
         public bool ContainsItem(MeatovItemData itemData)
         {
-            if (H3ID.Equals(itemData.H3ID))
+            if (tarkovID.Equals(itemData.tarkovID))
             {
                 return true;
             }
@@ -2300,7 +2290,7 @@ namespace EFM
         public int GetEmptyMountCount()
         {
             int total = 0;
-            if(physObj.AttachmentMounts != null)
+            if(physObj != null && physObj.AttachmentMounts != null)
             {
                 for(int i=0; i < physObj.AttachmentMounts.Count; ++i)
                 {
@@ -2740,19 +2730,26 @@ namespace EFM
         {
             MeatovItem newParent = null;
 
-            if(physObj.QuickbeltSlot != null)
+            if(physObj == null)
             {
-                // If in QBS, we may not be attached directly to the QBS itself so go through it instead of transform parent
-                newParent = physObj.QuickbeltSlot.GetComponentInParents<MeatovItem>();
-            }
-            else if(physObj is FVRFireArmAttachment && (physObj as FVRFireArmAttachment).curMount != null)
-            {
-                // If attachment, we may be parented to some root item instead of the item that owns the mount we are on
-                newParent = (physObj as FVRFireArmAttachment).curMount.GetComponentInParents<MeatovItem>();
+                newParent = transform.GetComponentInParents<MeatovItem>(false);
             }
             else
             {
-                newParent = transform.GetComponentInParents<MeatovItem>(false);
+                if (physObj.QuickbeltSlot != null)
+                {
+                    // If in QBS, we may not be attached directly to the QBS itself so go through it instead of transform parent
+                    newParent = physObj.QuickbeltSlot.GetComponentInParents<MeatovItem>();
+                }
+                else if (physObj is FVRFireArmAttachment && (physObj as FVRFireArmAttachment).curMount != null)
+                {
+                    // If attachment, we may be parented to some root item instead of the item that owns the mount we are on
+                    newParent = (physObj as FVRFireArmAttachment).curMount.GetComponentInParents<MeatovItem>();
+                }
+                else
+                {
+                    newParent = transform.GetComponentInParents<MeatovItem>(false);
+                }
             }
 
             if (newParent != parent)
@@ -2765,7 +2762,8 @@ namespace EFM
                     parent.children[childIndex].childIndex = childIndex;
                     parent.children.RemoveAt(parent.children.Count - 1);
                     // If mod, we want to find first weapon parent to affect stats of
-                    if (itemType == ItemType.Mod)
+                    // We dont want to do this if 868, modulworkshop mods and their modifiers will be handled in the ModulWeaponPart patches
+                    if (itemType == ItemType.Mod && index != 868)
                     {
                         MeatovItem weaponParent = parent;
                         while (weaponParent != null && weaponParent.itemType != ItemType.Weapon)
@@ -2797,7 +2795,7 @@ namespace EFM
                 {
                     parent = newParent;
                     // If mod, we want to find first weapon parent to affect stats of
-                    if (itemType == ItemType.Mod)
+                    if (itemType == ItemType.Mod && index != 868)
                     {
                         MeatovItem weaponParent = parent;
                         while (weaponParent != null && weaponParent.itemType != ItemType.Weapon)
@@ -2840,7 +2838,10 @@ namespace EFM
 
         public void ProcessDestruction()
         {
-            Mod.meatovItemByInteractive.Remove(physObj);
+            if(physObj != null)
+            {
+                Mod.meatovItemByInteractive.Remove(physObj);
+            }
 
             if (locationIndex == 0)
             {
@@ -2920,5 +2921,25 @@ namespace EFM
                 destroyed = true;
             }
         }
-	}
+
+        public static void Copy(MeatovItem from, MeatovItem to)
+        {
+            to.insured = from.insured;
+            to.looted = from.looted;
+            to.foundInRaid = from.foundInRaid;
+            to.broken = from.broken;
+            to.armor = from.armor;
+            to.configurationIndex = from.configurationIndex;
+            to.activeSlotsSetIndex = from.activeSlotsSetIndex;
+            to.containingVolume = from.containingVolume;
+            to.stack = from.stack;
+            to.amount = from.amount;
+            to.dogtagLevel = from.dogtagLevel;
+            to.dogtagName = from.dogtagName;
+            to.ergonomics = from.ergonomics;
+            to.currentRecoilVertical = from.currentRecoilVertical;
+            to.currentRecoilHorizontal = from.currentRecoilHorizontal;
+            to.currentSightingRange = from.currentSightingRange;
+        }
+    }
 }

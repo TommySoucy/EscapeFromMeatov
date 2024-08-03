@@ -2125,15 +2125,15 @@ namespace EFM
             // StackOnly should be true if not item location was changed, but the stack count has
             if (stackOnly)
             {
-                if (inventory.ContainsKey(item.H3ID))
+                if (inventory.ContainsKey(item.tarkovID))
                 {
-                    inventory[item.H3ID] += stackDifference;
+                    inventory[item.tarkovID] += stackDifference;
 
-                    if (inventory[item.H3ID] <= 0)
+                    if (inventory[item.tarkovID] <= 0)
                     {
                         Mod.LogError("DEV: Hideout AddToInventory stackonly with difference " + stackDifference + " for " + item.name + " reached 0 count:\n" + Environment.StackTrace);
-                        inventory.Remove(item.H3ID);
-                        inventoryItems.Remove(item.H3ID);
+                        inventory.Remove(item.tarkovID);
+                        inventoryItems.Remove(item.tarkovID);
                     }
                 }
                 else
@@ -2143,15 +2143,15 @@ namespace EFM
 
                 if (item.foundInRaid)
                 {
-                    if (FIRInventory.ContainsKey(item.H3ID))
+                    if (FIRInventory.ContainsKey(item.tarkovID))
                     {
-                        FIRInventory[item.H3ID] += stackDifference;
+                        FIRInventory[item.tarkovID] += stackDifference;
 
-                        if (FIRInventory[item.H3ID] <= 0)
+                        if (FIRInventory[item.tarkovID] <= 0)
                         {
                             Mod.LogError("DEV: Hideout AddToInventory stackonly with difference " + stackDifference + " for " + item.name + " reached 0 count:\n" + Environment.StackTrace);
-                            FIRInventory.Remove(item.H3ID);
-                            FIRInventoryItems.Remove(item.H3ID);
+                            FIRInventory.Remove(item.tarkovID);
+                            FIRInventoryItems.Remove(item.tarkovID);
                         }
                     }
                     else
@@ -2163,28 +2163,28 @@ namespace EFM
             else
             {
                 difference = item.stack;
-                if (inventory.ContainsKey(item.H3ID))
+                if (inventory.ContainsKey(item.tarkovID))
                 {
-                    inventory[item.H3ID] += item.stack;
-                    inventoryItems[item.H3ID].Add(item);
+                    inventory[item.tarkovID] += item.stack;
+                    inventoryItems[item.tarkovID].Add(item);
                 }
                 else
                 {
-                    inventory.Add(item.H3ID, item.stack);
-                    inventoryItems.Add(item.H3ID, new List<MeatovItem> { item });
+                    inventory.Add(item.tarkovID, item.stack);
+                    inventoryItems.Add(item.tarkovID, new List<MeatovItem> { item });
                 }
 
                 if (item.foundInRaid)
                 {
-                    if (FIRInventory.ContainsKey(item.H3ID))
+                    if (FIRInventory.ContainsKey(item.tarkovID))
                     {
-                        FIRInventory[item.H3ID] += item.stack;
-                        FIRInventoryItems[item.H3ID].Add(item);
+                        FIRInventory[item.tarkovID] += item.stack;
+                        FIRInventoryItems[item.tarkovID].Add(item);
                     }
                     else
                     {
-                        FIRInventory.Add(item.H3ID, item.stack);
-                        FIRInventoryItems.Add(item.H3ID, new List<MeatovItem> { item });
+                        FIRInventory.Add(item.tarkovID, item.stack);
+                        FIRInventoryItems.Add(item.tarkovID, new List<MeatovItem> { item });
                     }
                 }
 
@@ -2242,55 +2242,55 @@ namespace EFM
                 return;
             }
 
-            if (FIRInventory.ContainsKey(item.H3ID))
+            if (FIRInventory.ContainsKey(item.tarkovID))
             {
-                FIRInventory[item.H3ID] += item.stack;
-                FIRInventoryItems[item.H3ID].Add(item);
+                FIRInventory[item.tarkovID] += item.stack;
+                FIRInventoryItems[item.tarkovID].Add(item);
             }
             else
             {
-                FIRInventory.Add(item.H3ID, item.stack);
-                FIRInventoryItems.Add(item.H3ID, new List<MeatovItem> { item });
+                FIRInventory.Add(item.tarkovID, item.stack);
+                FIRInventoryItems.Add(item.tarkovID, new List<MeatovItem> { item });
             }
         }
 
         public void RemoveFromInventory(MeatovItem item)
         {
-            Mod.LogInfo("\tRemoving item " + item.H3ID + " with IID: " + item.GetInstanceID() + " from hideout inventory");
+            Mod.LogInfo("\tRemoving item "+item.tarkovID + ":" + item.H3ID + " with IID: " + item.GetInstanceID() + " from hideout inventory");
             int difference = -item.stack;
 
-            if (inventory.ContainsKey(item.H3ID))
+            if (inventory.ContainsKey(item.tarkovID))
             {
-                inventory[item.H3ID] -= item.stack;
-                inventoryItems[item.H3ID].Remove(item);
+                inventory[item.tarkovID] -= item.stack;
+                inventoryItems[item.tarkovID].Remove(item);
             }
             else
             {
-                Mod.LogError("Attempting to remove " + item.H3ID + " from hideout inventory but key was not found in it:\n" + Environment.StackTrace);
+                Mod.LogError("Attempting to remove "+item.tarkovID + ":" + item.H3ID + " from hideout inventory but key was not found in it:\n" + Environment.StackTrace);
                 return;
             }
-            if (inventory[item.H3ID] == 0)
+            if (inventory[item.tarkovID] == 0)
             {
-                inventory.Remove(item.H3ID);
-                inventoryItems.Remove(item.H3ID);
+                inventory.Remove(item.tarkovID);
+                inventoryItems.Remove(item.tarkovID);
             }
 
             if (item.foundInRaid)
             {
-                if (FIRInventory.ContainsKey(item.H3ID))
+                if (FIRInventory.ContainsKey(item.tarkovID))
                 {
-                    FIRInventory[item.H3ID] -= item.stack;
-                    FIRInventoryItems[item.H3ID].Remove(item);
+                    FIRInventory[item.tarkovID] -= item.stack;
+                    FIRInventoryItems[item.tarkovID].Remove(item);
                 }
                 else
                 {
-                    Mod.LogError("Attempting to remove " + item.H3ID + " from hideout inventory but key was not found in it:\n" + Environment.StackTrace);
+                    Mod.LogError("Attempting to remove "+item.tarkovID + ":" + item.H3ID + " from hideout inventory but key was not found in it:\n" + Environment.StackTrace);
                     return;
                 }
-                if (FIRInventory[item.H3ID] == 0)
+                if (FIRInventory[item.tarkovID] == 0)
                 {
-                    FIRInventory.Remove(item.H3ID);
-                    FIRInventoryItems.Remove(item.H3ID);
+                    FIRInventory.Remove(item.tarkovID);
+                    FIRInventoryItems.Remove(item.tarkovID);
                 }
             }
 
@@ -2331,590 +2331,21 @@ namespace EFM
                 return;
             }
 
-            if (FIRInventory.ContainsKey(item.H3ID))
+            if (FIRInventory.ContainsKey(item.tarkovID))
             {
-                FIRInventory[item.H3ID] -= item.stack;
-                FIRInventoryItems[item.H3ID].Remove(item);
+                FIRInventory[item.tarkovID] -= item.stack;
+                FIRInventoryItems[item.tarkovID].Remove(item);
             }
             else
             {
-                Mod.LogError("Attempting to remove " + item.H3ID + " from hideout inventory but key was not found in it:\n" + Environment.StackTrace);
+                Mod.LogError("Attempting to remove "+item.tarkovID + ":" + item.H3ID + " from hideout inventory but key was not found in it:\n" + Environment.StackTrace);
                 return;
             }
-            if (FIRInventory[item.H3ID] == 0)
+            if (FIRInventory[item.tarkovID] == 0)
             {
-                FIRInventory.Remove(item.H3ID);
-                FIRInventoryItems.Remove(item.H3ID);
+                FIRInventory.Remove(item.tarkovID);
+                FIRInventoryItems.Remove(item.tarkovID);
             }
-        }
-
-        private GameObject LoadSavedItem(Transform parent, JToken item, int locationIndex = -1, bool inAll = false)
-        {
-            Mod.LogInfo("Loading item " + item["PhysicalObject"]["ObjectWrapper"]["ItemID"]);
-            int parsedID = -1;
-            GameObject prefabToUse = null;
-            if (int.TryParse(item["PhysicalObject"]["ObjectWrapper"]["ItemID"].ToString(), out parsedID))
-            {
-                // Custom item, fetch from our own assets
-                prefabToUse = Mod.GetItemPrefab(parsedID);
-            }
-            else
-            {
-                // Vanilla item, fetch from game assets
-                prefabToUse = IM.OD[item["PhysicalObject"]["ObjectWrapper"]["ItemID"].ToString()].GetGameObject();
-            }
-
-            GameObject itemObject = Instantiate<GameObject>(prefabToUse);
-
-            itemObject.transform.parent = parent; // Set parent after so it can awake before doing anything, in case parent is inactive
-
-            FVRPhysicalObject itemPhysicalObject = itemObject.GetComponentInChildren<FVRPhysicalObject>();
-            FVRObject itemObjectWrapper = itemPhysicalObject.ObjectWrapper;
-            MeatovItem MI = itemObject.GetComponent<MeatovItem>();
-
-            // Fill data
-
-            // PhysicalObject
-            itemPhysicalObject.m_isSpawnLock = (bool)item["PhysicalObject"]["m_isSpawnLock"];
-            itemPhysicalObject.m_isHardnessed = (bool)item["PhysicalObject"]["m_isHarnessed"];
-            itemPhysicalObject.IsKinematicLocked = (bool)item["PhysicalObject"]["IsKinematicLocked"];
-            itemPhysicalObject.IsInWater = (bool)item["PhysicalObject"]["IsInWater"];
-            AddAttachments(itemPhysicalObject, item["PhysicalObject"]);
-            if ((int)item["PhysicalObject"]["heldMode"] != 0)
-            {
-                FVRViveHand hand = ((int)item["PhysicalObject"]["heldMode"] == 1 ? GM.CurrentPlayerBody.RightHand : GM.CurrentPlayerBody.LeftHand).GetComponentInChildren<FVRViveHand>();
-                hand.CurrentInteractable = itemPhysicalObject;
-                FieldInfo handStateField = typeof(FVRViveHand).GetField("m_state", BindingFlags.NonPublic | BindingFlags.Instance);
-                handStateField.SetValue(hand, FVRViveHand.HandState.GripInteracting);
-                // Must set location index before beginning interaction because begin interactionpatch will consider this to be in hideout and will try to remove it from it
-                // but it isnt in there yet
-                MI.takeCurrentLocation = false;
-                MI.locationIndex = 0;
-                locationIndex = 0;
-                hand.CurrentInteractable.BeginInteraction(hand);
-            }
-
-            // ObjectWrapper
-            itemObjectWrapper.ItemID = item["PhysicalObject"]["ObjectWrapper"]["ItemID"].ToString();
-
-            // Firearm
-            if (itemPhysicalObject is FVRFireArm)
-            {
-                FVRFireArm firearmPhysicalObject = itemPhysicalObject as FVRFireArm;
-
-                // Build and load flagDict from saved lists
-                if (item["PhysicalObject"]["flagDict"] != null)
-                {
-                    JObject loadedFlagDict = (JObject)item["PhysicalObject"]["flagDict"];
-                    Dictionary<string, string> flagDict = new Dictionary<string, string>();
-                    flagDict = loadedFlagDict.ToObject<Dictionary<string, string>>();
-                    firearmPhysicalObject.ConfigureFromFlagDic(flagDict);
-                }
-
-                // Chambers
-                List<FireArmRoundClass> newLoadedRoundsInChambers = new List<FireArmRoundClass>();
-                if (item["PhysicalObject"]["loadedRoundsInChambers"] != null && ((JArray)item["PhysicalObject"]["loadedRoundsInChambers"]).Count > 0)
-                {
-                    JArray loadedLRIC = ((JArray)item["PhysicalObject"]["loadedRoundsInChambers"]);
-                    foreach (int round in loadedLRIC)
-                    {
-                        newLoadedRoundsInChambers.Add((FireArmRoundClass)round);
-                    }
-                    firearmPhysicalObject.SetLoadedChambers(newLoadedRoundsInChambers);
-                }
-
-                // Magazine/Clip
-                if (item["PhysicalObject"]["ammoContainer"] != null)
-                {
-                    string rawContainerID = item["PhysicalObject"]["ammoContainer"]["itemID"].ToString();
-                    bool internalMag = false;
-                    int parsedContainerID = -1;
-                    GameObject containerPrefabToUse = null;
-                    if (int.TryParse(rawContainerID, out parsedContainerID))
-                    {
-                        // Custom mag, fetch from our own assets
-                        containerPrefabToUse = Mod.GetItemPrefab(parsedContainerID);
-                    }
-                    else if (rawContainerID.Equals("InternalMag"))
-                    {
-                        internalMag = true;
-                    }
-                    else
-                    {
-                        // Vanilla mag, fetch from game assets
-                        containerPrefabToUse = IM.OD[rawContainerID].GetGameObject();
-                    }
-
-                    GameObject containerObject = internalMag ? firearmPhysicalObject.Magazine.gameObject : Instantiate<GameObject>(containerPrefabToUse);
-                    FVRPhysicalObject containerPhysicalObject = containerObject.GetComponentInChildren<FVRPhysicalObject>();
-
-                    if (firearmPhysicalObject.UsesClips && containerPhysicalObject is FVRFireArmClip)
-                    {
-                        FVRFireArmClip clipPhysicalObject = containerPhysicalObject as FVRFireArmClip;
-
-                        if (item["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"] != null)
-                        {
-                            List<FireArmRoundClass> newLoadedRoundsInClip = new List<FireArmRoundClass>();
-                            foreach (int round in item["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"])
-                            {
-                                newLoadedRoundsInClip.Add((FireArmRoundClass)round);
-                            }
-                            clipPhysicalObject.ReloadClipWithList(newLoadedRoundsInClip);
-                        }
-                        else
-                        {
-                            while (clipPhysicalObject.m_numRounds > 0)
-                            {
-                                clipPhysicalObject.RemoveRound();
-                            }
-                        }
-
-                        // Make sure the clip doesnt take the current location index once awake
-                        MeatovItem clipMI = clipPhysicalObject.GetComponent<MeatovItem>();
-                        if (locationIndex != -1)
-                        {
-                            clipMI.takeCurrentLocation = false;
-                            clipMI.locationIndex = locationIndex;
-                        }
-
-                        clipPhysicalObject.Load(firearmPhysicalObject);
-                    }
-                    else if (firearmPhysicalObject.UsesMagazines && containerPhysicalObject is FVRFireArmMagazine)
-                    {
-                        FVRFireArmMagazine magPhysicalObject = containerPhysicalObject as FVRFireArmMagazine;
-                        magPhysicalObject.UsesVizInterp = false;
-
-                        if (item["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"] != null)
-                        {
-                            List<FireArmRoundClass> newLoadedRoundsInMag = new List<FireArmRoundClass>();
-                            foreach (int round in item["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"])
-                            {
-                                newLoadedRoundsInMag.Add((FireArmRoundClass)round);
-                            }
-                            magPhysicalObject.ReloadMagWithList(newLoadedRoundsInMag);
-                        }
-                        else
-                        {
-                            while (magPhysicalObject.m_numRounds > 0)
-                            {
-                                magPhysicalObject.RemoveRound();
-                            }
-                        }
-
-                        if (!internalMag)
-                        {
-                            // Make sure the mag doesnt take the current location index once awake
-                            MeatovItem magMI = magPhysicalObject.GetComponent<MeatovItem>();
-                            if (locationIndex != -1)
-                            {
-                                magMI.takeCurrentLocation = false;
-                                magMI.locationIndex = locationIndex;
-                            }
-
-                            magPhysicalObject.Load(firearmPhysicalObject);
-                        }
-                    }
-                }
-
-                // Set to right shoulder if this was saved in it
-                if (item["isRightShoulder"] != null)
-                {
-                    itemPhysicalObject.SetQuickBeltSlot(Mod.rightShoulderSlot);
-
-                    MI.UpdateInventories();
-
-                    Mod.rightShoulderObject = itemObject;
-                    itemObject.SetActive(false);
-                }
-
-                if (firearmPhysicalObject is ClosedBoltWeapon)
-                {
-                    (firearmPhysicalObject as ClosedBoltWeapon).CockHammer();
-                }
-                else if (firearmPhysicalObject is BoltActionRifle)
-                {
-                    (firearmPhysicalObject as BoltActionRifle).CockHammer();
-                }
-                else if (firearmPhysicalObject is TubeFedShotgun)
-                {
-                    (firearmPhysicalObject as TubeFedShotgun).CockHammer();
-                }
-                else if (firearmPhysicalObject is BreakActionWeapon)
-                {
-                    (firearmPhysicalObject as BreakActionWeapon).CockHammer();
-                }
-                // TODO: Might also have to set private fields in OpenBolt, LeverAction, etc
-            }
-            else if (itemPhysicalObject is FVRFireArmMagazine)
-            {
-                FVRFireArmMagazine magPhysicalObject = (itemPhysicalObject as FVRFireArmMagazine);
-
-                if (item["PhysicalObject"]["loadedRoundsInContainer"] != null)
-                {
-                    List<FireArmRoundClass> newLoadedRoundsInMag = new List<FireArmRoundClass>();
-                    foreach (int round in item["PhysicalObject"]["loadedRoundsInContainer"])
-                    {
-                        newLoadedRoundsInMag.Add((FireArmRoundClass)round);
-                    }
-                    magPhysicalObject.ReloadMagWithList(newLoadedRoundsInMag);
-                }
-                else
-                {
-                    while (magPhysicalObject.m_numRounds > 0)
-                    {
-                        magPhysicalObject.RemoveRound();
-                    }
-                }
-            }
-            else if (itemPhysicalObject is FVRFireArmClip)
-            {
-                FVRFireArmClip clipPhysicalObject = (itemPhysicalObject as FVRFireArmClip);
-
-                if (item["PhysicalObject"]["loadedRoundsInContainer"] != null)
-                {
-                    List<FireArmRoundClass> newLoadedRoundsInClip = new List<FireArmRoundClass>();
-                    foreach (int round in item["PhysicalObject"]["loadedRoundsInContainer"])
-                    {
-                        newLoadedRoundsInClip.Add((FireArmRoundClass)round);
-                    }
-                    clipPhysicalObject.ReloadClipWithList(newLoadedRoundsInClip);
-                }
-                else
-                {
-                    while (clipPhysicalObject.m_numRounds > 0)
-                    {
-                        clipPhysicalObject.RemoveRound();
-                    }
-                }
-            }
-            else if (itemPhysicalObject is Speedloader)
-            {
-                Speedloader SLPhysicalObject = (itemPhysicalObject as Speedloader);
-
-                if (item["PhysicalObject"]["loadedRoundsInContainer"] != null)
-                {
-                    JArray loadedRIC = (JArray)item["PhysicalObject"]["loadedRoundsInContainer"];
-                    for (int j = 0; j < loadedRIC.Count; ++j)
-                    {
-                        int currentRound = (int)loadedRIC[j];
-                        SpeedloaderChamber currentChamber = SLPhysicalObject.Chambers[j];
-
-                        if (currentRound > 0)
-                        {
-                            currentChamber.Load((FireArmRoundClass)currentRound);
-                        }
-                        else if (currentRound == -1)
-                        {
-                            currentChamber.Unload();
-                        }
-                        else // Loaded spent
-                        {
-                            currentChamber.LoadEmpty((FireArmRoundClass)(currentRound * -1 - 2));
-                        }
-                    }
-                }
-                else
-                {
-                    foreach (SpeedloaderChamber chamber in SLPhysicalObject.Chambers)
-                    {
-                        chamber.Unload();
-                    }
-                }
-            }
-
-            // Custom item
-            if (MI != null)
-            {
-                if (inAll)
-                {
-                    MI.inAll = true;
-                }
-                else
-                {
-                    // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                    Mod.RemoveFromAll(itemPhysicalObject, MI);
-                }
-
-                MI.itemType = (MeatovItem.ItemType)(int)item["itemType"];
-                MI.amount = (int)item["amount"];
-                MI.looted = (bool)item["looted"];
-                MI.insured = (bool)item["insured"];
-                if (locationIndex != -1)
-                {
-                    MI.takeCurrentLocation = false;
-                    MI.locationIndex = locationIndex;
-                }
-
-                // Armor
-                if (MI.itemType == MeatovItem.ItemType.ArmoredRig || MI.itemType == MeatovItem.ItemType.BodyArmor)
-                {
-                    Mod.LogInfo("is armor");
-                    MI.armor = (float)item["PhysicalObject"]["armor"];
-                    MI.maxArmor = (float)item["PhysicalObject"]["maxArmor"];
-
-                    if ((int)item["PhysicalObject"]["equipSlot"] != -1)
-                    {
-                        MI.takeCurrentLocation = false;
-                        MI.locationIndex = 0;
-                    }
-                }
-
-                // Rig
-                if (MI.itemType == MeatovItem.ItemType.ArmoredRig || MI.itemType == MeatovItem.ItemType.Rig)
-                {
-                    Mod.LogInfo("is rig");
-                    bool equipped = (int)item["PhysicalObject"]["equipSlot"] != -1;
-                    if (equipped)
-                    {
-                        MI.takeCurrentLocation = false;
-                        MI.locationIndex = 0;
-                    }
-
-                    if (item["PhysicalObject"]["quickBeltSlotContents"] != null)
-                    {
-                        JArray loadedQBContents = (JArray)item["PhysicalObject"]["quickBeltSlotContents"];
-                        for (int j = 0; j < loadedQBContents.Count; ++j)
-                        {
-                            if (loadedQBContents[j] == null || loadedQBContents[j].Type == JTokenType.Null)
-                            {
-                                MI.itemsInSlots[j] = null;
-                            }
-                            else
-                            {
-                                //MI.itemsInSlots[j] = LoadSavedItem(null, loadedQBContents[j], MI.locationIndex, equipped);
-                                //MI.itemsInSlots[j].SetActive(false); // Inactive by default // TODO: If we ever save the mode of the rig, and therefore could load an open rig, then we should check this mode before setting active or inactive
-                            }
-                        }
-
-                        //if (equipped)
-                        //{
-                        //    // Put inner items in their slots
-                        //    for (int i = 0; i < customItemWrapper.itemsInSlots.Length; ++i)
-                        //    {
-                        //        if (customItemWrapper.itemsInSlots[i] != null)
-                        //        {
-                        //            FVRPhysicalObject currentItemPhysObj = customItemWrapper.itemsInSlots[i].GetComponent<FVRPhysicalObject>();
-                        //            if (currentItemPhysObj != null)
-                        //            {
-                        //                // Attach item to quick slot
-                        //                FVRQuickBeltSlot quickBeltSlot = customItemWrapper.rigSlots[i];
-                        //                currentItemPhysObj.SetQuickBeltSlot(quickBeltSlot);
-                        //                currentItemPhysObj.SetParentage(null);
-                        //            }
-                        //        }
-                        //    }
-                        //}
-
-                        // Update the current weight of the rig
-                        MeatovItem.SetCurrentWeight(MI);
-
-                        MI.UpdateClosedMode();
-                    }
-                }
-
-                // Backpack
-                if (MI.itemType == MeatovItem.ItemType.Backpack)
-                {
-                    Mod.LogInfo("is backpack");
-
-                    if ((int)item["PhysicalObject"]["equipSlot"] != -1)
-                    {
-                        MI.takeCurrentLocation = false;
-                        MI.locationIndex = 0;
-                    }
-
-                    if (item["PhysicalObject"]["backpackContents"] != null)
-                    {
-                        JArray loadedBPContents = (JArray)item["PhysicalObject"]["backpackContents"];
-                        for (int j = 0; j < loadedBPContents.Count; ++j)
-                        {
-                            LoadSavedItem(MI.containerItemRoot, loadedBPContents[j], MI.locationIndex, false);
-                        }
-                    }
-
-                    MI.UpdateClosedMode();
-                }
-
-                // Container
-                if (MI.itemType == MeatovItem.ItemType.Container)
-                {
-                    Mod.LogInfo("is container");
-
-                    if ((int)item["PhysicalObject"]["equipSlot"] != -1)
-                    {
-                        MI.takeCurrentLocation = false;
-                        MI.locationIndex = 0;
-                    }
-
-                    if (item["PhysicalObject"]["containerContents"] != null)
-                    {
-                        JArray loadedContainerContents = (JArray)item["PhysicalObject"]["containerContents"];
-                        for (int j = 0; j < loadedContainerContents.Count; ++j)
-                        {
-                            LoadSavedItem(MI.containerItemRoot, loadedContainerContents[j], MI.locationIndex, false);
-                        }
-                    }
-                }
-
-                // Pouch
-                if (MI.itemType == MeatovItem.ItemType.Pouch)
-                {
-                    Mod.LogInfo("is Pouch");
-
-                    if ((int)item["PhysicalObject"]["equipSlot"] != -1)
-                    {
-                        MI.takeCurrentLocation = false;
-                        MI.locationIndex = 0;
-                    }
-
-                    if (item["PhysicalObject"]["containerContents"] != null)
-                    {
-                        JArray loadedPouchContents = (JArray)item["PhysicalObject"]["containerContents"];
-                        for (int j = 0; j < loadedPouchContents.Count; ++j)
-                        {
-                            LoadSavedItem(MI.containerItemRoot, loadedPouchContents[j], MI.locationIndex, false);
-                        }
-                    }
-                }
-
-                // AmmoBox
-                //if (customItemWrapper.itemType == MeatovItem.ItemType.AmmoBox)
-                //{
-                //    Mod.LogInfo("is ammo box");
-                //}
-
-                // Money
-                if (MI.itemType == MeatovItem.ItemType.Money)
-                {
-                    Mod.LogInfo("is money");
-
-                    MI.stack = (int)item["stack"];
-                    MI.UpdateStackModel();
-                }
-
-                // Consumable
-                //if (customItemWrapper.itemType == MeatovItem.ItemType.Consumable)
-                //{
-                //    Mod.LogInfo("is Consumable");
-                //}
-
-                // Key
-                //if (customItemWrapper.itemType == MeatovItem.ItemType.Key)
-                //{
-                //    Mod.LogInfo("is Key");
-                //}
-
-                // Earpiece
-                if (MI.itemType == MeatovItem.ItemType.Earpiece)
-                {
-                    Mod.LogInfo("is Earpiece");
-
-                    if ((int)item["PhysicalObject"]["equipSlot"] != -1)
-                    {
-                        MI.takeCurrentLocation = false;
-                        MI.locationIndex = 0;
-                    }
-                }
-
-                // Face Cover
-                if (MI.itemType == MeatovItem.ItemType.FaceCover)
-                {
-                    Mod.LogInfo("is Face Cover");
-
-                    if ((int)item["PhysicalObject"]["equipSlot"] != -1)
-                    {
-                        MI.takeCurrentLocation = false;
-                        MI.locationIndex = 0;
-                    }
-                }
-
-                // Eyewear
-                if (MI.itemType == MeatovItem.ItemType.Eyewear)
-                {
-                    Mod.LogInfo("is Eyewear");
-
-                    if ((int)item["PhysicalObject"]["equipSlot"] != -1)
-                    {
-                        MI.takeCurrentLocation = false;
-                        MI.locationIndex = 0;
-                    }
-                }
-
-                // Headwear
-                if (MI.itemType == MeatovItem.ItemType.Headwear)
-                {
-                    Mod.LogInfo("is Headwear");
-
-                    if ((int)item["PhysicalObject"]["equipSlot"] != -1)
-                    {
-                        MI.takeCurrentLocation = false;
-                        MI.locationIndex = 0;
-                    }
-                }
-
-                // Dogtag
-                if (MI.itemType == MeatovItem.ItemType.DogTag)
-                {
-                    MI.dogtagName = item["dogtagName"].ToString();
-                    MI.dogtagLevel = (int)item["dogtagLevel"];
-                }
-
-                // Equip the item if it has an equip slot
-                if ((int)item["PhysicalObject"]["equipSlot"] != -1)
-                {
-                    MI.takeCurrentLocation = false;
-
-                    int equipSlotIndex = (int)item["PhysicalObject"]["equipSlot"];
-                    Mod.LogInfo("Item has equip slot: " + equipSlotIndex);
-                    FVRQuickBeltSlot equipSlot = StatusUI.instance.equipmentSlots[equipSlotIndex];
-                    itemPhysicalObject.SetQuickBeltSlot(equipSlot);
-                    itemPhysicalObject.SetParentage(null);
-
-                    if (equipSlotIndex == 0)
-                    {
-                        Mod.leftShoulderObject = itemPhysicalObject.gameObject;
-                    }
-
-                    //EFM_EquipmentSlot.WearEquipment(customItemWrapper);
-
-                    itemPhysicalObject.gameObject.SetActive(StatusUI.instance.IsOpen());
-                }
-
-                // Put item in pocket if it has pocket index
-                if (item["pocketSlotIndex"] != null)
-                {
-                    Mod.LogInfo("Loaded item has pocket index: " + ((int)item["pocketSlotIndex"]));
-                    MI.takeCurrentLocation = false;
-                    MI.locationIndex = 0;
-
-                    FVRQuickBeltSlot pocketSlot = Mod.pocketSlots[(int)item["pocketSlotIndex"]];
-                    itemPhysicalObject.SetQuickBeltSlot(pocketSlot);
-                    itemPhysicalObject.SetParentage(null);
-                }
-            }
-
-            // Place in tradeVolume
-            if (item["inTradeVolume"] != null)
-            {
-                itemObject.transform.parent = transform.GetChild(1).GetChild(24).GetChild(1);
-            }
-            else if (parent != null && parent.parent != null) // Add to container in case parent is one
-            {
-                MeatovItem parentCIW = parent.parent.GetComponent<MeatovItem>();
-                if (parentCIW != null)
-                {
-                    parentCIW.AddItemToContainer(itemPhysicalObject);
-                }
-            }
-
-            // GameObject
-            itemObject.transform.localPosition = new Vector3((float)item["PhysicalObject"]["positionX"], (float)item["PhysicalObject"]["positionY"], (float)item["PhysicalObject"]["positionZ"]);
-            itemObject.transform.localRotation = Quaternion.Euler(new Vector3((float)item["PhysicalObject"]["rotationX"], (float)item["PhysicalObject"]["rotationY"], (float)item["PhysicalObject"]["rotationZ"]));
-
-            // Ensure item and its contents are all in the correct location index
-            MI.UpdateInventories();
-
-            return itemObject;
         }
 
         private void AddAttachments(FVRPhysicalObject physicalObject, JToken loadedPhysicalObject)
