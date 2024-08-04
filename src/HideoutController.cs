@@ -1,5 +1,6 @@
 ﻿using FistVR;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -1493,7 +1494,7 @@ namespace EFM
             Mod.wishList = new List<MeatovItemData>();
             for (int i=0; i < wishlistArray.Count; ++i)
             {
-                if (Mod.GetItemData(wishlistArray[i].ToString(), out MeatovItemData itemData))
+                if (Mod.defaultItemData.TryGetValue(wishlistArray[i].ToString(), out MeatovItemData itemData))
                 {
                     Mod.wishList.Add(itemData);
                 }
@@ -1501,23 +1502,9 @@ namespace EFM
             Mod.LogInfo("\t0");
 
             // Get what each meatov item is needed for now that we have all the necessary data
-            for (int i = 0; i < Mod.customItemData.Length; ++i)
+            foreach (KeyValuePair<string, MeatovItemData> itemData in Mod.defaultItemData)
             {
-                if (Mod.customItemData[i] != null)
-                {
-                    Mod.customItemData[i].InitCheckmarkData();
-                }
-            }
-            foreach (KeyValuePair<string, MeatovItemData> vanillaItemDataEntry in Mod.vanillaItemData)
-            {
-                vanillaItemDataEntry.Value.InitCheckmarkData();
-            }
-            foreach(KeyValuePair<string, Dictionary<string, MeatovItemData>> partGroupEntry in Mod.modItemData)
-            {
-                foreach(KeyValuePair<string, MeatovItemData> partEntry in partGroupEntry.Value)
-                {
-                    partEntry.Value.InitCheckmarkData();
-                }
+                itemData.Value.InitCheckmarkData();
             }
             Mod.LogInfo("\t0");
 

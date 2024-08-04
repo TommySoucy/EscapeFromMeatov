@@ -3397,6 +3397,21 @@ namespace EFM
             }
         }
 
+        public static void DetachAllAttachmentsFromMount(FVRFireArmAttachmentMount mount, ref List<FVRFireArmAttachment> attachments)
+        {
+            foreach (FVRFireArmAttachment fvrfireArmAttachment in mount.AttachmentsList.ToArray())
+            {
+                foreach (FVRFireArmAttachmentMount mount2 in fvrfireArmAttachment.AttachmentMounts)
+                {
+                    DetachAllAttachmentsFromMount(mount2, ref attachments);
+                }
+                fvrfireArmAttachment.SetAllCollidersToLayer(false, "Default");
+                fvrfireArmAttachment.DetachFromMount();
+
+                attachments.Add(fvrfireArmAttachment);
+            }
+        }
+
         public static void OnItemCurrentWeightChanged(MeatovItem item, int preValue)
         {
             weight += item.currentWeight - preValue;

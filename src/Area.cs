@@ -824,8 +824,10 @@ namespace EFM
                         else
                         {
                             countLeft -= item.stack;
-                            item.DetachChildren();
-                            item.Destroy();
+                            if(item.DetachChildren())
+                            {
+                                item.Destroy();
+                            }
                         }
                     }
                 }

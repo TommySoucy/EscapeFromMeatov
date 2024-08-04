@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using UnityEngine;
 
 namespace EFM
@@ -47,6 +48,7 @@ namespace EFM
         public event OnItemStackChangedDelegate OnItemStackChanged;
         public delegate void OnVolumeChangedDelegate();
         public event OnVolumeChangedDelegate OnVolumeChanged;
+        public delegate void SpawnItemReturnDelegate(List<MeatovItem> itemsSpawned);
 
         public bool AddItem(MeatovItem item)
         {
@@ -207,7 +209,15 @@ namespace EFM
             }
         }
 
-        public void SpawnItem(MeatovItemData itemData, int amount, bool foundInRaid = false)
+        /// <summary>
+        /// Spawns a number of items corresponding to given itemData in this volume
+        /// </summary>
+        /// <param name="itemData">The item to spawn</param>
+        /// <param name="amount">The amount of this item to spawn</param>
+        /// <param name="foundInRaid">Whether the item is found in raid</param>
+        /// <param name="del">A delegate to process the spawned items once they are spawned</param>
+        /// <returns>True if spawned item is vanilla</returns>
+        public bool SpawnItem(MeatovItemData itemData, int amount, bool foundInRaid = false, SpawnItemReturnDelegate del = null)
         {
             int amountToSpawn = amount;
             float xSize = transform.localScale.x;
@@ -216,12 +226,15 @@ namespace EFM
             if (itemData.index == -1)
             {
                 // Spawn vanilla item will handle the updating of proper elements
-                AnvilManager.Run(SpawnVanillaItem(itemData, amountToSpawn, foundInRaid));
+                AnvilManager.Run(SpawnVanillaItem(itemData, amountToSpawn, foundInRaid, del));
+
+                return true;
             }
             else
             {
                 GameObject itemPrefab = Mod.GetItemPrefab(itemData.index);
                 List<GameObject> objectsList = new List<GameObject>();
+                List<MeatovItem> itemsSpawned = new List<MeatovItem>();
                 while (amountToSpawn > 0)
                 {
                     GameObject spawnedItem = Instantiate(itemPrefab);
@@ -256,11 +269,20 @@ namespace EFM
                                                                       UnityEngine.Random.Range(-ySize / 2, ySize / 2),
                                                                       UnityEngine.Random.Range(-zSize / 2, zSize / 2));
                     spawnedItem.transform.localRotation = UnityEngine.Random.rotation;
+
+                    itemsSpawned.Add(meatovItem);
                 }
+
+                if(del != null)
+                {
+                    del(itemsSpawned);
+                }
+
+                return false;
             }
         }
 
-        public IEnumerator SpawnVanillaItem(MeatovItemData itemData, int count, bool foundInRaid = false)
+        public IEnumerator SpawnVanillaItem(MeatovItemData itemData, int count, bool foundInRaid = false, SpawnItemReturnDelegate del = null)
         {
             yield return IM.OD[itemData.H3ID].GetGameObjectAsync();
             GameObject itemPrefab = IM.OD[itemData.H3ID].GetGameObject();
@@ -271,6 +293,7 @@ namespace EFM
             }
             FVRPhysicalObject physObj = itemPrefab.GetComponent<FVRPhysicalObject>();
             GameObject itemObject = null;
+            List<MeatovItem> itemsSpawned = new List<MeatovItem>();
             if (physObj is FVRFireArmRound && count > 1) // Multiple rounds, must spawn an ammobox
             {
                 int countLeft = count;
@@ -322,6 +345,8 @@ namespace EFM
                     itemObject.transform.localRotation = UnityEngine.Random.rotation;
 
                     boxCountLeft = countLeft / 120.0f;
+
+                    itemsSpawned.Add(meatovItem);
                 }
             }
             else // Not a round, or just 1, spawn as normal
@@ -341,7 +366,14 @@ namespace EFM
                                                                      UnityEngine.Random.Range(-activeVolume.transform.localScale.y / 2, activeVolume.transform.localScale.y / 2),
                                                                      UnityEngine.Random.Range(-activeVolume.transform.localScale.z / 2, activeVolume.transform.localScale.z / 2));
                     itemObject.transform.localRotation = UnityEngine.Random.rotation;
+
+                    itemsSpawned.Add(meatovItem);
                 }
+            }
+
+            if(del != null)
+            {
+                del(itemsSpawned);
             }
 
             yield break;

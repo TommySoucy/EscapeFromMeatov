@@ -521,7 +521,7 @@ namespace EFM
                         }
                         else
                         {
-                            Mod.LogError("DEV: Task " + task.ID + " handoveritem condition " + ID + " targets item " + itemID + " for which we do not have data");
+                            Mod.LogError("DEV: Task " + task.ID + " handoveritem condition " + ID + " targets item " + handoverItemTargetItemIDs[i] + " for which we do not have data");
                         }
                     }
                     break;

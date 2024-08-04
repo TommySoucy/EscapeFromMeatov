@@ -2699,16 +2699,68 @@ namespace EFM
             containingVolume = containerVolume.volume;
         }
 
-        public void DetachChildren()
+        /// <summary>
+        /// Detaches all the children from this item
+        /// Spawns non physical attachments
+        /// </summary>
+        /// <returns></returns>
+        public bool DetachChildren()
         {
-            if (parentVolume == null)
+            bool mustKeepParent = false;
+            ContainmentVolume volumeToUse = parentVolume;
+
+            if(volumeToUse == null && HideoutController.instance != null)
             {
-                // Must be reverse order since as children parent changes, they will remove themselves from the children list
+                volumeToUse = HideoutController.instance.marketManager.tradeVolume;
+            }
+
+            if (volumeToUse == null)
+            {
+                // Must be reverse order since as children parent changes, they may remove themselves from the children list
                 for (int i = children.Count - 1; i >= 0; --i)
                 {
                     if (children[i] != null)
                     {
-                        children[i].transform.parent = null;
+                        if (children[i].physObj == null)
+                        {
+                            // Physobj could be null if this is a modul part mod item, in which case it might have attachments
+                            List<FVRFireArmAttachment> attachments = new List<FVRFireArmAttachment>();
+                            ModularWeaponPart modulPart = children[i].GetComponent<ModularWeaponPart>();
+                            if(modulPart != null)
+                            {
+                                foreach (FVRFireArmAttachmentMount fvrfireArmAttachmentMount in modulPart.AttachmentMounts)
+                                {
+                                    Mod.DetachAllAttachmentsFromMount(fvrfireArmAttachmentMount, ref attachments);
+                                }
+                            }
+
+                            // Child is not a physical object, probably a modul workshop part mod item, must instantiate
+                            // TODO RAID: // This can only happen if we are in raid, at which point we should attach all detached children to a loot box
+                            //MeatovItem child = children[i];
+                            //ContainmentVolume.SpawnItemReturnDelegate del = itemsSpawned =>
+                            //{
+                            //    MeatovItem.Copy(child, itemsSpawned[0]);
+                            //};
+                            //mustKeepParent |= lootBoxVolume.SpawnItem(children[i].itemData, 1, false, del);
+                        }
+                        else
+                        {
+                            // Must detach children first if this is a vanilla attachment, since an attachment can't have attachment without parent
+                            if (children[i].physObj.AttachmentMounts != null)
+                            {
+                                List<FVRFireArmAttachment> attachments = new List<FVRFireArmAttachment>();
+                                foreach (FVRFireArmAttachmentMount fvrfireArmAttachmentMount in children[i].physObj.AttachmentMounts)
+                                {
+                                    Mod.DetachAllAttachmentsFromMount(fvrfireArmAttachmentMount, ref attachments);
+                                }
+                            }
+
+                            // TODO RAID: // This can only happen if we are in raid, at which point we should attach all detached children to a loot box
+                            //MeatovItem childItem = children[i];
+                            //lootBoxVolume.AddItem(children[i]);
+                            //childItem.transform.localPosition = transform.localPosition;
+                            children[i].transform.parent = null;
+                        }
                     }
                 }
             }
@@ -2718,12 +2770,48 @@ namespace EFM
                 {
                     if (children[i] != null)
                     {
-                        MeatovItem childItem = children[i];
-                        parentVolume.AddItem(children[i]);
-                        childItem.transform.localPosition = transform.localPosition;
+                        if (children[i].physObj == null)
+                        {
+                            // Physobj could be null if this is a modul part mod item, in which case it might have attachments
+                            List<FVRFireArmAttachment> attachments = new List<FVRFireArmAttachment>();
+                            ModularWeaponPart modulPart = children[i].GetComponent<ModularWeaponPart>();
+                            if (modulPart != null)
+                            {
+                                foreach (FVRFireArmAttachmentMount fvrfireArmAttachmentMount in modulPart.AttachmentMounts)
+                                {
+                                    Mod.DetachAllAttachmentsFromMount(fvrfireArmAttachmentMount, ref attachments);
+                                }
+                            }
+
+                            // Child is not a physical object, probably a modul workshop part mod item, must instantiate
+                            MeatovItem child = children[i];
+                            ContainmentVolume.SpawnItemReturnDelegate del = itemsSpawned =>
+                            {
+                                MeatovItem.Copy(child, itemsSpawned[0]);
+                            };
+                            mustKeepParent |= volumeToUse.SpawnItem(children[i].itemData, 1, false, del);
+                        }
+                        else
+                        {
+                            // Must detach children first if this is a vanilla attachment, since an attachment can't have attachment without parent
+                            if (children[i].physObj.AttachmentMounts != null)
+                            {
+                                List<FVRFireArmAttachment> attachments = new List<FVRFireArmAttachment>();
+                                foreach (FVRFireArmAttachmentMount fvrfireArmAttachmentMount in children[i].physObj.AttachmentMounts)
+                                {
+                                    Mod.DetachAllAttachmentsFromMount(fvrfireArmAttachmentMount, ref attachments);
+                                }
+                            }
+
+                            MeatovItem childItem = children[i];
+                            volumeToUse.AddItem(children[i]);
+                            childItem.transform.localPosition = transform.localPosition;
+                        }
                     }
                 }
             }
+
+            return mustKeepParent;
         }
 
         public void OnTransformParentChanged()
