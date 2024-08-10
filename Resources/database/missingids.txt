@@ -1,11 +1,3 @@
-648984b8d5b4df6140000a1a:7.62x54mm R BS ammo pack (20 pcs)
-64acee6903378853630da544:7.62x54mm R HP BT ammo pack (20 pcs)
-64aceab0426a303417060654:7.62x54mm R SP BT gzh ammo pack (20 pcs)
-64aceac0c4eda9354b0226b3:7.62x54mm R FMJ ammo pack (20 pcs)
-64898583d5b4df6140000a1d:5.56x45mm SSA AP ammo pack (50 pcs)
-6489875745f9ca4ba51c4808:9x21mm BT ammo pack (30 pcs)
-64898838d5b4df6140000a20:12/70 AP-20 ammo pack (25 pcs)
-
 5a7c74b3e899ef0014332c29:NSPU-M night vision scope
 5b3b6e495acfc4330140bd88:Armasight Vulcan MG 3.5x Bravo night vision scope
 6478641c19d732620e045e17:SIG Sauer ECHO1 1-2x30mm 30Hz thermal reflex scope
