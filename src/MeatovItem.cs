@@ -493,6 +493,14 @@ namespace EFM
             }
         }
 
+        public void Start()
+        {
+            if (!itemDataSet)
+            {
+                Mod.LogError("MeatovItem " + name + ":" + tarkovID + ":" + H3ID + " did not have its data set by the time it got to Start. StackTrace:\n" + Environment.StackTrace);
+            }
+        }
+
         public static void Setup(FVRPhysicalObject physicalObject)
         {
             physicalObject.gameObject.AddComponent<MeatovItem>();
@@ -608,6 +616,14 @@ namespace EFM
                 {
                     configurationIndex = GM.Instance.QuickbeltConfigurations.Length;
                     GM.Instance.QuickbeltConfigurations = GM.Instance.QuickbeltConfigurations.AddToArray(Mod.playerBundle.LoadAsset<GameObject>("Item" + index + "Configuration"));
+                }
+            }
+            else if (itemType == ItemType.AmmoBox)
+            {
+                if (physObj != null)
+                {
+                    FVRFireArmMagazine asMag = physObj as FVRFireArmMagazine;
+                    asMag.RoundType = data.roundType;
                 }
             }
 
@@ -1108,6 +1124,8 @@ namespace EFM
 				}
 			}
 
+            TODO e:// make patch for extracting a round from a mag/clip to SetData on round
+            TODO e:// make patch for extracting a round from a chamber to SetData on round
 			// If usage button started being pressed this frame
 			if (usageButtonDown)
 			{
