@@ -1147,6 +1147,7 @@ namespace EFM
 
             TODO e:// make patch for extracting a round from a mag/clip to SetData on round
             TODO e:// make patch for extracting a round from a chamber to SetData on round
+            TODO e:// round can be palmed and have different classes, this is stored in round's proxyRounds and we must track item data in there as well, check round.AddProxy
 			// If usage button started being pressed this frame
 			if (usageButtonDown)
 			{
