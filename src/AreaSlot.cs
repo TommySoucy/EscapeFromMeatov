@@ -171,6 +171,7 @@ namespace EFM
                     for (int j = 0; j < amount; ++j)
                     {
                         asMagazine.AddRound(meatovItem.roundClass, false, false);
+                        meatovItem.ammoContent.Add(itemData);
                     }
 
                     // Remove current slot item if there already is one

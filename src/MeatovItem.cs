@@ -283,6 +283,15 @@ namespace EFM
         public string cartridge;
 		public FireArmRoundClass roundClass;
 
+        [NonSerialized]
+        public List<MeatovItemData> ammoContent = new List<MeatovItemData>(); // First round added is first round in list
+        [NonSerialized]
+        public Dictionary<FVRFireArmChamber, MeatovItemData> chamberContent = new Dictionary<FVRFireArmChamber, MeatovItemData>();
+        [NonSerialized]
+        public Dictionary<SpeedloaderChamber, MeatovItemData> SLChamberContent = new Dictionary<SpeedloaderChamber, MeatovItemData>();
+        [NonSerialized]
+        public MeatovItemData cylinderData;
+
         // Stack
         [Header("Stack data")]
         private int _stack = 1;
@@ -469,7 +478,7 @@ namespace EFM
 
         private void Awake()
 		{
-            Mod.LogInfo("Meatov item " + H3ID + " awake");
+            Mod.LogInfo("Meatov item "+tarkovID+":" + H3ID + " awake");
             if(physObj == null)
             {
                 physObj = gameObject.GetComponent<FVRPhysicalObject>();
@@ -479,16 +488,27 @@ namespace EFM
             {
                 Mod.meatovItemByInteractive.Add(physObj, this);
 
-                // Quantities/Contents gets set to max on awake and will be overriden as necessary
-                if (physObj is FVRFireArmMagazine)
+                // Note that we assume chambers are empty by default
+                FVRFireArmChamber[] chambers = physObj.GetComponentsInChildren<FVRFireArmChamber>();
+                for(int i=0; i < chambers.Length; ++i)
+                {
+                    chamberContent.Add(chambers[i], null);
+                }
+                SpeedloaderChamber[] SLChambers = physObj.GetComponentsInChildren<SpeedloaderChamber>();
+                for(int i=0; i < SLChambers.Length; ++i)
+                {
+                    SLChamberContent.Add(SLChambers[i], null);
+                }
+
+                // Ammobox contents gets set to max on awake and will be overriden as necessary
+                if (itemType == ItemType.AmmoBox)
                 {
                     FVRFireArmMagazine asMagazine = physObj as FVRFireArmMagazine;
                     asMagazine.ReloadMagWithType(roundClass);
-                }
-                if (physObj is FVRFireArmClip)
-                {
-                    FVRFireArmClip asClip = physObj as FVRFireArmClip;
-                    asClip.ReloadClipWithType(roundClass);
+                    for(int i=0; i<asMagazine.m_numRounds; ++i)
+                    {
+                        ammoContent.Add(Mod.defaultItemData[cartridge]);
+                    }
                 }
             }
         }
@@ -514,6 +534,7 @@ namespace EFM
         ///      Item deserialize (Save loading, Insurance return, etc.)
         ///      Dev item spawner spawn
         ///      ModularWeaponPart EnablePrefix
+        ///      Mag/Clip/Chamber round removal
         /// </summary>
         /// <param name="data">Data to set</param>
         public void SetData(MeatovItemData data)
@@ -2368,7 +2389,10 @@ namespace EFM
                 FVRFireArmMagazine asMag = physObj as FVRFireArmMagazine;
                 for(int i=0; i < asMag.m_numRounds; ++i)
                 {
-                    ammo.Add((int)asMag.LoadedRounds[i].LR_Class);
+                    JObject roundObject = new JObject();
+                    roundObject["class"] = (int)asMag.LoadedRounds[i].LR_Class;
+                    roundObject["tarkovID"] = ammoContent[i].tarkovID;
+                    ammo.Add(roundObject);
                 }
                 serialized["ammo"] = ammo;
             }
@@ -2504,7 +2528,8 @@ namespace EFM
                         FVRFireArmMagazine asMag = item.physObj as FVRFireArmMagazine;
                         for (int i = 0; i < ammo.Count; ++i)
                         {
-                            asMag.AddRound((FireArmRoundClass)(int)ammo[i], false, true);
+                            asMag.AddRound((FireArmRoundClass)(int)(ammo[i]["class"]), false, true);
+                            item.ammoContent.Add(Mod.defaultItemData[ammo[i]["takovID"].ToString()]);
                         }
                     }
 

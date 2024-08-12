@@ -202,6 +202,31 @@ namespace EFM
             PatchController.Verify(chamberSetRoundClassPatchOriginal, harmony, true);
             harmony.Patch(chamberSetRoundClassPatchOriginal, new HarmonyMethod(chamberSetRoundClassPatchPrefix));
 
+            // RevolverCylinderPatch
+            MethodInfo loadFromSpeedLoaderOriginal = typeof(RevolverCylinder).GetMethod("LoadFromSpeedLoader", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo loadFromSpeedLoaderPrefix = typeof(RevolverCylinderPatch).GetMethod("LoadFromSpeedLoaderPrefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            PatchController.Verify(loadFromSpeedLoaderOriginal, harmony, true);
+            harmony.Patch(loadFromSpeedLoaderOriginal, new HarmonyMethod(loadFromSpeedLoaderPrefix));
+
+            // RevolvingShotgunPatch
+            MethodInfo loadCylinderOriginal = typeof(RevolvingShotgun).GetMethod("LoadCylinder", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo loadCylinderPrefix = typeof(RevolvingShotgunPatch).GetMethod("LoadCylinderPrefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo ejectCylinderOriginal = typeof(RevolvingShotgun).GetMethod("LoadCylinder", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo ejectCylinderPrefix = typeof(RevolvingShotgunPatch).GetMethod("EjectCylinderPrefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            PatchController.Verify(loadCylinderOriginal, harmony, true);
+            PatchController.Verify(ejectCylinderOriginal, harmony, true);
+            harmony.Patch(loadCylinderOriginal, new HarmonyMethod(loadCylinderPrefix));
+            harmony.Patch(ejectCylinderOriginal, new HarmonyMethod(ejectCylinderPrefix));
+
+            // FVRFireArmRoundPatch
+            MethodInfo FVRFixedUpdateOriginal = typeof(FVRFireArmRound).GetMethod("LoadFromSpeedLoader", BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo FVRFixedUpdateTranspiler = typeof(FVRFireArmRoundPatch).GetMethod("FVRFixedUpdateTranspiler", BindingFlags.NonPublic | BindingFlags.Static);
+
+            PatchController.Verify(FVRFixedUpdateOriginal, harmony, true);
+            harmony.Patch(FVRFixedUpdateOriginal, null, null, new HarmonyMethod(FVRFixedUpdateTranspiler));
+
             // MagRemoveRoundPatch
             MethodInfo magRemoveRoundPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { }, null);
             MethodInfo magRemoveRoundPatchPrefix = typeof(MagRemoveRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
@@ -3393,6 +3418,15 @@ namespace EFM
             {
                 if(round == null)
                 {
+                    if (meatovItem.chamberContent.ContainsKey(__instance))
+                    {
+                        meatovItem.chamberContent[__instance] = null;
+                    }
+                    else
+                    {
+                        Mod.LogError("Tried to set round in chamber that immediate meatov item parent did not have:\n" + Environment.StackTrace);
+                    }
+
                     if (__instance.GetRound() != null)
                     {
                         meatovItem.currentWeight -= Mod.GetRoundWeight(__instance.GetRound().RoundType);
@@ -3400,6 +3434,16 @@ namespace EFM
                 }
                 else
                 {
+                    MeatovItem roundMeatovItem = __instance.GetComponentInParent<MeatovItem>();
+                    if (meatovItem.chamberContent.ContainsKey(__instance))
+                    {
+                        meatovItem.chamberContent[__instance] = roundMeatovItem.itemData;
+                    }
+                    else
+                    {
+                        Mod.LogError("Tried to set round in chamber that immediate meatov item parent did not have:\n" + Environment.StackTrace);
+                    }
+
                     if (__instance.GetRound() == null)
                     {
                         meatovItem.currentWeight += Mod.GetRoundWeight(round.RoundType);
@@ -3424,6 +3468,15 @@ namespace EFM
             {
                 if (round == null)
                 {
+                    if (meatovItem.chamberContent.ContainsKey(__instance))
+                    {
+                        meatovItem.chamberContent[__instance] = null;
+                    }
+                    else
+                    {
+                        Mod.LogError("Tried to set round in chamber that immediate meatov item parent did not have:\n" + Environment.StackTrace);
+                    }
+
                     if (__instance.GetRound() != null)
                     {
                         meatovItem.currentWeight -= Mod.GetRoundWeight(__instance.GetRound().RoundType);
@@ -3431,6 +3484,16 @@ namespace EFM
                 }
                 else
                 {
+                    MeatovItem roundMeatovItem = __instance.GetComponentInParent<MeatovItem>();
+                    if (meatovItem.chamberContent.ContainsKey(__instance))
+                    {
+                        meatovItem.chamberContent[__instance] = roundMeatovItem.itemData;
+                    }
+                    else
+                    {
+                        Mod.LogError("Tried to set round in chamber that immediate meatov item parent did not have:\n" + Environment.StackTrace);
+                    }
+
                     if (__instance.GetRound() == null)
                     {
                         meatovItem.currentWeight += Mod.GetRoundWeight(round.RoundType);
@@ -3473,6 +3536,225 @@ namespace EFM
         }
     }
 
+    // Patches RevolverCylinder
+    class RevolverCylinderPatch
+    {
+        static bool LoadFromSpeedLoaderPrefix(RevolverCylinder __instance, Speedloader loader)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
+            MeatovItem loaderMeatovItem = loader.GetComponent<MeatovItem>();
+            if(loaderMeatovItem == null)
+            {
+                Mod.LogError("LoadFromSpeedLoaderPrefix on loader " + loader.name + " did not have meatov item");
+                return true;
+            }
+
+            __instance.SpeedLoaderID = loader.ObjectWrapper.ItemID;
+            __instance.m_hasSpeedLoadedIn = true;
+            bool flag = false;
+            for (int i = 0; i < loader.Chambers.Count; i++)
+            {
+                if (i < __instance.Revolver.Chambers.Length)
+                {
+                    if (loader.Chambers[i].IsLoaded)
+                    {
+                        if (!__instance.Revolver.Chambers[i].IsFull)
+                        {
+                            if (loader.Chambers[i].IsSpent)
+                            {
+                                __instance.Revolver.Chambers[i].Autochamber(loader.Chambers[i].Unload());
+                                __instance.Revolver.Chambers[i].Fire();
+                            }
+                            else
+                            {
+                                MeatovItem meatovItem = __instance.Revolver.GetComponent<MeatovItem>();
+                                meatovItem.chamberContent[__instance.Revolver.Chambers[i]] = loaderMeatovItem.SLChamberContent[loader.Chambers[i]];
+
+                                __instance.Revolver.Chambers[i].SetRound(loader.Chambers[i].Unload(), loader.Chambers[i].transform.position, loader.Chambers[i].transform.rotation);
+                            }
+                            flag = true;
+                        }
+                    }
+                }
+            }
+            if (flag)
+            {
+                __instance.Revolver.PlayAudioEvent(FirearmAudioEventType.MagazineIn, 1f);
+                if (__instance.MoonClip != null)
+                {
+                    __instance.MoonClip.SetActive(true);
+                }
+            }
+
+            return false;
+        }
+    }
+
+    // Patches RevolvingShotgun
+    class RevolvingShotgunPatch
+    {
+        static bool LoadCylinderPrefix(RevolvingShotgun __instance, Speedloader s, ref bool __result)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
+            MeatovItem shotgunMeatovItem = __instance.GetComponent<MeatovItem>();
+            if(shotgunMeatovItem == null)
+            {
+                Mod.LogError("LoadCylinderPrefix on shotgun " + __instance.name + " did not have meatov item");
+                return true;
+            }
+
+            MeatovItem SLMeatovItem = s.GetComponent<MeatovItem>();
+            if(SLMeatovItem == null)
+            {
+                Mod.LogError("LoadCylinderPrefix on speedlaoder " + s.name + " did not have meatov item");
+                return true;
+            }
+
+            if (__instance.CylinderLoaded)
+            {
+                __result = false;
+                return false;
+            }
+
+            // Store cylinder data
+            shotgunMeatovItem.cylinderData = SLMeatovItem.itemData;
+
+            __instance.CylinderLoaded = true;
+            __instance.ProxyCylinder.gameObject.SetActive(__instance.CylinderLoaded);
+            __instance.PlayAudioEvent(FirearmAudioEventType.MagazineIn, 1f);
+            __instance.m_curChamber = 0;
+            if (__instance.DoesCylinderRotate)
+            {
+                __instance.ProxyCylinder.localRotation = __instance.GetLocalRotationFromCylinder(__instance.m_curChamber);
+            }
+            for (int i = 0; i < __instance.Chambers.Length; i++)
+            {
+                if (s.Chambers[i].IsLoaded)
+                {
+                    __instance.Chambers[i].Autochamber(s.Chambers[i].LoadedClass);
+                    if (s.Chambers[i].IsSpent)
+                    {
+                        __instance.Chambers[i].IsSpent = true;
+                    }
+                    else
+                    {
+                        __instance.Chambers[i].IsSpent = false;
+                    }
+
+                    shotgunMeatovItem.chamberContent[__instance.Chambers[i]] = SLMeatovItem.SLChamberContent[s.Chambers[i]];
+                }
+                else
+                {
+                    __instance.Chambers[i].Unload();
+                }
+                __instance.Chambers[i].UpdateProxyDisplay();
+            }
+            __result = true;
+
+            return false;
+        }
+
+        static bool EjectCylinderPrefix(RevolvingShotgun __instance, ref Speedloader __result)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
+            MeatovItem shotgunMeatovItem = __instance.GetComponent<MeatovItem>();
+            if(shotgunMeatovItem == null)
+            {
+                Mod.LogError("EjectCylinderPrefix on shotgun " + __instance.name + " did not have meatov item");
+                return true;
+            }
+
+            GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(__instance.CylinderPrefab, __instance.CyclinderMountPoint.position, __instance.CyclinderMountPoint.rotation);
+
+            // Set newly instantiated cylinder's data to what we had stored
+            MeatovItem cylinderMeatovItem = gameObject.GetComponent<MeatovItem>();
+            cylinderMeatovItem.SetData(shotgunMeatovItem.cylinderData);
+
+            Speedloader component = gameObject.GetComponent<Speedloader>();
+            __instance.PlayAudioEvent(FirearmAudioEventType.MagazineOut, 1f);
+            for (int i = 0; i < component.Chambers.Count; i++)
+            {
+                if (!__instance.Chambers[i].IsFull)
+                {
+                    component.Chambers[i].Unload();
+                }
+                else if (__instance.Chambers[i].IsSpent)
+                {
+                    component.Chambers[i].LoadEmpty(__instance.Chambers[i].GetRound().RoundClass, false);
+                }
+                else
+                {
+                    component.Chambers[i].Load(__instance.Chambers[i].GetRound().RoundClass, false);
+
+                    // Set speedloader's content
+                    cylinderMeatovItem.SLChamberContent[component.Chambers[i]] = shotgunMeatovItem.chamberContent[__instance.Chambers[i]];
+                }
+                __instance.Chambers[i].UpdateProxyDisplay();
+            }
+            __instance.EjectDelay = 0.4f;
+            __instance.CylinderLoaded = false;
+            __instance.ProxyCylinder.gameObject.SetActive(__instance.CylinderLoaded);
+            __result = component;
+
+            return false;
+        }
+    }
+
+    // Patches FVRFireArmRound
+    class FVRFireArmRoundPatch
+    {
+        public static void SpeedLoaderChamberLoad(FVRFireArmRound round)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            MeatovItem loaderMeatovItem = round.m_hoverOverReloadTrigger.SpeedloaderChamber.GetComponentInParent<MeatovItem>();
+            MeatovItem roundMeatovItem = round.GetComponent<MeatovItem>();
+            if(loaderMeatovItem == null || roundMeatovItem == null)
+            {
+                Mod.LogError("SpeedLoaderChamberLoad loaderMeatovItem == null?: "+(loaderMeatovItem == null)+ ", roundMeatovItem == null?: "+(roundMeatovItem)+":\n"+Environment.StackTrace);
+            }
+            else
+            {
+                loaderMeatovItem.SLChamberContent[round.m_hoverOverReloadTrigger.SpeedloaderChamber] = roundMeatovItem.itemData;
+            }
+        }
+
+        // Patches FVRFixedUpdate to track when we load a speed loader chamber
+        static IEnumerable<CodeInstruction> FVRFixedUpdateTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
+        {
+            List<CodeInstruction> instructionList = new List<CodeInstruction>(instructions);
+            List<CodeInstruction> toInsert = new List<CodeInstruction>();
+            toInsert.Add(new CodeInstruction(OpCodes.Ldarg_0));
+            toInsert.Add(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(FVRFireArmRoundPatch), "SpeedLoaderChamberLoad")));
+
+            for (int i = 0; i < instructionList.Count; ++i)
+            {
+                CodeInstruction instruction = instructionList[i];
+                if ((instruction.opcode == OpCodes.Callvirt || instruction.opcode == OpCodes.Call) && instruction.operand.ToString().Contains("SpeedloaderChamber Load"))
+                {
+                    instructionList.InsertRange(i + 1, toInsert);
+                    break;
+                }
+            }
+            return instructionList;
+        }
+    }
+
     // Patches FVRFireArmMagazine.RemoveRound() to track ammo box ammo
     class MagRemoveRoundPatch
     {
@@ -3488,6 +3770,9 @@ namespace EFM
                 MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
                 if (meatovItem != null)
                 {
+                    // Manage ammo content
+                    meatovItem.ammoContent.RemoveAt(meatovItem.ammoContent.Count - 1);
+
                     // Manage weight
                     meatovItem.currentWeight -= Mod.GetRoundWeight(__instance.RoundType);
 
@@ -3544,6 +3829,9 @@ namespace EFM
                 MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
                 if (meatovItem != null)
                 {
+                    // Manage ammo content
+                    meatovItem.ammoContent.RemoveAt(meatovItem.ammoContent.Count - 1);
+
                     // Manage weight
                     meatovItem.currentWeight -= Mod.GetRoundWeight(__instance.RoundType);
 
@@ -3599,6 +3887,9 @@ namespace EFM
                 MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
                 if (meatovItem != null)
                 {
+                    // Manage ammo content
+                    meatovItem.ammoContent.RemoveAt(meatovItem.ammoContent.Count - 1);
+
                     // Manage weight
                     meatovItem.currentWeight -= Mod.GetRoundWeight(__instance.RoundType);
 
@@ -3654,6 +3945,9 @@ namespace EFM
                 MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
                 if (meatovItem != null)
                 {
+                    // Manage ammo content
+                    meatovItem.ammoContent.RemoveAt(meatovItem.ammoContent.Count - 1);
+
                     // Manage weight
                     meatovItem.currentWeight -= Mod.GetRoundWeight(__instance.RoundType);
                 }
@@ -3677,6 +3971,9 @@ namespace EFM
                 MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
                 if (meatovItem != null)
                 {
+                    // Manage ammo content
+                    meatovItem.ammoContent.RemoveAt(meatovItem.ammoContent.Count - 1);
+
                     // Manage weight
                     meatovItem.currentWeight -= Mod.GetRoundWeight(__instance.RoundType);
                 }
@@ -3699,6 +3996,9 @@ namespace EFM
                 MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
                 if (meatovItem != null)
                 {
+                    // Manage ammo content
+                    meatovItem.ammoContent.RemoveAt(meatovItem.ammoContent.Count - 1);
+
                     // Manage weight
                     meatovItem.currentWeight -= Mod.GetRoundWeight(__instance.RoundType);
                 }
@@ -4478,6 +4778,17 @@ namespace EFM
                 MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
                 if(meatovItem != null)
                 {
+                    // Manage ammo content
+                    MeatovItem roundItem = round.GetComponent<MeatovItem>();
+                    if(roundItem == null)
+                    {
+                        Mod.LogError("Tried to add physical round to mag but round did not have meatov item component:\n"+Environment.StackTrace);
+                    }
+                    else
+                    {
+                        meatovItem.ammoContent.Add(roundItem.itemData);
+                    }
+
                     // Manage weight
                     meatovItem.currentWeight += Mod.GetRoundWeight(__instance.RoundType);
 
@@ -4614,7 +4925,7 @@ namespace EFM
     {
         public static int clipAddRoundSkip;
 
-        static void Prefix(FVRFireArmClip __instance)
+        static void Prefix(FVRFireArmClip __instance, FVRFireArmRound round)
         {
             if (!Mod.inMeatovScene || clipAddRoundSkip > 0)
             {
@@ -4626,6 +4937,17 @@ namespace EFM
                 MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
                 if (meatovItem != null)
                 {
+                    // Manage ammo content
+                    MeatovItem roundItem = round.GetComponent<MeatovItem>();
+                    if (roundItem == null)
+                    {
+                        Mod.LogError("Tried to add physical round to clip but round did not have meatov item component:\n" + Environment.StackTrace);
+                    }
+                    else
+                    {
+                        meatovItem.ammoContent.Add(roundItem.itemData);
+                    }
+
                     // Manage weight
                     meatovItem.currentWeight += Mod.GetRoundWeight(__instance.RoundType);
                 }
