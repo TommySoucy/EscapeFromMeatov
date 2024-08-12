@@ -219,7 +219,6 @@ namespace EFM
                     for (int i = roundList.Count-1; i >= 0 && countLeft > 0; --i)
                     {
                         asMag.AddRound(roundList[i].physObj as FVRFireArmRound, false, true, false);
-                        owner.descriptionPack.item.ammoContent.Add(roundData);
                         --entryCount;
                         --countLeft;
                     }
@@ -229,7 +228,6 @@ namespace EFM
                     for (int i = roundList.Count - 1; i >= 0 && countLeft > 0; --i)
                     {
                         asClip.AddRound(roundList[i].physObj as FVRFireArmRound, false, true, false);
-                        owner.descriptionPack.item.ammoContent.Add(roundData);
                         --entryCount;
                         --countLeft;
                     }
@@ -244,7 +242,6 @@ namespace EFM
                             if (!asSL.Chambers[j].IsLoaded)
                             {
                                 asSL.Chambers[j].Load(roundList[i].roundClass);
-                                owner.descriptionPack.item.ammoContent.Add(roundData);
                                 roundList[i].Destroy();
                                 --entryCount;
                                 --countLeft;
@@ -282,7 +279,6 @@ namespace EFM
                     for (int i = hideoutRoundList.Count-1; i >= 0 && countLeft > 0; --i)
                     {
                         asMag.AddRound(hideoutRoundList[i].physObj as FVRFireArmRound, false, true, false);
-                        owner.descriptionPack.item.ammoContent.Add(roundData);
                         --entryCount;
                         --countLeft;
                     }
@@ -292,7 +288,6 @@ namespace EFM
                     for (int i = hideoutRoundList.Count - 1; i >= 0 && countLeft > 0; --i)
                     {
                         asClip.AddRound(hideoutRoundList[i].physObj as FVRFireArmRound, false, true, false);
-                        owner.descriptionPack.item.ammoContent.Add(roundData);
                         --entryCount;
                         --countLeft;
                     }
@@ -307,7 +302,6 @@ namespace EFM
                             if (!asSL.Chambers[j].IsLoaded)
                             {
                                 asSL.Chambers[j].Load(hideoutRoundList[i].roundClass);
-                                owner.descriptionPack.item.ammoContent.Add(roundData);
                                 hideoutRoundList[i].Destroy();
                                 --entryCount;
                                 --countLeft;
@@ -354,14 +348,12 @@ namespace EFM
                             if (lr.LR_Class == roundData.roundClass)
                             {
                                 asMag.AddRound(roundData.roundClass, false, true);
-                                owner.descriptionPack.item.ammoContent.Add(roundData);
                                 --entryCount;
                                 --countLeft;
 
                                 // Remove the correct round
                                 boxMag.LoadedRounds[i] = boxMag.LoadedRounds[boxMag.m_numRounds - 1];
                                 boxMag.LoadedRounds[boxMag.m_numRounds - 1] = null;
-                                ammobox.Key.ammoContent.RemoveAt(i);
                                 --boxMag.m_numRounds;
 
 
@@ -384,13 +376,11 @@ namespace EFM
                             if (lr.LR_Class == roundData.roundClass)
                             {
                                 asClip.AddRound(roundData.roundClass, false, true);
-                                owner.descriptionPack.item.ammoContent.Add(roundData);
                                 --entryCount;
                                 --countLeft;
 
                                 boxMag.LoadedRounds[i] = boxMag.LoadedRounds[boxMag.m_numRounds - 1];
                                 boxMag.LoadedRounds[boxMag.m_numRounds - 1] = null;
-                                ammobox.Key.ammoContent.RemoveAt(i);
                                 --boxMag.m_numRounds;
 
                                 --Mod.ammoBoxesByRoundClassByRoundType[roundData.roundType][lr.LR_Class][ammobox.Key];
@@ -414,7 +404,6 @@ namespace EFM
                                     if (!asSL.Chambers[j].IsLoaded)
                                     {
                                         asSL.Chambers[j].Load(roundData.roundClass);
-                                        owner.descriptionPack.item.ammoContent.Add(roundData);
                                         --entryCount;
                                         --countLeft;
                                         found = true;
@@ -428,7 +417,6 @@ namespace EFM
 
                                 boxMag.LoadedRounds[i] = boxMag.LoadedRounds[boxMag.m_numRounds - 1];
                                 boxMag.LoadedRounds[boxMag.m_numRounds - 1] = null;
-                                ammobox.Key.ammoContent.RemoveAt(i);
                                 --boxMag.m_numRounds;
 
                                 --Mod.ammoBoxesByRoundClassByRoundType[roundData.roundType][lr.LR_Class][ammobox.Key];
@@ -499,13 +487,11 @@ namespace EFM
                             if (lr.LR_Class == roundData.roundClass)
                             {
                                 asMag.AddRound(roundData.roundClass, false, true);
-                                owner.descriptionPack.item.ammoContent.Add(roundData);
                                 --entryCount;
                                 --countLeft;
 
                                 boxMag.LoadedRounds[i] = boxMag.LoadedRounds[boxMag.m_numRounds - 1];
                                 boxMag.LoadedRounds[boxMag.m_numRounds - 1] = null;
-                                ammobox.Key.ammoContent.RemoveAt(i);
                                 --boxMag.m_numRounds;
 
                                 --HideoutController.instance.ammoBoxesByRoundClassByRoundType[roundData.roundType][lr.LR_Class][ammobox.Key];
@@ -524,13 +510,11 @@ namespace EFM
                             if (lr.LR_Class == roundData.roundClass)
                             {
                                 asClip.AddRound(roundData.roundClass, false, true);
-                                owner.descriptionPack.item.ammoContent.Add(roundData);
                                 --entryCount;
                                 --countLeft;
 
                                 boxMag.LoadedRounds[i] = boxMag.LoadedRounds[boxMag.m_numRounds - 1];
                                 boxMag.LoadedRounds[boxMag.m_numRounds - 1] = null;
-                                ammobox.Key.ammoContent.RemoveAt(i);
                                 --boxMag.m_numRounds;
 
                                 --HideoutController.instance.ammoBoxesByRoundClassByRoundType[roundData.roundType][lr.LR_Class][ammobox.Key];
@@ -554,7 +538,6 @@ namespace EFM
                                     if (!asSL.Chambers[j].IsLoaded)
                                     {
                                         asSL.Chambers[j].Load(roundData.roundClass);
-                                        owner.descriptionPack.item.ammoContent.Add(roundData);
                                         --entryCount;
                                         --countLeft;
                                         found = true;
@@ -568,7 +551,6 @@ namespace EFM
 
                                 boxMag.LoadedRounds[i] = boxMag.LoadedRounds[boxMag.m_numRounds - 1];
                                 boxMag.LoadedRounds[boxMag.m_numRounds - 1] = null;
-                                ammobox.Key.ammoContent.RemoveAt(i);
                                 --boxMag.m_numRounds;
 
                                 --HideoutController.instance.ammoBoxesByRoundClassByRoundType[roundData.roundType][lr.LR_Class][ammobox.Key];

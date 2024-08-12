@@ -158,13 +158,6 @@ namespace EFM
             PatchController.Verify(handUpdatePatchOriginal, harmony, true);
             harmony.Patch(handUpdatePatchOriginal, new HarmonyMethod(handUpdatePatchPrefix));
 
-            // MagazineUpdateInteractionPatch
-            MethodInfo magazineUpdateInteractionPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("UpdateInteraction", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo magazineUpdateInteractionPatchTranspiler = typeof(MagazineUpdateInteractionPatch).GetMethod("Transpiler", BindingFlags.NonPublic | BindingFlags.Static);
-
-            PatchController.Verify(magazineUpdateInteractionPatchOriginal, harmony, true);
-            harmony.Patch(magazineUpdateInteractionPatchOriginal, null, null, new HarmonyMethod(magazineUpdateInteractionPatchTranspiler));
-
             //// ClipUpdateInteractionPatch
             //MethodInfo clipUpdateInteractionPatchOriginal = typeof(FVRFireArmClip).GetMethod("UpdateInteraction", BindingFlags.Public | BindingFlags.Instance);
             //MethodInfo clipUpdateInteractionPatchPostfix = typeof(ClipUpdateInteractionPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
@@ -200,67 +193,6 @@ namespace EFM
 
             PatchController.Verify(chamberSetRoundClassPatchOriginal, harmony, true);
             harmony.Patch(chamberSetRoundClassPatchOriginal, new HarmonyMethod(chamberSetRoundClassPatchPrefix));
-
-            // RevolverCylinderPatch
-            MethodInfo loadFromSpeedLoaderOriginal = typeof(RevolverCylinder).GetMethod("LoadFromSpeedLoader", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo loadFromSpeedLoaderPrefix = typeof(RevolverCylinderPatch).GetMethod("LoadFromSpeedLoaderPrefix", BindingFlags.NonPublic | BindingFlags.Static);
-
-            PatchController.Verify(loadFromSpeedLoaderOriginal, harmony, true);
-            harmony.Patch(loadFromSpeedLoaderOriginal, new HarmonyMethod(loadFromSpeedLoaderPrefix));
-
-            // RevolvingShotgunPatch
-            MethodInfo loadCylinderOriginal = typeof(RevolvingShotgun).GetMethod("LoadCylinder", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo loadCylinderPrefix = typeof(RevolvingShotgunPatch).GetMethod("LoadCylinderPrefix", BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo ejectCylinderOriginal = typeof(RevolvingShotgun).GetMethod("LoadCylinder", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo ejectCylinderPrefix = typeof(RevolvingShotgunPatch).GetMethod("EjectCylinderPrefix", BindingFlags.NonPublic | BindingFlags.Static);
-
-            PatchController.Verify(loadCylinderOriginal, harmony, true);
-            PatchController.Verify(ejectCylinderOriginal, harmony, true);
-            harmony.Patch(loadCylinderOriginal, new HarmonyMethod(loadCylinderPrefix));
-            harmony.Patch(ejectCylinderOriginal, new HarmonyMethod(ejectCylinderPrefix));
-
-            // FVRFireArmRoundPatch
-            MethodInfo FVRFixedUpdateOriginal = typeof(FVRFireArmRound).GetMethod("LoadFromSpeedLoader", BindingFlags.NonPublic | BindingFlags.Instance);
-            MethodInfo FVRFixedUpdateTranspiler = typeof(FVRFireArmRoundPatch).GetMethod("FVRFixedUpdateTranspiler", BindingFlags.NonPublic | BindingFlags.Static);
-
-            PatchController.Verify(FVRFixedUpdateOriginal, harmony, true);
-            harmony.Patch(FVRFixedUpdateOriginal, null, null, new HarmonyMethod(FVRFixedUpdateTranspiler));
-
-            // BAPPatch
-            MethodInfo updateBoltOriginal = typeof(BAP).GetMethod("UpdateBolt", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo updateBoltTranspiler = typeof(BAPPatch).GetMethod("UpdateBoltTranspiler", BindingFlags.NonPublic | BindingFlags.Static);
-
-            PatchController.Verify(updateBoltOriginal, harmony, true);
-            harmony.Patch(updateBoltOriginal, null, null, new HarmonyMethod(updateBoltTranspiler));
-
-            // BoltActionRiflePatch
-            MethodInfo boltActionRifleUpdateBoltOriginal = typeof(BoltActionRifle).GetMethod("UpdateBolt", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo boltActionRifleUpdateBoltTranspiler = typeof(BoltActionRiflePatch).GetMethod("UpdateBoltTranspiler", BindingFlags.NonPublic | BindingFlags.Static);
-
-            PatchController.Verify(boltActionRifleUpdateBoltOriginal, harmony, true);
-            harmony.Patch(boltActionRifleUpdateBoltOriginal, null, null, new HarmonyMethod(boltActionRifleUpdateBoltTranspiler));
-
-            // ClosedBoltWeaponPatch
-            MethodInfo closedBoltWeaponBeginChamberingRoundOriginal = typeof(ClosedBoltWeapon).GetMethod("BeginChamberingRound", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo closedBoltWeaponBeginChamberingRoundPrefix = typeof(ClosedBoltWeaponPatch).GetMethod("BeginChamberingRoundPrefix", BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo closedBoltWeaponChamberRoundOriginal = typeof(ClosedBoltWeapon).GetMethod("ChamberRound", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo closedBoltWeaponChamberRoundPrefix = typeof(ClosedBoltWeaponPatch).GetMethod("ChamberRoundPrefix", BindingFlags.NonPublic | BindingFlags.Static);
-
-            PatchController.Verify(closedBoltWeaponBeginChamberingRoundOriginal, harmony, true);
-            PatchController.Verify(closedBoltWeaponChamberRoundOriginal, harmony, true);
-            harmony.Patch(closedBoltWeaponBeginChamberingRoundOriginal, new HarmonyMethod(closedBoltWeaponBeginChamberingRoundPrefix));
-            harmony.Patch(closedBoltWeaponChamberRoundOriginal, new HarmonyMethod(closedBoltWeaponChamberRoundPrefix));
-
-            // HandgunPatch
-            MethodInfo handgunExtractRoundOriginal = typeof(Handgun).GetMethod("ExtractRound", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo handgunExtractRoundPrefix = typeof(HandgunPatch).GetMethod("BeginChamberingRoundPrefix", BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo handgunChamberRoundOriginal = typeof(Handgun).GetMethod("ChamberRound", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo handgunChamberRoundPrefix = typeof(HandgunPatch).GetMethod("ChamberRoundPrefix", BindingFlags.NonPublic | BindingFlags.Static);
-
-            PatchController.Verify(handgunExtractRoundOriginal, harmony, true);
-            PatchController.Verify(handgunChamberRoundOriginal, harmony, true);
-            harmony.Patch(handgunExtractRoundOriginal, new HarmonyMethod(handgunExtractRoundPrefix));
-            harmony.Patch(handgunChamberRoundOriginal, new HarmonyMethod(handgunChamberRoundPrefix));
 
             // MagRemoveRoundPatch
             MethodInfo magRemoveRoundPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { }, null);
@@ -419,16 +351,6 @@ namespace EFM
 
             //PatchController.Verify(entityCheckPatchOriginal, harmony, true);
             //harmony.Patch(entityCheckPatchOriginal, new HarmonyMethod(entityCheckPatchPrefix));
-
-            // ChamberEjectRoundPatch
-            MethodInfo chamberEjectRoundPatchOriginal = typeof(FVRFireArmChamber).GetMethod("EjectRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(Vector3), typeof(Vector3), typeof(Vector3), typeof(bool) }, null);
-            MethodInfo chamberEjectRoundPatchAnimationOriginal = typeof(FVRFireArmChamber).GetMethod("EjectRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(Vector3), typeof(Vector3), typeof(Vector3), typeof(Vector3), typeof(Quaternion), typeof(bool) }, null);
-            MethodInfo chamberEjectRoundPatchPostfix = typeof(ChamberEjectRoundPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
-
-            PatchController.Verify(chamberEjectRoundPatchOriginal, harmony, true);
-            PatchController.Verify(chamberEjectRoundPatchAnimationOriginal, harmony, true);
-            harmony.Patch(chamberEjectRoundPatchOriginal, null, new HarmonyMethod(chamberEjectRoundPatchPostfix));
-            harmony.Patch(chamberEjectRoundPatchAnimationOriginal, null, new HarmonyMethod(chamberEjectRoundPatchPostfix));
 
             //// GlobalFixedUpdatePatch
             //MethodInfo globalFixedUpdatePatchOriginal = typeof(FVRInteractiveObject).GetMethod("GlobalFixedUpdate", BindingFlags.Public | BindingFlags.Static);
@@ -3163,156 +3085,6 @@ namespace EFM
         }
     }
 
-    // Patches FVRFireArmMagazine.UpdateInteraction to set round item data
-    class MagazineUpdateInteractionPatch
-    {
-        public static MeatovItemData roundData;
-
-        public static void SetRoundItemData(GameObject round)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return;
-            }
-
-            MeatovItem roundMeatovItem = round.GetComponent<MeatovItem>();
-            if(roundMeatovItem != null)
-            {
-                roundMeatovItem.SetData(roundData);
-            }
-        }
-
-        public static void StoreRoundItemData(FVRFireArmMagazine instance)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return;
-            }
-
-            MeatovItem magMeatovItem = instance.GetComponent<MeatovItem>();
-            if(magMeatovItem != null)
-            {
-                roundData = magMeatovItem.ammoContent[magMeatovItem.ammoContent.Count - 1];
-            }
-        }
-
-        static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
-        {
-            List<CodeInstruction> instructionList = new List<CodeInstruction>(instructions);
-            List<CodeInstruction> toInsert0 = new List<CodeInstruction>();
-            toInsert0.Add(new CodeInstruction(OpCodes.Ldarg_0));
-            toInsert0.Add(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(MagazineUpdateInteractionPatch), "StoreRoundItemData")));
-            List<CodeInstruction> toInsert1 = new List<CodeInstruction>();
-            toInsert1.Add(new CodeInstruction(OpCodes.Ldloc_S, 25));
-            toInsert1.Add(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(MagazineUpdateInteractionPatch), "SetRoundItemData")));
-            List<CodeInstruction> toInsert2 = new List<CodeInstruction>();
-            toInsert2.Add(new CodeInstruction(OpCodes.Ldloc_S, 30));
-            toInsert2.Add(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(MagazineUpdateInteractionPatch), "SetRoundItemData")));
-            List<CodeInstruction> toInsert3 = new List<CodeInstruction>();
-            toInsert3.Add(new CodeInstruction(OpCodes.Ldloc_S, 35));
-            toInsert3.Add(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(MagazineUpdateInteractionPatch), "SetRoundItemData")));
-
-            int index = 0;
-            for (int i = 0; i < instructionList.Count; ++i)
-            {
-                CodeInstruction instruction = instructionList[i];
-                if ((instruction.opcode == OpCodes.Call || instruction.opcode == OpCodes.Callvirt) && instruction.operand.ToString().Equals("UnityEngine.GameObject RemoveRound(Boolean)"))
-                {
-                    if (index == 0)
-                    {
-                        instructionList.InsertRange(i, toInsert0);
-                        instructionList.InsertRange(i+12, toInsert1);
-                        i += 3;
-                        ++index;
-                    }
-                    else if (index == 1)
-                    {
-                        instructionList.InsertRange(i, toInsert0);
-                        instructionList.InsertRange(i + 11, toInsert2);
-                        i += 3;
-                        ++index;
-                    }
-                    else if (index == 2)
-                    {
-                        instructionList.InsertRange(i, toInsert0);
-                        instructionList.InsertRange(i + 11, toInsert3);
-                        i += 3;
-                        break;
-                    }
-                }
-            }
-            return instructionList;
-        }
-    }
-
-    // Patches FVRFireArmClip to get the created round item when ejected from the magazine so we can set its location index and update the lists accordingly
-    class ClipUpdateInteractionPatch
-    {
-        static GameObject latestEjectedRound;
-        static int latestEjectedRoundLocation = 0;
-
-        static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
-        {
-            List<CodeInstruction> instructionList = new List<CodeInstruction>(instructions);
-            List<CodeInstruction> toInsert = new List<CodeInstruction>();
-            toInsert.Add(new CodeInstruction(OpCodes.Stsfld, AccessTools.Field(typeof(MagazineUpdateInteractionPatch), "latestEjectedRound")));
-            toInsert.Add(new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(MagazineUpdateInteractionPatch), "latestEjectedRound")));
-
-            for (int i = 0; i < instructionList.Count; ++i)
-            {
-                CodeInstruction instruction = instructionList[i];
-                if (instruction.opcode == OpCodes.Call && instruction.operand.ToString().Equals("UnityEngine.GameObject RemoveRound(Boolean)"))
-                {
-                    if (instructionList[i + 1].opcode == OpCodes.Stloc_1)
-                    {
-                        instructionList.InsertRange(i + 1, toInsert);
-
-                        // Now in hand
-                        instructionList.Insert(i + 5, new CodeInstruction(OpCodes.Ldc_I4_0));
-                        instructionList.Insert(i + 6, new CodeInstruction(OpCodes.Stsfld, AccessTools.Field(typeof(MagazineUpdateInteractionPatch), "latestEjectedRoundLocation")));
-                    }
-                    else if (instructionList[i + 1].opcode == OpCodes.Stloc_S)
-                    {
-                        if (instructionList[i + 1].operand.ToString().Equals("UnityEngine.GameObject (6)"))
-                        {
-                            instructionList.InsertRange(i + 1, toInsert);
-
-                            // Now in slot, could be in raid or base so can just take the one in mod
-                            instructionList.Insert(i + 5, new CodeInstruction(OpCodes.Ldc_I4_1));
-                            instructionList.Insert(i + 6, new CodeInstruction(OpCodes.Stsfld, AccessTools.Field(typeof(MagazineUpdateInteractionPatch), "latestEjectedRoundLocation")));
-                        }
-                        else if (instructionList[i + 1].operand.ToString().Equals("UnityEngine.GameObject (11)"))
-                        {
-                            instructionList.InsertRange(i + 1, toInsert);
-
-                            // Now in slot, could be in raid or base so can just take the one in mod
-                            instructionList.Insert(i + 5, new CodeInstruction(OpCodes.Ldc_I4_1));
-                            instructionList.Insert(i + 6, new CodeInstruction(OpCodes.Stsfld, AccessTools.Field(typeof(MagazineUpdateInteractionPatch), "latestEjectedRoundLocation")));
-                        }
-                    }
-                }
-            }
-            return instructionList;
-        }
-
-        static void Postfix()
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return;
-            }
-
-            if (latestEjectedRound != null)
-            {
-                MeatovItem MI = latestEjectedRound.GetComponent<MeatovItem>();
-
-                MI.UpdateInventories();
-
-                latestEjectedRound = null;
-            }
-        }
-    }
-
     // Patches FVRMovementManager.Jump to make it use stamina or to prevent it altogether if not enough stamina
     // This completely replaces the original
     class MovementManagerJumpPatch
@@ -3469,15 +3241,6 @@ namespace EFM
             {
                 if(round == null)
                 {
-                    if (meatovItem.chamberContent.ContainsKey(__instance))
-                    {
-                        meatovItem.chamberContent[__instance] = null;
-                    }
-                    else
-                    {
-                        Mod.LogError("Tried to set round in chamber that immediate meatov item parent did not have:\n" + Environment.StackTrace);
-                    }
-
                     if (__instance.GetRound() != null)
                     {
                         meatovItem.currentWeight -= Mod.GetRoundWeight(__instance.GetRound().RoundType);
@@ -3485,19 +3248,6 @@ namespace EFM
                 }
                 else
                 {
-                    MeatovItem roundMeatovItem = round.GetComponent<MeatovItem>();
-                    if(roundMeatovItem != null)
-                    {
-                        if (meatovItem.chamberContent.ContainsKey(__instance))
-                        {
-                            meatovItem.chamberContent[__instance] = roundMeatovItem.itemData;
-                        }
-                        else
-                        {
-                            Mod.LogError("Tried to set round in chamber that immediate meatov item parent did not have:\n" + Environment.StackTrace);
-                        }
-                    }
-
                     if (__instance.GetRound() == null)
                     {
                         meatovItem.currentWeight += Mod.GetRoundWeight(round.RoundType);
@@ -3522,15 +3272,6 @@ namespace EFM
             {
                 if (round == null)
                 {
-                    if (meatovItem.chamberContent.ContainsKey(__instance))
-                    {
-                        meatovItem.chamberContent[__instance] = null;
-                    }
-                    else
-                    {
-                        Mod.LogError("Tried to set round in chamber that immediate meatov item parent did not have:\n" + Environment.StackTrace);
-                    }
-
                     if (__instance.GetRound() != null)
                     {
                         meatovItem.currentWeight -= Mod.GetRoundWeight(__instance.GetRound().RoundType);
@@ -3538,19 +3279,6 @@ namespace EFM
                 }
                 else
                 {
-                    MeatovItem roundMeatovItem = round.GetComponent<MeatovItem>();
-                    if (roundMeatovItem != null)
-                    {
-                        if (meatovItem.chamberContent.ContainsKey(__instance))
-                        {
-                            meatovItem.chamberContent[__instance] = roundMeatovItem.itemData;
-                        }
-                        else
-                        {
-                            Mod.LogError("Tried to set round in chamber that immediate meatov item parent did not have:\n" + Environment.StackTrace);
-                        }
-                    }
-
                     if (__instance.GetRound() == null)
                     {
                         meatovItem.currentWeight += Mod.GetRoundWeight(round.RoundType);
@@ -3593,511 +3321,6 @@ namespace EFM
         }
     }
 
-    // Patches RevolverCylinder
-    class RevolverCylinderPatch
-    {
-        static bool LoadFromSpeedLoaderPrefix(RevolverCylinder __instance, Speedloader loader)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return true;
-            }
-
-            MeatovItem loaderMeatovItem = loader.GetComponent<MeatovItem>();
-            if(loaderMeatovItem == null)
-            {
-                Mod.LogError("LoadFromSpeedLoaderPrefix on loader " + loader.name + " did not have meatov item");
-                return true;
-            }
-
-            __instance.SpeedLoaderID = loader.ObjectWrapper.ItemID;
-            __instance.m_hasSpeedLoadedIn = true;
-            bool flag = false;
-            for (int i = 0; i < loader.Chambers.Count; i++)
-            {
-                if (i < __instance.Revolver.Chambers.Length)
-                {
-                    if (loader.Chambers[i].IsLoaded)
-                    {
-                        if (!__instance.Revolver.Chambers[i].IsFull)
-                        {
-                            if (loader.Chambers[i].IsSpent)
-                            {
-                                __instance.Revolver.Chambers[i].Autochamber(loader.Chambers[i].Unload());
-                                __instance.Revolver.Chambers[i].Fire();
-                            }
-                            else
-                            {
-                                MeatovItem meatovItem = __instance.Revolver.GetComponent<MeatovItem>();
-                                meatovItem.chamberContent[__instance.Revolver.Chambers[i]] = loaderMeatovItem.SLChamberContent[loader.Chambers[i]];
-
-                                __instance.Revolver.Chambers[i].SetRound(loader.Chambers[i].Unload(), loader.Chambers[i].transform.position, loader.Chambers[i].transform.rotation);
-                            }
-                            flag = true;
-                        }
-                    }
-                }
-            }
-            if (flag)
-            {
-                __instance.Revolver.PlayAudioEvent(FirearmAudioEventType.MagazineIn, 1f);
-                if (__instance.MoonClip != null)
-                {
-                    __instance.MoonClip.SetActive(true);
-                }
-            }
-
-            return false;
-        }
-    }
-
-    // Patches RevolvingShotgun
-    class RevolvingShotgunPatch
-    {
-        static bool LoadCylinderPrefix(RevolvingShotgun __instance, Speedloader s, ref bool __result)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return true;
-            }
-
-            MeatovItem shotgunMeatovItem = __instance.GetComponent<MeatovItem>();
-            if(shotgunMeatovItem == null)
-            {
-                Mod.LogError("LoadCylinderPrefix on shotgun " + __instance.name + " did not have meatov item");
-                return true;
-            }
-
-            MeatovItem SLMeatovItem = s.GetComponent<MeatovItem>();
-            if(SLMeatovItem == null)
-            {
-                Mod.LogError("LoadCylinderPrefix on speedlaoder " + s.name + " did not have meatov item");
-                return true;
-            }
-
-            if (__instance.CylinderLoaded)
-            {
-                __result = false;
-                return false;
-            }
-
-            // Store cylinder data
-            shotgunMeatovItem.cylinderData = SLMeatovItem.itemData;
-
-            __instance.CylinderLoaded = true;
-            __instance.ProxyCylinder.gameObject.SetActive(__instance.CylinderLoaded);
-            __instance.PlayAudioEvent(FirearmAudioEventType.MagazineIn, 1f);
-            __instance.m_curChamber = 0;
-            if (__instance.DoesCylinderRotate)
-            {
-                __instance.ProxyCylinder.localRotation = __instance.GetLocalRotationFromCylinder(__instance.m_curChamber);
-            }
-            for (int i = 0; i < __instance.Chambers.Length; i++)
-            {
-                if (s.Chambers[i].IsLoaded)
-                {
-                    __instance.Chambers[i].Autochamber(s.Chambers[i].LoadedClass);
-                    if (s.Chambers[i].IsSpent)
-                    {
-                        __instance.Chambers[i].IsSpent = true;
-                    }
-                    else
-                    {
-                        __instance.Chambers[i].IsSpent = false;
-                    }
-
-                    shotgunMeatovItem.chamberContent[__instance.Chambers[i]] = SLMeatovItem.SLChamberContent[s.Chambers[i]];
-                }
-                else
-                {
-                    __instance.Chambers[i].Unload();
-                }
-                __instance.Chambers[i].UpdateProxyDisplay();
-            }
-            __result = true;
-
-            return false;
-        }
-
-        static bool EjectCylinderPrefix(RevolvingShotgun __instance, ref Speedloader __result)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return true;
-            }
-
-            MeatovItem shotgunMeatovItem = __instance.GetComponent<MeatovItem>();
-            if(shotgunMeatovItem == null)
-            {
-                Mod.LogError("EjectCylinderPrefix on shotgun " + __instance.name + " did not have meatov item");
-                return true;
-            }
-
-            GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(__instance.CylinderPrefab, __instance.CyclinderMountPoint.position, __instance.CyclinderMountPoint.rotation);
-
-            // Set newly instantiated cylinder's data to what we had stored
-            MeatovItem cylinderMeatovItem = gameObject.GetComponent<MeatovItem>();
-            cylinderMeatovItem.SetData(shotgunMeatovItem.cylinderData);
-
-            Speedloader component = gameObject.GetComponent<Speedloader>();
-            __instance.PlayAudioEvent(FirearmAudioEventType.MagazineOut, 1f);
-            for (int i = 0; i < component.Chambers.Count; i++)
-            {
-                if (!__instance.Chambers[i].IsFull)
-                {
-                    component.Chambers[i].Unload();
-                }
-                else if (__instance.Chambers[i].IsSpent)
-                {
-                    component.Chambers[i].LoadEmpty(__instance.Chambers[i].GetRound().RoundClass, false);
-                }
-                else
-                {
-                    component.Chambers[i].Load(__instance.Chambers[i].GetRound().RoundClass, false);
-
-                    // Set speedloader's content
-                    cylinderMeatovItem.SLChamberContent[component.Chambers[i]] = shotgunMeatovItem.chamberContent[__instance.Chambers[i]];
-                }
-                __instance.Chambers[i].UpdateProxyDisplay();
-            }
-            __instance.EjectDelay = 0.4f;
-            __instance.CylinderLoaded = false;
-            __instance.ProxyCylinder.gameObject.SetActive(__instance.CylinderLoaded);
-            __result = component;
-
-            return false;
-        }
-    }
-
-    // Patches FVRFireArmRound
-    class FVRFireArmRoundPatch
-    {
-        public static void SpeedLoaderChamberLoad(FVRFireArmRound round)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return;
-            }
-
-            MeatovItem loaderMeatovItem = round.m_hoverOverReloadTrigger.SpeedloaderChamber.GetComponentInParent<MeatovItem>();
-            MeatovItem roundMeatovItem = round.GetComponent<MeatovItem>();
-            if(loaderMeatovItem == null || roundMeatovItem == null)
-            {
-                Mod.LogError("SpeedLoaderChamberLoad loaderMeatovItem == null?: "+(loaderMeatovItem == null)+ ", roundMeatovItem == null?: "+(roundMeatovItem == null)+":\n"+Environment.StackTrace);
-            }
-            else
-            {
-                loaderMeatovItem.SLChamberContent[round.m_hoverOverReloadTrigger.SpeedloaderChamber] = roundMeatovItem.itemData;
-            }
-        }
-
-        // Patches FVRFixedUpdate to track when we load a speed loader chamber
-        static IEnumerable<CodeInstruction> FVRFixedUpdateTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
-        {
-            List<CodeInstruction> instructionList = new List<CodeInstruction>(instructions);
-            List<CodeInstruction> toInsert = new List<CodeInstruction>();
-            toInsert.Add(new CodeInstruction(OpCodes.Ldarg_0));
-            toInsert.Add(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(FVRFireArmRoundPatch), "SpeedLoaderChamberLoad")));
-
-            for (int i = 0; i < instructionList.Count; ++i)
-            {
-                CodeInstruction instruction = instructionList[i];
-                if ((instruction.opcode == OpCodes.Callvirt || instruction.opcode == OpCodes.Call) && instruction.operand.ToString().Contains("void Load"))
-                {
-                    instructionList.InsertRange(i + 1, toInsert);
-                    break;
-                }
-            }
-            return instructionList;
-        }
-    }
-
-    // Patches BAP to track round data
-    class BAPPatch
-    {
-        public static void UpdateBoltTranspilerLoadProxy(BAP instance, FVRFireArmMagazine mag)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return;
-            }
-
-            MeatovItem BAPMeatovItem = instance.GetComponent<MeatovItem>();
-            MeatovItem magMeatovItem = mag.GetComponent<MeatovItem>();
-            if(BAPMeatovItem == null || magMeatovItem == null)
-            {
-                Mod.LogError("BAPPatch.UpdateBoltTranspilerLoadProxy BAPMeatovItem == null?: " + (BAPMeatovItem == null)+ ", magMeatovItem == null?: " + (magMeatovItem == null) +":\n"+Environment.StackTrace);
-            }
-            else
-            {
-                BAPMeatovItem.ammoContent.Add(magMeatovItem.ammoContent[magMeatovItem.ammoContent.Count - 1]);
-            }
-        }
-
-        public static void UpdateBoltTranspilerLoadChamber(BAP instance)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return;
-            }
-
-            MeatovItem BAPMeatovItem = instance.GetComponent<MeatovItem>();
-            if(BAPMeatovItem == null)
-            {
-                Mod.LogError("BAPPatch.UpdateBoltTranspilerLoadChamber BAPMeatovItem == null:\n"+Environment.StackTrace);
-            }
-            else
-            {
-                BAPMeatovItem.chamberContent[instance.Chamber] = BAPMeatovItem.ammoContent[BAPMeatovItem.ammoContent.Count - 1];
-                BAPMeatovItem.ammoContent.RemoveAt(BAPMeatovItem.ammoContent.Count - 1);
-            }
-        }
-
-        // Patches UpdateBolt to track when we put a mag round into proxy, and proxy round into chamber
-        static IEnumerable<CodeInstruction> UpdateBoltTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
-        {
-            List<CodeInstruction> instructionList = new List<CodeInstruction>(instructions);
-            List<CodeInstruction> toInsert = new List<CodeInstruction>();
-            toInsert.Add(new CodeInstruction(OpCodes.Ldarg_0));
-            toInsert.Add(new CodeInstruction(OpCodes.Ldarg_0));
-            toInsert.Add(new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(BAP), "Magazine")));
-            toInsert.Add(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(BAPPatch), "UpdateBoltTranspilerLoadProxy")));
-            List<CodeInstruction> toInsert0 = new List<CodeInstruction>();
-            toInsert0.Add(new CodeInstruction(OpCodes.Ldarg_0));
-            toInsert0.Add(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(BAPPatch), "UpdateBoltTranspilerLoadChamber")));
-            bool inserted0 = false;
-
-            for (int i = 0; i < instructionList.Count; ++i)
-            {
-                CodeInstruction instruction = instructionList[i];
-                if (!inserted0 && (instruction.opcode == OpCodes.Callvirt || instruction.opcode == OpCodes.Call) && instruction.operand.ToString().Contains("void SetRound"))
-                {
-                    instructionList.InsertRange(i - 6, toInsert0);
-                    inserted0 = true;
-                }
-                else if ((instruction.opcode == OpCodes.Callvirt || instruction.opcode == OpCodes.Call) && instruction.operand.ToString().Contains("UnityEngine.GameObject RemoveRound(Boolean)"))
-                {
-                    instructionList.InsertRange(i - 3, toInsert);
-                    break;
-                }
-            }
-            return instructionList;
-        }
-    }
-
-    // Patches BoltActionRifle to track round data
-    class BoltActionRiflePatch
-    {
-        public static void UpdateBoltTranspilerLoadProxy(BoltActionRifle instance, FVRFireArmMagazine mag)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return;
-            }
-
-            MeatovItem BARMeatovItem = instance.GetComponent<MeatovItem>();
-            MeatovItem magMeatovItem = mag.GetComponent<MeatovItem>();
-            if(BARMeatovItem == null || magMeatovItem == null)
-            {
-                Mod.LogError("BoltActionRiflePatch.UpdateBoltTranspilerLoadProxy BARMeatovItem == null?: " + (BARMeatovItem == null)+ ", magMeatovItem == null?: " + (magMeatovItem == null) +":\n"+Environment.StackTrace);
-            }
-            else
-            {
-                BARMeatovItem.ammoContent.Add(magMeatovItem.ammoContent[magMeatovItem.ammoContent.Count - 1]);
-            }
-        }
-
-        public static void UpdateBoltTranspilerLoadChamber(BoltActionRifle instance)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return;
-            }
-
-            MeatovItem BARMeatovItem = instance.GetComponent<MeatovItem>();
-            if(BARMeatovItem == null)
-            {
-                Mod.LogError("BoltActionRiflePatch.UpdateBoltTranspilerLoadChamber BARMeatovItem == null:\n" + Environment.StackTrace);
-            }
-            else
-            {
-                BARMeatovItem.chamberContent[instance.Chamber] = BARMeatovItem.ammoContent[BARMeatovItem.ammoContent.Count - 1];
-                BARMeatovItem.ammoContent.RemoveAt(BARMeatovItem.ammoContent.Count - 1);
-            }
-        }
-
-        // Patches UpdateBolt to track when we put a mag round into proxy, and proxy round into chamber
-        static IEnumerable<CodeInstruction> UpdateBoltTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
-        {
-            List<CodeInstruction> instructionList = new List<CodeInstruction>(instructions);
-            List<CodeInstruction> toInsert = new List<CodeInstruction>();
-            toInsert.Add(new CodeInstruction(OpCodes.Ldarg_0));
-            toInsert.Add(new CodeInstruction(OpCodes.Ldarg_0));
-            toInsert.Add(new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(BoltActionRifle), "Magazine")));
-            toInsert.Add(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(BoltActionRiflePatch), "UpdateBoltTranspilerLoadProxy")));
-            List<CodeInstruction> toInsert0 = new List<CodeInstruction>();
-            toInsert0.Add(new CodeInstruction(OpCodes.Ldarg_0));
-            toInsert0.Add(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(BoltActionRiflePatch), "UpdateBoltTranspilerLoadChamber")));
-            bool inserted0 = false;
-
-            for (int i = 0; i < instructionList.Count; ++i)
-            {
-                CodeInstruction instruction = instructionList[i];
-                if (!inserted0 && (instruction.opcode == OpCodes.Callvirt || instruction.opcode == OpCodes.Call) && instruction.operand.ToString().Contains("void SetRound"))
-                {
-                    instructionList.InsertRange(i - 6, toInsert0);
-                    inserted0 = true;
-                }
-                else if ((instruction.opcode == OpCodes.Callvirt || instruction.opcode == OpCodes.Call) && instruction.operand.ToString().Contains("UnityEngine.GameObject RemoveRound(Boolean)"))
-                {
-                    instructionList.InsertRange(i - 3, toInsert);
-                    break;
-                }
-            }
-            return instructionList;
-        }
-    }
-
-    // Patches ClosedBoltWeapon
-    class ClosedBoltWeaponPatch
-    {
-        static bool BeginChamberingRoundPrefix(ClosedBoltWeapon __instance)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return true;
-            }
-
-            bool flag = false;
-            GameObject fromPrefabReference = null;
-            if (__instance.HasBelt)
-            {
-                if (!__instance.m_proxy.IsFull && __instance.BeltDD.HasARound())
-                {
-                    flag = true;
-                    fromPrefabReference = __instance.BeltDD.RemoveRound(false);
-                }
-            }
-            else if (!__instance.m_proxy.IsFull && __instance.Magazine != null && !__instance.Magazine.IsBeltBox && __instance.Magazine.HasARound())
-            {
-                flag = true;
-
-                // Store proxy round data
-                MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
-                MeatovItem magMeatovItem = __instance.GetComponent<MeatovItem>();
-                if (meatovItem != null && magMeatovItem != null)
-                {
-                    meatovItem.ammoContent.Add(magMeatovItem.ammoContent[magMeatovItem.ammoContent.Count - 1]);
-                }
-
-                fromPrefabReference = __instance.Magazine.RemoveRound(false);
-            }
-            if (!flag)
-            {
-                return false;
-            }
-            if (flag)
-            {
-                __instance.m_proxy.SetFromPrefabReference(fromPrefabReference);
-            }
-
-            return false;
-        }
-
-        static bool ChamberRoundPrefix(ClosedBoltWeapon __instance, ref bool __result)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return true;
-            }
-
-            if (__instance.m_proxy.IsFull && !__instance.Chamber.IsFull)
-            {
-                // Transfer proxy round data to chamber
-                MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
-                if (meatovItem != null)
-                {
-                    meatovItem.chamberContent[__instance.Chamber] = meatovItem.ammoContent[meatovItem.ammoContent.Count - 1];
-                    meatovItem.ammoContent.RemoveAt(meatovItem.ammoContent.Count - 1);
-                }
-
-                __instance.Chamber.SetRound(__instance.m_proxy.Round, false);
-                __instance.m_proxy.ClearProxy();
-                __result = true;
-                return false;
-            }
-
-            __result = false;
-
-            return false;
-        }
-    }
-
-    // Patches Handgun
-    class HandgunPatch
-    {
-        continue from here // some weapons use multiple proxies and one may be used while the other isn't we need to have two separate dedicated proxy vars and use those instead in all our proxy patches
-        static bool ExtractRoundPrefix(Handgun __instance)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return true;
-            }
-
-            if (__instance.Magazine == null)
-            {
-                return false;
-            }
-            if (__instance.m_proxy.IsFull)
-            {
-                return false;
-            }
-            if (__instance.Magazine.HasARound())
-            {
-                // Store proxy round data
-                MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
-                MeatovItem magMeatovItem = __instance.GetComponent<MeatovItem>();
-                if (meatovItem != null && magMeatovItem != null)
-                {
-                    meatovItem.ammoContent.Add(magMeatovItem.ammoContent[magMeatovItem.ammoContent.Count - 1]);
-                }
-
-                GameObject fromPrefabReference = __instance.Magazine.RemoveRound(false);
-                __instance.m_proxy.SetFromPrefabReference(fromPrefabReference);
-            }
-
-            return false;
-        }
-
-        static bool ChamberRoundPrefix(Handgun __instance, ref bool __result)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return true;
-            }
-
-            if (__instance.m_proxy.IsFull && !__instance.Chamber.IsFull)
-            {
-                // Transfer proxy round data to chamber
-                MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
-                if (meatovItem != null)
-                {
-                    meatovItem.chamberContent[__instance.Chamber] = meatovItem.ammoContent[meatovItem.ammoContent.Count - 1];
-                    meatovItem.ammoContent.RemoveAt(meatovItem.ammoContent.Count - 1);
-                }
-
-                __instance.Chamber.SetRound(__instance.m_proxy.Round, false);
-                __instance.m_proxy.ClearProxy();
-                __result = true;
-                return false;
-            }
-
-            __result = false;
-
-            return false;
-        }
-    }
-
     // Patches FVRFireArmMagazine.RemoveRound() to track ammo box ammo
     class MagRemoveRoundPatch
     {
@@ -4113,9 +3336,6 @@ namespace EFM
                 MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
                 if (meatovItem != null)
                 {
-                    // Manage ammo content
-                    meatovItem.ammoContent.RemoveAt(meatovItem.ammoContent.Count - 1);
-
                     // Manage weight
                     meatovItem.currentWeight -= Mod.GetRoundWeight(__instance.RoundType);
 
@@ -4172,9 +3392,6 @@ namespace EFM
                 MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
                 if (meatovItem != null)
                 {
-                    // Manage ammo content
-                    meatovItem.ammoContent.RemoveAt(meatovItem.ammoContent.Count - 1);
-
                     // Manage weight
                     meatovItem.currentWeight -= Mod.GetRoundWeight(__instance.RoundType);
 
@@ -4230,9 +3447,6 @@ namespace EFM
                 MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
                 if (meatovItem != null)
                 {
-                    // Manage ammo content
-                    meatovItem.ammoContent.RemoveAt(meatovItem.ammoContent.Count - 1);
-
                     // Manage weight
                     meatovItem.currentWeight -= Mod.GetRoundWeight(__instance.RoundType);
 
@@ -4288,9 +3502,6 @@ namespace EFM
                 MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
                 if (meatovItem != null)
                 {
-                    // Manage ammo content
-                    meatovItem.ammoContent.RemoveAt(meatovItem.ammoContent.Count - 1);
-
                     // Manage weight
                     meatovItem.currentWeight -= Mod.GetRoundWeight(__instance.RoundType);
                 }
@@ -4314,9 +3525,6 @@ namespace EFM
                 MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
                 if (meatovItem != null)
                 {
-                    // Manage ammo content
-                    meatovItem.ammoContent.RemoveAt(meatovItem.ammoContent.Count - 1);
-
                     // Manage weight
                     meatovItem.currentWeight -= Mod.GetRoundWeight(__instance.RoundType);
                 }
@@ -4339,9 +3547,6 @@ namespace EFM
                 MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
                 if (meatovItem != null)
                 {
-                    // Manage ammo content
-                    meatovItem.ammoContent.RemoveAt(meatovItem.ammoContent.Count - 1);
-
                     // Manage weight
                     meatovItem.currentWeight -= Mod.GetRoundWeight(__instance.RoundType);
                 }
@@ -5121,17 +4326,6 @@ namespace EFM
                 MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
                 if(meatovItem != null)
                 {
-                    // Manage ammo content
-                    MeatovItem roundItem = round.GetComponent<MeatovItem>();
-                    if(roundItem == null)
-                    {
-                        Mod.LogError("Tried to add physical round to mag but round did not have meatov item component:\n"+Environment.StackTrace);
-                    }
-                    else
-                    {
-                        meatovItem.ammoContent.Add(roundItem.itemData);
-                    }
-
                     // Manage weight
                     meatovItem.currentWeight += Mod.GetRoundWeight(__instance.RoundType);
 
@@ -5280,17 +4474,6 @@ namespace EFM
                 MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
                 if (meatovItem != null)
                 {
-                    // Manage ammo content
-                    MeatovItem roundItem = round.GetComponent<MeatovItem>();
-                    if (roundItem == null)
-                    {
-                        Mod.LogError("Tried to add physical round to clip but round did not have meatov item component:\n" + Environment.StackTrace);
-                    }
-                    else
-                    {
-                        meatovItem.ammoContent.Add(roundItem.itemData);
-                    }
-
                     // Manage weight
                     meatovItem.currentWeight += Mod.GetRoundWeight(__instance.RoundType);
                 }
@@ -5391,31 +4574,6 @@ namespace EFM
             }
 
             return false;
-        }
-    }
-
-    // Patches FVRFireArmChamber.EjectRound to set data on round
-    class ChamberEjectRoundPatch
-    {
-        static void Postfix(FVRFireArmChamber __instance, ref FVRFireArmRound __result)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return;
-            }
-
-            if (__result != null && !__result.IsSpent)
-            {
-                MeatovItem meatovItem = __result.GetComponent<MeatovItem>();
-                if(meatovItem != null)
-                {
-                    MeatovItem chamberParentItem = __instance.GetComponentInParent<MeatovItem>();
-                    if(chamberParentItem != null)
-                    {
-                        meatovItem.SetData(chamberParentItem.chamberContent[__instance]);
-                    }
-                }
-            }
         }
     }
 

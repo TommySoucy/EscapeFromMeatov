@@ -283,15 +283,6 @@ namespace EFM
         public string cartridge;
 		public FireArmRoundClass roundClass;
 
-        [NonSerialized]
-        public List<MeatovItemData> ammoContent = new List<MeatovItemData>(); // First round added is first round in list
-        [NonSerialized]
-        public Dictionary<FVRFireArmChamber, MeatovItemData> chamberContent = new Dictionary<FVRFireArmChamber, MeatovItemData>();
-        [NonSerialized]
-        public Dictionary<SpeedloaderChamber, MeatovItemData> SLChamberContent = new Dictionary<SpeedloaderChamber, MeatovItemData>();
-        [NonSerialized]
-        public MeatovItemData cylinderData;
-
         // Stack
         [Header("Stack data")]
         private int _stack = 1;
@@ -488,27 +479,19 @@ namespace EFM
             {
                 Mod.meatovItemByInteractive.Add(physObj, this);
 
-                // Note that we assume chambers are empty by default
-                FVRFireArmChamber[] chambers = physObj.GetComponentsInChildren<FVRFireArmChamber>();
-                for(int i=0; i < chambers.Length; ++i)
-                {
-                    chamberContent.Add(chambers[i], null);
-                }
-                SpeedloaderChamber[] SLChambers = physObj.GetComponentsInChildren<SpeedloaderChamber>();
-                for(int i=0; i < SLChambers.Length; ++i)
-                {
-                    SLChamberContent.Add(SLChambers[i], null);
-                }
-
                 // Ammobox contents gets set to max on awake and will be overriden as necessary
                 if (itemType == ItemType.AmmoBox)
                 {
                     FVRFireArmMagazine asMagazine = physObj as FVRFireArmMagazine;
                     asMagazine.ReloadMagWithType(roundClass);
-                    for(int i=0; i<asMagazine.m_numRounds; ++i)
-                    {
-                        ammoContent.Add(Mod.defaultItemData[cartridge]);
-                    }
+                }
+
+                // Rounds can get their data directly from their H3ID since only one tarkov round will ever point to an H3 round
+                // Note that this is how everything should work, not just rounds, and, unfortunately, causes
+                // some rounds to be missing from the game entirely, since not every tarkov round has an equivalent in H3
+                if(physObj is FVRFireArmRound && physObj.ObjectWrapper != null && Mod.defaultItemDataByH3ID.TryGetValue(physObj.ObjectWrapper.ItemID, out List<MeatovItemData> itemDatas))
+                {
+                    SetData(itemDatas[0]);
                 }
             }
         }
@@ -534,7 +517,11 @@ namespace EFM
         ///      Item deserialize (Save loading, Insurance return, etc.)
         ///      Dev item spawner spawn
         ///      ModularWeaponPart EnablePrefix
-        ///      Mag/Clip/Chamber round removal
+        /// For rounds, it is instead called on MeatovItem.Awake. Note that this should be the case for all items, as all items shold be mapped one-to-one
+        /// This is unfortunately not the case, and is why we must call SetData manually after instantiations
+        /// Doing the same for rounds, considering their data can be stored in various containers, is extremely complicated and just not worth it
+        /// The tradeoff of setting data on awake from their H3ID, means that we might end up with the wrong round
+        /// Considering the complexity of the alternative and the fact that a one-to-one map is the goal anyway, I figured this was acceptable
         /// </summary>
         /// <param name="data">Data to set</param>
         public void SetData(MeatovItemData data)
@@ -1145,9 +1132,6 @@ namespace EFM
 				}
 			}
 
-            TODO e:// make patch for extracting a round from a mag/clip to SetData on round
-            TODO e:// make patch for extracting a round from a chamber to SetData on round
-            TODO e:// round can be palmed and have different classes, this is stored in round's proxyRounds and we must track item data in there as well, check round.AddProxy
 			// If usage button started being pressed this frame
 			if (usageButtonDown)
 			{
@@ -2392,7 +2376,6 @@ namespace EFM
                 {
                     JObject roundObject = new JObject();
                     roundObject["class"] = (int)asMag.LoadedRounds[i].LR_Class;
-                    roundObject["tarkovID"] = ammoContent[i].tarkovID;
                     ammo.Add(roundObject);
                 }
                 serialized["ammo"] = ammo;
@@ -2530,7 +2513,6 @@ namespace EFM
                         for (int i = 0; i < ammo.Count; ++i)
                         {
                             asMag.AddRound((FireArmRoundClass)(int)(ammo[i]["class"]), false, true);
-                            item.ammoContent.Add(Mod.defaultItemData[ammo[i]["takovID"].ToString()]);
                         }
                     }
 
