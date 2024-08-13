@@ -45630,7 +45630,8 @@
     "useTime": 5.0,
     "amountRate": -1.0,
     "consumeEffects": [],
-    "buffEffects": []
+    "buffEffects": [],
+    "value": 0
   },
   "572b7d8524597762b472f9d1": {
     "tarkovID": "572b7d8524597762b472f9d1",
