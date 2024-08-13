@@ -238,11 +238,13 @@ namespace EFM
                 foreach (KeyValuePair<string, int> barterLevelEntry in barterLevelPerID)
                 {
                     string barterItemID = null;
+                    List<string> barterItemChildrenIDs = new List<string>();
                     for (int i=0; i< itemsArray.Count; ++i)
                     {
                         if (itemsArray[i]["_id"].ToString().Equals(barterLevelEntry.Key))
                         {
                             barterItemID = itemsArray[i]["_tpl"].ToString();
+                            FindAssortChildren(barterItemID, barterItemChildrenIDs, itemsArray);
                             break;
                         }
                     }
@@ -258,7 +260,14 @@ namespace EFM
                         Barter currentBarter = new Barter();
                         currentBarter.level = barterLevelEntry.Value;
                         currentBarter.trader = this;
-                        Mod.defaultItemData.TryGetValue(barterItemID, out currentBarter.itemData);
+                        currentBarter.itemData = new List<MeatovItemData>();
+                        Mod.defaultItemData.TryGetValue(barterItemID, out MeatovItemData parentItemData);
+                        currentBarter.itemData.Add(parentItemData);
+                        for(int j=0; j< barterItemChildrenIDs.Count; ++j)
+                        {
+                            Mod.defaultItemData.TryGetValue(barterItemChildrenIDs[j], out MeatovItemData childItemData);
+                            currentBarter.itemData.Add(childItemData);
+                        }
 
                         List<BarterPrice> tempBarterPrices = new List<BarterPrice>();
                         JArray currentScheme = schemes[i] as JArray;
@@ -335,6 +344,18 @@ namespace EFM
                             bartersByItemID.Add(barterItemID, new List<Barter> { currentBarter });
                         }
                     }
+                }
+            }
+        }
+
+        public void FindAssortChildren(string parent, List<string> children, JArray itemsArray)
+        {
+            for(int i=0; i < itemsArray.Count; ++i)
+            {
+                if (itemsArray[i]["parentId"].ToString().Equals(parent))
+                {
+                    children.Add(itemsArray[i]["_tpl"].ToString());
+                    FindAssortChildren(itemsArray[i]["_tpl"].ToString(), children, itemsArray);
                 }
             }
         }
@@ -541,7 +562,7 @@ namespace EFM
     public class Barter
     {
         // Static data
-        public MeatovItemData itemData;
+        public List<MeatovItemData> itemData;
         public int level;
         public Trader trader;
         public BarterPrice[] prices;

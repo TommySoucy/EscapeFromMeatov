@@ -139,11 +139,11 @@ namespace EFM
         [NonSerialized]
         public int currentTraderIndex;
         public MeatovItemData currencyItemData;
-        public MeatovItemData cartItem;
+        public List<MeatovItemData> cartItems;
         [NonSerialized]
         public int cartItemCount;
         public List<BarterPrice> buyPrices;
-        public MeatovItemData ragFairCartItem;
+        public List<MeatovItemData> ragFairCartItems;
         public Barter ragFairCartBarter;
         [NonSerialized]
         public int ragFairCartItemCount;
@@ -885,7 +885,7 @@ namespace EFM
 
         public void SetRagFairBuy(Barter ragFairBarter)
         {
-            ragFairCartItem = ragFairBarter.itemData;
+            ragFairCartItems = ragFairBarter.itemData;
             ragFairCartBarter = ragFairBarter;
 
             if (ragFairBuyItemPriceViewsByID == null)
@@ -898,8 +898,8 @@ namespace EFM
             }
 
             ragFairBuyCart.SetActive(true);
-            ragFairBuyItemView.itemView.SetItemData(ragFairBarter.itemData);
-            ragFairBuyItemView.itemName.text = ragFairBarter.itemData.name;
+            ragFairBuyItemView.itemView.SetItemData(ragFairBarter.itemData[0]);
+            ragFairBuyItemView.itemName.text = ragFairBarter.itemData[0].name;
             ragFairBuyItemView.amount.text = "1";
             ragFairBuyPrices = new List<BarterPrice>(ragFairBarter.prices);
 
@@ -982,7 +982,7 @@ namespace EFM
             {
                 if (category.barters[i].trader == null 
                     || (category.barters[i].level <= category.barters[i].trader.level
-                        && (!category.barters[i].trader.rewardBarters.TryGetValue(category.barters[i].itemData.tarkovID, out bool unlocked)
+                        && (!category.barters[i].trader.rewardBarters.TryGetValue(category.barters[i].itemData[0].tarkovID, out bool unlocked)
                             || unlocked)))
                 {
                     Transform buyItemElement = Instantiate(ragFairBuyItemPrefab, ragFairBuyItemParent).transform;
@@ -1004,12 +1004,15 @@ namespace EFM
             }
 
             // Add bought amount of item to trade volume
-            tradeVolume.SpawnItem(ragFairCartItem, ragFairCartItemCount);
+            for(int i = 0; i< ragFairCartItems.Count; ++i)
+            {
+                tradeVolume.SpawnItem(ragFairCartItems[i], ragFairCartItemCount);
+            }
         }
 
         public void OnRagFairBuyAmountClicked()
         {
-            if(ragFairCartItem == null)
+            if(ragFairCartItems == null)
             {
                 return;
             }
@@ -1565,7 +1568,7 @@ namespace EFM
                         }
 
                         // Skip if this barter is locked
-                        if (currentBarter.needUnlock && !trader.rewardBarters[currentBarter.itemData.tarkovID])
+                        if (currentBarter.needUnlock && !trader.rewardBarters[currentBarter.itemData[0].tarkovID])
                         {
                             continue;
                         }
@@ -1600,7 +1603,7 @@ namespace EFM
                                 currencyToUse = 3;
                             }
                         }
-                        itemView.SetItemData(currentBarter.itemData, false, false, false, null, true, currencyToUse, valueToUse, false, false);
+                        itemView.SetItemData(currentBarter.itemData[0], false, false, false, null, true, currencyToUse, valueToUse, false, false);
 
                         // Setup button
                         PointableButton pointableButton = currentItemView.GetComponent<PointableButton>();
@@ -1710,9 +1713,9 @@ namespace EFM
                 {
                     for (int i = 0; i < barters.Value.Count; ++i)
                     {
-                        for (int j = 0; j < barters.Value[i].itemData.parents.Length; ++j)
+                        for (int j = 0; j < barters.Value[i].itemData[0].parents.Length; ++j)
                         {
-                            CategoryTreeNode category = Mod.itemCategories.FindChild(barters.Value[i].itemData.parents[j]);
+                            CategoryTreeNode category = Mod.itemCategories.FindChild(barters.Value[i].itemData[0].parents[j]);
                             if (category != null)
                             {
                                 category.barters.Remove(barters.Value[i]);
@@ -1722,7 +1725,7 @@ namespace EFM
                         if(ragFairCartBarter == barters.Value[i])
                         {
                             ragFairCartBarter = null;
-                            ragFairCartItem = null;
+                            ragFairCartItems = null;
 
                             ragFairBuyDealButton.SetActive(false);
                         }
@@ -1752,7 +1755,8 @@ namespace EFM
                         if (!fence.bartersByItemID.ContainsKey(randomItem.tarkovID))
                         {
                             Barter barter = new Barter();
-                            barter.itemData = randomItem;
+                            barter.itemData = new List<MeatovItemData>();
+                            barter.itemData.Add(randomItem);
                             barter.prices = new BarterPrice[1];
                             barter.prices[0] = new BarterPrice();
                             barter.prices[0].itemData = roubleItemData;
@@ -1797,9 +1801,9 @@ namespace EFM
             tasksHoverScrollProcessor.mustUpdateMiddleHeight = 1;
         }
 
-        public void OnBuyItemClick(MeatovItemData item, BarterPrice[] priceList)
+        public void OnBuyItemClick(List<MeatovItemData> items, BarterPrice[] priceList)
         {
-            cartItem = item;
+            cartItems = items;
 
             if (buyItemPriceViewsByID == null)
             {
@@ -1810,7 +1814,7 @@ namespace EFM
                 buyItemPriceViewsByID.Clear();
             }
 
-            if (item == null)
+            if (items[0] == null)
             {
                 cartItemCount = -1;
                 buyPrices = null;
@@ -1832,11 +1836,11 @@ namespace EFM
             {
                 cartItemCount = 1;
                 buyPrices = new List<BarterPrice>(priceList);
-                Mod.LogInfo("on buy item click called, with ID: " + item.tarkovID+":"+item.H3ID);
-                Mod.LogInfo("Got item name: " + item.name);
+                Mod.LogInfo("on buy item click called, with ID: " + items[0].tarkovID+":"+ items[0].H3ID);
+                Mod.LogInfo("Got item name: " + items[0].name);
 
-                buyItemView.itemView.SetItemData(item);
-                buyItemView.itemName.text = item.name;
+                buyItemView.itemView.SetItemData(items[0]);
+                buyItemView.itemName.text = items[0].name;
                 buyItemCount.gameObject.SetActive(true);
                 buyItemCount.text = "1";
 
@@ -1914,7 +1918,10 @@ namespace EFM
             }
 
             // Add bought amount of item to trade volume
-            tradeVolume.SpawnItem(cartItem, cartItemCount);
+            for(int i = 0; i < cartItems.Count; ++i)
+            {
+                tradeVolume.SpawnItem(cartItems[i], cartItemCount);
+            }
 
             // Update amount of item in trader's assort
             //Mod.traders[currentTraderIndex].assortmentByLevel[Mod.traders[currentTraderIndex].GetLoyaltyLevel()].itemsByID[cartItem].stack -= cartItemCount;

@@ -15,11 +15,11 @@ namespace EFM
         {
             if(this.barter != null)
             {
-                this.barter.itemData.OnNeededForChanged -= OnNeededForChanged;
+                this.barter.itemData[0].OnNeededForChanged -= OnNeededForChanged;
             }
 
             this.barter = barter;
-            barter.itemData.OnNeededForChanged += OnNeededForChanged;
+            barter.itemData[0].OnNeededForChanged += OnNeededForChanged;
 
             if (barter.itemData == null)
             {
@@ -43,7 +43,7 @@ namespace EFM
             }
             if (priceCount == 0)
             {
-                Mod.LogWarning("Ragfair was adding a barter for item "+barter.itemData.name+" with all prices missing item data");
+                Mod.LogWarning("Ragfair was adding a barter for item "+barter.itemData[0].name+" with all prices missing item data");
                 Destroy(gameObject);
                 return;
             }
@@ -65,15 +65,15 @@ namespace EFM
                     currencyToUse = 3;
                 }
             }
-            itemView.SetItemData(barter.itemData, false, false, false, null, true, currencyToUse, valueToUse, false, false);
-            itemName.text = barter.itemData.name;
-            wishlistStar.color = barter.itemData.onWishlist ? Color.yellow : Color.black;
+            itemView.SetItemData(barter.itemData[0], false, false, false, null, true, currencyToUse, valueToUse, false, false);
+            itemName.text = barter.itemData[0].name;
+            wishlistStar.color = barter.itemData[0].onWishlist ? Color.yellow : Color.black;
         }
 
         public void OnWishlistClicked()
         {
             // Note that we don't set star color here, it will be changed through OnNeededForChanged
-            barter.itemData.onWishlist = !barter.itemData.onWishlist;
+            barter.itemData[0].onWishlist = !barter.itemData[0].onWishlist;
         }
 
         public void OnBuyClicked()
@@ -88,7 +88,7 @@ namespace EFM
         {
             if(index == 2)
             {
-                wishlistStar.color = barter.itemData.onWishlist ? Color.yellow : Color.black;
+                wishlistStar.color = barter.itemData[0].onWishlist ? Color.yellow : Color.black;
             }
         }
 
@@ -96,7 +96,7 @@ namespace EFM
         {
             if (barter != null)
             {
-                barter.itemData.OnNeededForChanged -= OnNeededForChanged;
+                barter.itemData[0].OnNeededForChanged -= OnNeededForChanged;
             }
         }
     }

@@ -2,7 +2,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using UnityEngine;
 
 namespace EFM
@@ -50,13 +49,13 @@ namespace EFM
         public event OnVolumeChangedDelegate OnVolumeChanged;
         public delegate void SpawnItemReturnDelegate(List<MeatovItem> itemsSpawned);
 
-        public bool AddItem(MeatovItem item)
+        public bool AddItem(MeatovItem item, bool bypass = false)
         {
             staticVolume.SetActive(true);
             activeVolume.SetActive(false);
 
             bool fits = Mod.IDDescribedInList(item.tarkovID, item.parents, whitelist, blacklist) && (!hasMaxVolume || item.volumes[item.mode] <= (maxVolume - volume));
-            if (fits)
+            if (fits || bypass)
             {
                 item.physObj.SetAllCollidersToLayer(false, "NoCol");
                 item.physObj.StoreAndDestroyRigidbody();

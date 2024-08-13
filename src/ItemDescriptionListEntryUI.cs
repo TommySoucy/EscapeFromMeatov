@@ -73,7 +73,7 @@ namespace EFM
                 unfulfilledIcon.SetActive(true);
             }
             amount.text = currentCount.ToString() + "/" + neededCount;
-            entryName.text = barter.itemData.name;
+            entryName.text = barter.itemData[0].name;
             entryName.color = Mod.neededForColors[3];
             entryInfo.text = Mod.traders[traderIndex].name + " lvl " + level;
         }

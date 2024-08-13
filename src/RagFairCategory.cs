@@ -33,7 +33,7 @@ namespace EFM
             {
                 if (category.barters[i].trader == null
                     || (category.barters[i].level <= category.barters[i].trader.level
-                        && (!category.barters[i].trader.rewardBarters.TryGetValue(category.barters[i].itemData.tarkovID, out bool unlocked)
+                        && (!category.barters[i].trader.rewardBarters.TryGetValue(category.barters[i].itemData[0].tarkovID, out bool unlocked)
                             || unlocked)))
                 {
                     ++actualBarterCount;

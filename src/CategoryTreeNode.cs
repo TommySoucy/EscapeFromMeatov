@@ -50,7 +50,7 @@ namespace EFM
                     if (!added && items[i].canSellOnRagfair)
                     {
                         Barter barter = new Barter();
-                        barter.itemData = items[i];
+                        barter.itemData = new List<MeatovItemData>() { items[i] };
                         barter.prices = new BarterPrice[1];
                         barter.prices[0] = new BarterPrice();
                         barter.prices[0].itemData = roubleData;

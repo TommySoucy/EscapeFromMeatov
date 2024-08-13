@@ -2016,9 +2016,9 @@ namespace EFM
                     // This is what we need to update here
                     for (int i = 0; i < barters.Count; ++i)
                     {
-                        if (trader.rewardBarters.ContainsKey(barters[i].itemData.tarkovID))
+                        if (trader.rewardBarters.ContainsKey(barters[i].itemData[0].tarkovID))
                         {
-                            trader.rewardBarters[barters[i].itemData.tarkovID] = true;
+                            trader.rewardBarters[barters[i].itemData[0].tarkovID] = true;
                         }
                     }
                     break;
