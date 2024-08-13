@@ -526,6 +526,11 @@ namespace EFM
         /// <param name="data">Data to set</param>
         public void SetData(MeatovItemData data)
         {
+            if (itemDataSet)
+            {
+                return;
+            }
+
             itemData = data;
 
             tarkovID = data.tarkovID;
