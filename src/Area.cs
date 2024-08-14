@@ -49,6 +49,8 @@ namespace EFM
         public List<Production> activeProductions = new List<Production>();
         [NonSerialized]
         public bool init;
+        [NonSerialized]
+        public Dictionary<MeatovItemData, int> availableModulParts; // Dict of modul parts in workbench
 
         // Power
         public bool requiresPower;
@@ -93,6 +95,31 @@ namespace EFM
                     gameObject.SetActive(false);
                     return;
                 }
+            }
+
+            // Workbench specific
+            if (index == 10)
+            {
+                GameObject platformPrefab = IM.OD["NWMWPlatform"].GetGameObject();
+
+                for (int i=0; i < levels.Length; ++i)
+                {
+                    // Make the vices modul workshop platforms
+                    if (levels[i].vicePoint != null)
+                    {
+                        GameObject platformInstance = Instantiate(platformPrefab, levels[i].vicePoint);
+                        platformInstance.transform.GetChild(3).localPosition += new Vector3(levels[i].viceFlipOffset.x, levels[i].viceFlipOffset.y, 0);
+                    }
+
+                    // Sub to volume content changed events to keep track of modul parts
+                    if (levels[i].areaVolumes != null && levels[i].areaVolumes.Length > 0 && levels[i].areaVolumes[0] != null)
+                    {
+                        levels[i].areaVolumes[0].OnItemAdded += OnWorkbenchItemAdded;
+                        levels[i].areaVolumes[0].OnItemRemoved += OnWorkbenchItemRemoved;
+                    }
+                }
+
+                availableModulParts = new Dictionary<MeatovItemData, int>();
             }
 
             UpdateObjectsPerLevel();
@@ -1029,6 +1056,38 @@ namespace EFM
                 default:
                     Mod.LogError("Area IndexToName called with invalid index: " + index);
                     return "";
+            }
+        }
+
+        public void OnWorkbenchItemAdded(MeatovItem item)
+        {
+            if(availableModulParts.ContainsKey(item.itemData))
+            {
+                ++availableModulParts[item.itemData];
+            }
+            else
+            {
+                availableModulParts.Add(item.itemData, 1);
+            }
+        }
+
+        public void OnWorkbenchItemRemoved(MeatovItem item)
+        {
+            int count = 0;
+            if (availableModulParts.TryGetValue(item.itemData, out count))
+            {
+                if(count - 1 <= 0)
+                {
+                    availableModulParts.Remove(item.itemData);
+                }
+                else
+                {
+                    --availableModulParts[item.itemData];
+                }
+            }
+            else
+            {
+                Mod.LogError("OnWorkbenchItemRemoved, trying to remove " + item.itemData.tarkovID + ":" + item.itemData.H3ID + " but this item data is missing from available parts dict:\n"+Environment.StackTrace);
             }
         }
     }

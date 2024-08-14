@@ -11,5 +11,9 @@ namespace EFM
         public Vector2[] workingRanges;
         public AudioClip[] mainAudioClips;
         public AudioSource[] mainAudioSources;
+
+        // Workbench specific
+        public Transform vicePoint;
+        public Vector2 viceFlipOffset;
     }
 }

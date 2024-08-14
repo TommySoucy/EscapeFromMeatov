@@ -107,6 +107,7 @@ namespace EFM
         public static GameObject[] scavRaidReturnItems; // Hands, Equipment, Right shoulder, pockets
         public static GameObject instantiatedItem;
         public static Dictionary<FVRInteractiveObject, MeatovItem> meatovItemByInteractive = new Dictionary<FVRInteractiveObject, MeatovItem>();
+        public static Dictionary<string, Dictionary<string, byte>> noneModulParts; // Dict of "None" modul workshop parts by part ID by group ID
 
         // Player
         private static int _level = 1;
@@ -2018,6 +2019,47 @@ namespace EFM
 
                                 File.WriteAllText(path + "/database/NewDefaultItemData.json", newItemDataToFix.ToString());
                                 break;
+                            case 23: // Fix white and black lists
+                                Mod.LogInfo("\tDebug: Fix white and black lists");
+                                JObject itemDataToFix = JObject.Parse(File.ReadAllText(path + "/database/DefaultItemData.json"));
+                                Dictionary<string, JToken> itemDataDict = itemDataToFix.ToObject<Dictionary<string, JToken>>();
+                                JObject itemsDB = JObject.Parse(File.ReadAllText(path + "/database/templates/items.json"));
+                                foreach(KeyValuePair<string, JToken> item in itemDataDict)
+                                {
+                                    JToken itemDBData = itemsDB[item.Key];
+                                    if(itemDBData == null)
+                                    {
+                                        Mod.LogError("Missing item DB data for "+item.Key);
+                                        continue;
+                                    }
+                                    if (item.Value["whiteList"] != null)
+                                    {
+                                        if(itemDBData["_props"]["Grids"] == null || itemDBData["_props"]["Grids"][0]["_props"]["filters"][0]["Filter"] == null)
+                                        {
+                                            Mod.LogError("Item DB data for " + item.Key+" is missing grids or whitelist");
+                                        }
+                                        else
+                                        {
+                                            item.Value["whiteList"] = itemDBData["_props"]["Grids"][0]["_props"]["filters"][0]["Filter"];
+                                        }
+                                    }
+                                    if (item.Value["blackList"] != null)
+                                    {
+                                        if (itemDBData["_props"]["Grids"] == null || itemDBData["_props"]["Grids"][0]["_props"]["filters"][0]["ExcludedFilter"] == null)
+                                        {
+                                            Mod.LogError("Item DB data for " + item.Key + " is missing grids or blacklist");
+                                        }
+                                        else
+                                        {
+                                            item.Value["blackList"] = itemDBData["_props"]["Grids"][0]["_props"]["filters"][0]["ExcludedFilter"];
+                                        }
+                                    }
+
+                                    itemDataToFix[item.Key] = item.Value;
+                                }
+
+                                File.WriteAllText(path + "/database/DefaultItemData.json", itemDataToFix.ToString());
+                                break;
                         }
                     }
                 }
@@ -2665,6 +2707,7 @@ namespace EFM
             localeDB = JObject.Parse(File.ReadAllText(path + "/database/locales/global/en.json"));
             itemDB = JObject.Parse(File.ReadAllText(path + "/database/templates/items.json"));
             ParseDefaultItemData();
+            ParseNoneModulParts();
 
             traders = new Trader[9];
             traderBaseDB = new JObject[9];
@@ -2922,6 +2965,17 @@ namespace EFM
             }
         }
 
+        public void ParseNoneModulParts()
+        {
+            noneModulParts = new Dictionary<string, Dictionary<string, byte>>();
+
+            Dictionary<string, JToken> nonPartData = JObject.Parse(File.ReadAllText(path + "/database/NoneModulParts.json")).ToObject<Dictionary<string, JToken>>();
+            foreach(KeyValuePair<string, JToken> entry in nonPartData)
+            {
+                noneModulParts.Add(entry.Key, new Dictionary<string, byte>() { { entry.Value.ToString(), 0 } });
+            }
+        }
+
         private void ParseDefaultItemData()
         {
             JObject data = JObject.Parse(File.ReadAllText(path + "/database/DefaultItemData.json"));
@@ -2957,7 +3011,7 @@ namespace EFM
                     if (defaultItemDataEntry.Value["modulGroup"] == null || defaultItemDataEntry.Value["modulGroup"].Type == JTokenType.Null)
                     {
                         // Custom item
-                        customItemDataList.Add(new MeatovItemData(defaultItemDataEntry.Value));
+                        customItemDataList.Add(currentItemData);
                         if(currentItemData.index > highestCustomIndex)
                         {
                             highestCustomIndex = currentItemData.index;

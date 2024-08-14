@@ -458,6 +458,13 @@ namespace EFM
             PatchController.Verify(wristMenuPatchAwakeOriginal, harmony, true);
             harmony.Patch(wristMenuPatchUpdateOriginal, new HarmonyMethod(wristMenuPatchUpdatePrefix));
             harmony.Patch(wristMenuPatchAwakeOriginal, new HarmonyMethod(wristMenuPatchAwakePrefix));
+
+            // ModularWorkshopUIPatch
+            MethodInfo updateDisplayOriginal = typeof(ModularWorkshopUI).GetMethod("UpdateDisplay", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo updateDisplayPrefix = typeof(ModularWorkshopUIPatch).GetMethod("UpdateDisplayPrefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            PatchController.Verify(updateDisplayOriginal, harmony, true);
+            harmony.Patch(updateDisplayOriginal, new HarmonyMethod(updateDisplayPrefix));
         }
     }
 
@@ -5235,6 +5242,159 @@ namespace EFM
                     }
                 }
             }
+        }
+    }
+
+    // Patches ModularWorkshopUI
+    public class ModularWorkshopUIPatch
+    {
+        // Patches UpdateDisplay to prevent display of parts player doesn't have in workbench volume
+        static bool UpdateDisplayPrefix(ModularWorkshopUI __instance, bool ____skinOnlyMode, bool ____isShowingUI, bool ____isShowingSkins, int ____pageIndex, int ____skinPageIndex,
+                                        Dictionary<string, GameObject> ____partDictionary, string[] ____partNames, Sprite[] ____partSprites, 
+                                        Dictionary<string, ModularWorkshopSkinsDefinition.SkinDefinition> ____skinDictionary, string[] ____skinDisplayNames, Sprite[] ____skinSprites,
+                                        int ____selectedButton, int ____selectedPart)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
+            if (__instance.DisplayNameText != null && !____skinOnlyMode)
+            {
+                __instance.DisplayNameText.text = ModularWorkshopManager.ModularWorkshopPartsGroupsDictionary[__instance.ModularPartsGroupID].DisplayName;
+            }
+            else if (__instance.DisplayNameText != null && ____skinOnlyMode)
+            {
+                __instance.DisplayNameText.text = "Receiver Skins";
+            }
+            if (____isShowingUI)
+            {
+                GameObject mainCanvas = __instance.MainCanvas;
+                if (mainCanvas != null)
+                {
+                    mainCanvas.SetActive(true);
+                }
+                GameObject showButton = __instance.ShowButton;
+                if (showButton != null)
+                {
+                    showButton.SetActive(false);
+                }
+                GameObject hideButton = __instance.HideButton;
+                if (hideButton != null)
+                {
+                    hideButton.SetActive(true);
+                }
+                if (!____isShowingSkins)
+                {
+                    for (int i = 0; i < __instance.PartButtons.Length; i++)
+                    {
+                        TODO e: // Only display parts present in Mod.noneModulParts and HideoutController.instance.areaController.areas[10].availableModulParts
+                        if (i + __instance.PartButtons.Length * ____pageIndex < ____partDictionary.Count)
+                        {
+                            __instance.PartButtons[i].SetActive(true);
+                            string text = ____partNames[i + __instance.PartButtons.Length * ____pageIndex];
+                            __instance.PartTexts[i].text = text;
+                            __instance.PartImages[i].sprite = ____partSprites[i + __instance.PartButtons.Length * ____pageIndex];
+                        }
+                        else
+                        {
+                            __instance.PartButtons[i].SetActive(false);
+                        }
+                    }
+                }
+                else
+                {
+                    for (int j = 0; j < __instance.PartButtons.Length; j++)
+                    {
+                        if (j + __instance.PartButtons.Length * ____skinPageIndex < ____skinDictionary.Count)
+                        {
+                            __instance.PartButtons[j].SetActive(true);
+                            __instance.PartTexts[j].text = ____skinDisplayNames[j + __instance.PartButtons.Length * ____skinPageIndex];
+                            __instance.PartImages[j].sprite = ____skinSprites[j + __instance.PartButtons.Length * ____skinPageIndex];
+                        }
+                        else
+                        {
+                            __instance.PartButtons[j].SetActive(false);
+                        }
+                    }
+                }
+                if (!____isShowingSkins && ____pageIndex == 0)
+                {
+                    __instance.BackButton.SetActive(false);
+                }
+                else if (____isShowingSkins && ____skinPageIndex == 0)
+                {
+                    __instance.BackButton.SetActive(false);
+                }
+                else
+                {
+                    __instance.BackButton.SetActive(true);
+                }
+                if (!____isShowingSkins && ____partDictionary.Count > __instance.PartButtons.Length * (1 + ____pageIndex))
+                {
+                    __instance.NextButton.SetActive(true);
+                }
+                else if (____isShowingSkins && ____skinDictionary.Count > __instance.PartButtons.Length * (1 + ____skinPageIndex))
+                {
+                    __instance.NextButton.SetActive(true);
+                }
+                else
+                {
+                    __instance.NextButton.SetActive(false);
+                }
+                __instance.ButtonSet.SetSelectedButton(____selectedButton);
+                if (!____skinOnlyMode)
+                {
+                    string str = ____partNames[____selectedPart];
+                    ModularWorkshopSkinsDefinition modularWorkshopSkinsDefinition;
+                    if (!____isShowingSkins && ModularWorkshopManager.ModularWorkshopSkinsDictionary.TryGetValue(__instance.ModularPartsGroupID + "/" + str, out modularWorkshopSkinsDefinition) && modularWorkshopSkinsDefinition.SkinDictionary.Count > 1)
+                    {
+                        __instance.ShowSkinsButton.SetActive(true);
+                    }
+                    else
+                    {
+                        __instance.ShowSkinsButton.SetActive(false);
+                    }
+                }
+                if (____isShowingSkins && !____skinOnlyMode)
+                {
+                    __instance.HideSkinsButton.SetActive(true);
+                }
+                else
+                {
+                    __instance.HideSkinsButton.SetActive(false);
+                }
+                if (__instance.PageIndex != null)
+                {
+                    __instance.PageIndex.text = (____isShowingSkins ? string.Format("{0}/{1}", 1 + ____skinPageIndex, Mathf.CeilToInt((float)(1 + (____skinDictionary.Count - 1) / __instance.PartButtons.Length))) : string.Format("{0}/{1}", 1 + ____pageIndex, Mathf.CeilToInt((float)(1 + (____partDictionary.Count - 1) / __instance.PartButtons.Length))));
+                    return false;
+                }
+            }
+            else
+            {
+                __instance.MainCanvas.SetActive(false);
+                if (!____skinOnlyMode && ____partDictionary.Count > 1)
+                {
+                    __instance.ShowButton.SetActive(true);
+                }
+                else if (____skinOnlyMode && ____skinDictionary.Count > 1)
+                {
+                    __instance.ShowButton.SetActive(true);
+                }
+                else
+                {
+                    __instance.ShowButton.SetActive(false);
+                }
+                __instance.HideButton.SetActive(false);
+                if (!____skinOnlyMode)
+                {
+                    __instance.ShowButtonText.text = ModularWorkshopManager.ModularWorkshopPartsGroupsDictionary[__instance.ModularPartsGroupID].DisplayName;
+                    return false;
+                }
+                __instance.ShowButtonText.text = "Receiver Skin";
+            }
+
+            return false;
         }
     }
     #endregion
