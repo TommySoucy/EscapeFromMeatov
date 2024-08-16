@@ -106,7 +106,7 @@ namespace EFM
 
         public void SetDescriptionPack(DescriptionPack pack)
         {
-            if(descriptionPack != null && descriptionPack.itemData != null)
+            if (descriptionPack != null && descriptionPack.itemData != null)
             {
                 descriptionPack.itemData.OnNeededForChanged -= OnNeededForChanged;
                 descriptionPack.itemData.OnNeededForAreaTotalChanged -= OnNeededForAreaTotalChanged;
@@ -412,13 +412,6 @@ namespace EFM
 
         public void SetStats()
         {
-            while(statsParent.transform.childCount > 1)
-            {
-                Transform currentChild = statsParent.transform.GetChild(statsParent.transform.childCount - 1);
-                currentChild.SetParent(null);
-                Destroy(currentChild.gameObject);
-            }
-
             if(descriptionPack.itemData.itemType == MeatovItem.ItemType.Weapon)
             {
                 if(descriptionPack.item == null)
