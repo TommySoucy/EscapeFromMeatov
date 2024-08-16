@@ -1,4 +1,5 @@
 ﻿using FistVR;
+using ModularWorkshop;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -50,7 +51,7 @@ namespace EFM
         [NonSerialized]
         public bool init;
         [NonSerialized]
-        public Dictionary<MeatovItemData, int> availableModulParts; // Dict of modul parts in workbench
+        public Dictionary<string, Dictionary<string, List<MeatovItem>>> availableModulParts; // Dict of modul parts in workbench
 
         // Power
         public bool requiresPower;
@@ -119,7 +120,7 @@ namespace EFM
                     }
                 }
 
-                availableModulParts = new Dictionary<MeatovItemData, int>();
+                availableModulParts = new Dictionary<string, Dictionary<string, List<MeatovItem>>>();
             }
 
             UpdateObjectsPerLevel();
@@ -1061,33 +1062,62 @@ namespace EFM
 
         public void OnWorkbenchItemAdded(MeatovItem item)
         {
-            if(availableModulParts.ContainsKey(item.itemData))
+            if(item.itemType == MeatovItem.ItemType.Mod)
             {
-                ++availableModulParts[item.itemData];
-            }
-            else
-            {
-                availableModulParts.Add(item.itemData, 1);
+                if (availableModulParts.TryGetValue(item.modGroup, out Dictionary<string, List<MeatovItem>> partsDict))
+                {
+                    if(partsDict.TryGetValue(item.modPart, out List<MeatovItem> itemList))
+                    {
+                        itemList.Add(item);
+                    }
+                    else
+                    {
+                        partsDict.Add(item.modPart, new List<MeatovItem>() { item });
+                    }
+                }
+                else
+                {
+                    availableModulParts.Add(item.modGroup, new Dictionary<string, List<MeatovItem>>() { { item.modPart, new List<MeatovItem>() { item } } });
+                }
+
+                UpdateWorkbenchModularUI();
             }
         }
 
         public void OnWorkbenchItemRemoved(MeatovItem item)
         {
-            int count = 0;
-            if (availableModulParts.TryGetValue(item.itemData, out count))
+            if(item.itemType == MeatovItem.ItemType.Mod)
             {
-                if(count - 1 <= 0)
+                if (availableModulParts.TryGetValue(item.modGroup, out Dictionary<string, List<MeatovItem>> partsDict)
+                    && partsDict.TryGetValue(item.modPart, out List<MeatovItem> itemList))
                 {
-                    availableModulParts.Remove(item.itemData);
+                    itemList.Remove(item);
+
+                    if(itemList.Count <= 0)
+                    {
+                        partsDict.Remove(item.modPart);
+
+                        if(partsDict.Count <= 0)
+                        {
+                            availableModulParts.Remove(item.modGroup);
+                        }
+                    }
                 }
                 else
                 {
-                    --availableModulParts[item.itemData];
+                    Mod.LogError("OnWorkbenchItemRemoved, trying to remove " + item.tarkovID + ":" + item.H3ID + " (" + item.modGroup + ":" + item.modPart + ") but this item data is missing from available parts dict:\n" + Environment.StackTrace);
                 }
+
+                UpdateWorkbenchModularUI();
             }
-            else
+        }
+
+        public void UpdateWorkbenchModularUI()
+        {
+            ModularWorkshopPlatform platform = levels[currentLevel].vicePoint.GetChild(0).GetComponent<ModularWorkshopPlatform>();
+            foreach (KeyValuePair<string, GameObject> UIScreen in platform._UIScreens)
             {
-                Mod.LogError("OnWorkbenchItemRemoved, trying to remove " + item.itemData.tarkovID + ":" + item.itemData.H3ID + " but this item data is missing from available parts dict:\n"+Environment.StackTrace);
+                UIScreen.Value.GetComponent<ModularWorkshopUI>().UpdateDisplay();
             }
         }
     }
