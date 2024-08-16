@@ -2436,9 +2436,13 @@ namespace EFM
             int parsed = 0;
             if (!int.TryParse(H3ID, out parsed))
             {
+                Mod.LogInfo("Vanilla serialization of " + name);
                 VaultFile vaultFile = new VaultFile();
                 VaultSystem.ScanObjectToVaultFile(vaultFile, physObj);
-                serialized["vanillaData"] = JObject.FromObject(vaultFile);
+                Mod.LogInfo("\tFinished vault file, serializing");
+                string jsonFile = JsonUtility.ToJson(vaultFile, false);
+                serialized["vanillaData"] = jsonFile;
+                Mod.LogInfo("\tVault file serialized");
                 // Store all live meatov item data necessary for vanilla items in the entire hierarchy of this item, including this item's
                 serialized["vanillaCustomData"] = GetAllSerializedVanillaCustomData();
             }
@@ -2490,7 +2494,8 @@ namespace EFM
             {
                 if(itemData.index == -1)
                 {
-                    VaultFile loadedVanillaData = serialized["vanillaData"].ToObject<VaultFile>();
+                    VaultFile loadedVanillaData = new VaultFile();
+                    JsonUtility.FromJsonOverwrite(serialized["vanillaData"].ToString(), loadedVanillaData);
                     VaultSystem.SpawnVaultFile(loadedVanillaData, null, false, false, false, out string error, Vector3.zero, del, false);
 
                     return null;

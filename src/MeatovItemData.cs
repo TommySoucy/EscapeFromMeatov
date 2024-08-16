@@ -392,7 +392,6 @@ namespace EFM
                 return;
             }
 
-            Mod.LogInfo("InitCheckmarkData for "+ tarkovID+":"+H3ID);
             if (HideoutController.instance == null)
             {
                 Mod.LogError("MeatovItemData.UpdateCheckmarkData called but missing hideout instance!");

@@ -1182,11 +1182,15 @@ namespace EFM
                                     }
                                 }
                             }
-                            GameObject newEntry = Instantiate(compatibleAmmoEntryPrefab, compatibleAmmoParent.transform);
-                            newEntry.SetActive(true);
-                            ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
-                            entryUI.SetAmmo(this, itemDatas[k], hideoutCount, playerCount, ammoBoxCount);
-                            gotAmmo = true;
+
+                            if(hideoutCount + playerCount + ammoBoxCount > 0)
+                            {
+                                GameObject newEntry = Instantiate(compatibleAmmoEntryPrefab, compatibleAmmoParent.transform);
+                                newEntry.SetActive(true);
+                                ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
+                                entryUI.SetAmmo(this, itemDatas[k], hideoutCount, playerCount, ammoBoxCount);
+                                gotAmmo = true;
+                            }
                         }
                     }
                 }
