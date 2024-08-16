@@ -562,6 +562,10 @@ namespace EFM
 
             ergonomicsModifier = data.ergonomicsModifier;
             recoilModifier = data.recoilModifier;
+            if(itemType == ItemType.Weapon)
+            {
+                ergonomics = ergonomicsModifier;
+            }
 
             blocksEarpiece = data.blocksEarpiece;
             blocksEyewear = data.blocksEyewear;

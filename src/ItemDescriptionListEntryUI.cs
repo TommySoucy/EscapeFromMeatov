@@ -121,8 +121,6 @@ namespace EFM
         public void SetAmmo(ItemDescriptionUI owner, MeatovItemData roundData, int hideoutCount, int playerCount, int ammoBoxCount)
         {
             this.owner = owner;
-            fulfilledIcon.SetActive(false);
-            unfulfilledIcon.SetActive(false);
             entryName.text = roundData.name;
             if(owner.descriptionPack.item == null)
             {
