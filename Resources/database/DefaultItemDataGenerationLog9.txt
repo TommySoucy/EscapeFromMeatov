@@ -1,2 +1,0 @@
-INFO: Entries with more than 1 usage of an H3ID
-INFO: Writing new default item file

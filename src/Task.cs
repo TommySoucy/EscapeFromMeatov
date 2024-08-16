@@ -521,7 +521,10 @@ namespace EFM
                         }
                         else
                         {
-                            Mod.LogError("DEV: Task " + task.ID + " handoveritem condition " + ID + " targets item " + handoverItemTargetItemIDs[i] + " for which we do not have data");
+                            if (!Mod.oldItemMap.ContainsKey(handoverItemTargetItemIDs[i]))
+                            {
+                                Mod.LogError("DEV: Task " + task.ID + " handoveritem condition " + ID + " targets item " + handoverItemTargetItemIDs[i] + " for which we do not have data");
+                            }
                         }
                     }
                     break;
@@ -549,7 +552,10 @@ namespace EFM
                         }
                         else
                         {
-                            Mod.LogError("DEV: Task " + task.ID + " find item condition " + ID + " targets item " + itemID + " for which we do not have data");
+                            if (!Mod.oldItemMap.ContainsKey(itemID))
+                            {
+                                Mod.LogError("DEV: Task " + task.ID + " find item condition " + ID + " targets item " + itemID + " for which we do not have data");
+                            }
                         }
                     }
                     findItemCountInRaid = (bool)properties["countInRaid"];
@@ -602,7 +608,10 @@ namespace EFM
                         }
                         else
                         {
-                            Mod.LogError("DEV: Task " + task.ID + " leave item condition " + ID + " targets item " + itemID + " for which we do not have data");
+                            if (!Mod.oldItemMap.ContainsKey(itemID))
+                            {
+                                Mod.LogError("DEV: Task " + task.ID + " leave item condition " + ID + " targets item " + itemID + " for which we do not have data");
+                            }
                         }
                     }
                     plantTime = (int)properties["plantTime"];
@@ -623,7 +632,10 @@ namespace EFM
                         }
                         else
                         {
-                            Mod.LogError("DEV: Task " + task.ID + " leave beacon condition " + ID + " targets item " + itemID + " for which we do not have data");
+                            if (!Mod.oldItemMap.ContainsKey(itemID))
+                            {
+                                Mod.LogError("DEV: Task " + task.ID + " leave beacon condition " + ID + " targets item " + itemID + " for which we do not have data");
+                            }
                         }
                     }
                     plantTime = (int)properties["plantTime"];
@@ -677,7 +689,10 @@ namespace EFM
                         }
                         else
                         {
-                            Mod.LogError("DEV: Task " + task.ID + " weapon assembly condition " + ID + " targets item " + itemID + " for which we do not have data");
+                            if (!Mod.oldItemMap.ContainsKey(itemID))
+                            {
+                                Mod.LogError("DEV: Task " + task.ID + " weapon assembly condition " + ID + " targets item " + itemID + " for which we do not have data");
+                            }
                         }
                     }
                     List<string> weaponAssemblyContainsTargetItemIDs = properties["containsItems"].ToObject<List<string>>();
@@ -691,7 +706,10 @@ namespace EFM
                         }
                         else
                         {
-                            Mod.LogError("DEV: Task " + task.ID + " weapon assembly contains condition " + ID + " targets item " + itemID + " for which we do not have data");
+                            if (!Mod.oldItemMap.ContainsKey(itemID))
+                            {
+                                Mod.LogError("DEV: Task " + task.ID + " weapon assembly contains condition " + ID + " targets item " + itemID + " for which we do not have data");
+                            }
                         }
                     }
                     hasItemFromCategories = properties["hasItemFromCategory"].ToObject<List<string>>();
@@ -1507,7 +1525,10 @@ namespace EFM
                         }
                         else
                         {
-                            Mod.LogError("DEV: Task " +condition.task.ID + " use item counter condition from condition " + condition.ID + " targets item " + itemID + " for which we do not have data");
+                            if (!Mod.oldItemMap.ContainsKey(itemID))
+                            {
+                                Mod.LogError("DEV: Task " + condition.task.ID + " use item counter condition from condition " + condition.ID + " targets item " + itemID + " for which we do not have data");
+                            }
                         }
                     }
                     useItemValue = (int)properties["value"];
@@ -1922,7 +1943,10 @@ namespace EFM
                         }
                         else
                         {
-                            Mod.LogError("DEV: Task " + task.ID + " reward " + ID + " targets item " + itemsArray[i]["_tpl"].ToString() + " for which we do not have data");
+                            if (!Mod.oldItemMap.ContainsKey(itemsArray[i]["_tpl"].ToString()))
+                            {
+                                Mod.LogError("DEV: Task " + task.ID + " reward " + ID + " targets item " + itemsArray[i]["_tpl"].ToString() + " for which we do not have data");
+                            }
                         }
                     }
                     amount = (int)data["value"];
@@ -1967,7 +1991,10 @@ namespace EFM
                         // Note that here we just take the first item in the array
                         if (!Mod.defaultItemData.TryGetValue(productionItemsArray[0]["_tpl"].ToString(), out productionProduct))
                         {
-                            Mod.LogError("DEV: Task " + task.ID + " reward " + ID + " targets item " + productionItemsArray[0]["_tpl"].ToString() + " for which we do not have data");
+                            if (!Mod.oldItemMap.ContainsKey(productionItemsArray[0]["_tpl"].ToString()))
+                            {
+                                Mod.LogError("DEV: Task " + task.ID + " reward " + ID + " targets item " + productionItemsArray[0]["_tpl"].ToString() + " for which we do not have data");
+                            }
                         }
                     }
                     break;

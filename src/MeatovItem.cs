@@ -53,7 +53,9 @@ namespace EFM
             HMG = 7, // Skill for this class of weapon apparently doesn't work for stationary weapons, but the only HMG in the game is a stationary weapon. Anyway the only HMG isn't implemented as an item
             Launcher = 8, // 55818b014bdc2ddc698b456b or 5447bedf4bdc2d87278b4568
             AttachedLauncher = 9, // Attached launcher have parent Launcher instead of AttachedLauncher
-            DMR = 10 // 5447b6194bdc2d67278b4567
+            DMR = 10, // 5447b6194bdc2d67278b4567
+
+            None = 11
         }
 
         public enum ItemRarity

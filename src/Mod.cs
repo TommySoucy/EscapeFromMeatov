@@ -609,6 +609,7 @@ namespace EFM
         public static JArray lootContainerDB;
         public static JObject dynamicLootTable;
         public static JObject staticLootTable;
+        public static Dictionary<string, JToken> oldItemMap; // A map of what every item in tarkov points to in EFM, and a reason why not if it doesn't or if it is wrong
         public static Dictionary<string, MeatovItemData> defaultItemData; // All item data by tarkov ID
         public static Dictionary<string, List<MeatovItemData>> defaultItemDataByH3ID; // All item data by H3ID, note that this is a list, because multiple Tarkov IDs can point to the same H3ID
         public static MeatovItemData[] customItemData; // Custom item data by index
@@ -2978,6 +2979,7 @@ namespace EFM
 
         private void ParseDefaultItemData()
         {
+            oldItemMap = JObject.Parse(File.ReadAllText(path + "/database/ItemMap.json")).ToObject<Dictionary<string, JToken>>();
             JObject data = JObject.Parse(File.ReadAllText(path + "/database/DefaultItemData.json"));
             Dictionary<string, JToken> defaultItemDataDB = data.ToObject<Dictionary<string, JToken>>();
             defaultItemData = new Dictionary<string, MeatovItemData>();
@@ -3089,7 +3091,6 @@ namespace EFM
 
         public void BuildCategoriesTree()
         {
-            Mod.LogInfo("Building categ tree");
             if (itemCategories == null)
             {
                 itemCategories = new CategoryTreeNode(null, itemParentID, "Item");
@@ -3097,13 +3098,11 @@ namespace EFM
             // Note that a particular item will appear in the list corresponding to all of its ancestors, not only its direct parent
             foreach(KeyValuePair<string, List<MeatovItemData>> parentEntry in itemsByParents)
             {
-                Mod.LogInfo("Get all ancestors for "+ parentEntry.Key);
                 // Build list of all ancestors starting from this parent
                 List<string> parents = new List<string>() { parentEntry.Key };
                 JToken nextParentToken = itemDB[parentEntry.Key]["_parent"];
                 while (nextParentToken != null && !nextParentToken.ToString().Equals(""))
                 {
-                    Mod.LogInfo("Found " + nextParentToken.ToString());
                     parents.Add(nextParentToken.ToString());
                     nextParentToken = itemDB[nextParentToken.ToString()]["_parent"];
                 }

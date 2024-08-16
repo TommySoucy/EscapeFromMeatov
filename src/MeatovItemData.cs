@@ -203,7 +203,6 @@ namespace EFM
             }
 
             tarkovID = data["tarkovID"].ToString();
-            Mod.LogInfo("MeatovItemData ctor " + tarkovID);
             H3ID = Regex.Unescape(data["H3ID"].ToString());
             H3SpawnerID = data["H3SpawnerID"] == null ? null : data["H3SpawnerID"].ToString();
             index = data["index"] == null ? -1 : (int)data["index"];
@@ -253,6 +252,9 @@ namespace EFM
                 recoilHorizontal = (int)data["recoilHorizontal"];
                 sightingRange = (int)data["sightingRange"];
                 ergonomicsModifier = (int)data["ergonomicsModifier"];
+            }
+            if (data["recoilModifier"] != null)
+            {
                 recoilModifier = (int)data["recoilModifier"];
             }
             if (data["dimensions"] != null)

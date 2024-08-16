@@ -1,7 +1,0 @@
-INFO: Entries with more than 1 usage of an H3ID
-	830
-	DingPack
-	Matchbox
-	FlipzoLighter
-	HairsprayCan
-	Drill

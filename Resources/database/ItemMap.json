@@ -6332,6 +6332,9 @@
   "62811cd7308cb521f87a8f99": {
     "Note": "Missing, should be modul part of NWAIAXMC"
   },
+  "5fc23636016cce60e8341b05": {
+    "Note": "Missing, should be included with modul AXMC"
+  },
   "5bfea6e90db834001b7347f3": {
     "H3ID": "m700base",
 	"Note": "Should be MW"
@@ -9950,6 +9953,10 @@
   },
   "5a6b5ed88dc32e000c52ec86": {
     "H3ID": "Barrel_Salient_114_Threaded.ARP",
+	"Note": "Should be MW"
+  },
+  "5a6b5b8a8dc32e001207faf3": {
+    "H3ID": "Barrel_Alpha_Wolf_114_Threaded.ARP",
 	"Note": "Should be MW"
   },
   "5a7b4960e899ef197b331a2d": {

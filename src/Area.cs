@@ -1189,7 +1189,10 @@ namespace EFM
                     case RequirementType.Item:
                         if(!Mod.defaultItemData.TryGetValue(requirementData["templateId"].ToString(), out item))
                         {
-                            Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " item requirement targets item "+ requirementData["templateId"].ToString() + " for which we do not have data");
+                            if (!Mod.oldItemMap.ContainsKey(requirementData["templateId"].ToString()))
+                            {
+                                Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " item requirement targets item " + requirementData["templateId"].ToString() + " for which we do not have data");
+                            }
                             fulfilled = true;
                             return;
                         }
@@ -1234,7 +1237,10 @@ namespace EFM
                     case RequirementType.Tool:
                         if (!Mod.defaultItemData.TryGetValue(requirementData["templateId"].ToString(), out item))
                         {
-                            Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " tool requirement targets item " + requirementData["templateId"].ToString() + " for which we do not have data");
+                            if (!Mod.oldItemMap.ContainsKey(requirementData["templateId"].ToString()))
+                            {
+                                Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " tool requirement targets item " + requirementData["templateId"].ToString() + " for which we do not have data");
+                            }
                             fulfilled = true;
                             return;
                         }
@@ -1245,7 +1251,10 @@ namespace EFM
                     case RequirementType.Resource:
                         if (!Mod.defaultItemData.TryGetValue(requirementData["templateId"].ToString(), out item))
                         {
-                            Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " item requirement targets item " + requirementData["templateId"].ToString() + " for which we do not have data");
+                            if (!Mod.oldItemMap.ContainsKey(requirementData["templateId"].ToString()))
+                            {
+                                Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " item requirement targets item " + requirementData["templateId"].ToString() + " for which we do not have data");
+                            }
                             fulfilled = true;
                             return;
                         }
