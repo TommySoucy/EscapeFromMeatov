@@ -85,7 +85,6 @@ namespace EFM
         public string H3SpawnerID;
         public int index = -1;
         [NonSerialized]
-        public bool vanilla;
         public ItemType itemType;
 		public List<string> parents;
         public int weight; // Weight of a single instance of this item
@@ -2430,7 +2429,8 @@ namespace EFM
             }
 
             // Serialize vanilla items using vault system
-            if (vanilla)
+            int parsed = 0;
+            if (!int.TryParse(H3ID, out parsed))
             {
                 VaultFile vaultFile = new VaultFile();
                 VaultSystem.ScanObjectToVaultFile(vaultFile, physObj);
