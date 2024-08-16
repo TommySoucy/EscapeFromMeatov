@@ -85,7 +85,7 @@ namespace EFM
             }
 
             // Set buttons
-            nextButton.SetActive(items.Count > 8);
+            nextButton.SetActive(index + 8 < items.Count);
             previousButton.SetActive(false);
         }
 
@@ -99,6 +99,8 @@ namespace EFM
             index += 8;
             nextButton.SetActive(index + 8 < items.Count);
             previousButton.SetActive(true);
+
+            DisplayList();
         }
 
         public void Previous()
@@ -106,6 +108,8 @@ namespace EFM
             index -= 8;
             nextButton.SetActive(true);
             previousButton.SetActive(index - 8 >= 0);
+
+            DisplayList();
         }
     }
 }

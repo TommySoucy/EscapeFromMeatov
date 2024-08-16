@@ -259,7 +259,7 @@ namespace EFM
             }
             if (data["dimensions"] != null)
             {
-                dimensions = new Vector3(Mathf.Min(0.15f, (float)data["dimensions"][0]), Mathf.Min(0.05f, (float)data["dimensions"][1]), Mathf.Min(0.15f, (float)data["dimensions"][2]));
+                dimensions = new Vector3(Mathf.Max(0.15f, (float)data["dimensions"][0]), Mathf.Max(0.05f, (float)data["dimensions"][1]), Mathf.Max(0.15f, (float)data["dimensions"][2]));
             }
             else
             {
