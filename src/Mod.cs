@@ -10,7 +10,6 @@ using Valve.Newtonsoft.Json.Linq;
 using Valve.VR;
 using UnityEngine.UI;
 using ModularWorkshop;
-using System.Text.RegularExpressions;
 
 namespace EFM
 {
@@ -615,6 +614,7 @@ namespace EFM
         public static MeatovItemData[] customItemData; // Custom item data by index
         public static Dictionary<string, List<MeatovItemData>> vanillaItemData; // Vanilla item data by H3ID
         public static Dictionary<string, Dictionary<string, List<MeatovItemData>>> modItemsByPartByGroup; // Item data by mod group and part. This is a list of data because multiple mod items may point to the same part
+        public static Dictionary<FireArmRoundType, List<MeatovItemData>> roundDefaultItemDataByRoundType; // Round item data by round type
         public static Dictionary<string, JObject> lootContainersByName;
         public static Dictionary<string, AudioClip[]> itemSounds;
 
@@ -2984,6 +2984,7 @@ namespace EFM
             Dictionary<string, JToken> defaultItemDataDB = data.ToObject<Dictionary<string, JToken>>();
             defaultItemData = new Dictionary<string, MeatovItemData>();
             defaultItemDataByH3ID = new Dictionary<string, List<MeatovItemData>>();
+            roundDefaultItemDataByRoundType = new Dictionary<FireArmRoundType, List<MeatovItemData>>();
 
             modItemsByPartByGroup = new Dictionary<string, Dictionary<string, List<MeatovItemData>>>();
             itemsByParents = new Dictionary<string, List<MeatovItemData>>();
@@ -3005,6 +3006,18 @@ namespace EFM
                 {
                     currentItemData.defaultItemDataIndex = 0;
                     defaultItemDataByH3ID.Add(currentItemData.H3ID, new List<MeatovItemData>() { currentItemData });
+                }
+
+                if(currentItemData.itemType == MeatovItem.ItemType.Round)
+                {
+                    if (roundDefaultItemDataByRoundType.TryGetValue(currentItemData.roundType, out List<MeatovItemData> roundItemDataList))
+                    {
+                        roundItemDataList.Add(currentItemData);
+                    }
+                    else
+                    {
+                        roundDefaultItemDataByRoundType.Add(currentItemData.roundType, new List<MeatovItemData>() { currentItemData });
+                    }
                 }
 
                 int parsedID = -1;

@@ -37,6 +37,7 @@ namespace EFM
             DogTag = 17,
 
             Weapon = 18,
+            Round = 20,
 
             Mod = 19,
         }

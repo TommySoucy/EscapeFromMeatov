@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using static FistVR.ClosedBoltCarrierWrap;
 
 namespace EFM
 {
@@ -1136,62 +1137,56 @@ namespace EFM
             }
 
             // Fill new list if necessary
-            if (IM.OD.TryGetValue(descriptionPack.itemData.H3ID, out FVRObject wrapper) && wrapper.CompatibleSingleRounds != null)
+            if(Mod.roundDefaultItemDataByRoundType.TryGetValue(descriptionPack.itemData.roundType, out List<MeatovItemData> itemDatas))
             {
                 bool gotAmmo = false;
-                for (int i = 0; i < wrapper.CompatibleSingleRounds.Count; ++i)
+                for (int k = 0; k < itemDatas.Count; ++k)
                 {
-                    if (Mod.defaultItemDataByH3ID.TryGetValue(wrapper.CompatibleSingleRounds[i].ItemID, out List<MeatovItemData> itemDatas))
+                    int hideoutCount = 0;
+                    if (HideoutController.instance != null && HideoutController.instance.inventoryItems.TryGetValue(itemDatas[k].tarkovID, out List<MeatovItem> rounds))
                     {
-                        for (int k = 0; k < itemDatas.Count; ++k)
+                        hideoutCount = rounds.Count;
+                        for (int j = 0; j < rounds.Count; ++j)
                         {
-                            int hideoutCount = 0;
-                            if (HideoutController.instance != null && HideoutController.instance.inventoryItems.TryGetValue(itemDatas[k].tarkovID, out List<MeatovItem> rounds))
+                            FVRFireArmRound asRound = rounds[j].physObj as FVRFireArmRound;
+                            if (asRound == null)
                             {
-                                hideoutCount = rounds.Count;
-                                for (int j = 0; j < rounds.Count; ++j)
-                                {
-                                    FVRFireArmRound asRound = rounds[j].physObj as FVRFireArmRound;
-                                    if (asRound == null)
-                                    {
-                                        --hideoutCount;
-                                    }
-                                }
-                            }
-                            int playerCount = 0;
-                            if (Mod.playerInventoryItems.TryGetValue(itemDatas[k].tarkovID, out List<MeatovItem> playerRounds))
-                            {
-                                playerCount = playerRounds.Count;
-                                for (int j = 0; j < playerRounds.Count; ++j)
-                                {
-                                    FVRFireArmRound asRound = playerRounds[j].physObj as FVRFireArmRound;
-                                    if (asRound == null)
-                                    {
-                                        --playerCount;
-                                    }
-                                }
-                            }
-                            int ammoBoxCount = 0;
-                            if (Mod.ammoBoxesByRoundClassByRoundType.TryGetValue(wrapper.CompatibleSingleRounds[i].RoundType, out Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>> roundClasses))
-                            {
-                                if (roundClasses.TryGetValue(itemDatas[k].roundClass, out Dictionary<MeatovItem, int> ammoBoxes))
-                                {
-                                    foreach (KeyValuePair<MeatovItem, int> ammoBoxEntry in ammoBoxes)
-                                    {
-                                        ammoBoxCount += ammoBoxEntry.Value;
-                                    }
-                                }
-                            }
-
-                            if(hideoutCount + playerCount + ammoBoxCount > 0)
-                            {
-                                GameObject newEntry = Instantiate(compatibleAmmoEntryPrefab, compatibleAmmoParent.transform);
-                                newEntry.SetActive(true);
-                                ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
-                                entryUI.SetAmmo(this, itemDatas[k], hideoutCount, playerCount, ammoBoxCount);
-                                gotAmmo = true;
+                                --hideoutCount;
                             }
                         }
+                    }
+                    int playerCount = 0;
+                    if (Mod.playerInventoryItems.TryGetValue(itemDatas[k].tarkovID, out List<MeatovItem> playerRounds))
+                    {
+                        playerCount = playerRounds.Count;
+                        for (int j = 0; j < playerRounds.Count; ++j)
+                        {
+                            FVRFireArmRound asRound = playerRounds[j].physObj as FVRFireArmRound;
+                            if (asRound == null)
+                            {
+                                --playerCount;
+                            }
+                        }
+                    }
+                    int ammoBoxCount = 0;
+                    if (Mod.ammoBoxesByRoundClassByRoundType.TryGetValue(itemDatas[k].roundType, out Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>> roundClasses))
+                    {
+                        if (roundClasses.TryGetValue(itemDatas[k].roundClass, out Dictionary<MeatovItem, int> ammoBoxes))
+                        {
+                            foreach (KeyValuePair<MeatovItem, int> ammoBoxEntry in ammoBoxes)
+                            {
+                                ammoBoxCount += ammoBoxEntry.Value;
+                            }
+                        }
+                    }
+
+                    if (hideoutCount + playerCount + ammoBoxCount > 0)
+                    {
+                        GameObject newEntry = Instantiate(compatibleAmmoEntryPrefab, compatibleAmmoParent.transform);
+                        newEntry.SetActive(true);
+                        ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
+                        entryUI.SetAmmo(this, itemDatas[k], hideoutCount, playerCount, ammoBoxCount);
+                        gotAmmo = true;
                     }
                 }
                 compatibleAmmo.SetActive(gotAmmo);
