@@ -1019,110 +1019,52 @@ namespace EFM
             }
 
             // Fill new list if necessary
-            if (IM.OD.TryGetValue(descriptionPack.itemData.H3ID, out FVRObject wrapper))
+            if(descriptionPack.itemData.magType != FireArmMagazineType.mNone)
             {
                 bool gotContainer = false;
-                if(wrapper.CompatibleMagazines != null)
+                if (Mod.magDefaultItemDataByMagType.TryGetValue(descriptionPack.itemData.magType, out List<MeatovItemData> itemDatas))
                 {
-                    for (int i = 0; i < wrapper.CompatibleMagazines.Count; ++i)
+                    for (int k = 0; k < itemDatas.Count; ++k)
                     {
-                        if(Mod.defaultItemDataByH3ID.TryGetValue(wrapper.CompatibleMagazines[i].ItemID, out List<MeatovItemData> itemDatas))
+                        // Only consider mags not already loaded into a firearm
+                        // Note that we only consider mags in hideout if we are currently in hideout
+                        int hideoutCount = 0;
+                        if (HideoutController.instance != null && HideoutController.instance.inventoryItems.TryGetValue(itemDatas[k].tarkovID, out List<MeatovItem> mags))
                         {
-                            for(int k=0; k < itemDatas.Count; ++k)
+                            hideoutCount = mags.Count;
+                            for (int j = 0; j < mags.Count; ++j)
                             {
-                                // Only consider mags not already loaded into a firearm
-                                // Note that we only consider mags in hideout if we are currently in hideout
-                                int hideoutCount = 0;
-                                if (HideoutController.instance != null && HideoutController.instance.inventoryItems.TryGetValue(itemDatas[k].tarkovID, out List<MeatovItem> mags))
+                                FVRFireArmMagazine asMag = mags[j].physObj as FVRFireArmMagazine;
+                                if (asMag == null || asMag.FireArm != null || asMag.AttachableFireArm != null)
                                 {
-                                    hideoutCount = mags.Count;
-                                    for (int j = 0; j < mags.Count; ++j)
-                                    {
-                                        FVRFireArmMagazine asMag = mags[j].physObj as FVRFireArmMagazine;
-                                        if (asMag == null || asMag.FireArm != null || asMag.AttachableFireArm != null)
-                                        {
-                                            --hideoutCount;
-                                        }
-                                    }
-                                }
-                                int playerCount = 0;
-                                if (Mod.playerInventoryItems.TryGetValue(itemDatas[k].tarkovID, out List<MeatovItem> playerMags))
-                                {
-                                    playerCount = playerMags.Count;
-                                    for (int j = 0; j < playerMags.Count; ++j)
-                                    {
-                                        FVRFireArmMagazine asMag = playerMags[j].physObj as FVRFireArmMagazine;
-                                        if (asMag == null || asMag.FireArm != null || asMag.AttachableFireArm != null)
-                                        {
-                                            --playerCount;
-                                        }
-                                    }
-                                }
-                                if (hideoutCount > 0 || playerCount > 0)
-                                {
-                                    GameObject newEntry = Instantiate(compatibleAmmoContainersEntryPrefab, compatibleAmmoContainersParent.transform);
-                                    newEntry.SetActive(true);
-                                    ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
-                                    entryUI.SetAmmoContainer(this, itemDatas[k], hideoutCount, playerCount, true);
-                                    gotContainer = true;
+                                    --hideoutCount;
                                 }
                             }
                         }
-                    }
-                }
-                if(wrapper.CompatibleClips != null)
-                {
-                    for (int i = 0; i < wrapper.CompatibleClips.Count; ++i)
-                    {
-                        if (Mod.defaultItemDataByH3ID.TryGetValue(wrapper.CompatibleClips[i].ItemID, out List<MeatovItemData> itemDatas))
+                        int playerCount = 0;
+                        if (Mod.playerInventoryItems.TryGetValue(itemDatas[k].tarkovID, out List<MeatovItem> playerMags))
                         {
-                            for (int k = 0; k < itemDatas.Count; ++k)
+                            playerCount = playerMags.Count;
+                            for (int j = 0; j < playerMags.Count; ++j)
                             {
-                                // Only consider clips not already loaded into a firearm
-                                // Note that we only consider clips in hideout if we are currently in hideout
-                                int hideoutCount = 0;
-                                if (HideoutController.instance != null && HideoutController.instance.inventoryItems.TryGetValue(itemDatas[k].tarkovID, out List<MeatovItem> clips))
+                                FVRFireArmMagazine asMag = playerMags[j].physObj as FVRFireArmMagazine;
+                                if (asMag == null || asMag.FireArm != null || asMag.AttachableFireArm != null)
                                 {
-                                    hideoutCount = clips.Count;
-                                    for (int j = 0; j < clips.Count; ++j)
-                                    {
-                                        FVRFireArmClip asClip = clips[j].physObj as FVRFireArmClip;
-                                        if (asClip == null || asClip.FireArm != null)
-                                        {
-                                            --hideoutCount;
-                                        }
-                                    }
-                                }
-                                int playerCount = 0;
-                                if (Mod.playerInventoryItems.TryGetValue(itemDatas[k].tarkovID, out List<MeatovItem> playerClips))
-                                {
-                                    playerCount = playerClips.Count;
-                                    for (int j = 0; j < playerClips.Count; ++j)
-                                    {
-                                        FVRFireArmClip asClip = playerClips[j].physObj as FVRFireArmClip;
-                                        if (asClip == null || asClip.FireArm != null)
-                                        {
-                                            --playerCount;
-                                        }
-                                    }
-                                }
-                                if (hideoutCount > 0 || playerCount > 0)
-                                {
-                                    GameObject newEntry = Instantiate(compatibleAmmoContainersEntryPrefab, compatibleAmmoContainersParent.transform);
-                                    newEntry.SetActive(true);
-                                    ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
-                                    entryUI.SetAmmoContainer(this, itemDatas[k], hideoutCount, playerCount, false);
-                                    gotContainer = true;
+                                    --playerCount;
                                 }
                             }
+                        }
+                        if (hideoutCount > 0 || playerCount > 0)
+                        {
+                            GameObject newEntry = Instantiate(compatibleAmmoContainersEntryPrefab, compatibleAmmoContainersParent.transform);
+                            newEntry.SetActive(true);
+                            ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
+                            entryUI.SetAmmoContainer(this, itemDatas[k], hideoutCount, playerCount, true);
+                            gotContainer = true;
                         }
                     }
                 }
                 compatibleAmmoContainers.SetActive(gotContainer);
-            }
-            else
-            {
-                compatibleAmmoContainers.SetActive(false);
             }
         }
 

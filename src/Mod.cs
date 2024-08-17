@@ -615,6 +615,8 @@ namespace EFM
         public static Dictionary<string, List<MeatovItemData>> vanillaItemData; // Vanilla item data by H3ID
         public static Dictionary<string, Dictionary<string, List<MeatovItemData>>> modItemsByPartByGroup; // Item data by mod group and part. This is a list of data because multiple mod items may point to the same part
         public static Dictionary<FireArmRoundType, List<MeatovItemData>> roundDefaultItemDataByRoundType; // Round item data by round type
+        public static Dictionary<FireArmMagazineType, List<MeatovItemData>> magDefaultItemDataByMagType; // Mag item data by mag type
+        public static Dictionary<FireArmClipType, List<MeatovItemData>> clipDefaultItemDataByClipType; // Clip item data by clip type, And i realized after implementing this, there are no clips in tarkov
         public static Dictionary<string, JObject> lootContainersByName;
         public static Dictionary<string, AudioClip[]> itemSounds;
 
@@ -2985,6 +2987,8 @@ namespace EFM
             defaultItemData = new Dictionary<string, MeatovItemData>();
             defaultItemDataByH3ID = new Dictionary<string, List<MeatovItemData>>();
             roundDefaultItemDataByRoundType = new Dictionary<FireArmRoundType, List<MeatovItemData>>();
+            magDefaultItemDataByMagType = new Dictionary<FireArmMagazineType, List<MeatovItemData>>();
+            clipDefaultItemDataByClipType = new Dictionary<FireArmClipType, List<MeatovItemData>>();
 
             modItemsByPartByGroup = new Dictionary<string, Dictionary<string, List<MeatovItemData>>>();
             itemsByParents = new Dictionary<string, List<MeatovItemData>>();
@@ -3017,6 +3021,23 @@ namespace EFM
                     else
                     {
                         roundDefaultItemDataByRoundType.Add(currentItemData.roundType, new List<MeatovItemData>() { currentItemData });
+                    }
+                }
+
+                for(int i = 0; i < currentItemData.parents.Length; ++i)
+                {
+                    // If item is a mag
+                    TODO: // Make a Magazine ItemType and set all mags in data
+                    if (currentItemData.parents[i].Equals("5448bc234bdc2d3c308b4569"))
+                    {
+                        if (magDefaultItemDataByMagType.TryGetValue(currentItemData.magType, out List<MeatovItemData> magItemDataList))
+                        {
+                            magItemDataList.Add(currentItemData);
+                        }
+                        else
+                        {
+                            magDefaultItemDataByMagType.Add(currentItemData.magType, new List<MeatovItemData>() { currentItemData });
+                        }
                     }
                 }
 
