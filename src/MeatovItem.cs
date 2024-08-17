@@ -502,6 +502,24 @@ namespace EFM
             if (!itemDataSet)
             {
                 Mod.LogError("MeatovItem " + name + ":" + tarkovID + ":" + H3ID + " did not have its data set by the time it got to Start. StackTrace:\n" + Environment.StackTrace);
+
+                if(Mod.defaultItemData.TryGetValue(tarkovID, out MeatovItemData itemData))
+                {
+                    Mod.LogWarning("Data set on start for "+name);
+                    SetData(itemData);
+                }
+                else if(physObj != null && physObj.ObjectWrapper != null && Mod.defaultItemDataByH3ID.TryGetValue(physObj.ObjectWrapper.ItemID, out List<MeatovItemData> itemDatas))
+                {
+                    for(int i =0; i < itemDatas.Count; ++i)
+                    {
+                        if (itemDatas[i] != null)
+                        {
+                            Mod.LogWarning("Data set on start for " + name);
+                            SetData(itemDatas[i]);
+                            break;
+                        }
+                    }
+                }
             }
         }
 
