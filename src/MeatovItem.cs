@@ -526,6 +526,7 @@ namespace EFM
 
         public static void Setup(FVRPhysicalObject physicalObject)
         {
+            Mod.LogInfo("Meatovitem setup: " + physicalObject.name);
             physicalObject.gameObject.AddComponent<MeatovItem>();
         }
 

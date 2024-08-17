@@ -105,6 +105,7 @@ namespace EFM
         public static List<List<bool>> triggeredExplorationTriggers;
         public static GameObject[] scavRaidReturnItems; // Hands, Equipment, Right shoulder, pockets
         public static GameObject instantiatedItem;
+        public static bool skipNextInstantiation;
         public static Dictionary<FVRInteractiveObject, MeatovItem> meatovItemByInteractive = new Dictionary<FVRInteractiveObject, MeatovItem>();
         public static Dictionary<string, Dictionary<string, byte>> noneModulParts; // Dict of "None" modul workshop parts by part ID by group ID
 
@@ -4348,8 +4349,9 @@ namespace EFM
 
         public static void H3MP_OnInstantiationTrack(GameObject go)
         {
-            if (!Mod.inMeatovScene)
-            {
+            if (skipNextInstantiation || !Mod.inMeatovScene)
+            { 
+                skipNextInstantiation = false;
                 return;
             }
 
@@ -4360,6 +4362,7 @@ namespace EFM
             {
                 // We already setup this item, no need to do it here
                 // It is ready to be tracked by H3MP
+                instantiatedItem = null;
                 return;
             }
             else
@@ -4370,8 +4373,8 @@ namespace EFM
                 if (meatovItem == null && physObj != null)
                 {
                     MeatovItem.Setup(physObj);
+                    instantiatedItem = go;
                 }
-                instantiatedItem = null;
             }
         }
 

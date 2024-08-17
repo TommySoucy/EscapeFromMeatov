@@ -108,8 +108,26 @@ namespace EFM
                     // Make the vices modul workshop platforms
                     if (levels[i].vicePoint != null)
                     {
+                        Mod.skipNextInstantiation = true;
+                        ++H3MP.Mod.skipAllInstantiates;
                         GameObject platformInstance = Instantiate(platformPrefab, levels[i].vicePoint);
+                        --H3MP.Mod.skipAllInstantiates;
+
+                        platformInstance.transform.localPosition = Vector3.zero;
+                        platformInstance.transform.localScale = Vector3.one * 2;
+                        platformInstance.transform.GetChild(2).gameObject.SetActive(false);
                         platformInstance.transform.GetChild(3).localPosition += new Vector3(levels[i].viceFlipOffset.x, levels[i].viceFlipOffset.y, 0);
+                        Rigidbody rb = platformInstance.GetComponent<Rigidbody>();
+                        if(rb != null)
+                        {
+                            rb.isKinematic = true;
+                            Destroy(rb);
+                        }
+                        FVRPhysicalObject p = platformInstance.GetComponent<FVRPhysicalObject>();
+                        if(p != null)
+                        {
+                            p.IsPickUpLocked = true;
+                        }
                     }
 
                     // Sub to volume content changed events to keep track of modul parts
@@ -912,6 +930,34 @@ namespace EFM
                     }
                 }
             }
+        }
+
+        public void DebugUpgrade()
+        {
+            upgrading = false;
+
+            ++currentLevel;
+
+            for (int i = 0; i < levels.Length; ++i)
+            {
+                levels[i].gameObject.SetActive(i == currentLevel);
+            }
+
+            UI.Init();
+
+            UI.genericAudioSource.PlayOneShot(genericAudioClips[2]);
+
+            // Apply new bonuses
+            // Note that production bonuses are not applied, those are controlled through specific updates below
+            for (int i = 0; i < bonusesPerLevel[currentLevel].Length; ++i)
+            {
+                if ((bonusesPerLevel[currentLevel][i].passive || powered) && !bonusesPerLevel[currentLevel][i].production)
+                {
+                    bonusesPerLevel[currentLevel][i].Apply();
+                }
+            }
+
+            UI.UpdateStatusTexts();
         }
 
         public MeatovItem GetClosestItem(string tarkovID)

@@ -4107,95 +4107,67 @@ namespace EFM
                 return;
             }
 
-            // First find the first weapon meatov item in our hierarchy
-            MeatovItem item = __instance.GetComponentInParent<MeatovItem>();
-            while (item != null && item.itemType != ItemType.Weapon)
+            Mod.LogInfo("EnablePrefix on "+__instance.name);
+            if (overrideItem == null)
             {
-                item = item.parent;
-            }
-            if (item != null)
-            {
-                // EnablePrefix will be called on a modul part when the part is selected in workshop UI or when the weapon spawns
-                // If on weapon spawn, we don't have the specific data to give the part so just take the first one in its list
-                // If from workshop ui selection, we will have the data here as override, we can just set it directly
-                // Is it possible that we select a none part, at which point the overrideItem will be set to null by UI selection
-                // If this is the case, overrideItemNone will be set to true so we know not to put any data on the part
-                if (overrideItem == null)
+                Mod.LogInfo("\t\tNo override item");
+                if (overrideItemNone)
                 {
-                    if (overrideItemNone)
-                    {
-                        overrideItemNone = false;
-                    }
-                    else
-                    {
-                        TODO: // This is way too complicated, having ModularWeaponPart just keep a ref to the point it is currently attached to would
-                        //       let us skip having to find the point by iterating over all of them, fix it, make pull request
-                        //       The problem is that the part doesn't store which group it is a part of 
-                        //       But we need this to get its data
-                        //       Our next best option is to find which point it is attached to, which stores that data
-
-                        // Get the modular weapon this part is attached to
-                        IModularWeapon modularWeapon = __instance.GetComponentInParent<IModularWeapon>();
-                        if (modularWeapon != null)
-                        {
-                            // Go through all of the attachment points to find which one this part is attached to
-                            foreach (KeyValuePair<string, ModularWeaponPartsAttachmentPoint> pointEntry in modularWeapon.AllAttachmentPoints)
-                            {
-                                // Find data for this part
-                                if (pointEntry.Value.ModularPartPoint == __instance.transform
-                                    && Mod.modItemsByPartByGroup.TryGetValue(pointEntry.Key, out Dictionary<string, List<MeatovItemData>> groupDict)
-                                    && groupDict.TryGetValue(pointEntry.Value.SelectedModularWeaponPart, out List<MeatovItemData> partList))
-                                {
-                                    // Here, we assume the first part in the list is the default a modul weapon would spawn with
-                                    MeatovItemData partData = partList[0];
-                                    MeatovItem partItem = __instance.gameObject.AddComponent<MeatovItem>();
-                                    partItem.SetData(partData);
-                                    // Since the item got instantiated directly on an already parented object, we want to make sure we set the meatov parenting properly
-                                    partItem.OnTransformParentChanged();
-
-                                    //if (partData.recoilModifier != 0)
-                                    //{
-                                    //    item.currentRecoilHorizontal += (int)(item.baseRecoilHorizontal / 100.0f * partData.recoilModifier);
-                                    //}
-                                    //if (partData.ergonomicsModifier != 0)
-                                    //{
-                                    //    item.ergonomics += partData.ergonomicsModifier;
-                                    //}
-                                    //if (partData.sightingRange > item.currentSightingRange)
-                                    //{
-                                    //    item.currentSightingRange = partData.sightingRange;
-                                    //}
-                                    break;
-                                }
-                            }
-                        }
-                    }
+                    overrideItemNone = false;
                 }
                 else
                 {
-                    MeatovItem partItem = __instance.gameObject.AddComponent<MeatovItem>();
-                    partItem.SetData(overrideItem.itemData);
+                    Mod.LogInfo("\t\t\tNot override none, setting default data");
+                    TODO: // This is way too complicated, having ModularWeaponPart just keep a ref to the point it is currently attached to would
+                    //       let us skip having to find the point by iterating over all of them, fix it, make pull request
+                    //       The problem is that the part doesn't store which group it is a part of 
+                    //       But we need this to get its data
+                    //       Our next best option is to find which point it is attached to, which stores that data
 
-                    MeatovItem.Copy(overrideItem, partItem);
-
-                    overrideItem = null;
-
-                    // Since the item got instantiated directly on an already parented object, we want to make sure we set the meatov parenting properly
-                    partItem.OnTransformParentChanged();
-
-                    //if (overrideItem.itemData.recoilModifier != 0)
-                    //{
-                    //    item.currentRecoilHorizontal += (int)(item.baseRecoilHorizontal / 100.0f * overrideItem.itemData.recoilModifier);
-                    //}
-                    //if (overrideItem.itemData.ergonomicsModifier != 0)
-                    //{
-                    //    item.ergonomics += overrideItem.itemData.ergonomicsModifier;
-                    //}
-                    //if (overrideItem.itemData.sightingRange > item.currentSightingRange)
-                    //{
-                    //    item.currentSightingRange = overrideItem.itemData.sightingRange;
-                    //}
+                    // Get the modular weapon this part is attached to
+                    IModularWeapon modularWeapon = __instance.GetComponentInParent<IModularWeapon>();
+                    if (modularWeapon != null)
+                    {
+                        Mod.LogInfo("\t\t\t\tGot modular weapon");
+                        bool foundData = false;
+                        // Go through all of the attachment points to find which one this part is attached to
+                        foreach (KeyValuePair<string, ModularWeaponPartsAttachmentPoint> pointEntry in modularWeapon.AllAttachmentPoints)
+                        {
+                            Mod.LogInfo("\t\t\t\t\tChecking point "+ pointEntry.Value.ModularPartPoint.name+" for part group "+ pointEntry.Key+" with selected part: "+ pointEntry.Value.SelectedModularWeaponPart);
+                            // Find data for this part
+                            if (pointEntry.Value.ModularPartPoint == __instance.transform
+                                && Mod.modItemsByPartByGroup.TryGetValue(pointEntry.Key, out Dictionary<string, List<MeatovItemData>> groupDict)
+                                && groupDict.TryGetValue(pointEntry.Value.SelectedModularWeaponPart, out List<MeatovItemData> partList))
+                            {
+                                // Here, we assume the first part in the list is the default a modul weapon would spawn with
+                                MeatovItemData partData = partList[0];
+                                Mod.LogInfo("\t\t\t\t\t\tGot data: "+ partData.name);
+                                MeatovItem partItem = __instance.gameObject.AddComponent<MeatovItem>();
+                                partItem.SetData(partData);
+                                // Since the item got instantiated directly on an already parented object, we want to make sure we set the meatov parenting properly
+                                partItem.OnTransformParentChanged();
+                                foundData = true;
+                                break;
+                            }
+                        }
+                        if (!foundData)
+                        {
+                            Mod.LogError("Could not find data for part "+__instance.name+" on "+modularWeapon.ToString());
+                        }
+                    }
                 }
+            }
+            else
+            {
+                MeatovItem partItem = __instance.gameObject.AddComponent<MeatovItem>();
+                partItem.SetData(overrideItem.itemData);
+
+                MeatovItem.Copy(overrideItem, partItem);
+
+                overrideItem = null;
+
+                // Since the item got instantiated directly on an already parented object, we want to make sure we set the meatov parenting properly
+                partItem.OnTransformParentChanged();
             }
         }
 
@@ -4207,38 +4179,16 @@ namespace EFM
                 return;
             }
 
-            MeatovItem parentWeaponItem = __instance.GetComponentInParents<MeatovItem>(false);
-            while (parentWeaponItem != null && parentWeaponItem.itemType != ItemType.Weapon)
-            {
-                parentWeaponItem = parentWeaponItem.parent;
-            }
             MeatovItem partItem = __instance.GetComponent<MeatovItem>();
-            if (parentWeaponItem != null)
+            if(partItem != null)
             {
-                if(partItem != null)
+                // We want to keep the data that was on the modular part so make delegate to copy it
+                Area workbench = HideoutController.instance.areaController.areas[10];
+                ContainmentVolume.SpawnItemReturnDelegate del = itemsSpawned =>
                 {
-                    MeatovItemData partData = partItem.itemData;
-                    if (partData.recoilModifier != 0)
-                    {
-                        parentWeaponItem.currentRecoilHorizontal -= (int)(parentWeaponItem.baseRecoilHorizontal / 100.0f * partData.recoilModifier);
-                    }
-                    if (partData.ergonomicsModifier != 0)
-                    {
-                        parentWeaponItem.ergonomics -= partData.ergonomicsModifier;
-                    }
-                    if (partData.sightingRange == parentWeaponItem.currentSightingRange)
-                    {
-                        parentWeaponItem.UpdateSightingRange(partData);
-                    }
-
-                    // We want to keep the data that was on the modular part so make delegate to copy it
-                    Area workbench = HideoutController.instance.areaController.areas[10];
-                    ContainmentVolume.SpawnItemReturnDelegate del = itemsSpawned =>
-                    {
-                        MeatovItem.Copy(partItem, itemsSpawned[0]);
-                    };
-                    workbench.levels[workbench.currentLevel].areaVolumes[0].SpawnItem(partItem.itemData, 1, false, del);
-                }
+                    MeatovItem.Copy(partItem, itemsSpawned[0]);
+                };
+                workbench.levels[workbench.currentLevel].areaVolumes[0].SpawnItem(partItem.itemData, 1, false, del);
             }
         }
     }
@@ -5138,8 +5088,9 @@ namespace EFM
     {
         static void Postfix(ref UnityEngine.Object __result)
         {
-            if (__result == null || !Mod.inMeatovScene)
+            if (Mod.skipNextInstantiation || __result == null || !Mod.inMeatovScene)
             {
+                Mod.skipNextInstantiation = false;
                 return;
             }
 
@@ -5154,14 +5105,12 @@ namespace EFM
                 else
                 {
                     // Item not yet setup if possible, continue
+                    MeatovItem meatovItem = go.GetComponent<MeatovItem>();
                     FVRPhysicalObject physicalObject = go.GetComponent<FVRPhysicalObject>();
-                    if (physicalObject != null && physicalObject.ObjectWrapper != null)
+                    if (physicalObject != null && physicalObject.ObjectWrapper != null && meatovItem == null)
                     {
-                        // Must setup the item if it is vanilla
-                        if (!physicalObject.ObjectWrapper.ItemID.StartsWith("Meatov"))
-                        {
-                            MeatovItem.Setup(physicalObject);
-                        }
+                        MeatovItem.Setup(physicalObject);
+                        Mod.instantiatedItem = go;
                     }
                 }
             }
@@ -5173,8 +5122,9 @@ namespace EFM
     {
         static void Postfix(ref UnityEngine.Object __result, Transform parent)
         {
-            if (__result == null || !Mod.inMeatovScene)
+            if (Mod.skipNextInstantiation || __result == null || !Mod.inMeatovScene)
             {
+                Mod.skipNextInstantiation = false;
                 return;
             }
 
@@ -5189,14 +5139,12 @@ namespace EFM
                 else
                 {
                     // Item not yet setup if possible, continue
+                    MeatovItem meatovItem = go.GetComponent<MeatovItem>();
                     FVRPhysicalObject physicalObject = go.GetComponent<FVRPhysicalObject>();
-                    if (physicalObject != null && physicalObject.ObjectWrapper != null)
+                    if (physicalObject != null && physicalObject.ObjectWrapper != null && meatovItem == null)
                     {
-                        // Must setup the item if it is vanilla
-                        if (!physicalObject.ObjectWrapper.ItemID.StartsWith("Meatov"))
-                        {
-                            MeatovItem.Setup(physicalObject);
-                        }
+                        MeatovItem.Setup(physicalObject);
+                        Mod.instantiatedItem = go;
                     }
                 }
             }
@@ -5208,8 +5156,9 @@ namespace EFM
     {
         static void Postfix(ref UnityEngine.Object __result)
         {
-            if (__result == null || !Mod.inMeatovScene)
+            if (Mod.skipNextInstantiation || __result == null || !Mod.inMeatovScene)
             {
+                Mod.skipNextInstantiation = false;
                 return;
             }
 
@@ -5224,14 +5173,12 @@ namespace EFM
                 else
                 {
                     // Item not yet setup if possible, continue
+                    MeatovItem meatovItem = go.GetComponent<MeatovItem>();
                     FVRPhysicalObject physicalObject = go.GetComponent<FVRPhysicalObject>();
-                    if (physicalObject != null && physicalObject.ObjectWrapper != null)
+                    if (physicalObject != null && physicalObject.ObjectWrapper != null && meatovItem == null)
                     {
-                        // Must setup the item if it is vanilla
-                        if (!physicalObject.ObjectWrapper.ItemID.StartsWith("Meatov"))
-                        {
-                            MeatovItem.Setup(physicalObject);
-                        }
+                        MeatovItem.Setup(physicalObject);
+                        Mod.instantiatedItem = go;
                     }
                 }
             }
@@ -5243,8 +5190,9 @@ namespace EFM
     {
         static void Postfix(ref UnityEngine.Object __result, Transform parent)
         {
-            if (__result == null || !Mod.inMeatovScene)
+            if (Mod.skipNextInstantiation || __result == null || !Mod.inMeatovScene)
             {
+                Mod.skipNextInstantiation = false;
                 return;
             }
 
@@ -5259,14 +5207,12 @@ namespace EFM
                 else
                 {
                     // Item not yet setup if possible, continue
+                    MeatovItem meatovItem = go.GetComponent<MeatovItem>();
                     FVRPhysicalObject physicalObject = go.GetComponent<FVRPhysicalObject>();
-                    if (physicalObject != null && physicalObject.ObjectWrapper != null)
+                    if (physicalObject != null && physicalObject.ObjectWrapper != null && meatovItem == null)
                     {
-                        // Must setup the item if it is vanilla
-                        if (!physicalObject.ObjectWrapper.ItemID.StartsWith("Meatov"))
-                        {
-                            MeatovItem.Setup(physicalObject);
-                        }
+                        MeatovItem.Setup(physicalObject);
+                        Mod.instantiatedItem = go;
                     }
                 }
             }
@@ -5278,6 +5224,8 @@ namespace EFM
     {
         public static List<KeyValuePair<int, MeatovItem>> toDisplay;
 
+        public static ModularWorkshopUI debugInstance;
+
         // Patches UpdateDisplay to prevent display of parts player doesn't have in workbench volume
         static bool UpdateDisplayPrefix(ModularWorkshopUI __instance)
         {
@@ -5285,6 +5233,9 @@ namespace EFM
             {
                 return true;
             }
+            debugInstance = __instance;
+
+            Mod.LogInfo("UpdateDisplayPrefix for UI with groupd ID: "+__instance.ModularPartsGroupID);
 
             if (__instance.DisplayNameText != null && !__instance._skinOnlyMode)
             {
@@ -5296,6 +5247,7 @@ namespace EFM
             }
             if (__instance._isShowingUI)
             {
+                Mod.LogInfo("\tIs showing UI");
                 GameObject mainCanvas = __instance.MainCanvas;
                 if (mainCanvas != null)
                 {
@@ -5314,16 +5266,19 @@ namespace EFM
                 int maxPage = 0;
                 if (!__instance._isShowingSkins)
                 {
+                    Mod.LogInfo("\t\tNot showing skins, processing "+ __instance._partNames.Length+" parts");
                     // Build list of parts we want to display
                     int count = 0;
                     toDisplay = new List<KeyValuePair<int, MeatovItem>>();
                     for (int i = 0; i < __instance._partNames.Length; ++i)
                     {
+                        Mod.LogInfo("\t\t\tPart: "+ __instance._partNames[i]);
                         byte zero = 0;
                         // Note that here, we assume that there can only be a single none part to a group and it that it is the first in the part list
                         if (Mod.noneModulParts.TryGetValue(__instance.ModularPartsGroupID, out Dictionary<string, byte> noneParts) 
                             && noneParts.TryGetValue(__instance._partNames[i], out zero))
                         {
+                            Mod.LogInfo("\t\t\t\tAdded as none part");
                             toDisplay.Add(new KeyValuePair<int, MeatovItem>(i, null));
                             count = 1;
                         }
@@ -5331,6 +5286,7 @@ namespace EFM
                         // Ensure we have currently selected part in the list to display
                         if (i == __instance._selectedPart)
                         {
+                            Mod.LogInfo("\t\t\t\tThis is selected part");
                             MeatovItem partMeatovItem = null;
                             switch (__instance.PartType)
                             {
@@ -5353,6 +5309,7 @@ namespace EFM
 
                             if(partMeatovItem != null)
                             {
+                                Mod.LogInfo("\t\t\t\t\tGot part meatov item, adding to display list");
                                 toDisplay.Add(new KeyValuePair<int, MeatovItem>(i, partMeatovItem));
                                 ++count;
                             }
@@ -5361,7 +5318,8 @@ namespace EFM
                         if (HideoutController.instance.areaController.areas[10].availableModulParts.TryGetValue(__instance.ModularPartsGroupID, out Dictionary<string, List<MeatovItem>> partsDict)
                             && partsDict.TryGetValue(__instance._partNames[i], out List<MeatovItem> itemList))
                         {
-                            for(int j=itemList.Count - 1; j >= 0; --j)
+                            Mod.LogInfo("\t\t\t\tPart is in current workbench volume "+ itemList.Count+" times");
+                            for (int j=itemList.Count - 1; j >= 0; --j)
                             {
                                 if (itemList[j] == null)
                                 {
@@ -5379,9 +5337,10 @@ namespace EFM
                     // Calculate indices
                     maxPage = count / __instance.PartButtons.Length; // 0 based
                     int startIndex = maxPage * __instance.PartButtons.Length; // 0 based
+                    Mod.LogInfo("\t\tGot count: "+count+", calculated indices, maxPage: "+maxPage+ ", startIndex: " + startIndex);
 
-                    // Adjust page is necessary
-                    if(maxPage < __instance._pageIndex)
+                    // Adjust page if necessary
+                    if (maxPage < __instance._pageIndex)
                     {
                         __instance._pageIndex = maxPage;
                     }
@@ -5389,8 +5348,10 @@ namespace EFM
                     // Display parts
                     for (int i = startIndex, j = 0; j < __instance.PartButtons.Length; ++i, ++j)
                     {
+                        Mod.LogInfo("\t\t\tChecking button "+j+" for toDisplay "+i+": ("+ toDisplay[i].Key+","+ toDisplay[i].Value.itemName+")");
                         if (i < toDisplay.Count)
                         {
+                            Mod.LogInfo("\t\t\t\tDisplaying part: "+ __instance._partNames[toDisplay[i].Key]);
                             __instance.PartButtons[j].SetActive(true);
                             __instance.PartTexts[j].text = __instance._partNames[toDisplay[i].Key];
                             __instance.PartImages[j].sprite = __instance._partSprites[toDisplay[i].Key];
@@ -5417,6 +5378,7 @@ namespace EFM
                         }
                     }
                 }
+                Mod.LogInfo("\tDone displaying parts");
                 if (!__instance._isShowingSkins && __instance._pageIndex == 0)
                 {
                     __instance.BackButton.SetActive(false);
@@ -5472,7 +5434,7 @@ namespace EFM
             else
             {
                 __instance.MainCanvas.SetActive(false);
-                if (!__instance._skinOnlyMode && toDisplay.Count > 1)
+                if (!__instance._skinOnlyMode && __instance._partDictionary.Count > 1)
                 {
                     __instance.ShowButton.SetActive(true);
                 }

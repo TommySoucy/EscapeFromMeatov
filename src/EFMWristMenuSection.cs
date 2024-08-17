@@ -41,12 +41,13 @@ namespace EFM
             Text textOut = null;
             InitButton(new List<int>() { 0 }, new List<Vector3>() { new Vector3(0, 75, 0) }, new Vector2(1000, 150), new Vector2(140, 70), OnDevClicked, "Dev", out textOut);
             InitButton(new List<int>() { 0 }, new List<Vector3>() { new Vector3(0, 0, 0) }, new Vector2(1200, 150), new Vector2(140, 70), OnStatusClicked, "Status", out textOut);
-            InitButton(new List<int>() { 1 }, new List<Vector3>() { new Vector3(0, 75, 0) }, new Vector2(500, 240), new Vector2(140, 70), OnItemsClicked, "Items", out textOut);
+            InitButton(new List<int>() { 1 }, new List<Vector3>() { new Vector3(0, 75, 0) }, new Vector2(1000, 150), new Vector2(140, 70), OnItemsClicked, "Items", out textOut);
+            InitButton(new List<int>() { 1 }, new List<Vector3>() { new Vector3(0, 0, 0) }, new Vector2(1000, 150), new Vector2(140, 70), OnNearestAreaUpgradeClicked, "Upgrade nearest area", out textOut);
             //InitButton(new List<int>() { 1 }, new List<Vector3>() { Vector3.zero }, new Vector2(500, 240), new Vector2(140, 70), OnConnectClicked, "Join", out textOut);
             //InitButton(new List<int>() { 0, 1, 2, 3 }, new List<Vector3>() { new Vector3(0, -75, 0), new Vector3(0, -75, 0), new Vector3(0, -75, 0), new Vector3(0, -75, 0) }, new Vector2(500, 150), new Vector2(140, 70), OnOptionsClicked, "Options", out textOut);
             //InitButton(new List<int>() { 2 }, new List<Vector3>() { new Vector3(0, 75, 0) }, new Vector2(500, 240), new Vector2(140, 70), OnCloseClicked, "Close\nserver", out textOut);
             //InitButton(new List<int>() { 3 }, new List<Vector3>() { new Vector3(0, 75, 0) }, new Vector2(500, 240), new Vector2(140, 70), OnDisconnectClicked, "Disconnect", out textOut);
-            InitButton(new List<int>() { 1, 2 }, new List<Vector3>() { new Vector3(-215, 140, 0), new Vector3(-215, 140, 0), new Vector3(-215, 140, 0), new Vector3(-215, 140, 0) }, new Vector2(240, 240), new Vector2(70, 70), OnBackClicked, "Back", out textOut);
+            InitButton(new List<int>() { 1, 2 }, new List<Vector3>() { new Vector3(-215, 140, 0), new Vector3(-215, 140, 0) }, new Vector2(240, 240), new Vector2(70, 70), OnBackClicked, "Back", out textOut);
             //InitButton(new List<int>() { 4 }, new List<Vector3>() { new Vector3(0, 150, 0) }, new Vector2(1200, 150), new Vector2(270, 45), OnReloadConfigClicked, "Reload config", out textOut);
             //InitButton(new List<int>() { 4 }, new List<Vector3>() { new Vector3(0, 100, 0) }, new Vector2(1200, 150), new Vector2(270, 45), OnItemInterpolationClicked, "Item interpolation (ON)", out textOut);
             //InitButton(new List<int>() { 4 }, new List<Vector3>() { new Vector3(0, 50, 0) }, new Vector2(1200, 150), new Vector2(270, 45), OnTNHReviveClicked, "TNH revive", out textOut);
@@ -138,6 +139,32 @@ namespace EFM
             else
             {
                 Destroy(DevItemSpawner.instance.gameObject);
+            }
+        }
+
+        public void OnNearestAreaUpgradeClicked(Text textRef)
+        {
+            SM.PlayGlobalUISound(SM.GlobalUISound.Beep, transform.position);
+
+            if(HideoutController.instance != null)
+            {
+                float nearestDist = float.MaxValue;
+                Area currentNearest = null;
+                for(int i=0; i< HideoutController.instance.areaController.areas.Length; ++i)
+                {
+                    if(HideoutController.instance.areaController.areas[i] != null && HideoutController.instance.areaController.areas[i].UIRoot != null)
+                    {
+                        float currentDist = Vector3.Distance(HideoutController.instance.areaController.areas[i].UIRoot.position, GM.CurrentPlayerRoot.position);
+                        if (currentDist < nearestDist)
+                        {
+                            currentNearest = HideoutController.instance.areaController.areas[i];
+                        }
+                    }
+                }
+                if(currentNearest != null)
+                {
+                    currentNearest.DebugUpgrade();
+                }
             }
         }
 
