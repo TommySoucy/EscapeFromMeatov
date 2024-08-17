@@ -122,7 +122,8 @@ namespace EFM
         {
             this.owner = owner;
             entryName.text = roundData.name;
-            if(owner.descriptionPack.item == null)
+            if (owner.descriptionPack.item == null
+                || !(owner.descriptionPack.item.physObj is FVRFireArmMagazine || owner.descriptionPack.item.physObj is FVRFireArmClip || owner.descriptionPack.item.physObj is Speedloader))
             {
                 button.gameObject.SetActive(false);
             }
@@ -140,7 +141,7 @@ namespace EFM
         {
             int countLeft = 0;
             FVRFireArmMagazine asMag = null;
-            FVRFireArmMagazine asClip = null;
+            FVRFireArmClip asClip = null;
             Speedloader asSL = null;
             int typeIndex = -1;
             if (owner.descriptionPack.item != null)
@@ -161,7 +162,7 @@ namespace EFM
                 else if(owner.descriptionPack.item.physObj is FVRFireArmClip)
                 {
                     typeIndex = 1;
-                    asClip = owner.descriptionPack.item.physObj as FVRFireArmMagazine;
+                    asClip = owner.descriptionPack.item.physObj as FVRFireArmClip;
                     if (asClip.m_numRounds >= asClip.m_capacity)
                     {
                         return;
@@ -225,7 +226,7 @@ namespace EFM
                 {
                     for (int i = roundList.Count - 1; i >= 0 && countLeft > 0; --i)
                     {
-                        asClip.AddRound(roundList[i].physObj as FVRFireArmRound, false, true, false);
+                        asClip.AddRound(roundList[i].physObj as FVRFireArmRound, false, true);
                         --entryCount;
                         --countLeft;
                     }
@@ -285,7 +286,7 @@ namespace EFM
                 {
                     for (int i = hideoutRoundList.Count - 1; i >= 0 && countLeft > 0; --i)
                     {
-                        asClip.AddRound(hideoutRoundList[i].physObj as FVRFireArmRound, false, true, false);
+                        asClip.AddRound(hideoutRoundList[i].physObj as FVRFireArmRound, false, true);
                         --entryCount;
                         --countLeft;
                     }
