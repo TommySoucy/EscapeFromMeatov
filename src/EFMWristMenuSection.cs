@@ -154,9 +154,10 @@ namespace EFM
                 {
                     if(HideoutController.instance.areaController.areas[i] != null && HideoutController.instance.areaController.areas[i].UIRoot != null)
                     {
-                        float currentDist = Vector3.Distance(HideoutController.instance.areaController.areas[i].UIRoot.position, GM.CurrentPlayerRoot.position);
+                        float currentDist = Vector3.Distance(HideoutController.instance.areaController.areas[i].UIRoot.position, GM.CurrentPlayerBody.Head.position);
                         if (currentDist < nearestDist)
                         {
+                            nearestDist = currentDist;
                             currentNearest = HideoutController.instance.areaController.areas[i];
                         }
                     }

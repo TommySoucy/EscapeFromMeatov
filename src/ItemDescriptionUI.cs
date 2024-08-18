@@ -194,6 +194,7 @@ namespace EFM
                                          descriptionPack.hasFIROverride, descriptionPack.isFIROverride);
             }
             fullName.text = descriptionPack.itemData.name;
+            description.text = descriptionPack.itemData.description;
             effects.SetActive((descriptionPack.itemData.consumeEffects != null && descriptionPack.itemData.consumeEffects.Count > 0) || (descriptionPack.itemData.effects != null && descriptionPack.itemData.effects.Count > 0));
             if (effects.activeSelf)
             {

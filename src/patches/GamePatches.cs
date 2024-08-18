@@ -338,13 +338,13 @@ namespace EFM
             // ModularWeaponPartPatch
             MethodInfo modularWeaponPartEnableOriginal = typeof(ModularWeaponPart).GetMethod("EnablePart", BindingFlags.Public | BindingFlags.Instance);
             MethodInfo modularWeaponPartEnablePrefix = typeof(ModularWeaponPartPatch).GetMethod("EnablePrefix", BindingFlags.NonPublic | BindingFlags.Static);
-            //MethodInfo modularWeaponPartDisableOriginal = typeof(ModularWeaponPart).GetMethod("DisablePart", BindingFlags.Public | BindingFlags.Instance);
-            //MethodInfo modularWeaponPartDisablePrefix = typeof(ModularWeaponPartPatch).GetMethod("DisablePrefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo modularWeaponPartDisableOriginal = typeof(ModularWeaponPart).GetMethod("DisablePart", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo modularWeaponPartDisablePrefix = typeof(ModularWeaponPartPatch).GetMethod("DisablePrefix", BindingFlags.NonPublic | BindingFlags.Static);
 
             PatchController.Verify(modularWeaponPartEnableOriginal, harmony, true);
-            //PatchController.Verify(modularWeaponPartDisableOriginal, harmony, true);
+            PatchController.Verify(modularWeaponPartDisableOriginal, harmony, true);
             harmony.Patch(modularWeaponPartEnableOriginal, new HarmonyMethod(modularWeaponPartEnablePrefix));
-            //harmony.Patch(modularWeaponPartDisableOriginal, new HarmonyMethod(modularWeaponPartDisablePrefix));
+            harmony.Patch(modularWeaponPartDisableOriginal, new HarmonyMethod(modularWeaponPartDisablePrefix));
 
             //// EntityCheckPatch
             //MethodInfo entityCheckPatchOriginal = typeof(AIManager).GetMethod("EntityCheck", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -388,16 +388,16 @@ namespace EFM
             //PatchController.Verify(fireArmRecoilPatchOriginal, harmony, true);
             //harmony.Patch(fireArmRecoilPatchOriginal, new HarmonyMethod(fireArmRecoilPatchPrefix));
 
-            // PhysicalObjectPatch
-            MethodInfo physicalObjectBeginInteractionOriginal = typeof(FVRPhysicalObject).GetMethod("BeginInteraction", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo physicalObjectBeginInteractionPostfix = typeof(PhysicalObjectPatch).GetMethod("BeginInteractionPostfix", BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo physicalObjectEndInteractionOriginal = typeof(FVRPhysicalObject).GetMethod("EndInteraction", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo physicalObjectEndInteractionPostfix = typeof(PhysicalObjectPatch).GetMethod("EndInteractionPostfix", BindingFlags.NonPublic | BindingFlags.Static);
+            // InteractiveObjectPatch
+            MethodInfo interactiveObjectBeginInteractionOriginal = typeof(FVRInteractiveObject).GetMethod("BeginInteraction", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo interactiveObjectBeginInteractionPostfix = typeof(InteractiveObjectPatch).GetMethod("BeginInteractionPostfix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo interactiveObjectEndInteractionOriginal = typeof(FVRInteractiveObject).GetMethod("EndInteraction", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo interactiveObjectEndInteractionPostfix = typeof(InteractiveObjectPatch).GetMethod("EndInteractionPostfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            PatchController.Verify(physicalObjectBeginInteractionOriginal, harmony, true);
-            PatchController.Verify(physicalObjectEndInteractionOriginal, harmony, true);
-            harmony.Patch(physicalObjectBeginInteractionOriginal, null, new HarmonyMethod(physicalObjectBeginInteractionPostfix));
-            harmony.Patch(physicalObjectEndInteractionOriginal, null, new HarmonyMethod(physicalObjectEndInteractionPostfix));
+            PatchController.Verify(interactiveObjectBeginInteractionOriginal, harmony, true);
+            PatchController.Verify(interactiveObjectEndInteractionOriginal, harmony, true);
+            harmony.Patch(interactiveObjectBeginInteractionOriginal, null, new HarmonyMethod(interactiveObjectBeginInteractionPostfix));
+            harmony.Patch(interactiveObjectEndInteractionOriginal, null, new HarmonyMethod(interactiveObjectEndInteractionPostfix));
 
             //// HandCurrentInteractableSetPatch
             //MethodInfo handCurrentInteractableSetPatchOriginal = typeof(FVRViveHand).GetMethod("set_CurrentInteractable", BindingFlags.Public | BindingFlags.Instance);
@@ -4106,18 +4106,18 @@ namespace EFM
             {
                 return;
             }
+            Mod.LogInfo("Enable prefix on "+ __instance.Name);
 
-            Mod.LogInfo("EnablePrefix on "+__instance.name);
             if (overrideItem == null)
             {
-                Mod.LogInfo("\t\tNo override item");
+                Mod.LogInfo("\tNo override item");
                 if (overrideItemNone)
                 {
                     overrideItemNone = false;
                 }
                 else
                 {
-                    Mod.LogInfo("\t\t\tNot override none, setting default data");
+                    Mod.LogInfo("\t\tNot none");
                     TODO: // This is way too complicated, having ModularWeaponPart just keep a ref to the point it is currently attached to would
                     //       let us skip having to find the point by iterating over all of them, fix it, make pull request
                     //       The problem is that the part doesn't store which group it is a part of 
@@ -4128,23 +4128,28 @@ namespace EFM
                     IModularWeapon modularWeapon = __instance.GetComponentInParent<IModularWeapon>();
                     if (modularWeapon != null)
                     {
-                        Mod.LogInfo("\t\t\t\tGot modular weapon");
+                        Mod.LogInfo("\t\t\tGot modular weapon in parents");
                         bool foundData = false;
                         // Go through all of the attachment points to find which one this part is attached to
                         foreach (KeyValuePair<string, ModularWeaponPartsAttachmentPoint> pointEntry in modularWeapon.AllAttachmentPoints)
                         {
-                            Mod.LogInfo("\t\t\t\t\tChecking point "+ pointEntry.Value.ModularPartPoint.name+" for part group "+ pointEntry.Key+" with selected part: "+ pointEntry.Value.SelectedModularWeaponPart);
+                            Mod.LogInfo("\t\t\t\tChecking point "+ pointEntry.Key+":"+ pointEntry.Value.SelectedModularWeaponPart+":"+ pointEntry.Value.ModularPartPoint);
                             // Find data for this part
                             if (pointEntry.Value.ModularPartPoint == __instance.transform
                                 && Mod.modItemsByPartByGroup.TryGetValue(pointEntry.Key, out Dictionary<string, List<MeatovItemData>> groupDict)
                                 && groupDict.TryGetValue(pointEntry.Value.SelectedModularWeaponPart, out List<MeatovItemData> partList))
                             {
+                                Mod.LogInfo("\t\t\t\t\tDefault part enabled: " + pointEntry.Key+":"+ pointEntry.Value.SelectedModularWeaponPart);
                                 // Here, we assume the first part in the list is the default a modul weapon would spawn with
                                 MeatovItemData partData = partList[0];
-                                Mod.LogInfo("\t\t\t\t\t\tGot data: "+ partData.name);
-                                MeatovItem partItem = __instance.gameObject.AddComponent<MeatovItem>();
+                                MeatovItem partItem = __instance.gameObject.GetComponent<MeatovItem>();
+                                if(partItem == null)
+                                {
+                                    partItem = __instance.gameObject.AddComponent<MeatovItem>();
+                                }
                                 partItem.SetData(partData);
                                 // Since the item got instantiated directly on an already parented object, we want to make sure we set the meatov parenting properly
+                                // Note that despite this being here, it usually (if ever?) does not work because the parent weapon gets its meatovitem after
                                 partItem.OnTransformParentChanged();
                                 foundData = true;
                                 break;
@@ -4152,17 +4157,23 @@ namespace EFM
                         }
                         if (!foundData)
                         {
-                            Mod.LogError("Could not find data for part "+__instance.name+" on "+modularWeapon.ToString());
+                            Mod.LogWarning("Could not find data for part "+__instance.name+" on "+modularWeapon.ToString()+". This is probably because tarkov doesn't have this item");
                         }
                     }
                 }
             }
             else
             {
-                MeatovItem partItem = __instance.gameObject.AddComponent<MeatovItem>();
+                MeatovItem partItem = __instance.gameObject.GetComponent<MeatovItem>();
+                if (partItem == null)
+                {
+                    partItem = __instance.gameObject.AddComponent<MeatovItem>();
+                }
                 partItem.SetData(overrideItem.itemData);
 
                 MeatovItem.Copy(overrideItem, partItem);
+
+                overrideItem.Destroy();
 
                 overrideItem = null;
 
@@ -4783,10 +4794,10 @@ namespace EFM
         }
     }
 
-    // Patches FVRPhysicalObject
-    class PhysicalObjectPatch
+    // Patches FVRInteractiveObject
+    class InteractiveObjectPatch
     {
-        static void BeginInteractionPostfix(FVRPhysicalObject __instance, FVRViveHand hand)
+        static void BeginInteractionPostfix(FVRInteractiveObject __instance, FVRViveHand hand)
         {
             if (!Mod.inMeatovScene)
             {
@@ -4800,7 +4811,7 @@ namespace EFM
             }
         }
 
-        static void EndInteractionPostfix(FVRPhysicalObject __instance, FVRViveHand hand)
+        static void EndInteractionPostfix(FVRInteractiveObject __instance, FVRViveHand hand)
         {
             if (!Mod.inMeatovScene)
             {
@@ -5235,8 +5246,6 @@ namespace EFM
             }
             debugInstance = __instance;
 
-            Mod.LogInfo("UpdateDisplayPrefix for UI with groupd ID: "+__instance.ModularPartsGroupID);
-
             if (__instance.DisplayNameText != null && !__instance._skinOnlyMode)
             {
                 __instance.DisplayNameText.text = ModularWorkshopManager.ModularWorkshopPartsGroupsDictionary[__instance.ModularPartsGroupID].DisplayName;
@@ -5247,7 +5256,6 @@ namespace EFM
             }
             if (__instance._isShowingUI)
             {
-                Mod.LogInfo("\tIs showing UI");
                 GameObject mainCanvas = __instance.MainCanvas;
                 if (mainCanvas != null)
                 {
@@ -5266,19 +5274,16 @@ namespace EFM
                 int maxPage = 0;
                 if (!__instance._isShowingSkins)
                 {
-                    Mod.LogInfo("\t\tNot showing skins, processing "+ __instance._partNames.Length+" parts");
                     // Build list of parts we want to display
                     int count = 0;
                     toDisplay = new List<KeyValuePair<int, MeatovItem>>();
                     for (int i = 0; i < __instance._partNames.Length; ++i)
                     {
-                        Mod.LogInfo("\t\t\tPart: "+ __instance._partNames[i]);
                         byte zero = 0;
                         // Note that here, we assume that there can only be a single none part to a group and it that it is the first in the part list
                         if (Mod.noneModulParts.TryGetValue(__instance.ModularPartsGroupID, out Dictionary<string, byte> noneParts) 
                             && noneParts.TryGetValue(__instance._partNames[i], out zero))
                         {
-                            Mod.LogInfo("\t\t\t\tAdded as none part");
                             toDisplay.Add(new KeyValuePair<int, MeatovItem>(i, null));
                             count = 1;
                         }
@@ -5286,7 +5291,6 @@ namespace EFM
                         // Ensure we have currently selected part in the list to display
                         if (i == __instance._selectedPart)
                         {
-                            Mod.LogInfo("\t\t\t\tThis is selected part");
                             MeatovItem partMeatovItem = null;
                             switch (__instance.PartType)
                             {
@@ -5309,7 +5313,6 @@ namespace EFM
 
                             if(partMeatovItem != null)
                             {
-                                Mod.LogInfo("\t\t\t\t\tGot part meatov item, adding to display list");
                                 toDisplay.Add(new KeyValuePair<int, MeatovItem>(i, partMeatovItem));
                                 ++count;
                             }
@@ -5318,7 +5321,6 @@ namespace EFM
                         if (HideoutController.instance.areaController.areas[10].availableModulParts.TryGetValue(__instance.ModularPartsGroupID, out Dictionary<string, List<MeatovItem>> partsDict)
                             && partsDict.TryGetValue(__instance._partNames[i], out List<MeatovItem> itemList))
                         {
-                            Mod.LogInfo("\t\t\t\tPart is in current workbench volume "+ itemList.Count+" times");
                             for (int j=itemList.Count - 1; j >= 0; --j)
                             {
                                 if (itemList[j] == null)
@@ -5337,7 +5339,6 @@ namespace EFM
                     // Calculate indices
                     maxPage = count / __instance.PartButtons.Length; // 0 based
                     int startIndex = maxPage * __instance.PartButtons.Length; // 0 based
-                    Mod.LogInfo("\t\tGot count: "+count+", calculated indices, maxPage: "+maxPage+ ", startIndex: " + startIndex);
 
                     // Adjust page if necessary
                     if (maxPage < __instance._pageIndex)
@@ -5348,10 +5349,8 @@ namespace EFM
                     // Display parts
                     for (int i = startIndex, j = 0; j < __instance.PartButtons.Length; ++i, ++j)
                     {
-                        Mod.LogInfo("\t\t\tChecking button "+j+" for toDisplay "+i+": ("+ toDisplay[i].Key+","+ toDisplay[i].Value.itemName+")");
                         if (i < toDisplay.Count)
                         {
-                            Mod.LogInfo("\t\t\t\tDisplaying part: "+ __instance._partNames[toDisplay[i].Key]);
                             __instance.PartButtons[j].SetActive(true);
                             __instance.PartTexts[j].text = __instance._partNames[toDisplay[i].Key];
                             __instance.PartImages[j].sprite = __instance._partSprites[toDisplay[i].Key];
@@ -5378,7 +5377,6 @@ namespace EFM
                         }
                     }
                 }
-                Mod.LogInfo("\tDone displaying parts");
                 if (!__instance._isShowingSkins && __instance._pageIndex == 0)
                 {
                     __instance.BackButton.SetActive(false);
@@ -5471,6 +5469,10 @@ namespace EFM
             {
                 __instance._selectedPart = toDisplay == null ? 0 : toDisplay[__instance.PartButtons.Length * __instance._pageIndex + i].Key;
                 ModularWeaponPartPatch.overrideItem = toDisplay[__instance.PartButtons.Length * __instance._pageIndex + i].Value;
+                if(ModularWeaponPartPatch.overrideItem == null)
+                {
+                    ModularWeaponPartPatch.overrideItemNone = true;
+                }
                 __instance.PBButton_ApplyPart();
             }
             else

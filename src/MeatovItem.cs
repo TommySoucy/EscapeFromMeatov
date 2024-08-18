@@ -502,9 +502,9 @@ namespace EFM
         {
             if (!itemDataSet)
             {
-                Mod.LogError("MeatovItem " + name + ":" + tarkovID + ":" + H3ID + " did not have its data set by the time it got to Start. StackTrace:\n" + Environment.StackTrace);
+                Mod.LogWarning("MeatovItem " + name + ":" + tarkovID + ":" + H3ID + " did not have its data set by the time it got to Start");
 
-                if(Mod.defaultItemData.TryGetValue(tarkovID, out MeatovItemData itemData))
+                if(tarkovID != null && !tarkovID.Equals("") && Mod.defaultItemData.TryGetValue(tarkovID, out MeatovItemData itemData))
                 {
                     Mod.LogWarning("Data set on start for "+name);
                     SetData(itemData);
@@ -522,12 +522,30 @@ namespace EFM
                     }
                 }
             }
+
+            Mod.LogInfo("MeatovItem start " + H3ID+":"+tarkovID+":"+name);
+            // Make a parent changed call to make sure we are parented properly 
+            OnTransformParentChanged();
         }
 
         public static void Setup(FVRPhysicalObject physicalObject)
         {
             Mod.LogInfo("Meatovitem setup: " + physicalObject.name);
             physicalObject.gameObject.AddComponent<MeatovItem>();
+
+            TODO: // Also adding to children is necessary for old modul weapon or weapon that spawn with attachments already on the prefab
+            // Problem is, we don't have the data to set on those, so they have to set their own data on Start()
+            // The idea is that we should go through all the old modul weapons in data and change their ID to really just the receiver only prefab
+            // This would also ensure that we don't spawn an entire weapon along side other parts when we buy an item or get rewarded one for a quest or craft one, etc
+            FVRPhysicalObject[] childrenPhysObjs = physicalObject.GetComponentsInChildren<FVRPhysicalObject>();
+            for (int i = 0; i < childrenPhysObjs.Length; ++i)
+            {
+                if (childrenPhysObjs[i].ObjectWrapper != null && childrenPhysObjs[i].GetComponent<MeatovItem>() == null)
+                {
+                    Mod.LogInfo("\tAdded MeatovItem to "+ childrenPhysObjs[i].name);
+                    childrenPhysObjs[i].gameObject.AddComponent<MeatovItem>();
+                }
+            }
         }
 
         /// <summary>
@@ -637,6 +655,7 @@ namespace EFM
             {
                 Mod.SetIcon(data, modIcon);
                 modBox.localScale = data.dimensions;
+                modIcon.transform.localPosition = new Vector3(modIcon.transform.localPosition.x, modIcon.transform.localPosition.y, -data.dimensions.y / 2 - 0.001f);
                 modInteractive.localScale = data.dimensions;
                 volumes[0] = (int)(data.dimensions.x * data.dimensions.y * data.dimensions.z * 1000000);
                 modRenderer.material.color = data.color;
@@ -734,7 +753,7 @@ namespace EFM
 
         public void UpdateErgonomics()
         {
-            int current = 0;
+            int current = itemData.ergonomicsModifier;
 
             // Modul parts stat effects now applied like physical children since they actually have a meatov item and get processed like children
             //IModularWeapon modularWeaponInterface = GetComponent<IModularWeapon>();
@@ -2880,9 +2899,19 @@ namespace EFM
         {
             MeatovItem newParent = null;
 
+            Mod.LogInfo("OnTransformParentChanged called on " + H3ID+", current parent: "+ (parent == null ? "null" : parent.itemName));
+
             if(physObj == null)
             {
                 newParent = transform.GetComponentInParents<MeatovItem>(false);
+                Mod.LogInfo("\tphysobj null, parent MeatovItem: "+(newParent == null ? "null" : newParent.itemName));
+                Mod.LogInfo("\tHiderachy:");
+                Transform currentParent = transform;
+                while(currentParent != null)
+                {
+                    Mod.LogInfo("\t\t" + currentParent.name);
+                    currentParent = currentParent.parent;
+                }
             }
             else
             {
@@ -2904,9 +2933,11 @@ namespace EFM
 
             if (newParent != parent)
             {
+                Mod.LogInfo("\t\tnew parent is not current parent");
                 // Remove from previous parent if necessary
                 if (parent != null)
                 {
+                    Mod.LogInfo("\t\t\tCurrent parent not null, clearing");
                     parent.currentWeight -= currentWeight;
                     parent.children[childIndex] = parent.children[parent.children.Count - 1];
                     parent.children[childIndex].childIndex = childIndex;
@@ -2943,10 +2974,12 @@ namespace EFM
                 // Add to new parent
                 if (newParent != null)
                 {
+                    Mod.LogInfo("\t\t\tNew parent not null");
                     parent = newParent;
                     // If mod, we want to find first weapon parent to affect stats of
                     if (itemType == ItemType.Mod && index != 868)
                     {
+                        Mod.LogInfo("\t\t\t\tMod, Finding parent weapon");
                         MeatovItem weaponParent = parent;
                         while (weaponParent != null && weaponParent.itemType != ItemType.Weapon)
                         {
@@ -2954,6 +2987,7 @@ namespace EFM
                         }
                         if (weaponParent != null)
                         {
+                            Mod.LogInfo("\t\t\t\t\tGot parent weapon: "+weaponParent.itemName);
                             if (recoilModifier != 0)
                             {
                                 weaponParent.currentRecoilHorizontal += (int)(weaponParent.baseRecoilHorizontal / 100.0f * recoilModifier);
@@ -2971,6 +3005,7 @@ namespace EFM
                     childIndex = parent.children.Count;
                     parent.children.Add(this);
                     parent.currentWeight += currentWeight;
+                    Mod.LogInfo("\t\t\tAdded to parent children");
                 }
             }
 

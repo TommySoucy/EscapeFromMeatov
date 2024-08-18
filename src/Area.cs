@@ -116,7 +116,7 @@ namespace EFM
                         platformInstance.transform.localPosition = Vector3.zero;
                         platformInstance.transform.localScale = Vector3.one * 2;
                         platformInstance.transform.GetChild(2).gameObject.SetActive(false);
-                        platformInstance.transform.GetChild(3).localPosition += new Vector3(levels[i].viceFlipOffset.x, levels[i].viceFlipOffset.y, 0);
+                        platformInstance.transform.GetChild(3).localPosition = new Vector3(levels[i].viceFlipOffset.x, levels[i].viceFlipOffset.y, 0);
                         Rigidbody rb = platformInstance.GetComponent<Rigidbody>();
                         if(rb != null)
                         {
@@ -1160,7 +1160,7 @@ namespace EFM
 
         public void UpdateWorkbenchModularUI()
         {
-            ModularWorkshopPlatform platform = levels[currentLevel].vicePoint.GetChild(0).GetComponent<ModularWorkshopPlatform>();
+            ModularWorkshopPlatform platform = levels[currentLevel].vicePoint.GetChild(0).GetComponentInChildren<ModularWorkshopPlatform>();
             foreach (KeyValuePair<string, GameObject> UIScreen in platform._UIScreens)
             {
                 UIScreen.Value.GetComponent<ModularWorkshopUI>().UpdateDisplay();
