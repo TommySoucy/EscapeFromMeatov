@@ -148274,8 +148274,8 @@
     "volumes": [
       1524
     ],
-    "modulGroup": null,
-    "modulPart": null,
+    "modulGroup": "BufferTubes_AR",
+    "modulPart": "ADAR 2-15 Stock",
     "dimensions": [
       0.0,
       0.0,
@@ -148338,8 +148338,8 @@
     "volumes": [
       126
     ],
-    "modulGroup": null,
-    "modulPart": null,
+    "modulGroup": "Grips_AR",
+    "modulPart": "A2 Pistol Grip",
     "dimensions": [
       0.0,
       0.0,
@@ -148402,8 +148402,8 @@
     "volumes": [
       518
     ],
-    "modulGroup": null,
-    "modulPart": null,
+    "modulGroup": "Handguards_AR",
+    "modulPart": "M4A1 Standard Handguard",
     "dimensions": [
       0.0,
       0.0,
@@ -148466,8 +148466,8 @@
     "volumes": [
       172
     ],
-    "modulGroup": null,
-    "modulPart": null,
+    "modulGroup": "BufferTubes_AR",
+    "modulPart": "A2 Buffertube",
     "dimensions": [
       0.0,
       0.0,
@@ -148530,8 +148530,8 @@
     "volumes": [
       70
     ],
-    "modulGroup": null,
-    "modulPart": null,
+    "modulGroup": "Charging_AR15",
+    "modulPart": "AR15 Charging Handle",
     "dimensions": [
       0.0,
       0.0,
@@ -148594,8 +148594,8 @@
     "volumes": [
       421
     ],
-    "modulGroup": null,
-    "modulPart": null,
+    "modulGroup": "Uppers_AR",
+    "modulPart": "M4A1 Upper",
     "dimensions": [
       0.0,
       0.0,
@@ -148658,8 +148658,8 @@
     "volumes": [
       101
     ],
-    "modulGroup": null,
-    "modulPart": null,
+    "modulGroup": "GasBlocks_AR",
+    "modulPart": "M4 Front Post Gas Block",
     "dimensions": [
       0.0,
       0.0,
@@ -148722,8 +148722,8 @@
     "volumes": [
       592
     ],
-    "modulGroup": null,
-    "modulPart": null,
+    "modulGroup": "BufferStocks_AR",
+    "modulPart": "M4A1 Standard Stock",
     "dimensions": [
       0.0,
       0.0,
@@ -148786,8 +148786,8 @@
     "volumes": [
       1225
     ],
-    "modulGroup": null,
-    "modulPart": null,
+    "modulGroup": "BufferTubes_AR",
+    "modulPart": "Hera Arms CQR Stock",
     "dimensions": [
       0.0,
       0.0,
