@@ -136,8 +136,8 @@ namespace EFM
                 Mod.itemIconsBundleRequest = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/EFMItemIcons.ab");
                 Mod.hideoutBundleRequest = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/EFMHideout.ab");
                 Mod.hideoutAssetsBundleRequest = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/EFMHideoutAssets.ab");
-                Mod.hideoutAreaBundleRequests = new AssetBundleCreateRequest[4];
-                Mod.hideoutAreaBundles = new AssetBundle[4];
+                Mod.hideoutAreaBundleRequests = new AssetBundleCreateRequest[6];
+                Mod.hideoutAreaBundles = new AssetBundle[6];
                 for(int i=0; i< Mod.hideoutAreaBundleRequests.Length; ++i)
                 {
                     Mod.hideoutAreaBundleRequests[i] = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/EFMHideoutAreas"+i+".ab");

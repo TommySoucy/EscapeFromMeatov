@@ -28,7 +28,7 @@ namespace EFM
         public Transform spawn;
         public AreaController areaController;
         public Transform scavReturnNode;
-        public Switch[] switches; // UI, Trade
+        public Switch[] switches; // UI, Trade, Light
 
         // UI
         public Button loadButton;
@@ -219,6 +219,12 @@ namespace EFM
                             area.levels[k].areaUpgradeCheckProcessors[0].areaUI = area.UI;
                             area.levels[k].areaUpgradeCheckProcessors[1].areaUI = area.UI;
                         }
+                    }
+
+                    // Illumination specific
+                    if(areaIndex == 15)
+                    {
+                        switches[2].gameObjects = new List<GameObject>(area.objectsToToggle);
                     }
                 }
             }

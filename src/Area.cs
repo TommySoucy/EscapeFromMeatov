@@ -2,6 +2,7 @@
 using ModularWorkshop;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Valve.Newtonsoft.Json.Linq;
 
@@ -392,7 +393,10 @@ namespace EFM
                     // Manage objects
                     for (int i = 0; i < objectsToToggle.Length; ++i)
                     {
-                        objectsToToggle[i].SetActive(true);
+                        if(objectsToToggle[i] != null)
+                        {
+                            objectsToToggle[i].SetActive(true);
+                        }
                     }
 
                     // Resource consumption and specific bonuses
@@ -488,7 +492,10 @@ namespace EFM
                     // Manage objects
                     for (int i = 0; i < objectsToToggle.Length; ++i)
                     {
-                        objectsToToggle[i].SetActive(false);
+                        if (objectsToToggle[i] != null)
+                        {
+                            objectsToToggle[i].SetActive(false);
+                        }
                     }
 
                     // Bonuses
@@ -934,6 +941,11 @@ namespace EFM
 
         public void DebugUpgrade()
         {
+            if(currentLevel + 1 >= levels.Length)
+            {
+                return;
+            }
+
             upgrading = false;
 
             ++currentLevel;

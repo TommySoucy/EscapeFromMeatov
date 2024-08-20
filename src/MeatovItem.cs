@@ -2943,8 +2943,7 @@ namespace EFM
                     parent.children[childIndex].childIndex = childIndex;
                     parent.children.RemoveAt(parent.children.Count - 1);
                     // If mod, we want to find first weapon parent to affect stats of
-                    // We dont want to do this if 868, modulworkshop mods and their modifiers will be handled in the ModulWeaponPart patches
-                    if (itemType == ItemType.Mod && index != 868)
+                    if (itemType == ItemType.Mod)
                     {
                         MeatovItem weaponParent = parent;
                         while (weaponParent != null && weaponParent.itemType != ItemType.Weapon)
@@ -2977,7 +2976,7 @@ namespace EFM
                     Mod.LogInfo("\t\t\tNew parent not null");
                     parent = newParent;
                     // If mod, we want to find first weapon parent to affect stats of
-                    if (itemType == ItemType.Mod && index != 868)
+                    if (itemType == ItemType.Mod)
                     {
                         Mod.LogInfo("\t\t\t\tMod, Finding parent weapon");
                         MeatovItem weaponParent = parent;

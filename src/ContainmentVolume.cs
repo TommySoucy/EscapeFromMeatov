@@ -381,7 +381,7 @@ namespace EFM
         public bool Offer(MeatovItem item)
         {
             bool fits = Mod.IDDescribedInList(item.tarkovID, item.parents, whitelist, blacklist) && (!hasMaxVolume || item.volumes[item.mode] <= (maxVolume - volume));
-            Mod.LogInfo("\t\tItem " + item.itemName + " offered to volume " + name+", fits: "+ fits);
+            Mod.LogInfo("Item " + item.itemName + " offered to volume " + name+", fits: "+ fits);
             staticVolume.SetActive(!fits);
             activeVolume.SetActive(fits);
             return fits;

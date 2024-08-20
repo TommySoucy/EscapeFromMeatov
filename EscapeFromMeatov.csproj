@@ -58,6 +58,7 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="src\AmbientLightChanger.cs" />
     <Compile Include="src\AreaLevelData.cs" />
     <Compile Include="src\ConsumeUI.cs" />
     <Compile Include="src\AI.cs" />

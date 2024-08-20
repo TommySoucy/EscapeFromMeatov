@@ -102,6 +102,7 @@ namespace EFM
             ContainmentVolume volume = collider.GetComponent<ContainmentVolume>();
             if (volume != null)
             {
+                Mod.LogInfo("Hand entered volume " + volume.name+", heldItem null?: "+(heldItem == null)+ ", volumeCollider null?: " + (volumeCollider == null)+ ", otherHand.collidingVolume: " + (otherHand.collidingVolume == null ? "null": otherHand.collidingVolume.name));
                 if (heldItem != null && volumeCollider == null && (otherHand.collidingVolume == null || otherHand.collidingVolume != volume) && volume.Offer(heldItem))
                 {
                     collidingVolume = volume;

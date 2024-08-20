@@ -471,12 +471,19 @@ namespace EFM
                     statsRecoilHorizontalEntry.amount.color = Color.green;
                     statsRecoilHorizontalEntry.amount.gameObject.SetActive(true);
                 }
+                else
+                {
+                    statsRecoilHorizontalEntry.gameObject.SetActive(false);
+                }
 
-                statsSightingRangeEntry.gameObject.SetActive(true);
-                statsSightingRangeEntry.entryName.text = "Sighting Range:";
-                statsSightingRangeEntry.amount.text = descriptionPack.itemData.sightingRange.ToString();
-                statsSightingRangeEntry.amount.color = Color.white;
-                statsSightingRangeEntry.amount.gameObject.SetActive(true);
+                if(descriptionPack.itemData.sightingRange != 0)
+                {
+                    statsSightingRangeEntry.gameObject.SetActive(true);
+                    statsSightingRangeEntry.entryName.text = "Sighting Range:";
+                    statsSightingRangeEntry.amount.text = descriptionPack.itemData.sightingRange.ToString();
+                    statsSightingRangeEntry.amount.color = Color.white;
+                    statsSightingRangeEntry.amount.gameObject.SetActive(true);
+                }
 
                 if (descriptionPack.itemData.ergonomicsModifier > 0)
                 {
@@ -493,6 +500,10 @@ namespace EFM
                     statsErgonomicsEntry.amount.text = descriptionPack.itemData.ergonomicsModifier.ToString();
                     statsErgonomicsEntry.amount.color = Color.red;
                     statsErgonomicsEntry.amount.gameObject.SetActive(true);
+                }
+                else
+                {
+                    statsErgonomicsEntry.gameObject.SetActive(false);
                 }
             }
         }

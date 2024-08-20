@@ -249,9 +249,18 @@ namespace EFM
             if(data["recoilVertical"] != null)
             {
                 recoilVertical = (int)data["recoilVertical"];
-                recoilHorizontal = (int)data["recoilHorizontal"];
-                sightingRange = (int)data["sightingRange"];
+            }
+            if (data["ergonomicsModifier"] != null)
+            {
                 ergonomicsModifier = (int)data["ergonomicsModifier"];
+            }
+            if (data["sightingRange"] != null)
+            {
+                sightingRange = (int)data["sightingRange"];
+            }
+            if (data["recoilHorizontal"] != null)
+            {
+                recoilHorizontal = (int)data["recoilHorizontal"];
             }
             if (data["recoilModifier"] != null)
             {

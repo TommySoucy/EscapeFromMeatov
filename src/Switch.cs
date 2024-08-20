@@ -46,11 +46,17 @@ namespace EFM
                     }
                     foreach (GameObject go in gameObjects)
                     {
-                        go.SetActive(active);
+                        if(go != null)
+                        {
+                            go.SetActive(active);
+                        }
                     }
                     foreach (GameObject go in negativeGameObjects)
                     {
-                        go.SetActive(!active);
+                        if (go != null)
+                        {
+                            go.SetActive(!active);
+                        }
                     }
                     break;
                 case Mode.Power:
