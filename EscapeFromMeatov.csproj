@@ -106,6 +106,7 @@
     <Compile Include="src\LootContainerCover.cs" />
     <Compile Include="src\LootContainerSlider.cs" />
     <Compile Include="src\MeatovItemData.cs" />
+    <Compile Include="src\Networking.cs" />
     <Compile Include="src\PartUI.cs" />
     <Compile Include="src\PriceItemView.cs" />
     <Compile Include="src\ProductionView.cs" />
@@ -115,6 +116,7 @@
     <Compile Include="src\RagFairListingUI.cs" />
     <Compile Include="src\RagFairSellItemView.cs" />
     <Compile Include="src\RagFairWishlistItemView.cs" />
+    <Compile Include="src\RaidInstance.cs" />
     <Compile Include="src\RequirementItemView.cs" />
     <Compile Include="src\ResultItemView.cs" />
     <Compile Include="src\RigSlot.cs" />
@@ -167,9 +169,9 @@
     <Reference Include="BepInEx, Version=5.4.21.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\BepInEx.BaseLib.5.4.21\lib\net35\BepInEx.dll</HintPath>
     </Reference>
-    <Reference Include="H3MP, Version=1.8.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="H3MP, Version=1.9.15.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>F:\VR\H3VR Modding\H3MP\H3MP\H3MP\bin\Debug\H3MP.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\VR\H3VR Modding\H3MP\H3MP\H3MP\bin\Debug\H3MP.dll</HintPath>
     </Reference>
     <Reference Include="ModularWorkshop, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>

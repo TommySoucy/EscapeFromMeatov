@@ -620,6 +620,7 @@ namespace EFM
         public static Dictionary<FireArmClipType, List<MeatovItemData>> clipDefaultItemDataByClipType; // Clip item data by clip type, And i realized after implementing this, there are no clips in tarkov
         public static Dictionary<string, JObject> lootContainersByName;
         public static Dictionary<string, AudioClip[]> itemSounds;
+        public static List<KeyValuePair<string, string>> availableRaidMaps = new List<KeyValuePair<string, string>>();
 
         // Debug
         public static bool waitingForDebugCode;
@@ -694,6 +695,11 @@ namespace EFM
             LoadDefaultAssets();
 
             PatchController.DoPatching();
+
+            // Sub to H3MP events
+            H3MP.Mod.OnConnection += Networking.OnConnection;
+            H3MP.Networking.Client.OnDisconnect += Networking.OnDisconnection;
+            H3MP.Networking.Server.OnServerClose += Networking.OnDisconnection;
 
             Init();
         }

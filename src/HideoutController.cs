@@ -1,4 +1,6 @@
 ﻿using FistVR;
+using H3MP;
+using H3MP.Networking;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -59,6 +61,38 @@ namespace EFM
         public GameObject charChoicePanel;
         public GameObject[] saveConfirmTexts;
         public Transform[] optionPages;
+        // H3MP
+        public GameObject instancesPage;
+        public Transform instancesParent;
+        public GameObject instancesNextButton;
+        public GameObject instancesPreviousButton;
+        public GameObject instanceEntryPrefab;
+        public GameObject newInstance0Page;
+        public Text newInstancePMCCheckText;
+        public Text newInstanceScavCheckText;
+        public Text newInstanceSpawnTogetherCheckText;
+        public Text timeChoice0CheckText;
+        public Text timeChoice1CheckText;
+        public GameObject newInstance1Page;
+        public Transform newInstanceMapListParent;
+        public GameObject newInstanceMapListEntryPrefab;
+        public GameObject newInstancePreviousButton;
+        public GameObject newInstanceNextButton;
+        public GameObject joinInstancePage;
+        public Text joinInstanceTitle;
+        public Text joinInstancePMCCheckText;
+        public Text joinInstanceScavCheckText;
+        public GameObject waitingServerPage;
+        public GameObject waitingInstancePage;
+        public Text waitingInstanceCharText;
+        public Text waitingInstanceMapText;
+        public Text waitingInstanceSpawnTogetherText;
+        public Text waitingInstanceTimeText;
+        public GameObject waitingInstancePlayerListPage;
+        public Transform waitingInstancePlayerListParent;
+        public GameObject waitingInstancePlayerListEntryPrefab;
+        public GameObject countdownPage;
+        public Text countdownText;
 
         // Assets
         public static GameObject areaCanvasPrefab; // AreaCanvas
@@ -119,9 +153,9 @@ namespace EFM
         public float time;
         private bool cancelRaidLoad;
         private bool loadingRaid;
-        private bool countdownDeploy;
-        private float deployTimer;
-        private float deployTime = 0; // TODO: Should be 10 but set to 0 for faster debugging
+        public bool countdownDeploy;
+        public float deployTimer;
+        public float deployTime = 0; // TODO: Should be 10 but set to 0 for faster debugging
         private int insuredSetIndex = 0;
         private float defaultScavTime = 900; // seconds, 15m
         private float scavTimer;
@@ -136,6 +170,13 @@ namespace EFM
         public MarketManager marketManager;
         public static bool inMarket; // whether we are currently in market mode or in area UI mode
         public GCManager GCManager;
+        public int instancesListPage;
+        public int newInstanceMapListPage;
+        public int waitingPlayerListPage;
+        public bool charChoicePMC; // false is Scav
+        public bool timeChoiceIs0; // false is 1
+        public bool PMCSpawnTogether;
+        public int mapChoiceIndex;
 
         public delegate void OnHideoutInventoryChangedDelegate();
         public event OnHideoutInventoryChangedDelegate OnHideoutInventoryChanged;
@@ -1261,6 +1302,15 @@ namespace EFM
             float offsetTime = (time + 43200) % 86400; // Offset time by 12 hours
             string formattedTime1 = Mod.FormatTimeString(offsetTime);
             timeChoice1.text = formattedTime1;
+
+            if (timeChoiceIs0)
+            {
+                waitingInstanceTimeText.text = "Time: " + formattedTime0;
+            }
+            else
+            {
+                waitingInstanceTimeText.text = "Time: " + formattedTime1;
+            }
 
             confirmChosenTime.text = Mod.chosenTimeIndex == 0 ? formattedTime0 : formattedTime1;
             loadingChosenTime.text = confirmChosenTime.text;
@@ -2942,7 +2992,20 @@ namespace EFM
         public void OnRaidClicked()
         {
             clickAudio.Play();
-            SetPage(3);
+            if (H3MP.Networking.Client.isFullyConnected)
+            {
+                pages[0].SetActive(false);
+                instancesPage.SetActive(true);
+
+                instancesListPage = 0;
+                instancesNextButton.SetActive(Networking.raidInstances.Count > 6);
+                instancesPreviousButton.SetActive(false);
+                PopulateInstancesList();
+            }
+            else
+            {
+                SetPage(3);
+            }
         }
 
         public void OnCreditsClicked()
@@ -2980,6 +3043,451 @@ namespace EFM
                     SetPage(0);
                     break;
             }
+        }
+
+        public void OnInstancesBackClicked()
+        {
+            clickAudio.Play();
+            SetPage(0);
+        }
+
+        public void OnInstancesNewInstanceClicked()
+        {
+            clickAudio.Play();
+
+            instancesPage.SetActive(false);
+            newInstance0Page.SetActive(true);
+            newInstanceNextButton.SetActive(true);
+            newInstancePreviousButton.SetActive(false);
+
+            charChoicePMC = true;
+            newInstancePMCCheckText.text = "X";
+            newInstanceScavCheckText.text = "";
+            timeChoiceIs0 = true;
+            timeChoice0CheckText.text = "X";
+            timeChoice1CheckText.text = "";
+            PMCSpawnTogether = true;
+            newInstanceSpawnTogetherCheckText.text = "X";
+            mapChoiceIndex = 0;
+        }
+
+        public void OnInstancesNextClicked()
+        {
+            clickAudio.Play();
+            ++instancesListPage;
+
+            PopulateInstancesList();
+
+            if (instancesListPage == Networking.raidInstances.Count / 6)
+            {
+                instancesNextButton.SetActive(false);
+            }
+            instancesPreviousButton.SetActive(true);
+        }
+
+        public void OnInstancesPreviousClicked()
+        {
+            clickAudio.Play();
+            --instancesListPage;
+
+            PopulateInstancesList();
+
+            if(instancesListPage == 0)
+            {
+                instancesPreviousButton.SetActive(false);
+            }
+            instancesNextButton.SetActive(true);
+        }
+
+        public void PopulateInstancesList()
+        {
+            while (instancesParent.childCount > 1)
+            {
+                Transform child = instancesParent.GetChild(1);
+                child.SetParent(null);
+                Destroy(child.gameObject);
+            }
+
+            int maxPage = (Networking.raidInstances.Count - 1) / 6;
+            if(instancesListPage > maxPage)
+            {
+                instancesListPage = maxPage;
+            }
+
+            int i = -1;
+            foreach(KeyValuePair<int, RaidInstance> instanceDataEntry in Networking.raidInstances)
+            {
+                ++i;
+                if (i < instancesListPage * 6)
+                {
+                    continue;
+                }
+
+                if (instancesParent.childCount == 7)
+                {
+                    break;
+                }
+
+                GameObject newInstanceListEntry = Instantiate(instanceEntryPrefab, instancesParent);
+                newInstanceListEntry.SetActive(true);
+
+                string mapPath = Mod.availableRaidMaps[i].Value;
+                int index = instanceDataEntry.Key;
+                newInstanceListEntry.GetComponentInChildren<Text>().text = "Instance " + instanceDataEntry.Value.ID;
+                newInstanceListEntry.GetComponentInChildren<Button>().onClick.AddListener(() => { OnInstanceClicked(index); });
+            }
+        }
+
+        public void OnInstanceClicked(int ID)
+        {
+            clickAudio.Play();
+            instancesPage.SetActive(false);
+            joinInstancePage.SetActive(true);
+
+            Networking.potentialInstance = Networking.raidInstances[ID];
+            joinInstanceTitle.text = "Join Instance "+ ID;
+            if (Networking.potentialInstance.waiting)
+            {
+                charChoicePMC = true;
+                joinInstancePMCCheckText.text = "X";
+                joinInstanceScavCheckText.text = "";
+            }
+            else
+            {
+                charChoicePMC = false;
+                joinInstancePMCCheckText.text = "";
+                joinInstanceScavCheckText.text = "X";
+            }
+        }
+
+        public void OnJoinInstanceBackClicked()
+        {
+            clickAudio.Play();
+            instancesPage.SetActive(true);
+            joinInstancePage.SetActive(false);
+        }
+
+        public void OnJoinInstanceCharPMCClicked()
+        {
+            if (Networking.potentialInstance.waiting)
+            {
+                clickAudio.Play();
+                charChoicePMC = true;
+
+                newInstancePMCCheckText.text = "X";
+                newInstanceScavCheckText.text = "";
+            }
+            else
+            {
+                charChoicePMC = false;
+
+                newInstancePMCCheckText.text = "";
+                newInstanceScavCheckText.text = "X";
+            }
+        }
+
+        public void OnJoinInstanceConfirmClicked()
+        {
+            clickAudio.Play();
+
+            joinInstancePage.SetActive(false);
+            waitingServerPage.SetActive(true);
+
+            SetInstance(Networking.potentialInstance);
+        }
+
+        public void OnJoinInstanceCharScavClicked()
+        {
+            clickAudio.Play();
+            charChoicePMC = false;
+
+            newInstancePMCCheckText.text = "";
+            newInstanceScavCheckText.text = "X";
+        }
+
+        public void OnNewInstanceCharPMCClicked()
+        {
+            clickAudio.Play();
+
+            charChoicePMC = true;
+
+            newInstancePMCCheckText.text = "X";
+            newInstanceScavCheckText.text = "";
+        }
+
+        public void OnNewInstanceCharScavClicked()
+        {
+            clickAudio.Play();
+
+            charChoicePMC = false;
+
+            newInstancePMCCheckText.text = "";
+            newInstanceScavCheckText.text = "X";
+        }
+
+        public void OnNewInstanceTime0Clicked()
+        {
+            clickAudio.Play();
+
+            timeChoiceIs0 = true;
+
+            timeChoice0CheckText.text = "X";
+            timeChoice1CheckText.text = "";
+        }
+
+        public void OnNewInstanceTime1Clicked()
+        {
+            clickAudio.Play();
+
+            timeChoiceIs0 = false;
+
+            timeChoice0CheckText.text = "";
+            timeChoice1CheckText.text = "X";
+        }
+
+        public void OnNewInstanceSpawnTogetherClicked()
+        {
+            clickAudio.Play();
+
+            PMCSpawnTogether = !PMCSpawnTogether;
+
+            newInstanceSpawnTogetherCheckText.text = PMCSpawnTogether ? "X" : "";
+        }
+
+        public void PopulateNewInstanceMapList()
+        {
+            while (newInstanceMapListParent.childCount > 1)
+            {
+                Transform child = newInstanceMapListParent.GetChild(1);
+                child.SetParent(null);
+                Destroy(child.gameObject);
+            }
+
+            for (int i = newInstanceMapListPage * 6; i < Mod.availableRaidMaps.Count; ++i)
+            {
+                if(newInstanceMapListParent.childCount == 7)
+                {
+                    break;
+                }
+
+                GameObject newInstanceMapListEntry = Instantiate(newInstanceMapListEntryPrefab, newInstanceMapListParent);
+                newInstanceMapListEntry.SetActive(true);
+
+                int index = i;
+                newInstanceMapListEntry.GetComponentInChildren<Text>().text = Mod.availableRaidMaps[i].Key;
+                newInstanceMapListEntry.GetComponentInChildren<Button>().onClick.AddListener(() => { OnNewInstanceMapClicked(index); });
+
+                if (mapChoiceIndex == i)
+                {
+                    newInstanceMapListEntry.GetComponentInChildren<Image>().color = Color.white;
+                    newInstanceMapListEntry.GetComponentInChildren<Text>().color = Color.black;
+                }
+            }
+        }
+
+        public void OnNewInstanceMapClicked(int index)
+        {
+            mapChoiceIndex = index;
+
+            PopulateNewInstanceMapList();
+        }
+
+        public void OnNewInstance0NextClicked()
+        {
+            clickAudio.Play();
+
+            newInstance0Page.SetActive(false);
+            newInstance1Page.SetActive(true);
+
+            newInstanceMapListPage = 0;
+            newInstanceNextButton.SetActive(Mod.availableRaidMaps.Count > 6);
+            instancesPreviousButton.SetActive(false);
+            PopulateNewInstanceMapList();
+        }
+
+        public void OnNewInstance1PreviousClicked()
+        {
+            clickAudio.Play();
+
+            --newInstanceMapListPage;
+            PopulateNewInstanceMapList();
+
+            if(newInstanceMapListPage == 0)
+            {
+                newInstancePreviousButton.SetActive(false);
+            }
+            newInstanceNextButton.SetActive(true);
+        }
+
+        public void OnNewInstance1NextClicked()
+        {
+            clickAudio.Play();
+
+            ++newInstanceMapListPage;
+            PopulateNewInstanceMapList();
+
+            if (newInstanceMapListPage == Mod.availableRaidMaps.Count / 6)
+            {
+                newInstanceNextButton.SetActive(false);
+            }
+            newInstancePreviousButton.SetActive(true);
+        }
+
+        public void OnNewInstanceBackClicked()
+        {
+            clickAudio.Play();
+
+            if (newInstance1Page.activeSelf)
+            {
+                newInstance0Page.SetActive(true);
+                newInstanceNextButton.SetActive(true);
+                newInstance1Page.SetActive(false);
+            }
+            else
+            {
+                instancesPage.SetActive(true);
+                newInstance0Page.SetActive(false);
+            }
+        }
+
+        public void OnNewInstanceConfirmClicked()
+        {
+            clickAudio.Play();
+
+            newInstance0Page.SetActive(false);
+            newInstance1Page.SetActive(false);
+            waitingServerPage.SetActive(true);
+
+            Networking.setLatestInstance = true;
+            RaidInstance raidInstance = Networking.AddInstance(Mod.availableRaidMaps[mapChoiceIndex].Key, timeChoiceIs0, PMCSpawnTogether);
+        }
+
+        public void SetInstance(RaidInstance instance)
+        {
+            if (waitingServerPage.activeSelf)
+            {
+                waitingServerPage.SetActive(false);
+                waitingInstancePage.SetActive(true);
+
+                if(Networking.raidInstances.TryGetValue(H3MP.GameManager.instance, out RaidInstance previousRaidInstance))
+                {
+                    previousRaidInstance.players.Remove(H3MP.GameManager.ID);
+
+                    if(previousRaidInstance.players.Count == 0)
+                    {
+                        Networking.raidInstances.Remove(H3MP.GameManager.instance);
+
+                        HideoutController.instance.PopulateInstancesList();
+                    }
+                }
+
+                GameManager.SetInstance(instance.ID);
+
+                if (!instance.players.Contains(H3MP.GameManager.ID))
+                {
+                    instance.players.Add(H3MP.GameManager.ID);
+                }
+
+                waitingInstanceCharText.text = "Character: " + (charChoicePMC ? "PMC" : "Scav");
+                waitingInstanceMapText.text = "Map: " + Mod.availableRaidMaps[mapChoiceIndex].Key;
+                waitingInstanceSpawnTogetherText.text = "PMCs spawn together: " + PMCSpawnTogether;
+
+                Networking.currentInstance = instance;
+
+                // Populate player list
+                PopulatePlayerList();
+                for (int i = 0; i < instance.players.Count; ++i)
+                {
+                    GameObject newPlayer = Instantiate<GameObject>(waitingInstancePlayerListEntryPrefab, waitingInstancePlayerListParent);
+                    if (GameManager.players.ContainsKey(instance.players[i]))
+                    {
+                        newPlayer.transform.GetComponentInChildren<Text>().text = GameManager.players[instance.players[i]].username + (i == 0 ? " (Host)" : "");
+                    }
+                    else
+                    {
+                        newPlayer.transform.GetComponentInChildren<Text>().text = H3MP.Mod.config["Username"].ToString() + (i == 0 ? " (Host)" : "");
+                    }
+                    newPlayer.SetActive(true);
+                }
+            }
+        }
+
+        public void PopulatePlayerList()
+        {
+            while (waitingInstancePlayerListParent.childCount > 1)
+            {
+                Transform child = waitingInstancePlayerListParent.GetChild(1);
+                child.SetParent(null);
+                Destroy(child.gameObject);
+            }
+
+            int maxPage = (Networking.currentInstance.players.Count - 1) / 6;
+            if (waitingPlayerListPage > maxPage)
+            {
+                waitingPlayerListPage = maxPage;
+            }
+
+            for (int i= waitingPlayerListPage * 6; i< Networking.currentInstance.players.Count;++i)
+            {
+                if (waitingInstancePlayerListParent.childCount == 7)
+                {
+                    break;
+                }
+
+                GameObject newInstanceListEntry = Instantiate(waitingInstancePlayerListEntryPrefab, waitingInstancePlayerListParent);
+                newInstanceListEntry.SetActive(true);
+
+                if (GameManager.players.ContainsKey(Networking.currentInstance.players[i]))
+                {
+                    newInstanceListEntry.GetComponentInChildren<Text>().text = GameManager.players[Networking.currentInstance.players[i]].username + (i == 0 ? " (Host)" : "");
+                }
+                else
+                {
+                    newInstanceListEntry.GetComponentInChildren<Text>().text = H3MP.Mod.config["Username"].ToString() + (i == 0 ? " (Host)" : "");
+                }
+            }
+        }
+
+        public void OnWaitingBackClicked()
+        {
+            clickAudio.Play();
+
+            waitingInstancePage.SetActive(false);
+            waitingServerPage.SetActive(false);
+            SetPage(0);
+
+            H3MP.GameManager.SetInstance(0);
+            Networking.currentInstance = null;
+        }
+
+        public void OnWaitingInstancePlayerListClicked()
+        {
+            clickAudio.Play();
+
+            waitingInstancePage.SetActive(false);
+            waitingInstancePlayerListPage.SetActive(true);
+        }
+
+        public void OnWaitingInstancePlayerListBackClicked()
+        {
+            clickAudio.Play();
+
+            waitingInstancePage.SetActive(true);
+            waitingInstancePlayerListPage.SetActive(false);
+        }
+
+        public void OnWaitingInstanceStartClicked()
+        {
+            clickAudio.Play();
+
+            waitingInstancePage.SetActive(false);
+            waitingInstancePlayerListPage.SetActive(false);
+            countdownPage.SetActive(true);
+
+            cont from here//continue raid loading process for MP and then make sure it is setup properly for SP considering custom maps
+            loadingRaid = true;
+            Mod.chosenMapName = "Factory";
+            Mod.currentRaidBundleRequest = AssetBundle.LoadFromFileAsync(Mod.path + "/EscapeFromMeatovFactory.ab");
         }
 
         public void OnOptionsNextClicked()
