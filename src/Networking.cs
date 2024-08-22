@@ -11,6 +11,8 @@ namespace EFM
         public static bool setLatestInstance;
 
         public static int addInstancePacketID; // AddEFMInstancePacketID
+        public static int setPlayerReadynessPacketID; // SetEFMInstancePlayerReadyness
+        public static int setInstanceWaitingPacketID; // SetEFMInstanceWaitingPacketID
 
         public static void OnConnection()
         {
@@ -21,28 +23,63 @@ namespace EFM
             // Setup custom packets
             if (ThreadManager.host)
             {
-                if (H3MP.Mod.registeredCustomPacketIDs.TryGetValue("AddEFMInstancePacketID", out int customPacketID))
-                {
-                    addInstancePacketID = customPacketID;
-                }
-                else
+                // Add instance
+                if (!H3MP.Mod.registeredCustomPacketIDs.TryGetValue("AddEFMInstancePacketID", out addInstancePacketID))
                 {
                     addInstancePacketID = Server.RegisterCustomPacketType("AddEFMInstancePacketID");
                 }
-
                 H3MP.Mod.customPacketHandlers[addInstancePacketID] = AddInstanceServerHandler;
+
+                // Set player readyness
+                if (!H3MP.Mod.registeredCustomPacketIDs.TryGetValue("SetEFMInstancePlayerReadyness", out setPlayerReadynessPacketID))
+                {
+                    setPlayerReadynessPacketID = Server.RegisterCustomPacketType("SetEFMInstancePlayerReadyness");
+                }
+                H3MP.Mod.customPacketHandlers[setPlayerReadynessPacketID] = SetPlayerReadynessServerHandler;
+
+                // Set instance waiting
+                if (!H3MP.Mod.registeredCustomPacketIDs.TryGetValue("SetEFMInstanceWaitingPacketID", out setInstanceWaitingPacketID))
+                {
+                    setInstanceWaitingPacketID = Server.RegisterCustomPacketType("SetEFMInstanceWaitingPacketID");
+                }
+                H3MP.Mod.customPacketHandlers[setInstanceWaitingPacketID] = SetInstanceWaitingServerHandler;
             }
             else
             {
-                if (H3MP.Mod.registeredCustomPacketIDs.TryGetValue("AddEFMInstancePacketID", out int customPacketID))
+                // Add instance
+                if (H3MP.Mod.registeredCustomPacketIDs.TryGetValue("AddEFMInstancePacketID", out int customAddInstancePacketID))
                 {
-                    addInstancePacketID = customPacketID;
+                    addInstancePacketID = customAddInstancePacketID;
                     H3MP.Mod.customPacketHandlers[addInstancePacketID] = AddInstanceClientHandler;
                 }
                 else
                 {
                     ClientSend.RegisterCustomPacketType("AddEFMInstancePacketID");
                     H3MP.Mod.CustomPacketHandlerReceived += AddEFMInstancePacketIDReceived;
+                }
+
+                // Set player readyness
+                if (H3MP.Mod.registeredCustomPacketIDs.TryGetValue("SetEFMInstancePlayerReadyness", out int customSetPlayerReadynessPacketID))
+                {
+                    setPlayerReadynessPacketID = customSetPlayerReadynessPacketID;
+                    H3MP.Mod.customPacketHandlers[setPlayerReadynessPacketID] = SetPlayerReadynessClientHandler;
+                }
+                else
+                {
+                    ClientSend.RegisterCustomPacketType("SetEFMInstancePlayerReadyness");
+                    H3MP.Mod.CustomPacketHandlerReceived += SetEFMInstancePlayerReadynessPacketIDReceived;
+                }
+
+                // Set instance waiting
+                if (H3MP.Mod.registeredCustomPacketIDs.TryGetValue("SetEFMInstanceWaitingPacketID", out int customSetInstanceWaitingPacketID))
+                {
+                    setInstanceWaitingPacketID = customSetInstanceWaitingPacketID;
+                    H3MP.Mod.customPacketHandlers[setInstanceWaitingPacketID] = SetInstanceWaitingClientHandler;
+                }
+                else
+                {
+                    ClientSend.RegisterCustomPacketType("SetEFMInstanceWaitingPacketID");
+                    H3MP.Mod.CustomPacketHandlerReceived += SetEFMInstanceWaitingPacketIDReceived;
                 }
             }
         }
@@ -119,6 +156,26 @@ namespace EFM
             }
         }
 
+        public static void SetEFMInstancePlayerReadynessPacketIDReceived(string identifier, int ID)
+        {
+            if (identifier.Equals("SetEFMInstancePlayerReadyness"))
+            {
+                setPlayerReadynessPacketID = ID;
+                H3MP.Mod.customPacketHandlers[setPlayerReadynessPacketID] = SetPlayerReadynessClientHandler;
+                H3MP.Mod.CustomPacketHandlerReceived -= SetEFMInstancePlayerReadynessPacketIDReceived;
+            }
+        }
+
+        public static void SetEFMInstanceWaitingPacketIDReceived(string identifier, int ID)
+        {
+            if (identifier.Equals("SetEFMInstanceWaitingPacketID"))
+            {
+                setInstanceWaitingPacketID = ID;
+                H3MP.Mod.customPacketHandlers[setInstanceWaitingPacketID] = SetInstanceWaitingClientHandler;
+                H3MP.Mod.CustomPacketHandlerReceived -= SetEFMInstanceWaitingPacketIDReceived;
+            }
+        }
+
         public static RaidInstance AddInstance(string map, bool timeIs0, bool spawnTogether)
         {
             if (ThreadManager.host)
@@ -143,6 +200,10 @@ namespace EFM
                     packet.Write(map);
                     packet.Write(timeIs0);
                     packet.Write(spawnTogether);
+                    packet.Write(true);
+                    packet.Write(1);
+                    packet.Write(0);
+                    packet.Write(1);
                     packet.Write(0);
 
                     ServerSend.SendTCPDataToAll(packet, true);
@@ -182,7 +243,6 @@ namespace EFM
 
         public static void AddInstanceServerHandler(int clientID, Packet packet)
         {
-            int hostID = packet.ReadInt();
             string map = packet.ReadString();
             bool timeIs0 = packet.ReadBool();
             bool spawnTogether = packet.ReadBool();
@@ -193,7 +253,6 @@ namespace EFM
             using (Packet newPacket = new Packet(addInstancePacketID))
             {
                 newPacket.Write(newRaidInstance.ID);
-                newPacket.Write(hostID);
                 newPacket.Write(map);
                 newPacket.Write(timeIs0);
                 newPacket.Write(spawnTogether);
@@ -202,32 +261,122 @@ namespace EFM
             }
         }
 
+        public static void SetPlayerReadynessServerHandler(int clientID, Packet packet)
+        {
+            int instanceID = packet.ReadInt();
+            bool ready = packet.ReadBool();
+
+            if(raidInstances.TryGetValue(instanceID, out RaidInstance raidInstance))
+            {
+                if (ready)
+                {
+                    if (raidInstance.players.Contains(clientID) && !raidInstance.readyPlayers.Contains(clientID))
+                    {
+                        raidInstance.readyPlayers.Add(clientID);
+                    }
+                }
+                else
+                {
+                    raidInstance.readyPlayers.Remove(clientID);
+                }
+
+                // Send to all clients
+                using (Packet newPacket = new Packet(setPlayerReadynessPacketID))
+                {
+                    newPacket.Write(instanceID);
+                    newPacket.Write(clientID);
+                    newPacket.Write(ready);
+
+                    ServerSend.SendTCPDataToAll(newPacket, true);
+                }
+            }
+        }
+
+        public static void SetInstanceWaitingServerHandler(int clientID, Packet packet)
+        {
+            int instanceID = packet.ReadInt();
+            bool waiting = packet.ReadBool();
+
+            if(raidInstances.TryGetValue(instanceID, out RaidInstance raidInstance) && raidInstance.players[0] == clientID)
+            {
+                raidInstance.waiting = waiting;
+
+                // Send to all clients
+                using (Packet newPacket = new Packet(setInstanceWaitingPacketID))
+                {
+                    newPacket.Write(instanceID);
+                    newPacket.Write(waiting);
+
+                    ServerSend.SendTCPDataToAll(newPacket, true);
+                }
+            }
+        }
+
         ////////////// CLIENT HANDLERS
 
         public static void AddInstanceClientHandler(int clientID, Packet packet)
         {
             int ID = packet.ReadInt();
-            int hostID = packet.ReadInt();
             string map = packet.ReadString();
             bool timeIs0 = packet.ReadBool();
             bool spawnTogether = packet.ReadBool();
+            bool waiting = packet.ReadBool();
             int playerCount = packet.ReadInt();
             List<int> players = new List<int>();
             for(int i=0; i < playerCount; ++i)
             {
                 players.Add(packet.ReadInt());
             }
+            int readyPlayerCount = packet.ReadInt();
+            List<int> readyPlayers = new List<int>();
+            for(int i=0; i < readyPlayerCount; ++i)
+            {
+                readyPlayers.Add(packet.ReadInt());
+            }
 
             if (!H3MP.GameManager.activeInstances.ContainsKey(ID))
             {
                 H3MP.GameManager.activeInstances.Add(ID, playerCount);
             }
-            RaidInstance newRaidInstance = new RaidInstance(ID, map, timeIs0, spawnTogether, players);
+            RaidInstance newRaidInstance = new RaidInstance(ID, map, timeIs0, spawnTogether, waiting, players, readyPlayers);
             raidInstances.Add(ID, newRaidInstance);
 
             // Only want to set dontAddToInstance if we want to join the TNH instance upon receiving it
             H3MP.GameManager.dontAddToInstance = setLatestInstance;
             OnInstanceReceived(newRaidInstance);
+        }
+
+        public static void SetPlayerReadynessClientHandler(int clientID, Packet packet)
+        {
+            int instanceID = packet.ReadInt();
+            int playerID = packet.ReadInt();
+            bool ready = packet.ReadBool();
+
+            if (raidInstances.TryGetValue(instanceID, out RaidInstance raidInstance))
+            {
+                if (ready)
+                {
+                    if (raidInstance.players.Contains(playerID) && !raidInstance.readyPlayers.Contains(playerID))
+                    {
+                        raidInstance.readyPlayers.Add(playerID);
+                    }
+                }
+                else
+                {
+                    raidInstance.readyPlayers.Remove(playerID);
+                }
+            }
+        }
+
+        public static void SetInstanceWaitingClientHandler(int clientID, Packet packet)
+        {
+            int instanceID = packet.ReadInt();
+            bool waiting = packet.ReadBool();
+
+            if (raidInstances.TryGetValue(instanceID, out RaidInstance raidInstance))
+            {
+                raidInstance.waiting = waiting;
+            }
         }
     }
 }

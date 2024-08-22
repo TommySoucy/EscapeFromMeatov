@@ -54,7 +54,9 @@ namespace EFM
         public static AssetBundleCreateRequest[] itemsBundlesRequests;
         public static AssetBundle playerBundle;
         public static AssetBundleCreateRequest playerBundleRequest;
-        public static AssetBundleCreateRequest currentRaidBundleRequest;
+        public static AssetBundleCreateRequest raidMapBundleRequest;
+        public static List<AssetBundleCreateRequest> raidMapAdditiveBundleRequests;
+        public static List<AssetBundleCreateRequest> raidMapPrefabBundleRequests;
         public static List<GameObject> securedMainSceneComponents;
         public static List<GameObject> securedObjects;
         public static FVRInteractiveObject securedLeftHandInteractable;
@@ -76,6 +78,7 @@ namespace EFM
         public static int healingExp = 0;
         public static int explorationExp = 0;
         public static float raidTime = 0;
+        public static bool loadingToMeatovScene;
         public static bool inMeatovScene;
         public static int pocketsConfigIndex;
         public static Dictionary<int, int> quickbeltConfigurationIndices;
@@ -620,7 +623,9 @@ namespace EFM
         public static Dictionary<FireArmClipType, List<MeatovItemData>> clipDefaultItemDataByClipType; // Clip item data by clip type, And i realized after implementing this, there are no clips in tarkov
         public static Dictionary<string, JObject> lootContainersByName;
         public static Dictionary<string, AudioClip[]> itemSounds;
-        public static List<KeyValuePair<string, string>> availableRaidMaps = new List<KeyValuePair<string, string>>();
+        public static Dictionary<string, string> availableRaidMaps = new Dictionary<string, string>();
+        public static Dictionary<string, List<string>> availableRaidMapAdditives = new Dictionary<string, List<string>>();
+        public static Dictionary<string, List<string>> availableRaidMapPrefabs = new Dictionary<string, List<string>>();
 
         // Debug
         public static bool waitingForDebugCode;
@@ -3784,7 +3789,7 @@ namespace EFM
             if (loading) // Started loading
             {
                 // Loading into meatov scene
-                if (H3MP.Patches.LoadLevelBeginPatch.loadingLevel.Contains("Meatov"))
+                if (loadingToMeatovScene || H3MP.Patches.LoadLevelBeginPatch.loadingLevel.Contains("Meatov"))
                 {
                     // Secure scene components if haven't already
                     if(securedMainSceneComponents == null || securedMainSceneComponents.Count == 0)
@@ -3811,7 +3816,8 @@ namespace EFM
                 // The simplest solution is to keep things as unsecured as possible, only securing them when moving scenes
                 UnsecureMainSceneComponents();
 
-                inMeatovScene = H3MP.Patches.LoadLevelBeginPatch.loadingLevel.Contains("Meatov");
+                inMeatovScene = loadingToMeatovScene || H3MP.Patches.LoadLevelBeginPatch.loadingLevel.Contains("Meatov");
+                loadingToMeatovScene = false;
 
                 switch (H3MP.Patches.LoadLevelBeginPatch.loadingLevel)
                 {
@@ -4414,6 +4420,132 @@ namespace EFM
             long num3 = amount / 1000000L;
             long num4 = amount / 100000L % 10L;
             return num3 + ((num4 != 0L) ? ("." + num4) : "") + "M";
+        }
+
+        public static void AddRaidMap(string mapName, string bundleName)
+        {
+            if (availableRaidMaps.TryGetValue(mapName, out string existingFullPath))
+            {
+                Mod.LogError("Could not add raid map " + mapName + ":" + bundleName + ", a map with the samename is already loaded with full path: " + existingFullPath);
+                return;
+            }
+
+            // Find plugins directory
+            string currentDirectory = Directory.GetCurrentDirectory();
+            DirectoryInfo currentParentDirectory = Directory.GetParent(currentDirectory);
+            while (currentParentDirectory != null && !currentParentDirectory.Name.Equals("plugins"))
+            {
+                currentParentDirectory = currentParentDirectory.Parent;
+            }
+            if (!currentParentDirectory.Name.Equals("plugins"))
+            {
+                Mod.LogError("Could not find plugins folder to look for map " + mapName + ":" + bundleName);
+                return;
+            }
+
+            // Find full path to bundle
+            if(FindBundle(bundleName, currentParentDirectory.FullName, out string fullPath))
+            {
+                // Add if found
+                availableRaidMaps.Add(mapName, fullPath);
+            }
+            else
+            {
+                Mod.LogError("Could not find map bundle:" + bundleName);
+            }
+        }
+
+        public static void AddRaidMapAdditive(string mapName, string bundleName)
+        {
+            // Find plugins directory
+            string currentDirectory = Directory.GetCurrentDirectory();
+            DirectoryInfo currentParentDirectory = Directory.GetParent(currentDirectory);
+            while (currentParentDirectory != null && !currentParentDirectory.Name.Equals("plugins"))
+            {
+                currentParentDirectory = currentParentDirectory.Parent;
+            }
+            if (!currentParentDirectory.Name.Equals("plugins"))
+            {
+                Mod.LogError("Could not find plugins folder to look for map additive " + mapName + ":" + bundleName);
+                return;
+            }
+
+            // Find full path to bundle
+            if(FindBundle(bundleName, currentParentDirectory.FullName, out string fullPath))
+            {
+                // Add if found
+                if(availableRaidMapAdditives.TryGetValue(mapName, out List<string> existingAdditives))
+                {
+                    existingAdditives.Add(fullPath);
+                }
+                else
+                {
+                    availableRaidMapAdditives.Add(mapName, new List<string> { fullPath });
+                }
+            }
+            else
+            {
+                Mod.LogError("Could not find map additive bundle:" + bundleName);
+            }
+        }
+
+        public static void AddRaidMapPrefab(string mapName, string bundleName)
+        {
+            // Find plugins directory
+            string currentDirectory = Directory.GetCurrentDirectory();
+            DirectoryInfo currentParentDirectory = Directory.GetParent(currentDirectory);
+            while (currentParentDirectory != null && !currentParentDirectory.Name.Equals("plugins"))
+            {
+                currentParentDirectory = currentParentDirectory.Parent;
+            }
+            if (!currentParentDirectory.Name.Equals("plugins"))
+            {
+                Mod.LogError("Could not find plugins folder to look for map prefab " + mapName + ":" + bundleName);
+                return;
+            }
+
+            // Find full path to bundle
+            if(FindBundle(bundleName, currentParentDirectory.FullName, out string fullPath))
+            {
+                // Add if found
+                if(availableRaidMapPrefabs.TryGetValue(mapName, out List<string> existingAdditives))
+                {
+                    existingAdditives.Add(fullPath);
+                }
+                else
+                {
+                    availableRaidMapPrefabs.Add(mapName, new List<string> { fullPath });
+                }
+            }
+            else
+            {
+                Mod.LogError("Could not find map prefab bundle:" + bundleName);
+            }
+        }
+
+        public static bool FindBundle(string bundleName, string directory, out string fullPath)
+        {
+            string[] files = Directory.GetFiles(directory);
+            for (int i=0; i < files.Length; ++i)
+            {
+                if (files[i].EndsWith(bundleName))
+                {
+                    fullPath = files[i];
+                    return true;
+                }
+            }
+
+            string[] dirs = Directory.GetDirectories(directory);
+            for (int i=0; i < dirs.Length; ++i)
+            {
+                if(FindBundle(bundleName, dirs[i], out fullPath))
+                {
+                    return true;
+                }
+            }
+
+            fullPath = null;
+            return false;
         }
     }
 
