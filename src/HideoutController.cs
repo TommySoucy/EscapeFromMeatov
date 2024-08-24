@@ -347,6 +347,25 @@ namespace EFM
             Mod.baseEnergyRate += defaultEnergyRate;
             Mod.baseHydrationRate += defaultHydrationRate;
 
+            // Sub to UI events
+            foreach(KeyValuePair<string, string> raidMapEntry in Mod.availableRaidMaps)
+            {
+                if(Mod.raidMapEntryRequirements.TryGetValue(raidMapEntry.Key, out Dictionary<string, int> requirements))
+                {
+                    foreach(KeyValuePair<string, int> requirement in requirements)
+                    {
+                        if(Mod.defaultItemData.TryGetValue(requirement.Key, out MeatovItemData itemData))
+                        {
+                            itemData.OnPlayerItemInventoryChanged += OnPlayerItemInventoryChanged;
+                        }
+                        else
+                        {
+                            Mod.LogError("Could not get item data for raid map " + raidMapEntry.Key + " requirement of x" + requirement.Value + " " + requirement.Key);
+                        }
+                    }
+                }
+            }
+
             Mod.justFinishedRaid = false;
             init = true;
             Mod.LogInfo("\t0");
@@ -438,6 +457,8 @@ namespace EFM
 
                     try
                     {
+                        TODO e: // Consume map requirements
+
                         Mod.loadingToMeatovScene = true;
                         SteamVR_LoadLevel.Begin(Mod.mapChoiceName, false, 0.5f, 0f, 0f, 0f, 1f);
                         countdownDeploy = false;
@@ -3198,9 +3219,15 @@ namespace EFM
             instancesNextButton.SetActive(true);
         }
 
+        public void OnPlayerItemInventoryChanged(int difference)
+        {
+            PopulateInstancesList();
+            PopulateMapList();
+            PopulateNewInstanceMapList();
+        }
+
         public void PopulateInstancesList()
         {
-            TODO e: // Add check for whether we have the map installed and if we have the map's entry requirements
             while (instancesParent.childCount > 1)
             {
                 Transform child = instancesParent.GetChild(1);
@@ -3217,20 +3244,38 @@ namespace EFM
             int i = -1;
             foreach(KeyValuePair<int, RaidInstance> instanceDataEntry in Networking.raidInstances)
             {
+                if (instancesParent.childCount == 7)
+                {
+                    break;
+                }
+
                 ++i;
                 if (i < instancesListPage * 6)
                 {
                     continue;
                 }
 
-                if (instancesParent.childCount == 7)
-                {
-                    break;
-                }
-
                 if (!Mod.availableRaidMaps.ContainsKey(instanceDataEntry.Value.map))
                 {
                     continue;
+                }
+
+                if(Mod.raidMapEntryRequirements.TryGetValue(instanceDataEntry.Value.map, out Dictionary<string, int> itemRequirements))
+                {
+                    bool unfulfilled = false;
+                    foreach(KeyValuePair<string, int> item in itemRequirements)
+                    {
+                        int currentCount = 0;
+                        if(!Mod.playerInventory.TryGetValue(item.Key, out currentCount) || currentCount < item.Value)
+                        {
+                            unfulfilled = true;
+                            break;
+                        }
+                    }
+                    if (unfulfilled)
+                    {
+                        continue;
+                    }
                 }
 
                 GameObject newInstanceListEntry = Instantiate(instanceEntryPrefab, instancesParent);
@@ -3381,6 +3426,24 @@ namespace EFM
                     break;
                 }
 
+                if (Mod.raidMapEntryRequirements.TryGetValue(raidMap.Key, out Dictionary<string, int> itemRequirements))
+                {
+                    bool unfulfilled = false;
+                    foreach (KeyValuePair<string, int> item in itemRequirements)
+                    {
+                        int currentCount = 0;
+                        if (!Mod.playerInventory.TryGetValue(item.Key, out currentCount) || currentCount < item.Value)
+                        {
+                            unfulfilled = true;
+                            break;
+                        }
+                    }
+                    if (unfulfilled)
+                    {
+                        continue;
+                    }
+                }
+
                 GameObject newInstanceMapListEntry = Instantiate(newInstanceMapListEntryPrefab, newInstanceMapListParent);
                 newInstanceMapListEntry.SetActive(true);
 
@@ -3398,7 +3461,6 @@ namespace EFM
 
         public void PopulateMapList()
         {
-            TODO e: // Add check for whether we have the map's entry requirements and sub to event to update map list when we un/fulfill requirement
             while (mapListParent.childCount > 1)
             {
                 Transform child = mapListParent.GetChild(1);
@@ -3418,6 +3480,24 @@ namespace EFM
                 if (mapListParent.childCount == 7)
                 {
                     break;
+                }
+
+                if (Mod.raidMapEntryRequirements.TryGetValue(raidMap.Key, out Dictionary<string, int> itemRequirements))
+                {
+                    bool unfulfilled = false;
+                    foreach (KeyValuePair<string, int> item in itemRequirements)
+                    {
+                        int currentCount = 0;
+                        if (!Mod.playerInventory.TryGetValue(item.Key, out currentCount) || currentCount < item.Value)
+                        {
+                            unfulfilled = true;
+                            break;
+                        }
+                    }
+                    if (unfulfilled)
+                    {
+                        continue;
+                    }
                 }
 
                 GameObject newMapListEntry = Instantiate(mapListEntryPrefab, mapListParent);
