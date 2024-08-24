@@ -67,10 +67,10 @@ namespace EFM
         public static Hand rightHand;
         public static Hand leftHand;
         public static List<List<RigSlot>> looseRigSlots;
-        public static int chosenCharIndex;
-        public static int chosenMapIndex;
-        public static int chosenTimeIndex;
-        public static string chosenMapName;
+        public static string mapChoiceName;
+        public static bool charChoicePMC; // false is Scav
+        public static bool timeChoiceIs0; // false is 1
+        public static bool PMCSpawnTogether;
         public static HideoutController.FinishRaidState raidState;
         public static bool justFinishedRaid;
         public static Dictionary<string, int> killList;
@@ -626,6 +626,7 @@ namespace EFM
         public static Dictionary<string, string> availableRaidMaps = new Dictionary<string, string>();
         public static Dictionary<string, List<string>> availableRaidMapAdditives = new Dictionary<string, List<string>>();
         public static Dictionary<string, List<string>> availableRaidMapPrefabs = new Dictionary<string, List<string>>();
+        public static Dictionary<string, Dictionary<string, int>> raidMapEntryRequirements = new Dictionary<string, Dictionary<string, int>>();
 
         // Debug
         public static bool waitingForDebugCode;
@@ -805,7 +806,7 @@ namespace EFM
                                 break;
                             case 6: // Start factory raid
                                 Mod.LogInfo("\tDebug: Start factory raid");
-                                Mod.chosenMapIndex = -1;
+                                Mod.mapChoiceName = "RaidDev";
                                 GameObject.Find("Hideout").GetComponent<HideoutController>().OnConfirmRaidClicked();
                                 break;
                             case 7: // Load autosave
@@ -3524,7 +3525,7 @@ namespace EFM
             }
 
             // Skip if in scav raid
-            if (Mod.currentLocationIndex == 2 && Mod.chosenCharIndex == 1)
+            if (Mod.currentLocationIndex == 2 && !Mod.charChoicePMC)
             {
                 return;
             }
@@ -3588,7 +3589,7 @@ namespace EFM
             // Globals SkillsSettings
             // Skip if in scav raid
             Skill skill = Mod.skills[skillIndex];
-            if (Mod.currentLocationIndex == 1 || Mod.chosenCharIndex == 1 || skill.raidProgress >= 300) // Max 3 levels per raid TODO: should be unique to each skill
+            if (Mod.currentLocationIndex == 1 || !Mod.charChoicePMC || skill.raidProgress >= 300) // Max 3 levels per raid TODO: should be unique to each skill
             {
                 return;
             }
@@ -3788,11 +3789,19 @@ namespace EFM
         {
             if (loading) // Started loading
             {
-                // Loading into meatov scene
-                if (loadingToMeatovScene || H3MP.Patches.LoadLevelBeginPatch.loadingLevel.Contains("Meatov"))
+                // Set instance to 0 if leaving raid or if going to MeatovMainMenu
+                if(GameObject.FindObjectOfType<Raid_Manager>() != null || H3MP.Patches.LoadLevelBeginPatch.loadingLevel.Equals("MeatovMainMenu"))
                 {
+                    H3MP.GameManager.SetInstance(0);
+                }
+
+                // Loading into meatov scene
+                if (loadingToMeatovScene || H3MP.Patches.LoadLevelBeginPatch.loadingLevel.Equals("MeatovMainMenu"))
+                {
+                    loadingToMeatovScene = true;
+
                     // Secure scene components if haven't already
-                    if(securedMainSceneComponents == null || securedMainSceneComponents.Count == 0)
+                    if (securedMainSceneComponents == null || securedMainSceneComponents.Count == 0)
                     {
                         SecureMainSceneComponents();
                     }
@@ -3816,7 +3825,7 @@ namespace EFM
                 // The simplest solution is to keep things as unsecured as possible, only securing them when moving scenes
                 UnsecureMainSceneComponents();
 
-                inMeatovScene = loadingToMeatovScene || H3MP.Patches.LoadLevelBeginPatch.loadingLevel.Contains("Meatov");
+                inMeatovScene = loadingToMeatovScene;
                 loadingToMeatovScene = false;
 
                 switch (H3MP.Patches.LoadLevelBeginPatch.loadingLevel)
@@ -3988,7 +3997,7 @@ namespace EFM
             }
             securedObjects.Clear();
 
-            if (Mod.justFinishedRaid && Mod.chosenCharIndex == 1)
+            if (Mod.justFinishedRaid && !Mod.charChoicePMC)
             {
                 // Make sure that all scav return items are in their proper return nodes
                 Transform returnNodeParent = HideoutController.instance.transform.GetChild(1).GetChild(25);
@@ -4520,6 +4529,30 @@ namespace EFM
             else
             {
                 Mod.LogError("Could not find map prefab bundle:" + bundleName);
+            }
+        }
+
+        public static void AddRaidMapRequirements(string mapName, Dictionary<string, int> requirements)
+        {
+            if(requirements == null || requirements.Count == 0)
+            {
+                return;
+            }
+
+            if (availableRaidMaps.ContainsKey(mapName))
+            {
+                if (raidMapEntryRequirements.ContainsKey(mapName))
+                {
+                    Mod.LogError("Could not add entry requirements for raid map: " + mapName + ", requirements already exist");
+                }
+                else
+                {
+                    raidMapEntryRequirements.Add(mapName, requirements);
+                }
+            }
+            else
+            {
+                Mod.LogError("Could not add entry requirements for raid map: " + mapName+", map missing");
             }
         }
 

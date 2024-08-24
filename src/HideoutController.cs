@@ -1,11 +1,13 @@
 ﻿using FistVR;
 using H3MP;
+using H3MP.Networking;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 using Valve.Newtonsoft.Json.Linq;
+using static RootMotion.FinalIK.GenericPoser;
 
 namespace EFM
 {
@@ -57,6 +59,9 @@ namespace EFM
         public GameObject charChoicePanel;
         public GameObject[] saveConfirmTexts;
         public Transform[] optionPages;
+        public Transform mapListParent;
+        public GameObject mapListEntryPrefab;
+        public int mapListPage;
         // H3MP
         public GameObject instancesPage;
         public Transform instancesParent;
@@ -153,8 +158,8 @@ namespace EFM
         public static DateTime saveTime;
         public static double secondsSinceSave;
         public float time;
-        private bool cancelRaidLoad;
-        private bool loadingRaid;
+        public bool cancelRaidLoad;
+        public bool loadingRaid;
         public bool countdownDeploy;
         public bool waitForDeploy;
         public float deployTimer;
@@ -176,10 +181,6 @@ namespace EFM
         public int instancesListPage;
         public int newInstanceMapListPage;
         public int waitingPlayerListPage;
-        public bool charChoicePMC; // false is Scav
-        public bool timeChoiceIs0; // false is 1
-        public bool PMCSpawnTogether;
-        public string mapChoiceName;
 
         public delegate void OnHideoutInventoryChangedDelegate();
         public event OnHideoutInventoryChangedDelegate OnHideoutInventoryChanged;
@@ -295,7 +296,7 @@ namespace EFM
             InitTime();
 
             Mod.LogInfo("\t0");
-            if (Mod.justFinishedRaid && Mod.chosenCharIndex == 0)
+            if (Mod.justFinishedRaid && Mod.charChoicePMC)
             {
                 FinishRaid(Mod.raidState); // This will save on autosave
 
@@ -369,7 +370,6 @@ namespace EFM
             UpdateRates();
 
             // Handle raid loading process
-            TODO e: // review single player loading process to ensure it fuctions still, and use the new pages and stuff as well
             if (cancelRaidLoad)
             {
                 loadingRaid = false;
@@ -438,12 +438,13 @@ namespace EFM
 
                     try
                     {
-                        SteamVR_LoadLevel.Begin(mapChoiceName, false, 0.5f, 0f, 0f, 0f, 1f);
+                        Mod.loadingToMeatovScene = true;
+                        SteamVR_LoadLevel.Begin(Mod.mapChoiceName, false, 0.5f, 0f, 0f, 0f, 1f);
                         countdownDeploy = false;
                     }
                     catch(Exception ex)
                     {
-                        Mod.LogError("Could not load level: "+mapChoiceName+", cancelling: "+ ex.Message+"\n"+ ex.StackTrace);
+                        Mod.LogError("Could not load level: "+Mod.mapChoiceName+", cancelling: "+ ex.Message+"\n"+ ex.StackTrace);
                         cancelRaidLoad = true;
                     }
                 }
@@ -1386,7 +1387,7 @@ namespace EFM
             string formattedTime1 = Mod.FormatTimeString(offsetTime);
             timeChoice1.text = formattedTime1;
 
-            if (timeChoiceIs0)
+            if (Mod.timeChoiceIs0)
             {
                 waitingInstanceTimeText.text = "Time: " + formattedTime0;
             }
@@ -1395,7 +1396,7 @@ namespace EFM
                 waitingInstanceTimeText.text = "Time: " + formattedTime1;
             }
 
-            confirmChosenTime.text = Mod.chosenTimeIndex == 0 ? formattedTime0 : formattedTime1;
+            confirmChosenTime.text = Mod.timeChoiceIs0 ? formattedTime0 : formattedTime1;
             loadingChosenTime.text = confirmChosenTime.text;
         }
 
@@ -1472,7 +1473,7 @@ namespace EFM
 
             Mod.LogInfo("\t0");
             // Load player data only if we don't want to use the data from the PMC raid we just finished
-            if (!Mod.justFinishedRaid || Mod.chosenCharIndex == 1)
+            if (!Mod.justFinishedRaid || !Mod.charChoicePMC)
             {
                 Mod.LogInfo("\t\tNot finished raid");
                 Mod.level = (int)loadedData["level"];
@@ -2534,7 +2535,7 @@ namespace EFM
 
             if (Mod.justFinishedRaid)
             {
-                if (Mod.chosenCharIndex == 0)
+                if (Mod.charChoicePMC)
                 {
                     // Spawn with less health and energy/hydration if killed or MIA
                     int raidResultExp = 0; // TODO: Add bonus for how long we survived
@@ -3158,15 +3159,15 @@ namespace EFM
             newInstanceNextButton.SetActive(true);
             newInstancePreviousButton.SetActive(false);
 
-            charChoicePMC = true;
+            Mod.charChoicePMC = true;
             newInstancePMCCheckText.text = "X";
             newInstanceScavCheckText.text = "";
-            timeChoiceIs0 = true;
+            Mod.timeChoiceIs0 = true;
             timeChoice0CheckText.text = "X";
             timeChoice1CheckText.text = "";
-            PMCSpawnTogether = true;
+            Mod.PMCSpawnTogether = true;
             newInstanceSpawnTogetherCheckText.text = "X";
-            mapChoiceName = null;
+            Mod.mapChoiceName = null;
         }
 
         public void OnInstancesNextClicked()
@@ -3199,7 +3200,7 @@ namespace EFM
 
         public void PopulateInstancesList()
         {
-            TODO: // Add check for whether we have the map installed and if we have the map's entry requirements
+            TODO e: // Add check for whether we have the map installed and if we have the map's entry requirements
             while (instancesParent.childCount > 1)
             {
                 Transform child = instancesParent.GetChild(1);
@@ -3227,6 +3228,11 @@ namespace EFM
                     break;
                 }
 
+                if (!Mod.availableRaidMaps.ContainsKey(instanceDataEntry.Value.map))
+                {
+                    continue;
+                }
+
                 GameObject newInstanceListEntry = Instantiate(instanceEntryPrefab, instancesParent);
                 newInstanceListEntry.SetActive(true);
 
@@ -3246,13 +3252,13 @@ namespace EFM
             joinInstanceTitle.text = "Join Instance "+ ID;
             if (Networking.potentialInstance.waiting)
             {
-                charChoicePMC = true;
+                Mod.charChoicePMC = true;
                 joinInstancePMCCheckText.text = "X";
                 joinInstanceScavCheckText.text = "";
             }
             else
             {
-                charChoicePMC = false;
+                Mod.charChoicePMC = false;
                 joinInstancePMCCheckText.text = "";
                 joinInstanceScavCheckText.text = "X";
             }
@@ -3270,14 +3276,14 @@ namespace EFM
             if (Networking.potentialInstance.waiting)
             {
                 clickAudio.Play();
-                charChoicePMC = true;
+                Mod.charChoicePMC = true;
 
                 newInstancePMCCheckText.text = "X";
                 newInstanceScavCheckText.text = "";
             }
             else
             {
-                charChoicePMC = false;
+                Mod.charChoicePMC = false;
 
                 newInstancePMCCheckText.text = "";
                 newInstanceScavCheckText.text = "X";
@@ -3297,7 +3303,7 @@ namespace EFM
         public void OnJoinInstanceCharScavClicked()
         {
             clickAudio.Play();
-            charChoicePMC = false;
+            Mod.charChoicePMC = false;
 
             newInstancePMCCheckText.text = "";
             newInstanceScavCheckText.text = "X";
@@ -3307,7 +3313,7 @@ namespace EFM
         {
             clickAudio.Play();
 
-            charChoicePMC = true;
+            Mod.charChoicePMC = true;
 
             newInstancePMCCheckText.text = "X";
             newInstanceScavCheckText.text = "";
@@ -3317,7 +3323,7 @@ namespace EFM
         {
             clickAudio.Play();
 
-            charChoicePMC = false;
+            Mod.charChoicePMC = false;
 
             newInstancePMCCheckText.text = "";
             newInstanceScavCheckText.text = "X";
@@ -3327,7 +3333,7 @@ namespace EFM
         {
             clickAudio.Play();
 
-            timeChoiceIs0 = true;
+            Mod.timeChoiceIs0 = true;
 
             timeChoice0CheckText.text = "X";
             timeChoice1CheckText.text = "";
@@ -3337,7 +3343,7 @@ namespace EFM
         {
             clickAudio.Play();
 
-            timeChoiceIs0 = false;
+            Mod.timeChoiceIs0 = false;
 
             timeChoice0CheckText.text = "";
             timeChoice1CheckText.text = "X";
@@ -3347,9 +3353,9 @@ namespace EFM
         {
             clickAudio.Play();
 
-            PMCSpawnTogether = !PMCSpawnTogether;
+            Mod.PMCSpawnTogether = !Mod.PMCSpawnTogether;
 
-            newInstanceSpawnTogetherCheckText.text = PMCSpawnTogether ? "X" : "";
+            newInstanceSpawnTogetherCheckText.text = Mod.PMCSpawnTogether ? "X" : "";
         }
 
         public void PopulateNewInstanceMapList()
@@ -3382,7 +3388,7 @@ namespace EFM
                 newInstanceMapListEntry.GetComponentInChildren<Text>().text = mapName;
                 newInstanceMapListEntry.GetComponentInChildren<Button>().onClick.AddListener(() => { OnNewInstanceMapClicked(mapName); });
 
-                if (mapChoiceName.Equals("mapName"))
+                if (Mod.mapChoiceName.Equals("mapName"))
                 {
                     newInstanceMapListEntry.GetComponentInChildren<Image>().color = Color.white;
                     newInstanceMapListEntry.GetComponentInChildren<Text>().color = Color.black;
@@ -3390,9 +3396,48 @@ namespace EFM
             }
         }
 
+        public void PopulateMapList()
+        {
+            TODO e: // Add check for whether we have the map's entry requirements and sub to event to update map list when we un/fulfill requirement
+            while (mapListParent.childCount > 1)
+            {
+                Transform child = mapListParent.GetChild(1);
+                child.SetParent(null);
+                Destroy(child.gameObject);
+            }
+
+            int i = -1;
+            foreach (KeyValuePair<string, string> raidMap in Mod.availableRaidMaps)
+            {
+                ++i;
+                if (i < mapListPage * 6)
+                {
+                    continue;
+                }
+
+                if (mapListParent.childCount == 7)
+                {
+                    break;
+                }
+
+                GameObject newMapListEntry = Instantiate(mapListEntryPrefab, mapListParent);
+                newMapListEntry.SetActive(true);
+
+                string mapName = raidMap.Key;
+                newMapListEntry.GetComponentInChildren<Text>().text = mapName;
+                newMapListEntry.GetComponentInChildren<Button>().onClick.AddListener(() => { OnMapClicked(mapName); });
+
+                if (Mod.mapChoiceName.Equals("mapName"))
+                {
+                    newMapListEntry.GetComponentInChildren<Image>().color = Color.white;
+                    newMapListEntry.GetComponentInChildren<Text>().color = Color.black;
+                }
+            }
+        }
+
         public void OnNewInstanceMapClicked(string name)
         {
-            mapChoiceName = name;
+            Mod.mapChoiceName = name;
 
             PopulateNewInstanceMapList();
         }
@@ -3464,9 +3509,11 @@ namespace EFM
             waitingServerPage.SetActive(true);
 
             Networking.setLatestInstance = true;
-            RaidInstance raidInstance = Networking.AddInstance(mapChoiceName, timeChoiceIs0, PMCSpawnTogether);
+            RaidInstance raidInstance = Networking.AddInstance(Mod.mapChoiceName, Mod.timeChoiceIs0, Mod.PMCSpawnTogether);
         }
 
+        // Note that this is the only method we will ever use to join en EFM raid instance
+        // So we don't need to sub to H3MP's instance joined event to handle raid instances
         public void SetInstance(RaidInstance instance)
         {
             if (waitingServerPage.activeSelf)
@@ -3493,9 +3540,9 @@ namespace EFM
                     instance.players.Add(H3MP.GameManager.ID);
                 }
 
-                waitingInstanceCharText.text = "Character: " + (charChoicePMC ? "PMC" : "Scav");
-                waitingInstanceMapText.text = "Map: " + mapChoiceName;
-                waitingInstanceSpawnTogetherText.text = "PMCs spawn together: " + PMCSpawnTogether;
+                waitingInstanceCharText.text = "Character: " + (Mod.charChoicePMC ? "PMC" : "Scav");
+                waitingInstanceMapText.text = "Map: " + Mod.mapChoiceName;
+                waitingInstanceSpawnTogetherText.text = "PMCs spawn together: " + Mod.PMCSpawnTogether;
                 waitingInstanceStartButton.SetActive(Networking.currentInstance.players[0] == GameManager.ID);
 
                 Networking.currentInstance = instance;
@@ -3515,6 +3562,26 @@ namespace EFM
                     }
                     newPlayer.SetActive(true);
                 }
+            }
+        }
+
+        public static void OnInstanceLeft(int instance, int destination)
+        {
+            if(Networking.raidInstances.TryGetValue(instance, out RaidInstance raidInstance))
+            {
+                raidInstance.players.Remove(H3MP.GameManager.ID);
+
+                if (raidInstance.players.Count == 0)
+                {
+                    Networking.raidInstances.Remove(H3MP.GameManager.instance);
+
+                    if(HideoutController.instance != null)
+                    {
+                        HideoutController.instance.PopulateInstancesList();
+                    }
+                }
+
+                Networking.currentInstance = null;
             }
         }
 
@@ -3604,12 +3671,39 @@ namespace EFM
                     Mod.raidMapAdditiveBundleRequests.Add(AssetBundle.LoadFromFileAsync(additivePaths[i]));
                 }
             }
+            else
+            {
+                Mod.raidMapAdditiveBundleRequests = null;
+            }
             if(Mod.availableRaidMapPrefabs.TryGetValue(Networking.currentInstance.map, out List<string> prefabPaths))
             {
                 Mod.raidMapPrefabBundleRequests = new List<AssetBundleCreateRequest>();
                 for(int i=0; i< prefabPaths.Count; ++i)
                 {
                     Mod.raidMapPrefabBundleRequests.Add(AssetBundle.LoadFromFileAsync(prefabPaths[i]));
+                }
+            }
+            else
+            {
+                Mod.raidMapPrefabBundleRequests = null;
+            }
+
+            // Send SetWaiting packet to everyone else if we are the instance host
+            if (Networking.currentInstance.players[0] == GameManager.ID)
+            {
+                using (Packet packet = new Packet(Networking.setInstanceWaitingPacketID))
+                {
+                    packet.Write(Networking.currentInstance.ID);
+                    packet.Write(true);
+
+                    if (ThreadManager.host)
+                    {
+                        ServerSend.SendTCPDataToAll(packet, true);
+                    }
+                    else
+                    {
+                        ClientSend.SendTCPData(packet, true);
+                    }
                 }
             }
         }
@@ -3666,37 +3760,27 @@ namespace EFM
             //buttons[3][1].GetComponent<Collider>().enabled = true;
         }
 
+        TODO: // Add a check for MP, when we create instance, can only choose PMC if still ahve item in scav return nodes. IF joining instance, can only confirm if !scav chosen or if no items in nodes
+        TODO: // Add scav timer to MP process
         public void OnCharClicked(int charIndex)
         {
             clickAudio.Play();
 
-            Mod.chosenCharIndex = charIndex;
+            Mod.charChoicePMC = charIndex == 0;
 
             // Update chosen char text
-            confirmChosenCharacter.text = charIndex == 0 ? "PMC" : "Scav";
+            confirmChosenCharacter.text = Mod.charChoicePMC ? "PMC" : "Scav";
             loadingChosenCharacter.text = confirmChosenCharacter.text;
 
-            bool previousScavItemFound = false;
-            Transform scavRaidItemNodeParent = transform.GetChild(1).GetChild(25);
-            foreach (Transform child in scavRaidItemNodeParent)
+            if (scavReturnNode.childCount > 0)
             {
-                if (child.childCount > 0)
-                {
-                    previousScavItemFound = true;
-                    break;
-                }
-            }
-
-            if (previousScavItemFound)
-            {
-                //buttons[3][0].GetComponent<Collider>().enabled = false;
-                //buttons[3][1].GetComponent<Collider>().enabled = false;
-
                 scavBlock.gameObject.SetActive(true);
             }
             else
             {
                 SetPage(4);
+                mapListPage = 0;
+                PopulateMapList();
             }
         }
 
@@ -3704,18 +3788,11 @@ namespace EFM
         {
             clickAudio.Play();
 
-            Mod.chosenMapName = mapName;
+            Mod.mapChoiceName = mapName;
 
             // Update chosen map text
-            switch (Mod.chosenMapIndex)
-            {
-                case 0:
-                    confirmChosenMap.text = "Factory";
-                    loadingChosenMap.text = "Factory";
-                    break;
-                default:
-                    break;
-            }
+            confirmChosenMap.text = mapName;
+            loadingChosenMap.text = mapName;
 
             SetPage(5);
         }
@@ -3724,7 +3801,7 @@ namespace EFM
         {
             clickAudio.Play();
 
-            Mod.chosenTimeIndex = timeIndex;
+            Mod.timeChoiceIs0 = timeIndex == 0;
             SetPage(6);
         }
 
@@ -3734,24 +3811,31 @@ namespace EFM
 
             SetPage(7);
 
-            // Begin loading raid map
-            switch (Mod.chosenMapIndex)
+            loadingRaid = true;
+            Mod.raidMapBundleRequest = AssetBundle.LoadFromFileAsync(Mod.availableRaidMaps[Mod.mapChoiceName]);
+            if (Mod.availableRaidMapAdditives.TryGetValue(Mod.mapChoiceName, out List<string> additivePaths))
             {
-                case 0:
-                    loadingRaid = true;
-                    Mod.chosenMapName = "Factory";
-                    Mod.raidMapBundleRequest = AssetBundle.LoadFromFileAsync(Mod.path + "/EscapeFromMeatovFactory.ab");
-                    break;
-                default:
-                    loadingRaid = true;
-                    Mod.chosenMapIndex = 0;
-                    Mod.chosenCharIndex = 0;
-                    Mod.chosenTimeIndex = 0;
-                    Mod.chosenMapName = "Factory";
-                    confirmChosenMap.text = "Factory";
-                    loadingChosenMap.text = "Factory";
-                    Mod.raidMapBundleRequest = AssetBundle.LoadFromFileAsync(Mod.path + "/EscapeFromMeatovFactory.ab");
-                    break;
+                Mod.raidMapAdditiveBundleRequests = new List<AssetBundleCreateRequest>();
+                for (int i = 0; i < additivePaths.Count; ++i)
+                {
+                    Mod.raidMapAdditiveBundleRequests.Add(AssetBundle.LoadFromFileAsync(additivePaths[i]));
+                }
+            }
+            else
+            {
+                Mod.raidMapAdditiveBundleRequests = null;
+            }
+            if (Mod.availableRaidMapPrefabs.TryGetValue(Mod.mapChoiceName, out List<string> prefabPaths))
+            {
+                Mod.raidMapPrefabBundleRequests = new List<AssetBundleCreateRequest>();
+                for (int i = 0; i < prefabPaths.Count; ++i)
+                {
+                    Mod.raidMapPrefabBundleRequests.Add(AssetBundle.LoadFromFileAsync(prefabPaths[i]));
+                }
+            }
+            else
+            {
+                Mod.raidMapPrefabBundleRequests = null;
             }
         }
 

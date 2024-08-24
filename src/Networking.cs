@@ -5,20 +5,49 @@ namespace EFM
 {
     public class Networking
     {
+        // Instance handling:
+        // We can only ever join a raid instance through HideoutController.SetInstance so we handle joining there
+        // Leaving a raid instance is handled through the OnInstanceLeft event by HideoutController.OnInstanceLeft
+        // Other players joining/leaving is handled through the OnPlayerInstanceChanged event by OnPlayerInstanceChanged
+        // A RaidInstance should be left when we leave a scene that has a RaidManager (Leaving raid) or when we go to MeatovMainMenu
         public static RaidInstance potentialInstance;
         public static RaidInstance currentInstance;
         public static Dictionary<int, RaidInstance> raidInstances = new Dictionary<int, RaidInstance>();
         public static bool setLatestInstance;
 
+        TODO: // Make sure we use each of these as we are supposed to to keep everything up to date
         public static int addInstancePacketID; // AddEFMInstancePacketID
         public static int setPlayerReadynessPacketID; // SetEFMInstancePlayerReadyness
         public static int setInstanceWaitingPacketID; // SetEFMInstanceWaitingPacketID
 
         public static void OnConnection()
         {
+            if(HideoutController.instance != null)
+            {
+                if(HideoutController.instance.loadingRaid || HideoutController.instance.countdownDeploy || HideoutController.instance.waitForDeploy)
+                {
+                    // Already starting a game, just disconnect
+                    if (ThreadManager.host)
+                    {
+                        Server.Close();
+                    }
+                    else
+                    {
+                        Client.singleton.Disconnect(true, 0);
+                    }
+                    return;
+                }
+                else if(HideoutController.instance.pageIndex > 2 && HideoutController.instance.pageIndex < 8)
+                {
+                    // Was already going through the singleplayer process to start a game, set back to page 0
+                    HideoutController.instance.SetPage(0);
+                }
+            }
+
             // Sub to events
             H3MP.GameManager.OnPlayerInstanceChanged += OnPlayerInstanceChanged;
             H3MP.Mod.OnGetBestPotentialObjectHost += OnGetBestPotentialObjectHost;
+            H3MP.GameManager.OnInstanceLeft += HideoutController.OnInstanceLeft;
 
             // Setup custom packets
             if (ThreadManager.host)
@@ -89,6 +118,7 @@ namespace EFM
             // Unsub from events
             H3MP.GameManager.OnPlayerInstanceChanged -= OnPlayerInstanceChanged;
             H3MP.Mod.OnGetBestPotentialObjectHost -= OnGetBestPotentialObjectHost;
+            H3MP.GameManager.OnInstanceLeft -= HideoutController.OnInstanceLeft;
         }
 
         public static void OnPlayerInstanceChanged(int ID, int previousInstanceID, int newInstanceID)
@@ -299,7 +329,14 @@ namespace EFM
 
             if(raidInstances.TryGetValue(instanceID, out RaidInstance raidInstance) && raidInstance.players[0] == clientID)
             {
+                bool preValue = raidInstance.waiting;
                 raidInstance.waiting = waiting;
+
+                // Start loading if necessary
+                if(preValue != waiting && !waiting && Networking.currentInstance == raidInstance && HideoutController.instance != null && (HideoutController.instance.waitingInstancePage.activeSelf || HideoutController.instance.waitingInstancePlayerListPage.activeSelf))
+                {
+                    HideoutController.instance.OnWaitingInstanceStartClicked();
+                }
 
                 // Send to all clients
                 using (Packet newPacket = new Packet(setInstanceWaitingPacketID))
@@ -375,7 +412,14 @@ namespace EFM
 
             if (raidInstances.TryGetValue(instanceID, out RaidInstance raidInstance))
             {
+                bool preValue = raidInstance.waiting;
                 raidInstance.waiting = waiting;
+
+                // Start loading if necessary
+                if (preValue != waiting && !waiting && Networking.currentInstance == raidInstance && HideoutController.instance != null && (HideoutController.instance.waitingInstancePage.activeSelf || HideoutController.instance.waitingInstancePlayerListPage.activeSelf))
+                {
+                    HideoutController.instance.OnWaitingInstanceStartClicked();
+                }
             }
         }
     }

@@ -223,6 +223,7 @@ namespace EFM
             {
                 Mod.LogInfo(i.ToString() + " : " + bundledScenes[i]);
             }
+            Mod.loadingToMeatovScene = true;
             SteamVR_LoadLevel.Begin("MeatovHideout", false, 0.5f, 0f, 0f, 0f, 1f);
         }
 
