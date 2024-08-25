@@ -3828,6 +3828,34 @@ namespace EFM
                 inMeatovScene = loadingToMeatovScene;
                 loadingToMeatovScene = false;
 
+                // Finish loading raid map if necessary
+                Raid_Manager raidManager = GameObject.FindObjectOfType<Raid_Manager>();
+                if (raidManager != null)
+                {
+                    if(raidMapAdditiveBundleRequests != null)
+                    {
+                        for(int i=0; i < raidMapAdditiveBundleRequests.Count; ++i)
+                        {
+                            string[] additiveScenes = raidMapAdditiveBundleRequests[i].assetBundle.GetAllScenePaths();
+                            for(int j=0; j < additiveScenes.Length; ++j)
+                            {
+                                SceneManager.LoadScene(additiveScenes[j], LoadSceneMode.Additive);
+                            }
+                        }
+                    }
+                    if(raidMapPrefabBundleRequests != null)
+                    {
+                        for(int i=0; i < raidMapPrefabBundleRequests.Count; ++i)
+                        {
+                            GameObject[] mapPrefabs = raidMapAdditiveBundleRequests[i].assetBundle.LoadAllAssets<GameObject>();
+                            for(int j=0; j < mapPrefabs.Length; ++j)
+                            {
+                                GameObject.Instantiate(mapPrefabs[j]);
+                            }
+                        }
+                    }
+                }
+
                 switch (H3MP.Patches.LoadLevelBeginPatch.loadingLevel)
                 {
                     case "MainMenu3":
