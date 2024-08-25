@@ -7,7 +7,6 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 using Valve.Newtonsoft.Json.Linq;
-using static RootMotion.FinalIK.GenericPoser;
 
 namespace EFM
 {
@@ -525,16 +524,7 @@ namespace EFM
             }
             else if (waitForDeploy)
             {
-                int readyCount = 0;
-                for(int i=0; i < Networking.currentInstance.players.Count; ++i)
-                {
-                    if (Networking.currentInstance.readyPlayers.Contains(Networking.currentInstance.players[i]))
-                    {
-                        ++readyCount;
-                    }
-                }
-
-                if (readyCount == Networking.currentInstance.players.Count)
+                if (Networking.currentInstance.AllPlayersReady())
                 {
                     waitForDeployPage.SetActive(false);
                     waitForDeploy = false;
@@ -543,7 +533,7 @@ namespace EFM
                 }
                 else
                 {
-                    waitForDeployCountText.text = readyCount.ToString() + "/" + Networking.currentInstance.players.Count;
+                    waitForDeployCountText.text = Networking.currentInstance.readyPlayers.Count.ToString() + "/" + Networking.currentInstance.players.Count;
                 }
             }
             else if (loadingRaid)
@@ -578,15 +568,43 @@ namespace EFM
 
                         loadingRaid = false;
                         loadingPage.SetActive(false);
-                        if (Networking.currentInstance == null || Networking.currentInstance.AllPlayersReady())
+                        if (Networking.currentInstance == null)
                         {
                             countdownPage.SetActive(true);
                             countdownDeploy = true;
                         }
                         else
                         {
-                            waitForDeployPage.SetActive(true);
-                            waitForDeploy = true;
+                            if (!Networking.currentInstance.readyPlayers.Contains(H3MP.GameManager.ID))
+                            {
+                                Networking.currentInstance.readyPlayers.Add(H3MP.GameManager.ID);
+
+                                using (Packet packet = new Packet(Networking.setPlayerReadynessPacketID))
+                                {
+                                    packet.Write(H3MP.GameManager.ID);
+                                    packet.Write(true);
+
+                                    if (ThreadManager.host)
+                                    {
+                                        ServerSend.SendTCPDataToAll(packet, true);
+                                    }
+                                    else
+                                    {
+                                        ClientSend.SendTCPData(packet, true);
+                                    }
+                                }
+                            }
+
+                            if (Networking.currentInstance.AllPlayersReady())
+                            {
+                                countdownPage.SetActive(true);
+                                countdownDeploy = true;
+                            }
+                            else
+                            {
+                                waitForDeployPage.SetActive(true);
+                                waitForDeploy = true;
+                            }
                         }
                     }
                     else
