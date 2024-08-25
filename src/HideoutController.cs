@@ -461,9 +461,9 @@ namespace EFM
                     {
                         // Check if fulfill map requirements, if don't, cancel load
                         bool canLoad = true;
-                        if (Mod.raidMapEntryRequirements.TryGetValue(Mod.mapChoiceName, out Dictionary<string, int> itemRequirements))
+                        if (Mod.raidMapEntryRequirements.TryGetValue(Mod.mapChoiceName, out Dictionary<string, int> itemRequirementsCheck))
                         {
-                            foreach (KeyValuePair<string, int> item in itemRequirements)
+                            foreach (KeyValuePair<string, int> item in itemRequirementsCheck)
                             {
                                 int currentCount = 0;
                                 if (!Mod.playerInventory.TryGetValue(item.Key, out currentCount) || currentCount < item.Value)
@@ -477,8 +477,34 @@ namespace EFM
                         if (canLoad)
                         {
                             // Consume requirements
-                            td
+                            if (Mod.raidMapEntryRequirements.TryGetValue(Mod.mapChoiceName, out Dictionary<string, int> itemRequirements))
+                            {
+                                foreach (KeyValuePair<string, int> itemRequirement in itemRequirements)
+                                {
+                                    List<MeatovItem> potentialItems = Mod.playerInventoryItems[itemRequirement.Key];
+                                    int countLeft = itemRequirement.Value;
+                                    while (countLeft > 0)
+                                    {
+                                        MeatovItem item = potentialItems[potentialItems.Count - 1];
+                                        if (item.stack > countLeft)
+                                        {
+                                            item.stack -= countLeft;
+                                            countLeft = 0;
+                                            break;
+                                        }
+                                        else
+                                        {
+                                            countLeft -= item.stack;
+                                            if (item.DetachChildren())
+                                            {
+                                                item.Destroy();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
 
+                            // Load raid scene
                             Mod.loadingToMeatovScene = true;
                             SteamVR_LoadLevel.Begin(Mod.mapChoiceName, false, 0.5f, 0f, 0f, 0f, 1f);
                             countdownDeploy = false;
