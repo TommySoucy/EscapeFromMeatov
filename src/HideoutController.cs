@@ -71,6 +71,7 @@ namespace EFM
         public GameObject newInstance0Page;
         public Text newInstancePMCCheckText;
         public Text newInstanceScavCheckText;
+        public Text newInstanceScavTimerText;
         public Text newInstanceSpawnTogetherCheckText;
         public Text timeChoice0CheckText;
         public Text timeChoice1CheckText;
@@ -83,6 +84,7 @@ namespace EFM
         public Text joinInstanceTitle;
         public Text joinInstancePMCCheckText;
         public Text joinInstanceScavCheckText;
+        public Text joinInstanceScavTimerText;
         public GameObject waitingServerPage;
         public GameObject waitingInstancePage;
         public Text waitingInstanceCharText;
@@ -380,7 +382,7 @@ namespace EFM
                 UpdateTime();
             }
 
-            //UpdateScavTimer();
+            UpdateScavTimer();
 
             Effect.UpdateStatic();
 
@@ -457,11 +459,36 @@ namespace EFM
 
                     try
                     {
-                        TODO e: // Consume map requirements
+                        // Check if fulfill map requirements, if don't, cancel load
+                        bool canLoad = true;
+                        if (Mod.raidMapEntryRequirements.TryGetValue(Mod.mapChoiceName, out Dictionary<string, int> itemRequirements))
+                        {
+                            foreach (KeyValuePair<string, int> item in itemRequirements)
+                            {
+                                int currentCount = 0;
+                                if (!Mod.playerInventory.TryGetValue(item.Key, out currentCount) || currentCount < item.Value)
+                                {
+                                    canLoad = false;
+                                    break;
+                                }
+                            }
+                        }
 
-                        Mod.loadingToMeatovScene = true;
-                        SteamVR_LoadLevel.Begin(Mod.mapChoiceName, false, 0.5f, 0f, 0f, 0f, 1f);
-                        countdownDeploy = false;
+                        if (canLoad)
+                        {
+                            // Consume requirements
+                            td
+
+                            Mod.loadingToMeatovScene = true;
+                            SteamVR_LoadLevel.Begin(Mod.mapChoiceName, false, 0.5f, 0f, 0f, 0f, 1f);
+                            countdownDeploy = false;
+                        }
+                        else
+                        {
+                            GameManager.SetInstance(0);
+                            cancelRaidLoad = true;
+                            Mod.LogError("Got to raid scene load but could not fulfill all requirements, cancelling");
+                        }
                     }
                     catch(Exception ex)
                     {
@@ -576,17 +603,31 @@ namespace EFM
                 scavButtonCollider.enabled = true;
                 scavButtonText.color = Color.white;
                 scavTimerText.gameObject.SetActive(false);
+                newInstanceScavTimerText.gameObject.SetActive(false);
+                joinInstanceScavTimerText.gameObject.SetActive(false);
             }
-            else if (charChoicePanel.activeSelf)
+            else
             {
                 // Update scav timer text
-                scavTimerText.text = Mod.FormatTimeString(scavTimer);
+                string formattedString = Mod.FormatTimeString(scavTimer);
+                scavTimerText.text = formattedString;
+                newInstanceScavTimerText.text = formattedString;
+                joinInstanceScavTimerText.text = formattedString;
 
                 if (!scavTimerText.gameObject.activeSelf)
                 {
                     // Disable Scav button, Enable scav timer text
                     scavButtonCollider.enabled = false;
                     scavButtonText.color = Color.grey;
+                    scavTimerText.gameObject.SetActive(true);
+                }
+
+                if (!newInstanceScavTimerText.gameObject.activeSelf)
+                {
+                    scavTimerText.gameObject.SetActive(true);
+                }
+                if (!joinInstanceScavTimerText.gameObject.activeSelf)
+                {
                     scavTimerText.gameObject.SetActive(true);
                 }
             }
@@ -3224,6 +3265,7 @@ namespace EFM
             PopulateInstancesList();
             PopulateMapList();
             PopulateNewInstanceMapList();
+            UpdateStartButton();
         }
 
         public void PopulateInstancesList()
@@ -3255,11 +3297,13 @@ namespace EFM
                     continue;
                 }
 
+                // Can only join an instance with a map we have installed
                 if (!Mod.availableRaidMaps.ContainsKey(instanceDataEntry.Value.map))
                 {
                     continue;
                 }
 
+                // Can only join an instance with a map we have requirements for
                 if(Mod.raidMapEntryRequirements.TryGetValue(instanceDataEntry.Value.map, out Dictionary<string, int> itemRequirements))
                 {
                     bool unfulfilled = false;
@@ -3276,6 +3320,12 @@ namespace EFM
                     {
                         continue;
                     }
+                }
+
+                // Can only join instance if we can choose PMC (Not ongoing) or scav (our scav timer is over and scav return node has been cleared)
+                if(!instanceDataEntry.Value.waiting && (scavTimer > 0 || scavReturnNode.childCount > 0))
+                {
+                    continue;
                 }
 
                 GameObject newInstanceListEntry = Instantiate(instanceEntryPrefab, instancesParent);
@@ -3323,15 +3373,15 @@ namespace EFM
                 clickAudio.Play();
                 Mod.charChoicePMC = true;
 
-                newInstancePMCCheckText.text = "X";
-                newInstanceScavCheckText.text = "";
+                joinInstancePMCCheckText.text = "X";
+                joinInstanceScavCheckText.text = "";
             }
             else
             {
                 Mod.charChoicePMC = false;
 
-                newInstancePMCCheckText.text = "";
-                newInstanceScavCheckText.text = "X";
+                joinInstancePMCCheckText.text = "";
+                joinInstanceScavCheckText.text = "X";
             }
         }
 
@@ -3347,11 +3397,21 @@ namespace EFM
 
         public void OnJoinInstanceCharScavClicked()
         {
-            clickAudio.Play();
-            Mod.charChoicePMC = false;
+            if(scavTimer > 0 || scavReturnNode.childCount > 0)
+            {
+                Mod.charChoicePMC = true;
 
-            newInstancePMCCheckText.text = "";
-            newInstanceScavCheckText.text = "X";
+                joinInstancePMCCheckText.text = "X";
+                joinInstanceScavCheckText.text = "";
+            }
+            else
+            {
+                clickAudio.Play();
+                Mod.charChoicePMC = false;
+
+                joinInstancePMCCheckText.text = "";
+                joinInstanceScavCheckText.text = "X";
+            }
         }
 
         public void OnNewInstanceCharPMCClicked()
@@ -3366,12 +3426,22 @@ namespace EFM
 
         public void OnNewInstanceCharScavClicked()
         {
-            clickAudio.Play();
+            if (scavTimer > 0 || scavReturnNode.childCount > 0)
+            {
+                Mod.charChoicePMC = true;
 
-            Mod.charChoicePMC = false;
+                newInstancePMCCheckText.text = "X";
+                newInstanceScavCheckText.text = "";
+            }
+            else
+            {
+                clickAudio.Play();
 
-            newInstancePMCCheckText.text = "";
-            newInstanceScavCheckText.text = "X";
+                Mod.charChoicePMC = false;
+
+                newInstancePMCCheckText.text = "";
+                newInstanceScavCheckText.text = "X";
+            }
         }
 
         public void OnNewInstanceTime0Clicked()
@@ -3623,7 +3693,7 @@ namespace EFM
                 waitingInstanceCharText.text = "Character: " + (Mod.charChoicePMC ? "PMC" : "Scav");
                 waitingInstanceMapText.text = "Map: " + Mod.mapChoiceName;
                 waitingInstanceSpawnTogetherText.text = "PMCs spawn together: " + Mod.PMCSpawnTogether;
-                waitingInstanceStartButton.SetActive(Networking.currentInstance.players[0] == GameManager.ID);
+                UpdateStartButton();
 
                 Networking.currentInstance = instance;
 
@@ -3642,6 +3712,27 @@ namespace EFM
                     }
                     newPlayer.SetActive(true);
                 }
+            }
+        }
+
+        public void UpdateStartButton()
+        {
+            if(waitingInstancePage.activeSelf || waitingInstancePlayerListPage.activeSelf)
+            {
+                bool allFulfilled = true;
+                if (Mod.raidMapEntryRequirements.TryGetValue(Networking.currentInstance.map, out Dictionary<string, int> itemRequirements))
+                {
+                    foreach (KeyValuePair<string, int> item in itemRequirements)
+                    {
+                        int currentCount = 0;
+                        if (!Mod.playerInventory.TryGetValue(item.Key, out currentCount) || currentCount < item.Value)
+                        {
+                            allFulfilled = false;
+                            break;
+                        }
+                    }
+                }
+                waitingInstanceStartButton.SetActive(Networking.currentInstance.players[0] == GameManager.ID && allFulfilled);
             }
         }
 
@@ -3720,7 +3811,7 @@ namespace EFM
             waitingInstancePage.SetActive(false);
             waitingInstancePlayerListPage.SetActive(true);
 
-            waitingInstanceStartButton.SetActive(Networking.currentInstance.players[0] == GameManager.ID);
+            UpdateStartButton();
         }
 
         public void OnWaitingInstancePlayerListBackClicked()
@@ -3730,7 +3821,7 @@ namespace EFM
             waitingInstancePage.SetActive(true);
             waitingInstancePlayerListPage.SetActive(false);
 
-            waitingInstanceStartButton.SetActive(Networking.currentInstance.players[0] == GameManager.ID);
+            UpdateStartButton();
         }
 
         public void OnWaitingInstanceStartClicked()
@@ -3840,8 +3931,6 @@ namespace EFM
             //buttons[3][1].GetComponent<Collider>().enabled = true;
         }
 
-        TODO: // Add a check for MP, when we create instance, can only choose PMC if still ahve item in scav return nodes. IF joining instance, can only confirm if !scav chosen or if no items in nodes
-        TODO: // Add scav timer to MP process
         public void OnCharClicked(int charIndex)
         {
             clickAudio.Play();
