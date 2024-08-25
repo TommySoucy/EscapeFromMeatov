@@ -619,7 +619,7 @@ namespace EFM
 
             // If leaving hideout and dont want to secure equipment
             // Or if just coming back from raid (which will secure equipment) and it was scav raid
-            if ((!Mod.justFinishedRaid && !secureEquipment) || (Mod.justFinishedRaid && Mod.chosenCharIndex == 1)) // Make sure all items are removed from player logically
+            if ((!Mod.justFinishedRaid && !secureEquipment) || (Mod.justFinishedRaid && !Mod.charChoicePMC)) // Make sure all items are removed from player logically
             {
                 Mod.scavRaidReturnItems = new GameObject[15];
 

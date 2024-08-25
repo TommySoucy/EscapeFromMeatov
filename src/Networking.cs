@@ -15,7 +15,6 @@ namespace EFM
         public static Dictionary<int, RaidInstance> raidInstances = new Dictionary<int, RaidInstance>();
         public static bool setLatestInstance;
 
-        TODO: // Make sure we use each of these as we are supposed to to keep everything up to date
         public static int addInstancePacketID; // AddEFMInstancePacketID
         public static int setPlayerReadynessPacketID; // SetEFMInstancePlayerReadyness
         public static int setInstanceWaitingPacketID; // SetEFMInstanceWaitingPacketID

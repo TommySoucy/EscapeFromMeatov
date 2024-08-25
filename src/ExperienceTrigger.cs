@@ -1,9 +1,4 @@
-﻿using FistVR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace EFM
 {
@@ -13,7 +8,7 @@ namespace EFM
         public void OnTriggerEnter(Collider other)
         {
             // Skip if in scav raid
-            if (Mod.currentLocationIndex == 2 && Mod.chosenCharIndex == 1)
+            if (Mod.currentLocationIndex == 2 && !Mod.charChoicePMC)
             {
                 return;
             }
@@ -23,7 +18,7 @@ namespace EFM
             {
                 // TODO: Find amount for each zone, for now set to give 100 xp each
                 Mod.AddExperience(100, 3);
-                Mod.triggeredExplorationTriggers[Mod.chosenMapIndex][transform.GetSiblingIndex()] = true;
+                //Mod.triggeredExplorationTriggers[Mod.mapChoiceName][transform.GetSiblingIndex()] = true;
                 triggered = true;
             }
         }
