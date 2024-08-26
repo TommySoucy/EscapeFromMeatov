@@ -60,6 +60,7 @@
   <ItemGroup>
     <Compile Include="src\AmbientLightChanger.cs" />
     <Compile Include="src\AreaLevelData.cs" />
+    <Compile Include="src\BotInventory.cs" />
     <Compile Include="src\ConsumeUI.cs" />
     <Compile Include="src\AI.cs" />
     <Compile Include="src\Area.cs" />
@@ -117,6 +118,7 @@
     <Compile Include="src\RagFairSellItemView.cs" />
     <Compile Include="src\RagFairWishlistItemView.cs" />
     <Compile Include="src\RaidInstance.cs" />
+    <Compile Include="src\RaidManager.cs" />
     <Compile Include="src\RequirementItemView.cs" />
     <Compile Include="src\ResultItemView.cs" />
     <Compile Include="src\RigSlot.cs" />
@@ -124,6 +126,7 @@
     <Compile Include="src\ShotData.cs" />
     <Compile Include="src\SkillRequirement.cs" />
     <Compile Include="src\SkillUI.cs" />
+    <Compile Include="src\Spawn.cs" />
     <Compile Include="src\StackSplitUI.cs" />
     <Compile Include="src\StaminaUI.cs" />
     <Compile Include="src\StatRewardView.cs" />
@@ -143,7 +146,6 @@
     <Compile Include="src\patches\GamePatches.cs" />
     <Compile Include="src\patches\PatchController.cs" />
     <Compile Include="src\PointableButton.cs" />
-    <Compile Include="src\Raid_Manager.cs" />
     <Compile Include="src\ShoulderStorage.cs" />
     <Compile Include="src\Skill.cs" />
     <Compile Include="src\StackTrigger.cs" />

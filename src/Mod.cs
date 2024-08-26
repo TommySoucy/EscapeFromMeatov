@@ -90,7 +90,7 @@ namespace EFM
         public static ShoulderStorage rightShoulderSlot;
         public static GameObject leftShoulderObject;
         public static GameObject rightShoulderObject;
-        public static Raid_Manager currentRaidManager;
+        public static RaidManager currentRaidManager;
         public static Dictionary<string, int>[] requiredPerArea;
         public static List<MeatovItemData> wishList;
         public static Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>> ammoBoxesByRoundClassByRoundType; // Ammo boxes (key) and their round count (value), corresponding to round type and class
@@ -627,6 +627,7 @@ namespace EFM
         public static Dictionary<string, List<string>> availableRaidMapAdditives = new Dictionary<string, List<string>>();
         public static Dictionary<string, List<string>> availableRaidMapPrefabs = new Dictionary<string, List<string>>();
         public static Dictionary<string, Dictionary<string, int>> raidMapEntryRequirements = new Dictionary<string, Dictionary<string, int>>();
+        public static Dictionary<string, JObject> botData;
 
         // Debug
         public static bool waitingForDebugCode;
@@ -2724,6 +2725,7 @@ namespace EFM
             itemDB = JObject.Parse(File.ReadAllText(path + "/database/templates/items.json"));
             ParseDefaultItemData();
             ParseNoneModulParts();
+            LoadBotData();
 
             traders = new Trader[9];
             traderBaseDB = new JObject[9];
@@ -2978,6 +2980,17 @@ namespace EFM
                     return MeatovItem.ItemRarity.Not_exist;
                 default:
                     return MeatovItem.ItemRarity.Not_exist;
+            }
+        }
+
+        public void LoadBotData()
+        {
+            botData = new Dictionary<string, JObject>();
+
+            string[] typeFiles = Directory.GetFiles(path + "/database/bots/types");
+            for(int i=0; i < typeFiles.Length; ++i)
+            {
+                botData.Add(Path.GetFileNameWithoutExtension(typeFiles[i]), JObject.Parse(File.ReadAllText(typeFiles[i])));
             }
         }
 
@@ -3790,7 +3803,7 @@ namespace EFM
             if (loading) // Started loading
             {
                 // Set instance to 0 if leaving raid or if going to MeatovMainMenu
-                if(GameObject.FindObjectOfType<Raid_Manager>() != null || H3MP.Patches.LoadLevelBeginPatch.loadingLevel.Equals("MeatovMainMenu"))
+                if(GameObject.FindObjectOfType<RaidManager>() != null || H3MP.Patches.LoadLevelBeginPatch.loadingLevel.Equals("MeatovMainMenu"))
                 {
                     H3MP.GameManager.SetInstance(0);
                 }
@@ -3829,7 +3842,7 @@ namespace EFM
                 loadingToMeatovScene = false;
 
                 // Finish loading raid map if necessary
-                Raid_Manager raidManager = GameObject.FindObjectOfType<Raid_Manager>();
+                RaidManager raidManager = GameObject.FindObjectOfType<RaidManager>();
                 if (raidManager != null)
                 {
                     if(raidMapAdditiveBundleRequests != null)
