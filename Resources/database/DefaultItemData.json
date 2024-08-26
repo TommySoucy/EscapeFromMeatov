@@ -18742,7 +18742,12 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 28700
+    "value": 28700,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_LightArmour_Swat",
+		"SosigAccessory_Tactical_LightArmour_Desert",
+		"SosigAccessory_Tactical_LightArmour_CamoForest"
+	]
   },
   "5d5d646386f7742797261fd9": {
     "tarkovID": "5d5d646386f7742797261fd9",
@@ -18793,7 +18798,12 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 45300
+    "value": 45300,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_MediumArmour_Swat",
+		"SosigAccessory_Tactical_MediumArmour_Desert",
+		"SosigAccessory_Tactical_MediumArmour_CamoForest"
+	]
   },
   "5c0e446786f7742013381639": {
     "tarkovID": "5c0e446786f7742013381639",
@@ -18844,7 +18854,12 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 59300
+    "value": 59300,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_MediumArmour_Swat",
+		"SosigAccessory_Tactical_MediumArmour_Desert",
+		"SosigAccessory_Tactical_MediumArmour_CamoForest"
+	]
   },
   "5c0e3eb886f7742015526062": {
     "tarkovID": "5c0e3eb886f7742015526062",
@@ -18895,7 +18910,12 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 41500
+    "value": 41500,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_MediumArmour_Swat",
+		"SosigAccessory_Tactical_MediumArmour_Desert",
+		"SosigAccessory_Tactical_MediumArmour_CamoForest"
+	]
   },
   "5c0e53c886f7747fa54205c7": {
     "tarkovID": "5c0e53c886f7747fa54205c7",
@@ -18946,7 +18966,12 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 61100
+    "value": 61100,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_MediumArmour_Desert",
+		"SosigAccessory_Tactical_MediumArmour_CamoForest",
+		"SosigAccessory_Tactical_MediumArmour_Swat"
+	]
   },
   "5c0e51be86f774598e797894": {
     "tarkovID": "5c0e51be86f774598e797894",
@@ -18997,7 +19022,12 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 61100
+    "value": 61100,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_MediumArmour_Desert",
+		"SosigAccessory_Tactical_MediumArmour_CamoForest",
+		"SosigAccessory_Tactical_MediumArmour_Swat"
+	]
   },
   "5c0e541586f7747fa54205c9": {
     "tarkovID": "5c0e541586f7747fa54205c9",
@@ -19048,7 +19078,12 @@
     "buffEffects": [],
     "value": 29000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_HeavyArmour_Desert",
+		"SosigAccessory_Tactical_HeavyArmour_CamoForest",
+		"SosigAccessory_Tactical_HeavyArmour_Swat"
+	]
   },
   "5c0e5bab86f77461f55ed1f3": {
     "tarkovID": "5c0e5bab86f77461f55ed1f3",
@@ -19099,7 +19134,12 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 40300
+    "value": 40300,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_LightArmour_Swat",
+		"SosigAccessory_Tactical_LightArmour_Desert",
+		"SosigAccessory_Tactical_LightArmour_CamoForest"
+	]
   },
   "5c0e57ba86f7747fa141986d": {
     "tarkovID": "5c0e57ba86f7747fa141986d",
@@ -19150,7 +19190,12 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 68500
+    "value": 68500,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_MediumArmour_Swat",
+		"SosigAccessory_Tactical_MediumArmour_Desert",
+		"SosigAccessory_Tactical_MediumArmour_CamoForest"
+	]
   },
   "545cdb794bdc2d3a198b456a": {
     "tarkovID": "545cdb794bdc2d3a198b456a",
@@ -19201,7 +19246,12 @@
     "buffEffects": [],
     "value": 27000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_MediumArmour_Swat",
+		"SosigAccessory_Tactical_MediumArmour_Desert",
+		"SosigAccessory_Tactical_MediumArmour_CamoForest"
+	]
   },
   "5d5d87f786f77427997cfaef": {
     "tarkovID": "5d5d87f786f77427997cfaef",
@@ -19252,7 +19302,12 @@
     "buffEffects": [],
     "value": 31000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_LightArmour_Swat",
+		"SosigAccessory_Tactical_LightArmour_Desert",
+		"SosigAccessory_Tactical_LightArmour_CamoForest"
+	]
   },
   "5fd4c474dd870108a754b241": {
     "tarkovID": "5fd4c474dd870108a754b241",
@@ -19303,7 +19358,12 @@
     "buffEffects": [],
     "value": 26000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_MediumArmour_Swat",
+		"SosigAccessory_Tactical_MediumArmour_Desert",
+		"SosigAccessory_Tactical_MediumArmour_CamoForest"
+	]
   },
   "609e8540d5c319764c2bc2e9": {
     "tarkovID": "609e8540d5c319764c2bc2e9",
@@ -19354,7 +19414,12 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 51000
+    "value": 51000,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_LightArmour_Swat",
+		"SosigAccessory_Tactical_LightArmour_Desert",
+		"SosigAccessory_Tactical_LightArmour_CamoForest"
+	]
   },
   "60a283193cb70855c43a381d": {
     "tarkovID": "60a283193cb70855c43a381d",
@@ -19405,7 +19470,12 @@
     "buffEffects": [],
     "value": 32000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_MediumArmour_Swat",
+		"SosigAccessory_Tactical_MediumArmour_Desert",
+		"SosigAccessory_Tactical_MediumArmour_CamoForest"
+	]
   },
   "5e9dacf986f774054d6b89f4": {
     "tarkovID": "5e9dacf986f774054d6b89f4",
@@ -19456,7 +19526,12 @@
     "buffEffects": [],
     "value": 32000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_MediumArmour_Swat",
+		"SosigAccessory_Tactical_MediumArmour_Desert",
+		"SosigAccessory_Tactical_MediumArmour_CamoForest"
+	]
   },
   "5ab8e79e86f7742d8b372e78": {
     "tarkovID": "5ab8e79e86f7742d8b372e78",
@@ -19507,7 +19582,12 @@
     "buffEffects": [],
     "value": 32000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_MediumArmour_Swat",
+		"SosigAccessory_Tactical_MediumArmour_Desert",
+		"SosigAccessory_Tactical_MediumArmour_CamoForest"
+	]
   },
   "5b44cd8b86f774503d30cba2": {
     "tarkovID": "5b44cd8b86f774503d30cba2",
@@ -19558,7 +19638,12 @@
     "buffEffects": [],
     "value": 32000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_MediumArmour_Swat",
+		"SosigAccessory_Tactical_MediumArmour_Desert",
+		"SosigAccessory_Tactical_MediumArmour_CamoForest"
+	]
   },
   "5b44cf1486f77431723e3d05": {
     "tarkovID": "5b44cf1486f77431723e3d05",
@@ -19609,7 +19694,12 @@
     "buffEffects": [],
     "value": 32000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_MediumArmour_Swat",
+		"SosigAccessory_Tactical_MediumArmour_Desert",
+		"SosigAccessory_Tactical_MediumArmour_CamoForest"
+	]
   },
   "5b44d0de86f774503d30cba8": {
     "tarkovID": "5b44d0de86f774503d30cba8",
@@ -19660,7 +19750,12 @@
     "buffEffects": [],
     "value": 32000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_MediumArmour_Swat",
+		"SosigAccessory_Tactical_MediumArmour_Desert",
+		"SosigAccessory_Tactical_MediumArmour_CamoForest"
+	]
   },
   "5b44d22286f774172b0c9de8": {
     "tarkovID": "5b44d22286f774172b0c9de8",
@@ -19711,7 +19806,12 @@
     "buffEffects": [],
     "value": 32000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_LightArmour_Swat",
+		"SosigAccessory_Tactical_LightArmour_Desert",
+		"SosigAccessory_Tactical_LightArmour_CamoForest"
+	]
   },
   "5f5f41476bdad616ad46d631": {
     "tarkovID": "5f5f41476bdad616ad46d631",
@@ -19762,7 +19862,12 @@
     "buffEffects": [],
     "value": 32000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_MediumArmour_Swat",
+		"SosigAccessory_Tactical_MediumArmour_Desert",
+		"SosigAccessory_Tactical_MediumArmour_CamoForest"
+	]
   },
   "59e7635f86f7742cbf2c1095": {
     "tarkovID": "59e7635f86f7742cbf2c1095",
@@ -19813,7 +19918,12 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 22813
+    "value": 22813,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_LightArmour_Swat",
+		"SosigAccessory_Tactical_LightArmour_Desert",
+		"SosigAccessory_Tactical_LightArmour_CamoForest"
+	]
   },
   "5648a7494bdc2d9d488b4583": {
     "tarkovID": "5648a7494bdc2d9d488b4583",
@@ -19864,7 +19974,12 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 22839
+    "value": 22839,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_LightArmour_Swat",
+		"SosigAccessory_Tactical_LightArmour_Desert",
+		"SosigAccessory_Tactical_LightArmour_CamoForest"
+	]
   },
   "607f20859ee58b18e41ecd90": {
     "tarkovID": "607f20859ee58b18e41ecd90",
@@ -19915,7 +20030,12 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 52839
+    "value": 52839,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_LightArmour_Swat",
+		"SosigAccessory_Tactical_LightArmour_Desert",
+		"SosigAccessory_Tactical_LightArmour_CamoForest"
+	]
   },
   "5ca2151486f774244a3b8d30": {
     "tarkovID": "5ca2151486f774244a3b8d30",
@@ -19966,7 +20086,12 @@
     "buffEffects": [],
     "value": 29000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_MediumArmour_Swat",
+		"SosigAccessory_Tactical_MediumArmour_Desert",
+		"SosigAccessory_Tactical_MediumArmour_CamoForest"
+	]
   },
   "5ca21c6986f77479963115a7": {
     "tarkovID": "5ca21c6986f77479963115a7",
@@ -20017,7 +20142,12 @@
     "buffEffects": [],
     "value": 29000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_MediumArmour_Swat",
+		"SosigAccessory_Tactical_MediumArmour_Desert",
+		"SosigAccessory_Tactical_MediumArmour_CamoForest"
+	]
   },
   "5e4abb5086f77406975c9342": {
     "tarkovID": "5e4abb5086f77406975c9342",
@@ -20068,7 +20198,12 @@
     "buffEffects": [],
     "value": 29000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_HeavyArmour_Swat",
+		"SosigAccessory_Tactical_HeavyArmour_Desert",
+		"SosigAccessory_Tactical_HeavyArmour_CamoForest"
+	]
   },
   "6038b4ca92ec1c3103795a0d": {
     "tarkovID": "6038b4ca92ec1c3103795a0d",
@@ -20119,7 +20254,12 @@
     "buffEffects": [],
     "value": 29000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_HeavyArmour_Swat",
+		"SosigAccessory_Tactical_HeavyArmour_Desert",
+		"SosigAccessory_Tactical_HeavyArmour_CamoForest"
+	]
   },
   "6038b4b292ec1c3103795a0b": {
     "tarkovID": "6038b4b292ec1c3103795a0b",
@@ -20170,7 +20310,12 @@
     "buffEffects": [],
     "value": 29000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_HeavyArmour_Swat",
+		"SosigAccessory_Tactical_HeavyArmour_Desert",
+		"SosigAccessory_Tactical_HeavyArmour_CamoForest"
+	]
   },
   "5c0e655586f774045612eeb2": {
     "tarkovID": "5c0e655586f774045612eeb2",
@@ -20221,7 +20366,12 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 89000
+    "value": 89000,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_MediumArmour_Swat",
+		"SosigAccessory_Tactical_MediumArmour_Desert",
+		"SosigAccessory_Tactical_MediumArmour_CamoForest"
+	]
   },
   "5ab8e4ed86f7742d8e50c7fa": {
     "tarkovID": "5ab8e4ed86f7742d8e50c7fa",
@@ -20272,7 +20422,12 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 33355
+    "value": 33355,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_LightArmour_Swat",
+		"SosigAccessory_Tactical_LightArmour_Desert",
+		"SosigAccessory_Tactical_LightArmour_CamoForest"
+	]
   },
   "5c0e5edb86f77461f55ed1f7": {
     "tarkovID": "5c0e5edb86f77461f55ed1f7",
@@ -20323,7 +20478,12 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 38670
+    "value": 38670,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_LightArmour_Swat",
+		"SosigAccessory_Tactical_LightArmour_Desert",
+		"SosigAccessory_Tactical_LightArmour_CamoForest"
+	]
   },
   "5c0e625a86f7742d77340f62": {
     "tarkovID": "5c0e625a86f7742d77340f62",
@@ -20374,7 +20534,12 @@
     "buffEffects": [],
     "value": 31000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_MediumArmour_Swat",
+		"SosigAccessory_Tactical_MediumArmour_Desert",
+		"SosigAccessory_Tactical_MediumArmour_CamoForest"
+	]
   },
   "5df8a4d786f77412672a1e3b": {
     "tarkovID": "5df8a4d786f77412672a1e3b",
@@ -28584,7 +28749,12 @@
     "buffEffects": [],
     "value": 22000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_MediumArmour_Swat",
+		"SosigAccessory_Tactical_MediumArmour_Desert",
+		"SosigAccessory_Tactical_MediumArmour_CamoForest"
+	]
   },
   "603648ff5a45383c122086ac": {
     "tarkovID": "603648ff5a45383c122086ac",
@@ -28992,7 +29162,12 @@
     "buffEffects": [],
     "value": 22000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_MediumArmour_Swat",
+		"SosigAccessory_Tactical_MediumArmour_Desert",
+		"SosigAccessory_Tactical_MediumArmour_CamoForest"
+	]
   },
   "5b44c8ea86f7742d1627baf1": {
     "tarkovID": "5b44c8ea86f7742d1627baf1",
@@ -29145,7 +29320,12 @@
     "buffEffects": [],
     "value": 22000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_LightArmour_Swat",
+		"SosigAccessory_Tactical_LightArmour_Desert",
+		"SosigAccessory_Tactical_LightArmour_CamoForest"
+	]
   },
   "6034d0230ca681766b6a0fb5": {
     "tarkovID": "6034d0230ca681766b6a0fb5",
@@ -29298,7 +29478,12 @@
     "buffEffects": [],
     "value": 22000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_LightArmour_Swat",
+		"SosigAccessory_Tactical_LightArmour_Desert",
+		"SosigAccessory_Tactical_LightArmour_CamoForest"
+	]
   },
   "60a3c68c37ea821725773ef5": {
     "tarkovID": "60a3c68c37ea821725773ef5",
@@ -29349,7 +29534,12 @@
     "buffEffects": [],
     "value": 22000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_MediumArmour_Swat",
+		"SosigAccessory_Tactical_MediumArmour_Desert",
+		"SosigAccessory_Tactical_MediumArmour_CamoForest"
+	]
   },
   "5d5d85c586f774279a21cbdb": {
     "tarkovID": "5d5d85c586f774279a21cbdb",
@@ -29502,7 +29692,12 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 81270
+    "value": 81270,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_LightArmour_Swat",
+		"SosigAccessory_Tactical_LightArmour_Desert",
+		"SosigAccessory_Tactical_LightArmour_CamoForest"
+	]
   },
   "5ab8dced86f774646209ec87": {
     "tarkovID": "5ab8dced86f774646209ec87",
@@ -29553,7 +29748,12 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 68688
+    "value": 68688,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_MediumArmour_Swat",
+		"SosigAccessory_Tactical_MediumArmour_Desert",
+		"SosigAccessory_Tactical_MediumArmour_CamoForest"
+	]
   },
   "5d5d8ca986f7742798716522": {
     "tarkovID": "5d5d8ca986f7742798716522",
@@ -29859,7 +30059,12 @@
     "buffEffects": [],
     "value": 22000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_HeavyArmour_Swat",
+		"SosigAccessory_Tactical_HeavyArmour_Desert",
+		"SosigAccessory_Tactical_HeavyArmour_CamoForest"
+	]
   },
   "5e4abfed86f77406a2713cf7": {
     "tarkovID": "5e4abfed86f77406a2713cf7",
@@ -30114,7 +30319,12 @@
     "buffEffects": [],
     "value": 22000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_LightArmour_Swat",
+		"SosigAccessory_Tactical_LightArmour_Desert",
+		"SosigAccessory_Tactical_LightArmour_CamoForest"
+	]
   },
   "6034cf5fffd42c541047f72e": {
     "tarkovID": "6034cf5fffd42c541047f72e",
@@ -40011,7 +40221,12 @@
     "buffEffects": [],
     "value": 26000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_LightArmour_Swat",
+		"SosigAccessory_Tactical_LightArmour_Desert",
+		"SosigAccessory_Tactical_LightArmour_CamoForest"
+	]
   },
   "61bcc89aef0f505f0c6cd0fc": {
     "tarkovID": "61bcc89aef0f505f0c6cd0fc",
@@ -40062,7 +40277,12 @@
     "buffEffects": [],
     "value": 26000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_LightArmour_Swat",
+		"SosigAccessory_Tactical_LightArmour_Desert",
+		"SosigAccessory_Tactical_LightArmour_CamoForest"
+	]
   },
   "61a00bcb177fb945751bbe6a": {
     "tarkovID": "61a00bcb177fb945751bbe6a",
@@ -40831,7 +41051,12 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 54350
+    "value": 54350,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_LightArmour_Swat",
+		"SosigAccessory_Tactical_LightArmour_Desert",
+		"SosigAccessory_Tactical_LightArmour_CamoForest"
+	]
   },
   "628b9784bcf6e2659e09b8a2": {
     "tarkovID": "628b9784bcf6e2659e09b8a2",
@@ -40882,7 +41107,12 @@
     "buffEffects": [],
     "value": 28000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_LightArmour_Swat",
+		"SosigAccessory_Tactical_LightArmour_Desert",
+		"SosigAccessory_Tactical_LightArmour_CamoForest"
+	]
   },
   "628bc7fb408e2b2e9c0801b1": {
     "tarkovID": "628bc7fb408e2b2e9c0801b1",
@@ -41674,7 +41904,12 @@
     "buffEffects": [],
     "value": 28000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_LightArmour_Swat",
+		"SosigAccessory_Tactical_LightArmour_Desert",
+		"SosigAccessory_Tactical_LightArmour_CamoForest"
+	]
   },
   "628d0618d1ba6e4fa07ce5a4": {
     "tarkovID": "628d0618d1ba6e4fa07ce5a4",
@@ -41725,7 +41960,12 @@
     "buffEffects": [],
     "value": 28000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_LightArmour_Swat",
+		"SosigAccessory_Tactical_LightArmour_Desert",
+		"SosigAccessory_Tactical_LightArmour_CamoForest"
+	]
   },
   "628baf0b967de16aab5a4f36": {
     "tarkovID": "628baf0b967de16aab5a4f36",
@@ -41827,7 +42067,12 @@
     "buffEffects": [],
     "value": 28000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_LightArmour_Swat",
+		"SosigAccessory_Tactical_LightArmour_Desert",
+		"SosigAccessory_Tactical_LightArmour_CamoForest"
+	]
   },
   "628cd624459354321c4b7fa2": {
     "tarkovID": "628cd624459354321c4b7fa2",
@@ -41878,7 +42123,12 @@
     "buffEffects": [],
     "value": 28000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_MediumArmour_Swat",
+		"SosigAccessory_Tactical_MediumArmour_Desert",
+		"SosigAccessory_Tactical_MediumArmour_CamoForest"
+	]
   },
   "62a09f32621468534a797acb": {
     "tarkovID": "62a09f32621468534a797acb",
@@ -41998,7 +42248,12 @@
     "buffEffects": [],
     "value": 28000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_MediumArmour_Swat",
+		"SosigAccessory_Tactical_MediumArmour_Desert",
+		"SosigAccessory_Tactical_MediumArmour_CamoForest"
+	]
   },
   "639346cc1c8f182ad90c8972": {
     "tarkovID": "639346cc1c8f182ad90c8972",
@@ -42116,7 +42371,12 @@
     "buffEffects": [],
     "value": 28000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_LightArmour_Swat",
+		"SosigAccessory_Tactical_LightArmour_Desert",
+		"SosigAccessory_Tactical_LightArmour_CamoForest"
+	]
   },
   "64a536392d2c4e6e970f4121": {
     "tarkovID": "64a536392d2c4e6e970f4121",
@@ -42167,7 +42427,12 @@
     "buffEffects": [],
     "value": 28000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_LightArmour_Swat",
+		"SosigAccessory_Tactical_LightArmour_Desert",
+		"SosigAccessory_Tactical_LightArmour_CamoForest"
+	]
   },
   "639343fce101f4caa40a4ef3": {
     "tarkovID": "639343fce101f4caa40a4ef3",
@@ -42218,7 +42483,12 @@
     "buffEffects": [],
     "value": 28000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_MediumArmour_Swat",
+		"SosigAccessory_Tactical_MediumArmour_Desert",
+		"SosigAccessory_Tactical_MediumArmour_CamoForest"
+	]
   },
   "64be7095047e826eae02b0c1": {
     "tarkovID": "64be7095047e826eae02b0c1",
@@ -47799,7 +48069,12 @@
     "buffEffects": [],
     "value": 134063,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_LightArmour_Swat",
+		"SosigAccessory_Tactical_LightArmour_Desert",
+		"SosigAccessory_Tactical_LightArmour_CamoForest"
+	]
   },
   "64be79c487d1510151095552": {
     "tarkovID": "64be79c487d1510151095552",
@@ -47850,7 +48125,12 @@
     "buffEffects": [],
     "value": 65000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_MediumArmour_Swat",
+		"SosigAccessory_Tactical_MediumArmour_Desert",
+		"SosigAccessory_Tactical_MediumArmour_CamoForest"
+	]
   },
   "64be79e2bf8412471d0d9bcc": {
     "tarkovID": "64be79e2bf8412471d0d9bcc",
@@ -47901,7 +48181,12 @@
     "buffEffects": [],
     "value": 65000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_MediumArmour_Swat",
+		"SosigAccessory_Tactical_MediumArmour_Desert",
+		"SosigAccessory_Tactical_MediumArmour_CamoForest"
+	]
   },
   "648983d6b5a2df1c815a04ec": {
     "tarkovID": "648983d6b5a2df1c815a04ec",
