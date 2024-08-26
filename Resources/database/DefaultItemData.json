@@ -49540,7 +49540,10 @@
     "amountRate": -1.0,
     "consumeEffects": [],
     "buffEffects": [],
-    "value": 23147
+    "value": 23147,
+	"sosigItems": [
+		"Sosiggun_AKM"
+	]
   },
   "56dff0bed2720bb0668b4567": {
     "tarkovID": "56dff0bed2720bb0668b4567",
@@ -49695,7 +49698,10 @@
     "recoilModifier": 0,
     "modulGroup": null,
     "modulPart": null,
-    "value": 18397
+    "value": 18397,
+	"sosigItems": [
+		"Sosiggun_M16"
+	]
   },
   "5ae30bad5acfc400185c2dc4": {
     "tarkovID": "5ae30bad5acfc400185c2dc4",
@@ -50288,7 +50294,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems": [
+		"SosigMelee_BootKnife"
+	]
   },
   "590c311186f77424d1667482": {
     "tarkovID": "590c311186f77424d1667482",
@@ -50347,7 +50356,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems": [
+		"SosigMelee_Crowbar"
+	]
   },
   "5939a00786f7742fe8132936": {
     "tarkovID": "5939a00786f7742fe8132936",
@@ -50468,7 +50480,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_AA12"
+	]
   },
   "6086b5392535c57a13424d70": {
     "tarkovID": "6086b5392535c57a13424d70",
@@ -51406,7 +51421,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_Garand"
+	]
   },
   "64b9e2037fdfb81df81e3c25": {
     "tarkovID": "64b9e2037fdfb81df81e3c25",
@@ -52909,7 +52927,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_Scout"
+	]
   },
   "57838ad32459774a17445cd2": {
     "tarkovID": "57838ad32459774a17445cd2",
@@ -52971,7 +52992,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_Scout"
+	]
   },
   "5a69a2ed8dc32e000d46d1f1": {
     "tarkovID": "5a69a2ed8dc32e000d46d1f1",
@@ -54320,7 +54344,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_M1Carbine"
+	]
   },
   "587e02ff24597743df3deaeb": {
     "tarkovID": "587e02ff24597743df3deaeb",
@@ -54382,7 +54409,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_M1Carbine"
+	]
   },
   "593d1fa786f7746da62d61ac": {
     "tarkovID": "593d1fa786f7746da62d61ac",
@@ -55006,7 +55036,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunKedr"
+	]
   },
   "57f3c6bd24597738e730fa2f": {
     "tarkovID": "57f3c6bd24597738e730fa2f",
@@ -55068,7 +55101,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunKedr"
+	]
   },
   "57f4c844245977379d5c14d1": {
     "tarkovID": "57f4c844245977379d5c14d1",
@@ -55130,7 +55166,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunKedr"
+	]
   },
   "57f3c8cc2459773ec4480328": {
     "tarkovID": "57f3c8cc2459773ec4480328",
@@ -55381,7 +55420,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunMK47"
+	]
   },
   "5b099a765acfc47a8607efe3": {
     "tarkovID": "5b099a765acfc47a8607efe3",
@@ -57384,7 +57426,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_AKM"
+	]
   },
   "583990e32459771419544dd2": {
     "tarkovID": "583990e32459771419544dd2",
@@ -57446,7 +57491,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_AKM"
+	]
   },
   "5839a40f24597726f856b511": {
     "tarkovID": "5839a40f24597726f856b511",
@@ -57508,7 +57556,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_AKM"
+	]
   },
   "57dc324a24597759501edc20": {
     "tarkovID": "57dc324a24597759501edc20",
@@ -59336,7 +59387,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_AKM"
+	]
   },
   "5ac66d015acfc400180ae6e4": {
     "tarkovID": "5ac66d015acfc400180ae6e4",
@@ -59398,7 +59452,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_AKM"
+	]
   },
   "5ac66d2e5acfc43b321d4b53": {
     "tarkovID": "5ac66d2e5acfc43b321d4b53",
@@ -59460,7 +59517,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_AKM"
+	]
   },
   "5ac66d725acfc43b321d4b60": {
     "tarkovID": "5ac66d725acfc43b321d4b60",
@@ -59522,7 +59582,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_AKM"
+	]
   },
   "5ac66d9b5acfc4001633997a": {
     "tarkovID": "5ac66d9b5acfc4001633997a",
@@ -59584,7 +59647,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_AKM"
+	]
   },
   "628b9c37a733087d0d7fe84b": {
     "tarkovID": "628b9c37a733087d0d7fe84b",
@@ -59646,7 +59712,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_AKM"
+	]
   },
   "628b5638ad252a16da6dd245": {
     "tarkovID": "628b5638ad252a16da6dd245",
@@ -59708,7 +59777,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_AKM"
+	]
   },
   "5beed0f50db834001c062b12": {
     "tarkovID": "5beed0f50db834001c062b12",
@@ -59770,7 +59842,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_AKM"
+	]
   },
   "5beec1bd0db834001e6006f3": {
     "tarkovID": "5beec1bd0db834001e6006f3",
@@ -60021,7 +60096,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_M1Carbine"
+	]
   },
   "5f63405df5750b524b45f114": {
     "tarkovID": "5f63405df5750b524b45f114",
@@ -60083,7 +60161,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_M1Carbine"
+	]
   },
   "609a4b4fe2ff132951242d04": {
     "tarkovID": "609a4b4fe2ff132951242d04",
@@ -60402,7 +60483,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_AKM"
+	]
   },
   "649ec127c93611967b034957": {
     "tarkovID": "649ec127c93611967b034957",
@@ -60905,7 +60989,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_Scout"
+	]
   },
   "5de653abf76fdc1ce94a5a2a": {
     "tarkovID": "5de653abf76fdc1ce94a5a2a",
@@ -61029,7 +61116,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_Tommy"
+	]
   },
   "5ea034eb5aad6446a939737b": {
     "tarkovID": "5ea034eb5aad6446a939737b",
@@ -61219,7 +61309,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunMK47"
+	]
   },
   "628a60ae6b1d481ff772e9c8": {
     "tarkovID": "628a60ae6b1d481ff772e9c8",
@@ -61281,7 +61374,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_AKM"
+	]
   },
   "5bf3e03b0db834001d2c4a9c": {
     "tarkovID": "5bf3e03b0db834001d2c4a9c",
@@ -61343,7 +61439,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_AKM"
+	]
   },
   "5ab8e9fcd8ce870019439434": {
     "tarkovID": "5ab8e9fcd8ce870019439434",
@@ -61405,7 +61504,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_AKM"
+	]
   },
   "5bf3e0490db83400196199af": {
     "tarkovID": "5bf3e0490db83400196199af",
@@ -61467,7 +61569,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_AKM"
+	]
   },
   "5abcbc27d8ce8700182eceeb": {
     "tarkovID": "5abcbc27d8ce8700182eceeb",
@@ -61529,7 +61634,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_AKM"
+	]
   },
   "5ac4cd105acfc40016339859": {
     "tarkovID": "5ac4cd105acfc40016339859",
@@ -61591,7 +61699,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_AKM"
+	]
   },
   "59d6088586f774275f37482f": {
     "tarkovID": "59d6088586f774275f37482f",
@@ -61653,7 +61764,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_AKM"
+	]
   },
   "59ff346386f77477562ff5e2": {
     "tarkovID": "59ff346386f77477562ff5e2",
@@ -61715,7 +61829,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_AKM"
+	]
   },
   "5d2c829448f0353a5c7d6674": {
     "tarkovID": "5d2c829448f0353a5c7d6674",
@@ -71675,7 +71792,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_AKM"
+	]
   },
   "5f0596629e22f464da6bbdd9": {
     "tarkovID": "5f0596629e22f464da6bbdd9",
@@ -71973,7 +72093,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_DoubleBarrel"
+	]
   },
   "5580223e4bdc2d1c128b457f": {
     "tarkovID": "5580223e4bdc2d1c128b457f",
@@ -72035,7 +72158,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_DoubleBarrel"
+	]
   },
   "5a38e6bac4a2826c6e06d79b": {
     "tarkovID": "5a38e6bac4a2826c6e06d79b",
@@ -72097,7 +72223,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunToz106"
+	]
   },
   "5a38ef1fc4a282000b1521f6": {
     "tarkovID": "5a38ef1fc4a282000b1521f6",
@@ -72539,7 +72668,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems": [
+		"SosiggunSVDS"
+	]
   },
   "5c471c442e221602b542a6f8": {
     "tarkovID": "5c471c442e221602b542a6f8",
@@ -73686,7 +73818,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems": [
+		"Sosiggun_Scout"
+	]
   },
   "62811e2510e26c1f344e6554": {
     "tarkovID": "62811e2510e26c1f344e6554",
@@ -74388,7 +74523,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_Scout"
+	]
   },
   "5bfeb32b0db834001a6694d9": {
     "tarkovID": "5bfeb32b0db834001a6694d9",
@@ -75956,7 +76094,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_PKM"
+	]
   },
   "64637076203536ad5600c990": {
     "tarkovID": "64637076203536ad5600c990",
@@ -76018,7 +76159,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_PKM"
+	]
   },
   "6410733d5dd49d77bd07847e": {
     "tarkovID": "6410733d5dd49d77bd07847e",
@@ -76080,7 +76224,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_M1Carbine"
+	]
   },
   "646372518610c40fc20204e8": {
     "tarkovID": "646372518610c40fc20204e8",
@@ -76206,7 +76353,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_M1Carbine"
+	]
   },
   "641dc35e19604f20c800be18": {
     "tarkovID": "641dc35e19604f20c800be18",
@@ -76460,7 +76610,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems": [
+		"Sosiggun_Garand"
+	]
   },
   "5bfd297f0db834001a669119": {
     "tarkovID": "5bfd297f0db834001a669119",
@@ -76524,7 +76677,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems": [
+		"Sosiggun_Garand"
+	]
   },
   "5ae096d95acfc400185c2c81": {
     "tarkovID": "5ae096d95acfc400185c2c81",
@@ -78066,7 +78222,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_W1897"
+	]
   },
   "5e85a9a6eacf8c039e4e2ac1": {
     "tarkovID": "5e85a9a6eacf8c039e4e2ac1",
@@ -78364,7 +78523,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunM79"
+	]
   },
   "639af924d0446708ee62294e": {
     "tarkovID": "639af924d0446708ee62294e",
@@ -78426,7 +78588,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunM79"
+	]
   },
   "639c3fbbd0446708ee622ee9": {
     "tarkovID": "639c3fbbd0446708ee622ee9",
@@ -78488,7 +78653,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunM79"
+	]
   },
   "6275303a9f372d6ea97f9ec7": {
     "tarkovID": "6275303a9f372d6ea97f9ec7",
@@ -78550,7 +78718,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunRG6"
+	]
   },
   "60db29ce99594040e04c4a27": {
     "tarkovID": "60db29ce99594040e04c4a27",
@@ -78612,7 +78783,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_W1887"
+	]
   },
   "619d36da53b4d42ee724fae4": {
     "tarkovID": "619d36da53b4d42ee724fae4",
@@ -78802,7 +78976,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_870"
+	]
   },
   "6259c3387d6aab70bc23a18d": {
     "tarkovID": "6259c3387d6aab70bc23a18d",
@@ -79485,7 +79662,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_870"
+	]
   },
   "5e87071478f43e51ca2de5e1": {
     "tarkovID": "5e87071478f43e51ca2de5e1",
@@ -80851,7 +81031,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_870"
+	]
   },
   "5a787ebcc5856700142fdd98": {
     "tarkovID": "5a787ebcc5856700142fdd98",
@@ -82029,7 +82212,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_870"
+	]
   },
   "56dee2bdd2720bc8328b4567": {
     "tarkovID": "56dee2bdd2720bc8328b4567",
@@ -82091,7 +82277,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_870"
+	]
   },
   "606dae0ab0e443224b421bb7": {
     "tarkovID": "606dae0ab0e443224b421bb7",
@@ -82153,7 +82342,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_870"
+	]
   },
   "59fb137a86f7740adb646af1": {
     "tarkovID": "59fb137a86f7740adb646af1",
@@ -85777,7 +85969,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_Scout"
+	]
   },
   "5c4ee3d62e2216152006f302": {
     "tarkovID": "5c4ee3d62e2216152006f302",
@@ -86029,7 +86224,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_Scout"
+	]
   },
   "5df25b6c0b92095fd441e4cf": {
     "tarkovID": "5df25b6c0b92095fd441e4cf",
@@ -86216,7 +86414,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_Scout"
+	]
   },
   "5888996c24597754281f9419": {
     "tarkovID": "5888996c24597754281f9419",
@@ -88736,7 +88937,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunUSPMatch"
+	]
   },
   "5c079ec50db834001966a706": {
     "tarkovID": "5c079ec50db834001966a706",
@@ -88984,7 +89188,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunUSPMatch"
+	]
   },
   "571a279b24597720b4066566": {
     "tarkovID": "571a279b24597720b4066566",
@@ -90114,7 +90321,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_Makarov"
+	]
   },
   "5448bd6b4bdc2dfc2f8b4569": {
     "tarkovID": "5448bd6b4bdc2dfc2f8b4569",
@@ -90176,7 +90386,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_Makarov"
+	]
   },
   "573718ba2459775a75491131": {
     "tarkovID": "573718ba2459775a75491131",
@@ -91164,7 +91377,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunPP19"
+	]
   },
   "59f9cabd86f7743a10721f46": {
     "tarkovID": "59f9cabd86f7743a10721f46",
@@ -92909,7 +93125,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems": [
+		"SosiggunMP7"
+	]
   },
   "5fbcc3e4d6fa9c00c571bb58": {
     "tarkovID": "5fbcc3e4d6fa9c00c571bb58",
@@ -93355,7 +93574,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunMP7"
+	]
   },
   "58949dea86f77409483e16a8": {
     "tarkovID": "58949dea86f77409483e16a8",
@@ -95942,7 +96164,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunAsh12"
+	]
   },
   "5caf1691ae92152ac412efb9": {
     "tarkovID": "5caf1691ae92152ac412efb9",
@@ -96392,7 +96617,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunAsh12"
+	]
   },
   "5dcbd56fdbd3d91b3e5468d5": {
     "tarkovID": "5dcbd56fdbd3d91b3e5468d5",
@@ -96454,7 +96682,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunAsh12"
+	]
   },
   "5c48a2852e221602b21d5923": {
     "tarkovID": "5c48a2852e221602b21d5923",
@@ -96953,7 +97184,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunMK47"
+	]
   },
   "5df917564a9f347bc92edca3": {
     "tarkovID": "5df917564a9f347bc92edca3",
@@ -97139,7 +97373,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunMK47"
+	]
   },
   "5ef1ba28c64c5d0dfc0571a5": {
     "tarkovID": "5ef1ba28c64c5d0dfc0571a5",
@@ -98579,7 +98816,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunAsh12"
+	]
   },
   "5f2aa4559b44de6b1b4e68d1": {
     "tarkovID": "5f2aa4559b44de6b1b4e68d1",
@@ -98706,7 +98946,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems": [
+		"SosiggunMK47"
+	]
   },
   "5c07c60e0db834002330051f": {
     "tarkovID": "5c07c60e0db834002330051f",
@@ -98770,7 +99013,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems": [
+		"Sosiggun_M16"
+	]
   },
   "5d43021ca4b9362eab4b5e25": {
     "tarkovID": "5d43021ca4b9362eab4b5e25",
@@ -98834,7 +99080,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems": [
+		"Sosiggun_M16"
+	]
   },
   "5fc22d7c187fea44d52eda44": {
     "tarkovID": "5fc22d7c187fea44d52eda44",
@@ -98898,7 +99147,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems": [
+		"Sosiggun_M16"
+	]
   },
   "5fc23426900b1d5091531e15": {
     "tarkovID": "5fc23426900b1d5091531e15",
@@ -99325,7 +99577,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_M16"
+	]
   },
   "6165ac306ef05c2ce828ef74": {
     "tarkovID": "6165ac306ef05c2ce828ef74",
@@ -99387,7 +99642,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_M16"
+	]
   },
   "6184055050224f204c1da540": {
     "tarkovID": "6184055050224f204c1da540",
@@ -99449,7 +99707,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_M16"
+	]
   },
   "618428466ef05c2ce828f218": {
     "tarkovID": "618428466ef05c2ce828f218",
@@ -99511,7 +99772,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_M16"
+	]
   },
   "618405198004cc50514c3594": {
     "tarkovID": "618405198004cc50514c3594",
@@ -100893,7 +101157,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems": [
+		"Sosiggun_PSG1"
+	]
   },
   "617130016c780c1e710c9a24": {
     "tarkovID": "617130016c780c1e710c9a24",
@@ -101723,7 +101990,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunAsh12"
+	]
   },
   "63171672192e68c5460cebc5": {
     "tarkovID": "63171672192e68c5460cebc5",
@@ -101785,7 +102055,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunAsh12"
+	]
   },
   "62e7c72df68e7a0676050c77": {
     "tarkovID": "62e7c72df68e7a0676050c77",
@@ -112375,7 +112648,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunP90"
+	]
   },
   "5cc70093e4a949033c734312": {
     "tarkovID": "5cc70093e4a949033c734312",
@@ -113203,7 +113479,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunMP7"
+	]
   },
   "5de7bd7bfd6b4e6e2276dc25": {
     "tarkovID": "5de7bd7bfd6b4e6e2276dc25",
@@ -113265,7 +113544,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunMP7"
+	]
   },
   "5de8f237bbaf010b10528a70": {
     "tarkovID": "5de8f237bbaf010b10528a70",
@@ -114019,7 +114301,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunFutureNachtigal"
+	]
   },
   "622b379bf9cfc87d675d2de5": {
     "tarkovID": "622b379bf9cfc87d675d2de5",
@@ -115535,7 +115820,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_MP5SD"
+	]
   },
   "5fc3e466187fea44d52eda90": {
     "tarkovID": "5fc3e466187fea44d52eda90",
@@ -115785,7 +116073,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunKedr"
+	]
   },
   "633a98eab8b0506e48497c1a": {
     "tarkovID": "633a98eab8b0506e48497c1a",
@@ -116233,7 +116524,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunMP7"
+	]
   },
   "5bd70322209c4d00d7167b8f": {
     "tarkovID": "5bd70322209c4d00d7167b8f",
@@ -116295,7 +116589,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunMP7"
+	]
   },
   "5bd704e7209c4d00d7167c31": {
     "tarkovID": "5bd704e7209c4d00d7167c31",
@@ -117025,7 +117322,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_MP5SD"
+	]
   },
   "5d19cd96d7ad1a4a992c9f52": {
     "tarkovID": "5d19cd96d7ad1a4a992c9f52",
@@ -117336,7 +117636,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_MP5SD"
+	]
   },
   "5926f2e086f7745aae644231": {
     "tarkovID": "5926f2e086f7745aae644231",
@@ -117398,7 +117701,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_MP5SD"
+	]
   },
   "5a9548c9159bd400133e97b3": {
     "tarkovID": "5a9548c9159bd400133e97b3",
@@ -118690,7 +118996,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_Makarov"
+	]
   },
   "56e05b06d2720bb2668b4586": {
     "tarkovID": "56e05b06d2720bb2668b4586",
@@ -118817,7 +119126,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_C1903"
+	]
   },
   "576a7c512459771e796e0e17": {
     "tarkovID": "576a7c512459771e796e0e17",
@@ -119005,7 +119317,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_C1903"
+	]
   },
   "5abccb7dd8ce87001773e277": {
     "tarkovID": "5abccb7dd8ce87001773e277",
@@ -119067,7 +119382,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunFutureDesertVulture"
+	]
   },
   "5abcc328d8ce8700194394f3": {
     "tarkovID": "5abcc328d8ce8700194394f3",
@@ -119320,7 +119638,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_M9"
+	]
   },
   "5a27b281c4a28200741e1e52": {
     "tarkovID": "5a27b281c4a28200741e1e52",
@@ -119916,7 +120237,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunDP12"
+	]
   },
   "5fc3f2d5900b1d5091531e57": {
     "tarkovID": "5fc3f2d5900b1d5091531e57",
@@ -119978,7 +120302,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunDP12"
+	]
   },
   "5fb65363d1409e5ca04b54f5": {
     "tarkovID": "5fb65363d1409e5ca04b54f5",
@@ -120986,7 +121313,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_Glock"
+	]
   },
   "63076701a987397c0816d21b": {
     "tarkovID": "63076701a987397c0816d21b",
@@ -121234,7 +121564,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_Glock"
+	]
   },
   "5d1c702ad7ad1a632267f429": {
     "tarkovID": "5d1c702ad7ad1a632267f429",
@@ -121482,7 +121815,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_Glock"
+	]
   },
   "5a6b5f868dc32e000a311389": {
     "tarkovID": "5a6b5f868dc32e000a311389",
@@ -124073,7 +124409,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_M9"
+	]
   },
   "5cadc2e0ae9215051e1c21e7": {
     "tarkovID": "5cadc2e0ae9215051e1c21e7",
@@ -124201,7 +124540,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems": [
+		"Sosiggun_M9"
+	]
   },
   "5d67abc1a4b93614ec50137f": {
     "tarkovID": "5d67abc1a4b93614ec50137f",
@@ -124263,7 +124605,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_M9"
+	]
   },
   "5d3ef698a4b9361182109872": {
     "tarkovID": "5d3ef698a4b9361182109872",
@@ -124454,7 +124799,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_M1911"
+	]
   },
   "5ef3448ab37dfd6af863525c": {
     "tarkovID": "5ef3448ab37dfd6af863525c",
@@ -124706,7 +125054,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_M1911"
+	]
   },
   "60339954d62c9b14ed777c06": {
     "tarkovID": "60339954d62c9b14ed777c06",
@@ -124770,7 +125121,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems": [
+		"SosiggunPP19"
+	]
   },
   "602e63fb6335467b0c5ac94d": {
     "tarkovID": "602e63fb6335467b0c5ac94d",
@@ -125281,7 +125635,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunUSPMatch"
+	]
   },
   "602a97060ddce744014caf6f": {
     "tarkovID": "602a97060ddce744014caf6f",
@@ -125472,7 +125829,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunUSPMatch"
+	]
   },
   "6193d382ed0429009f543e65": {
     "tarkovID": "6193d382ed0429009f543e65",
@@ -126791,7 +127151,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_Revolver"
+	]
   },
   "633ec6ee025b096d320a3b15": {
     "tarkovID": "633ec6ee025b096d320a3b15",
@@ -126916,7 +127279,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"Sosiggun_Revolver"
+	]
   },
   "62330b3ed4dc74626d570b95": {
     "tarkovID": "62330b3ed4dc74626d570b95",
@@ -127870,7 +128236,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems": [
+		"Sosiggun_Garand"
+	]
   },
   "61f7b234ea4ab34f2f59c3ec": {
     "tarkovID": "61f7b234ea4ab34f2f59c3ec",
@@ -128060,7 +128429,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosiggunUSPMatch"
+	]
   },
   "5bffe7c50db834001d23ece1": {
     "tarkovID": "5bffe7c50db834001d23ece1",
@@ -147243,7 +147615,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems": [
+		"SosigMelee_Tomahawk"
+	]
   },
   "5bffdc370db834001d23eca8": {
     "tarkovID": "5bffdc370db834001d23eca8",
@@ -147357,7 +147732,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems": [
+		"SosigMelee_Gladius"
+	]
   },
   "5bffe7930db834001b734a39": {
     "tarkovID": "5bffe7930db834001b734a39",
@@ -147415,7 +147793,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems": [
+		"SosigMelee_Tomahawk"
+	]
   },
   "57e26ea924597715ca604a09": {
     "tarkovID": "57e26ea924597715ca604a09",
@@ -147471,7 +147852,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosigMelee_Tanto"
+	]
   },
   "57e26fc7245977162a14b800": {
     "tarkovID": "57e26fc7245977162a14b800",
@@ -147527,7 +147911,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosigMelee_Kabar"
+	]
   },
   "5bc9c1e2d4351e00367fbcf0": {
     "tarkovID": "5bc9c1e2d4351e00367fbcf0",
@@ -147583,7 +147970,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosigMelee_Rusty_Hatchet"
+	]
   },
   "5c010e350db83400232feec7": {
     "tarkovID": "5c010e350db83400232feec7",
@@ -147641,7 +148031,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems": [
+		"SosigMelee_Parazonium"
+	]
   },
   "5bead2e00db834001c062938": {
     "tarkovID": "5bead2e00db834001c062938",
@@ -147699,7 +148092,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems": [
+		"SosigMelee_Rusty_Spade"
+	]
   },
   "63920105a83e15700a00f168": {
     "tarkovID": "63920105a83e15700a00f168",
@@ -147757,7 +148153,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems": [
+		"SosigMelee_Tomahawk"
+	]
   },
   "5c0126f40db834002a125382": {
     "tarkovID": "5c0126f40db834002a125382",
@@ -147815,7 +148214,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems": [
+		"SosigMelee_Rusty_Pickaxe"
+	]
   },
   "5c012ffc0db834001d23f03f": {
     "tarkovID": "5c012ffc0db834001d23f03f",
@@ -147873,7 +148275,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems": [
+		"SosigMelee_Tomahawk"
+	]
   },
   "5c07df7f0db834001b73588a": {
     "tarkovID": "5c07df7f0db834001b73588a",
@@ -147931,7 +148336,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems": [
+		"SosigMelee_Crowbar"
+	]
   },
   "5fc64ea372b0dd78d51159dc": {
     "tarkovID": "5fc64ea372b0dd78d51159dc",
@@ -147989,7 +148397,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems": [
+		"SosigMelee_Parazonium"
+	]
   },
   "601948682627df266209af05": {
     "tarkovID": "601948682627df266209af05",
@@ -148047,7 +148458,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems": [
+		"SosigMelee_Parazonium"
+	]
   },
   "63495c500c297e20065a08b1": {
     "tarkovID": "63495c500c297e20065a08b1",
@@ -148103,7 +148517,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosigMelee_Cleaver"
+	]
   },
   "6087e570b998180e9f76dc24": {
     "tarkovID": "6087e570b998180e9f76dc24",
@@ -148159,7 +148576,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosigMelee_Warclub"
+	]
   },
   "63a0b208f444d32d6f03ea1e": {
     "tarkovID": "63a0b208f444d32d6f03ea1e",
@@ -148216,7 +148636,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems": [
+		"SosigMelee_Warclub"
+	]
   },
   "5c0e2ff6d174af02a1659d4a": {
     "tarkovID": "5c0e2ff6d174af02a1659d4a",
