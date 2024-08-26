@@ -10,6 +10,7 @@ using Valve.Newtonsoft.Json.Linq;
 using Valve.VR;
 using UnityEngine.UI;
 using ModularWorkshop;
+using System.Security.AccessControl;
 
 namespace EFM
 {
@@ -36,6 +37,7 @@ namespace EFM
         public static bool checkmarkFutureBarters = false;
         public static bool checkmarkShowBarter = false;
         public static bool checkmarkShowProduction = false;
+        public static int[] rarityWeights = { 80, 15, 5, 0 }; // Common, Rare, Superrare, Not_Exist
 
         // Live data
         public static Mod modInstance;

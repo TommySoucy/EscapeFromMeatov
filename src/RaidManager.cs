@@ -189,6 +189,7 @@ namespace EFM
             {
                 // Generate inventory
                 BotInventory botInventory = new BotInventory(botData);
+                td
 
                 TODO: // Should not be default template and outfit config
                 AnvilManager.Run(SpawnSosig(spawn, new SosigConfigTemplate(), new SosigOutfitConfig()));

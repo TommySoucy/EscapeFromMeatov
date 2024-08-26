@@ -93,9 +93,264 @@ namespace EFM
                         loot.Add(itemCountWeight.Key, itemDict);
 
                         int maxCount = int.Parse(weight.Key);
-                        for(int i=0; i < maxCount; ++i)
+
+                        // Some types of generations specify an item list
+                        if (itemCountWeight.Key.Equals("backpackLoot"))
                         {
-                            td
+                            JArray itemList = botData["inventory"]["items"]["Backpack"] as JArray;
+
+                            for(int i=0; i < maxCount; ++i)
+                            {
+                                string itemID = itemList[UnityEngine.Random.Range(0, itemList.Count)].ToString();
+                                if (Mod.defaultItemData.TryGetValue(itemID, out MeatovItemData itemData))
+                                {
+                                    if (itemDict.ContainsKey(itemData))
+                                    {
+                                        itemDict[itemData] += UnityEngine.Random.Range(1, itemData.maxStack + 1);
+                                    }
+                                    else
+                                    {
+                                        itemDict.Add(itemData, UnityEngine.Random.Range(1, itemData.maxStack + 1));
+                                    }
+                                }
+                                else
+                                {
+                                    if (!Mod.oldItemMap.ContainsKey(itemID))
+                                    {
+                                        Mod.LogError("Could not get item data for " + itemID + " in bot inventory backpack items");
+                                    }
+                                }
+                            }
+                        }
+                        else if (itemCountWeight.Key.Equals("pocketLoot"))
+                        {
+                            JArray itemList = botData["inventory"]["items"]["Pockets"] as JArray;
+
+                            for (int i = 0; i < maxCount; ++i)
+                            {
+                                string itemID = itemList[UnityEngine.Random.Range(0, itemList.Count)].ToString();
+                                if (Mod.defaultItemData.TryGetValue(itemID, out MeatovItemData itemData))
+                                {
+                                    if (itemDict.ContainsKey(itemData))
+                                    {
+                                        itemDict[itemData] += UnityEngine.Random.Range(1, itemData.maxStack + 1);
+                                    }
+                                    else
+                                    {
+                                        itemDict.Add(itemData, UnityEngine.Random.Range(1, itemData.maxStack + 1));
+                                    }
+                                }
+                                else
+                                {
+                                    if (!Mod.oldItemMap.ContainsKey(itemID))
+                                    {
+                                        Mod.LogError("Could not get item data for " + itemID + " in bot inventory pocket items");
+                                    }
+                                }
+                            }
+                        } 
+                        else if (itemCountWeight.Key.Equals("vestLoot"))
+                        {
+                            JArray itemList = botData["inventory"]["items"]["TacticalVest"] as JArray;
+
+                            for (int i = 0; i < maxCount; ++i)
+                            {
+                                string itemID = itemList[UnityEngine.Random.Range(0, itemList.Count)].ToString();
+                                if (Mod.defaultItemData.TryGetValue(itemID, out MeatovItemData itemData))
+                                {
+                                    if (itemDict.ContainsKey(itemData))
+                                    {
+                                        itemDict[itemData] += UnityEngine.Random.Range(1, itemData.maxStack + 1);
+                                    }
+                                    else
+                                    {
+                                        itemDict.Add(itemData, UnityEngine.Random.Range(1, itemData.maxStack + 1));
+                                    }
+                                }
+                                else
+                                {
+                                    if (!Mod.oldItemMap.ContainsKey(itemID))
+                                    {
+                                        Mod.LogError("Could not get item data for " + itemID + " in bot inventory vest items");
+                                    }
+                                }
+                            }
+                        } 
+                        else if (itemCountWeight.Key.Equals("specialItems"))
+                        {
+                            JArray itemList = botData["inventory"]["items"]["SpecialLoot"] as JArray;
+
+                            for (int i = 0; i < maxCount; ++i)
+                            {
+                                string itemID = itemList[UnityEngine.Random.Range(0, itemList.Count)].ToString();
+                                if (Mod.defaultItemData.TryGetValue(itemID, out MeatovItemData itemData))
+                                {
+                                    if (itemDict.ContainsKey(itemData))
+                                    {
+                                        itemDict[itemData] += UnityEngine.Random.Range(1, itemData.maxStack + 1);
+                                    }
+                                    else
+                                    {
+                                        itemDict.Add(itemData, UnityEngine.Random.Range(1, itemData.maxStack + 1));
+                                    }
+                                }
+                                else
+                                {
+                                    if (!Mod.oldItemMap.ContainsKey(itemID))
+                                    {
+                                        Mod.LogError("Could not get item data for " + itemID + " in bot inventory special items");
+                                    }
+                                }
+                            }
+                        }
+                        else if(itemCountWeight.Key.Equals("drugs")) // 5448f3a14bdc2d27728b4569
+                        {
+                            if(Mod.itemsByParents.TryGetValue("5448f3a14bdc2d27728b4569", out List<MeatovItemData> itemDatas))
+                            {
+                                for (int i = 0; i < maxCount; ++i)
+                                {
+                                    MeatovItemData itemData = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
+                                    if (Mod.IDDescribedInList(itemData.tarkovID, new List<string>(itemData.parents), itemCountWeight.Value["whitelist"].ToObject<List<string>>(), null))
+                                    {
+                                        if (itemDict.ContainsKey(itemData))
+                                        {
+                                            itemDict[itemData] += UnityEngine.Random.Range(1, itemData.maxStack + 1);
+                                        }
+                                        else
+                                        {
+                                            itemDict.Add(itemData, UnityEngine.Random.Range(1, itemData.maxStack + 1));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else if(itemCountWeight.Key.Equals("grenades")) // 543be6564bdc2df4348b4568
+                        {
+                            if (Mod.itemsByParents.TryGetValue("543be6564bdc2df4348b4568", out List<MeatovItemData> itemDatas))
+                            {
+                                for (int i = 0; i < maxCount; ++i)
+                                {
+                                    MeatovItemData itemData = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
+                                    if (Mod.IDDescribedInList(itemData.tarkovID, new List<string>(itemData.parents), itemCountWeight.Value["whitelist"].ToObject<List<string>>(), null))
+                                    {
+                                        if (itemDict.ContainsKey(itemData))
+                                        {
+                                            itemDict[itemData] += UnityEngine.Random.Range(1, itemData.maxStack + 1);
+                                        }
+                                        else
+                                        {
+                                            itemDict.Add(itemData, UnityEngine.Random.Range(1, itemData.maxStack + 1));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else if(itemCountWeight.Key.Equals("healing")) // 5448f39d4bdc2d0a728b4568
+                        {
+                            if (Mod.itemsByParents.TryGetValue("5448f39d4bdc2d0a728b4568", out List<MeatovItemData> itemDatas))
+                            {
+                                for (int i = 0; i < maxCount; ++i)
+                                {
+                                    MeatovItemData itemData = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
+                                    if (Mod.IDDescribedInList(itemData.tarkovID, new List<string>(itemData.parents), itemCountWeight.Value["whitelist"].ToObject<List<string>>(), null))
+                                    {
+                                        if (itemDict.ContainsKey(itemData))
+                                        {
+                                            itemDict[itemData] += UnityEngine.Random.Range(1, itemData.maxStack + 1);
+                                        }
+                                        else
+                                        {
+                                            itemDict.Add(itemData, UnityEngine.Random.Range(1, itemData.maxStack + 1));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else if(itemCountWeight.Key.Equals("magazines")) // 5448bc234bdc2d3c308b4569
+                        {
+                            if(equipment.TryGetValue("FirstPrimaryWeapon", out MeatovItemData firstPrimaryWeaponData) && firstPrimaryWeaponData.magType != FistVR.FireArmMagazineType.mNone)
+                            {
+                                if(Mod.magDefaultItemDataByMagType.TryGetValue(firstPrimaryWeaponData.magType, out List<MeatovItemData> itemDatas))
+                                {
+                                    MeatovItemData itemData = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
+                                    itemDict.Add(itemData, maxCount);
+                                }
+                                else
+                                {
+                                    Mod.LogError("No mag item data for mag type " + firstPrimaryWeaponData.magType + " needed for bot inventory first primary weapon " + firstPrimaryWeaponData.tarkovID);
+                                }
+                            }
+                            if(equipment.TryGetValue("SecondPrimaryWeapon", out MeatovItemData secondPrimaryWeaponData) && secondPrimaryWeaponData.magType != FistVR.FireArmMagazineType.mNone)
+                            {
+                                if(Mod.magDefaultItemDataByMagType.TryGetValue(secondPrimaryWeaponData.magType, out List<MeatovItemData> itemDatas))
+                                {
+                                    MeatovItemData itemData = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
+                                    itemDict.Add(itemData, maxCount);
+                                }
+                                else
+                                {
+                                    Mod.LogError("No mag item data for mag type " + secondPrimaryWeaponData.magType + " needed for bot inventory second primary weapon " + secondPrimaryWeaponData.tarkovID);
+                                }
+                            }
+                            if(equipment.TryGetValue("Holster", out MeatovItemData holsterWeaponData) && holsterWeaponData.magType != FistVR.FireArmMagazineType.mNone)
+                            {
+                                if(Mod.magDefaultItemDataByMagType.TryGetValue(holsterWeaponData.magType, out List<MeatovItemData> itemDatas))
+                                {
+                                    MeatovItemData itemData = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
+                                    itemDict.Add(itemData, maxCount);
+                                }
+                                else
+                                {
+                                    Mod.LogError("No mag item data for mag type " + holsterWeaponData.magType + " needed for bot inventory holster weapon " + holsterWeaponData.tarkovID);
+                                }
+                            }
+                        }
+                        else if(itemCountWeight.Key.Equals("stims")) // 5448f3a64bdc2d60728b456a
+                        {
+                            if (Mod.itemsByParents.TryGetValue("5448f3a64bdc2d60728b456a", out List<MeatovItemData> itemDatas))
+                            {
+                                for (int i = 0; i < maxCount; ++i)
+                                {
+                                    MeatovItemData itemData = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
+                                    if (Mod.IDDescribedInList(itemData.tarkovID, new List<string>(itemData.parents), itemCountWeight.Value["whitelist"].ToObject<List<string>>(), null))
+                                    {
+                                        if (itemDict.ContainsKey(itemData))
+                                        {
+                                            itemDict[itemData] += UnityEngine.Random.Range(1, itemData.maxStack + 1);
+                                        }
+                                        else
+                                        {
+                                            itemDict.Add(itemData, UnityEngine.Random.Range(1, itemData.maxStack + 1));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else // Rarity
+                        {
+                            for (int i = 0; i < maxCount; ++i)
+                            {
+                                MeatovItem.ItemRarity rarity = MeatovItem.ItemRarity.Common;
+                                int rarityRand = UnityEngine.Random.Range(0, 100);
+                                int rarityTotalWeight = 0;
+                                for (int j = 0; j < Mod.rarityWeights.Length; ++j)
+                                {
+                                    rarityTotalWeight += Mod.rarityWeights[j];
+                                    if (rarityRand < rarityTotalWeight)
+                                    {
+                                        rarity = (MeatovItem.ItemRarity)j;
+                                    }
+                                }
+
+                                if (Mod.itemsByRarity.TryGetValue(rarity, out List<MeatovItemData> itemDatas))
+                                {
+                                    MeatovItemData itemData = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
+                                    if (Mod.IDDescribedInList(itemData.tarkovID, new List<string>(itemData.parents), itemCountWeight.Value["whitelist"].ToObject<List<string>>(), null))
+                                    {
+                                        itemDict.Add(itemData, UnityEngine.Random.Range(1, itemData.maxStack + 1));
+                                    }
+                                }
+                            }
                         }
 
                         break;

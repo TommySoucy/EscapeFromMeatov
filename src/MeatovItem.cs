@@ -61,10 +61,10 @@ namespace EFM
 
         public enum ItemRarity
         {
-            Common,
-            Rare,
-            Superrare,
-            Not_exist
+            Common = 0,
+            Rare = 1,
+            Superrare = 2,
+            Not_exist = 3
         }
 
         // Hierarchy
