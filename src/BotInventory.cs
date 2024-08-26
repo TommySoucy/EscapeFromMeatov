@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using FistVR;
+using System.Collections.Generic;
+using UnityEngine;
 using Valve.Newtonsoft.Json.Linq;
 
 namespace EFM
@@ -357,6 +359,12 @@ namespace EFM
                     }
                 }
             }
+        }
+
+        public SosigOutfitConfig GetOutfitConfig()
+        {
+            SosigOutfitConfig outfitConfig = ScriptableObject.CreateInstance<SosigOutfitConfig>();
+            cont from here // Set in defaulti tem data what sosig wearable/item an item corresponds to, so we can use it here to generate outfit from inventory
         }
     }
 }

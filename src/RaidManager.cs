@@ -187,12 +187,20 @@ namespace EFM
 
             if(Mod.botData.TryGetValue(USEC ? "usec" : "bear", out JObject botData))
             {
+                // Generate sosig template
+                TODO e:
+
                 // Generate inventory
                 BotInventory botInventory = new BotInventory(botData);
-                td
 
-                TODO: // Should not be default template and outfit config
-                AnvilManager.Run(SpawnSosig(spawn, new SosigConfigTemplate(), new SosigOutfitConfig()));
+                // Generate outfit from inventory
+                SosigOutfitConfig outfitConfig = botInventory.GetOutfitConfig();
+
+                // Generate route through PMCNavPoints
+                TODO e:
+
+                TODO: // Should not be default template
+                AnvilManager.Run(SpawnSosig(spawn, botInventory, new SosigConfigTemplate(), outfitConfig));
             }
             else
             {
@@ -200,7 +208,7 @@ namespace EFM
             }
         }
 
-        public IEnumerator SpawnSosig(Spawn spawn, SosigConfigTemplate template, SosigOutfitConfig outfit,
+        public IEnumerator SpawnSosig(Spawn spawn, BotInventory botInventory, SosigConfigTemplate template, SosigOutfitConfig outfit,
                                       GameObject weaponPrefab, GameObject weaponPrefab2, GameObject weaponPrefab3, int IFF)
         {
             yield return IM.OD["SosigBody"].GetGameObjectAsync();
