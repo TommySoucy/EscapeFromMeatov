@@ -88582,7 +88582,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems":[
+		"Sosiggrenade_Smoke"
+	]
   },
   "617aa4dd8166f034d57de9c5": {
     "tarkovID": "617aa4dd8166f034d57de9c5",
@@ -88638,7 +88641,10 @@
       0.0,
       0.0,
       0.0
-    ]
+    ],
+	"sosigItems":[
+		"Sosiggrenade_Smoke"
+	]
   },
   "617fd91e5539a84ec44ce155": {
     "tarkovID": "617fd91e5539a84ec44ce155",
@@ -88696,7 +88702,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems":[
+		"Sosiggrenade_Frag"
+	]
   },
   "618a431df1eb8e24b8741deb": {
     "tarkovID": "618a431df1eb8e24b8741deb",
@@ -88754,7 +88763,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems":[
+		"Sosiggrenade_Frag"
+	]
   },
   "619256e5f8af2c1a4e1f5d92": {
     "tarkovID": "619256e5f8af2c1a4e1f5d92",
@@ -88812,7 +88824,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems":[
+		"Sosiggrenade_Flash"
+	]
   },
   "5a0c27731526d80618476ac4": {
     "tarkovID": "5a0c27731526d80618476ac4",
@@ -88870,7 +88885,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems":[
+		"Sosiggrenade_Flash"
+	]
   },
   "5e32f56fcb6d5863cc5e5ee4": {
     "tarkovID": "5e32f56fcb6d5863cc5e5ee4",
@@ -88928,7 +88946,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems":[
+		"Sosiggrenade_HLHE"
+	]
   },
   "5e340dcdcb6d5863cc5e5efb": {
     "tarkovID": "5e340dcdcb6d5863cc5e5efb",
@@ -88986,7 +89007,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems":[
+		"Sosiggrenade_HLHE"
+	]
   },
   "58d3db5386f77426186285a0": {
     "tarkovID": "58d3db5386f77426186285a0",
@@ -89044,7 +89068,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems":[
+		"Sosiggrenade_Frag"
+	]
   },
   "5448be9a4bdc2dfd2f8b456a": {
     "tarkovID": "5448be9a4bdc2dfd2f8b456a",
@@ -89102,7 +89129,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems":[
+		"Sosiggrenade_Frag"
+	]
   },
   "5710c24ad2720bc3458b45a3": {
     "tarkovID": "5710c24ad2720bc3458b45a3",
@@ -89160,7 +89190,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigItems":[
+		"Sosiggrenade_Frag"
+	]
   },
   "571a12c42459771f627b58a0": {
     "tarkovID": "571a12c42459771f627b58a0",
