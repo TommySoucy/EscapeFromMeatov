@@ -38,6 +38,7 @@ namespace EFM
 
         public BotInventory(JObject botData)
         {
+            TODO: // Take into account blocksEarpiece, blocksEyewear, etc
             equipment = new Dictionary<string, MeatovItemData>();
             Dictionary<string, int> equipmentChances = botData["chances"]["equipment"].ToObject<Dictionary<string, int>>();
             foreach(KeyValuePair<string, int> equipmentChance in equipmentChances)
@@ -364,7 +365,10 @@ namespace EFM
         public SosigOutfitConfig GetOutfitConfig()
         {
             SosigOutfitConfig outfitConfig = ScriptableObject.CreateInstance<SosigOutfitConfig>();
-            cont from here // Set in defaulti tem data what sosig wearable/item an item corresponds to, so we can use it here to generate outfit from inventory
+
+            if(equipment.ContainsKey())
+
+            return outfitConfig;
         }
     }
 }

@@ -172,6 +172,9 @@ namespace EFM
         }
         public RagFairWishlistItemView ragFairWishlistItemView;
 
+        // Sosig equivalent
+        public List<FVRObject> sosigEquivalents;
+
         // Events
         public delegate void OnItemFoundDelegate();
         public event OnItemFoundDelegate OnItemFound;
@@ -391,6 +394,39 @@ namespace EFM
             {
                 modGroup = data["modulGroup"].ToString();
                 modPart = data["modulPart"].ToString();
+            }
+
+            if (data["sosigItems"] != null)
+            {
+                sosigEquivalents = new List<FVRObject>();
+                JArray sosigItems = data["sosigItems"] as JArray;
+                for(int i=0; i < sosigItems.Count; ++i)
+                {
+                    if(IM.OD.TryGetValue(sosigItems[i].ToString(), out FVRObject sosigItem))
+                    {
+                        sosigEquivalents.Add(sosigItem);
+                    }
+                    else
+                    {
+                        Mod.LogError("Could not find sosig item: " + sosigItems[i].ToString()+" for item "+tarkovID);
+                    }
+                }
+            }
+            if (data["sosigWearables"] != null)
+            {
+                sosigEquivalents = new List<FVRObject>();
+                JArray sosigWearables = data["sosigWearables"] as JArray;
+                for (int i = 0; i < sosigWearables.Count; ++i)
+                {
+                    if (IM.OD.TryGetValue(sosigWearables[i].ToString(), out FVRObject sosigWearable))
+                    {
+                        sosigEquivalents.Add(sosigWearable);
+                    }
+                    else
+                    {
+                        Mod.LogError("Could not find sosig wearable: " + sosigWearables[i].ToString() + " for item " + tarkovID);
+                    }
+                }
             }
         }
 
