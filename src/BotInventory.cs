@@ -362,11 +362,241 @@ namespace EFM
             }
         }
 
-        public SosigOutfitConfig GetOutfitConfig()
+        public SosigOutfitConfig GetOutfitConfig(bool PMC)
         {
             SosigOutfitConfig outfitConfig = ScriptableObject.CreateInstance<SosigOutfitConfig>();
 
-            if(equipment.ContainsKey())
+            if (equipment.TryGetValue("Headwear", out MeatovItemData headwearItemData) && headwearItemData.sosigEquivalents != null && headwearItemData.sosigEquivalents.Count > 0)
+            {
+                outfitConfig.Chance_Headwear = 1;
+                outfitConfig.Headwear = headwearItemData.sosigEquivalents;
+            }
+            else
+            {
+                outfitConfig.Chance_Headwear = 0;
+            }
+            TODO e: // Make our own sosig otufit config that has a different list for earpieces
+            if (equipment.TryGetValue("Earpiece", out MeatovItemData earpieceItemData) && earpieceItemData.sosigEquivalents != null && earpieceItemData.sosigEquivalents.Count > 0)
+            {
+                outfitConfig.Chance_Headwear = 1;
+                if(outfitConfig.Headwear == null)
+                {
+                    outfitConfig.Headwear = earpieceItemData.sosigEquivalents;
+                }
+                else
+                {
+                    outfitConfig.Headwear.AddRange(earpieceItemData.sosigEquivalents);
+                }
+            }
+            else
+            {
+                if (outfitConfig.Headwear == null)
+                {
+                    outfitConfig.Chance_Headwear = 0;
+                }
+            }
+
+            if (equipment.TryGetValue("Eyewear", out MeatovItemData eyewearItemData) && eyewearItemData.sosigEquivalents != null && eyewearItemData.sosigEquivalents.Count > 0)
+            {
+                outfitConfig.Chance_Eyewear = 1;
+                outfitConfig.Eyewear = eyewearItemData.sosigEquivalents;
+            }
+            else
+            {
+                outfitConfig.Chance_Eyewear = 0;
+            }
+
+            if (equipment.TryGetValue("FaceCover", out MeatovItemData facewearItemData) && facewearItemData.sosigEquivalents != null && facewearItemData.sosigEquivalents.Count > 0)
+            {
+                outfitConfig.Chance_Facewear = 1;
+                outfitConfig.Facewear = facewearItemData.sosigEquivalents;
+            }
+            else
+            {
+                outfitConfig.Chance_Facewear = 0;
+            }
+
+            if (equipment.TryGetValue("ArmorVest", out MeatovItemData armorvestItemData) && armorvestItemData.sosigEquivalents != null && armorvestItemData.sosigEquivalents.Count > 0)
+            {
+                outfitConfig.Chance_Torsowear = 1;
+                outfitConfig.Torsowear = armorvestItemData.sosigEquivalents;
+            }
+            else
+            {
+                outfitConfig.Chance_Torsowear = 0;
+            }
+            if (equipment.TryGetValue("TacticalVest", out MeatovItemData vestItemData) && vestItemData.sosigEquivalents != null && vestItemData.sosigEquivalents.Count > 0)
+            {
+                outfitConfig.Chance_Torsowear = 1;
+                if(outfitConfig.Torsowear == null)
+                {
+                    outfitConfig.Torsowear = vestItemData.sosigEquivalents;
+                }
+                else
+                {
+                    outfitConfig.Torsowear.AddRange(vestItemData.sosigEquivalents);
+                }
+            }
+            else
+            {
+                if (outfitConfig.Torsowear == null)
+                {
+                    outfitConfig.Chance_Torsowear = 0;
+                }
+            }
+
+            if (equipment.TryGetValue("Backpack", out MeatovItemData backpackItemData) && backpackItemData.sosigEquivalents != null && backpackItemData.sosigEquivalents.Count > 0)
+            {
+                outfitConfig.Chance_Backpacks = 1;
+                outfitConfig.Backpacks = backpackItemData.sosigEquivalents;
+            }
+            else
+            {
+                outfitConfig.Chance_Backpacks = 0;
+            }
+
+            if (PMC)
+            {
+                /* Torso
+                SosigAccessory_MountainMeat_Jacket_Black
+                SosigAccessory_MountainMeat_Jacket_Brown
+                SosigAccessory_MountainMeat_Jacket_Green
+                SosigCasualUndershirtCamoDesert
+                SosigCasualUndershirtCamoForest
+                SosigCasualUndershirtCamoNight
+                SosigCasualUndershirtCamoUrban
+                SosigAccessory_MountainMeat_Undershirt_Green
+                SosigCasualHoodieHoodDownBlack
+                SosigCasualHoodieHoodDownBlue
+                SosigCasualHoodieHoodDownForest
+                SosigCasualHoodieHoodDownGreen
+                SosigCasualHoodieHoodDownOlive
+                */
+                /* Pants
+                SosigAccessory_MountainMeat_Pants_Black
+                SosigAccessory_MountainMeat_Pants_Brown
+                SosigAccessory_MountainMeat_Pants_Green
+                SosigAccessory_MountainMeat_Pants_Grey
+                SosigAccessory_MountainMeat_Pants_LightGrey
+                SosigAccessory_MountainMeat_Pants_Olive
+                SosigAccessory_MountainMeat_Pants_Tan
+                SosigAccessory_MountainMeat_Pants_Umber
+                SosigCasualShortsBlack
+                SosigCasualShortsBrown
+                SosigCasualShortsGreen
+                SosigCasualShortsGrey
+                SosigCasualShortsLightGrey
+                SosigCasualShortsOlive
+                SosigCasualShortsTan
+                SosigCasualShortsUmber
+                */
+            }
+            else
+            {
+                /* Torso
+                SosigAccessory_MountainMeat_Jacket_Black
+                SosigAccessory_MountainMeat_Jacket_Brown
+                SosigAccessory_MountainMeat_Jacket_Flannel
+                SosigAccessory_MountainMeat_Jacket_Green
+                SosigAccessory_MountainMeat_Jacket_Jean
+                SosigAccessory_MountainMeat_Jacket_Orange
+                SosigCasualTrackSuitTorsoBlack
+                SosigCasualTrackSuitTorsoBlue
+                SosigCasualTrackSuitTorsoGreen
+                SosigCasualTrackSuitTorsoGrey
+                SosigCasualTrackSuitTorsoOrange
+                SosigCasualTrackSuitTorsoPink
+                SosigCasualTrackSuitTorsoPurple
+                SosigCasualTrackSuitTorsoRed
+                SosigCasualTrackSuitTorsoTurquoise
+                SosigCasualTrackSuitTorsoYellow
+                SosigCasualTrackSuitTopColorSet1
+                SosigCasualTrackSuitTopColorSet2
+                SosigCasualTrackSuitTopColorSet3
+                SosigCasualTrackSuitTopColorSet4
+                SosigCasualTrackSuitTopColorSet5
+                SosigCasualTrackSuitTopColorSet6
+                SosigCasualTrackSuitTopColorSet7
+                SosigCasualTrackSuitTopColorSet8
+                SosigCasualTrackSuitTopStripedColorSet1
+                SosigCasualTrackSuitTopStripedColorSet2
+                SosigCasualTrackSuitTopStripedColorSet3
+                SosigCasualTrackSuitTopStripedColorSet4
+                SosigCasualTrackSuitTopStripedColorSet5
+                SosigCasualTrackSuitTopStripedColorSet6
+                SosigCasualTrackSuitTopStripedColorSet7
+                SosigCasualTrackSuitTopStripedColorSet8
+                SosigAccessory_MountainMeat_Undershirt_Blue
+                SosigAccessory_MountainMeat_Undershirt_Brown
+                SosigAccessory_MountainMeat_Undershirt_Green
+                SosigAccessory_MountainMeat_Undershirt_Tan
+                SosigAccessory_MountainMeat_Undershirt_White
+                SosigCasualUndershirtCamoDesert
+                SosigCasualUndershirtCamoForest
+                SosigCasualUndershirtCamoNight
+                SosigCasualUndershirtCamoPink
+                SosigCasualUndershirtCamoSky
+                SosigCasualUndershirtCamoUrban
+                SosigCasualHoodieHoodDownBlack
+                SosigCasualHoodieHoodDownBlue
+                SosigCasualHoodieHoodDownCream
+                SosigCasualHoodieHoodDownForest
+                SosigCasualHoodieHoodDownGreen
+                SosigCasualHoodieHoodDownLavendar
+                SosigCasualHoodieHoodDownMustard
+                SosigCasualHoodieHoodDownOlive
+                SosigCasualHoodieHoodDownPeach
+                SosigCasualHoodieHoodDownRed
+                SosigCasualHoodieHoodDownWhite
+                SosigCasualHoodieHoodDownYellow
+                */
+                /* Pants
+                SosigAccessory_MountainMeat_Pants_Black
+                SosigAccessory_MountainMeat_Pants_Brown
+                SosigAccessory_MountainMeat_Pants_Green
+                SosigAccessory_MountainMeat_Pants_Grey
+                SosigAccessory_MountainMeat_Pants_JeanDark
+                SosigAccessory_MountainMeat_Pants_JeanNew
+                SosigAccessory_MountainMeat_Pants_JeanWorn
+                SosigAccessory_MountainMeat_Pants_LightGrey
+                SosigAccessory_MountainMeat_Pants_Olive
+                SosigAccessory_MountainMeat_Pants_Tan
+                SosigAccessory_MountainMeat_Pants_Umber
+                SosigCasualShortsBlack
+                SosigCasualShortsBrown
+                SosigCasualShortsGreen
+                SosigCasualShortsGrey
+                SosigCasualShortsJeanDark
+                SosigCasualShortsJeanNew
+                SosigCasualShortsJeanWorn
+                SosigCasualShortsLightGrey
+                SosigCasualShortsOlive
+                SosigCasualShortsTan
+                SosigCasualShortsUmber
+                SosigCasualTrackSuitAbdoBlack
+                SosigCasualTrackSuitAbdoBlue
+                SosigCasualTrackSuitAbdoGreen
+                SosigCasualTrackSuitAbdoGrey
+                SosigCasualTrackSuitAbdoOrange
+                SosigCasualTrackSuitAbdoPink
+                SosigCasualTrackSuitAbdoPurple
+                SosigCasualTrackSuitAbdoRed
+                SosigCasualTrackSuitAbdoTurquoise
+                SosigCasualTrackSuitAbdoYellow
+                */
+                /* PantsLower
+                SosigCasualTrackSuitLegBlack
+                SosigCasualTrackSuitLegBlue
+                SosigCasualTrackSuitLegGreen
+                SosigCasualTrackSuitLegGrey
+                SosigCasualTrackSuitLegOrange
+                SosigCasualTrackSuitLegPink
+                SosigCasualTrackSuitLegPurple
+                SosigCasualTrackSuitLegRed
+                SosigCasualTrackSuitLegTurquoise
+                SosigCasualTrackSuitLegYellow
+                */
+            }
 
             return outfitConfig;
         }
