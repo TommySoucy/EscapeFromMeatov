@@ -23226,7 +23226,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 164912
+    "value": 164912,
+	"sosigWearables":[
+		"MGNinjaHelmet"
+	]
   },
   "59e7715586f7742ee5789605": {
     "tarkovID": "59e7715586f7742ee5789605",
@@ -25182,7 +25185,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 1995
+    "value": 1995,
+	"sosigWearables":[
+		"SosigAccessory_Common_Beanie_Black"
+	]
   },
   "5f99418230835532b445e954": {
     "tarkovID": "5f99418230835532b445e954",
@@ -25232,7 +25238,10 @@
     "buffEffects": [],
     "value": 5000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigCasualTruckerhatCamoPink"
+	]
   },
   "5b40e5e25acfc4001a599bea": {
     "tarkovID": "5b40e5e25acfc4001a599bea",
@@ -25282,7 +25291,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 1827
+    "value": 1827,
+	"sosigWearables":[
+		"SosigAccessory_MountainMeat_Truckerhat_Black"
+	]
   },
   "5aa2b87de5b5b00016327c25": {
     "tarkovID": "5aa2b87de5b5b00016327c25",
@@ -25332,7 +25344,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 1726
+    "value": 1726,
+	"sosigWearables":[
+		"SosigCasualTruckerhatCamoForest"
+	]
   },
   "5f60e6403b85f6263c14558c": {
     "tarkovID": "5f60e6403b85f6263c14558c",
@@ -25382,7 +25397,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 1500
+    "value": 1500,
+	"sosigWearables":[
+		"Sosigaccesory_ww2_normalcap_grey"
+	]
   },
   "5f60e7788adaa7100c3adb49": {
     "tarkovID": "5f60e7788adaa7100c3adb49",
@@ -25432,7 +25450,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 3400
+    "value": 3400,
+	"sosigWearables":[
+		"Sosigaccesory_ww2_normalcap_grey"
+	]
   },
   "5f60e784f2bcbb675b00dac7": {
     "tarkovID": "5f60e784f2bcbb675b00dac7",
@@ -25482,7 +25503,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 1353
+    "value": 1353,
+	"sosigWearables":[
+		"Sosigaccesory_ww2_normalcap_green"
+	]
   },
   "60bf74184a63fc79b60c57f6": {
     "tarkovID": "60bf74184a63fc79b60c57f6",
@@ -25532,7 +25556,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 29700
+    "value": 29700,
+	"sosigWearables":[
+		"SosigAccessory_Common_Beanie_Black"
+	]
   },
   "5a43957686f7742a2c2f11b0": {
     "tarkovID": "5a43957686f7742a2c2f11b0",
@@ -25582,7 +25609,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 500
+    "value": 500,
+	"sosigWearables":[
+		"SosigAccessory_Common_SantaHat"
+	]
   },
   "5aa2b9ede5b5b000137b758b": {
     "tarkovID": "5aa2b9ede5b5b000137b758b",
@@ -25632,7 +25662,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 19513
+    "value": 19513,
+	"sosigWearables":[
+		"sosigaccessory_desperado_hat_pinchedfront_tan"
+	]
   },
   "5a43943586f77416ad2f06e2": {
     "tarkovID": "5a43943586f77416ad2f06e2",
@@ -25682,7 +25715,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 500
+    "value": 500,
+	"sosigWearables":[
+		"SosigAccessory_Common_Beanie_Jean"
+	]
   },
   "5d96141523f0ea1b7f2aacab": {
     "tarkovID": "5d96141523f0ea1b7f2aacab",
@@ -25732,7 +25768,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 10200
+    "value": 10200,
+	"sosigWearables":[
+		"sosigaccessory_desperado_hat_pinchedfront_pearl"
+	]
   },
   "5aa2ba19e5b5b00014028f4e": {
     "tarkovID": "5aa2ba19e5b5b00014028f4e",
@@ -25782,7 +25821,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 4510
+    "value": 4510,
+	"sosigWearables":[
+		"SosigAccessory_Common_Beanie_Tan"
+	]
   },
   "59ef13ca86f77445fd0e2483": {
     "tarkovID": "59ef13ca86f77445fd0e2483",
@@ -25832,7 +25874,10 @@
     "buffEffects": [],
     "value": 2800,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigHLBreadcrabHead1"
+	]
   },
   "572b7fa124597762b472f9d2": {
     "tarkovID": "572b7fa124597762b472f9d2",
@@ -25853,7 +25898,7 @@
     ],
     "lootExperience": 20,
     "name": "Beanie",
-    "description": "Beanie",
+    "description": "A warm knitted beanie, traditionally made for skiers but worn by everyone.",
     "canSellOnRagfair": true,
     "compatibilityValue": 0,
     "usesMags": false,
@@ -25882,7 +25927,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 1070
+    "value": 1070,
+	"sosigWearables":[
+		"SosigAccessory_Common_Beanie_Forest"
+	]
   },
   "5bd073c986f7747f627e796c": {
     "tarkovID": "5bd073c986f7747f627e796c",
@@ -25932,7 +25980,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 24006
+    "value": 24006,
+	"sosigWearables":[
+		"SosigAccessory_Common_Beanie_Black"
+	]
   },
   "5f994730c91ed922dd355de3": {
     "tarkovID": "5f994730c91ed922dd355de3",
@@ -25982,7 +26033,10 @@
     "buffEffects": [],
     "value": 3000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Common_Beanie_Crimson"
+	]
   },
   "5aa2b89be5b5b0001569311f": {
     "tarkovID": "5aa2b89be5b5b0001569311f",
@@ -26032,7 +26086,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 1445
+    "value": 1445,
+	"sosigWearables":[
+		"Sosigaccesory_ww2_combatcap_grey"
+	]
   },
   "59e770f986f7742cbe3164ef": {
     "tarkovID": "59e770f986f7742cbe3164ef",
@@ -26082,7 +26139,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 1353
+    "value": 1353,
+	"sosigWearables":[
+		"Sosigaccesory_ww2_combatcap_green"
+	]
   },
   "603618feffd42c541047f771": {
     "tarkovID": "603618feffd42c541047f771",
@@ -26132,7 +26192,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 4353
+    "value": 4353,
+	"sosigWearables":[
+		"Sosigaccesory_ww2_combatcap_grey"
+	]
   },
   "603619720ca681766b6a0fc4": {
     "tarkovID": "603619720ca681766b6a0fc4",
@@ -26182,7 +26245,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 1353
+    "value": 1353,
+	"sosigWearables":[
+		"Sosigaccesory_ww2_combatcap_tan"
+	]
   },
   "6040de02647ad86262233012": {
     "tarkovID": "6040de02647ad86262233012",
@@ -26232,7 +26298,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 3353
+    "value": 3353,
+	"sosigWearables":[
+		"Sosigaccesory_ww2_combatcap_tan"
+	]
   },
   "60361a7497633951dc245eb4": {
     "tarkovID": "60361a7497633951dc245eb4",
@@ -26282,7 +26351,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 1353
+    "value": 1353,
+	"sosigWearables":[
+		"Sosigaccesory_ww2_combatcap_green"
+	]
   },
   "60361b0b5a45383c122086a1": {
     "tarkovID": "60361b0b5a45383c122086a1",
@@ -26332,7 +26404,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 1353
+    "value": 1353,
+	"sosigWearables":[
+		"Sosigaccesory_ww2_combatcap_tan"
+	]
   },
   "60361b5a9a15b10d96792291": {
     "tarkovID": "60361b5a9a15b10d96792291",
@@ -26382,7 +26457,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 2353
+    "value": 2353,
+	"sosigWearables":[
+		"Sosigaccesory_ww2_combatcap_tan"
+	]
   },
   "5b4327aa5acfc400175496e0": {
     "tarkovID": "5b4327aa5acfc400175496e0",
@@ -26432,7 +26510,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 2170
+    "value": 2170,
+	"sosigWearables":[
+		"sosigaccessory_desperado_hat_pinchedfront_brown"
+	]
   },
   "618aef6d0a5a59657e5f55ee": {
     "tarkovID": "618aef6d0a5a59657e5f55ee",
@@ -26482,7 +26563,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 9556
+    "value": 9556,
+	"sosigWearables":[
+		"sosigaccessory_desperado_hat_pinchedfront_brown"
+	]
   },
   "60b52e5bc7d8103275739d67": {
     "tarkovID": "60b52e5bc7d8103275739d67",
@@ -26532,7 +26616,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 3170
+    "value": 3170,
+	"sosigWearables":[
+		"sosigaccessory_desperado_hat_pinchedfront_grey"
+	]
   },
   "5aa2b8d7e5b5b00014028f4a": {
     "tarkovID": "5aa2b8d7e5b5b00014028f4a",
@@ -26582,7 +26669,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 1505
+    "value": 1505,
+	"sosigWearables":[
+		"SosigAccessory_MountainMeat_Truckerhat_BlueWhite"
+	]
   },
   "5b4329075acfc400153b78ff": {
     "tarkovID": "5b4329075acfc400153b78ff",
@@ -26632,7 +26722,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 4560
+    "value": 4560,
+	"sosigWearables":[
+		"SosigAccessory_Common_SantaHat"
+	]
   },
   "5ab8f20c86f7745cdb629fb2": {
     "tarkovID": "5ab8f20c86f7745cdb629fb2",
@@ -26682,7 +26775,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 5556
+    "value": 5556,
+	"sosigWearables":[
+		"SosigAccessoryCommonBalaklavaGrey"
+	]
   },
   "60a7acf20c5cb24b01346648": {
     "tarkovID": "60a7acf20c5cb24b01346648",
@@ -26732,7 +26828,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 8353
+    "value": 8353,
+	"sosigWearables":[
+		"SosigAccessory_MountainMeat_Truckerhat_GreenWhite"
+	]
   },
   "5aa2ba46e5b5b000137b758d": {
     "tarkovID": "5aa2ba46e5b5b000137b758d",
@@ -26782,7 +26881,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 2043
+    "value": 2043,
+	"sosigWearables":[
+		"SosigAccessory_Common_Beanie_Crimson"
+	]
   },
   "5b40e61f5acfc4001a599bec": {
     "tarkovID": "5b40e61f5acfc4001a599bec",
@@ -26832,7 +26934,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 1732
+    "value": 1732,
+	"sosigWearables":[
+		"SosigAccessory_MountainMeat_Truckerhat_Black"
+	]
   },
   "5aa2a7e8e5b5b00016327c16": {
     "tarkovID": "5aa2a7e8e5b5b00016327c16",
@@ -26882,7 +26987,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 20245
+    "value": 20245,
+	"sosigWearables":[
+		"SosigAccessory_MountainMeat_Truckerhat_Tan"
+	]
   },
   "59e7708286f7742cbd762753": {
     "tarkovID": "59e7708286f7742cbd762753",
@@ -26932,7 +27040,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 5013
+    "value": 5013,
+	"sosigWearables":[
+		"SosigAccessory_MountainMeat_Yukonhat_PlaidRed"
+	]
   },
   "5645bcc04bdc2d363b8b4572": {
     "tarkovID": "5645bcc04bdc2d363b8b4572",
@@ -40770,7 +40881,7 @@
     ],
     "lootExperience": 20,
     "name": "Leather cap",
-    "description": "Leather cap",
+    "description": "A respected gentleman's headdress. Protects the head from slander.",
     "canSellOnRagfair": true,
     "compatibilityValue": 0,
     "usesMags": false,
@@ -40799,7 +40910,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 33400
+    "value": 33400,
+	"sosigWearables":[
+		"sosigaccessory_desperado_hat_bowler_black"
+	]
   },
   "61bca7cda0eae612383adf57": {
     "tarkovID": "61bca7cda0eae612383adf57",
@@ -42554,7 +42668,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 27761
+    "value": 27761,
+	"sosigWearables":[
+		"SosigAccessory_Common_Beanie_Brown"
+	]
   },
   "62a09dd4621468534a797ac7": {
     "tarkovID": "62a09dd4621468534a797ac7",
@@ -47298,7 +47415,10 @@
       0.0
     ],
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_MountainMeat_Truckerhat_Red"
+	]
   },
   "57372fc52459776998772ca1": {
     "tarkovID": "57372fc52459776998772ca1",
@@ -48205,7 +48325,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 144790
+    "value": 144790,
+	"sosigWearables":[
+		"SosigAccessoryCommonBalaklavaGreen"
+	]
   },
   "638df4cc7b560b03794a18d2": {
     "tarkovID": "638df4cc7b560b03794a18d2",
