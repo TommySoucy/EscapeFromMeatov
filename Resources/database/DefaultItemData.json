@@ -2787,7 +2787,7 @@
     "tarkovID": "5d1b36a186f7742523398433",
     "H3ID": "62",
     "index": 62,
-    "itemType": "Earpiece",
+    "itemType": "Generic",
     "rarity": "Superrare",
     "parents": [
       "5d650c3e815116009f6201d2",
@@ -2836,7 +2836,7 @@
     "tarkovID": "5d1b371186f774253763a656",
     "H3ID": "63",
     "index": 63,
-    "itemType": "Earpiece",
+    "itemType": "Generic",
     "rarity": "Superrare",
     "parents": [
       "5d650c3e815116009f6201d2",
@@ -22970,7 +22970,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 2589
+    "value": 2589,
+	"sosigWearables":[
+		"SosigAccessoryCommonBalaklavaGrey"
+	]
   },
   "5ab8f4ff86f77431c60d91ba": {
     "tarkovID": "5ab8f4ff86f77431c60d91ba",
@@ -23020,7 +23023,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 6788
+    "value": 6788,
+	"sosigWearables":[
+		"SosigAccessoryCommonBalaklavaGrey"
+	]
   },
   "572b7fa524597762b747ce82": {
     "tarkovID": "572b7fa524597762b747ce82",
@@ -23070,7 +23076,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 2614
+    "value": 2614,
+	"sosigWearables":[
+		"SosigAccessory_Common_Bandana_Plain_Grey"
+	]
   },
   "59e8936686f77467ce798647": {
     "tarkovID": "59e8936686f77467ce798647",
@@ -23164,7 +23173,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 30454
+    "value": 30454,
+	"sosigWearables":[
+		"SosigAccessoryCommonBalaklavaBlue"
+	]
   },
   "5b4329f05acfc47a86086aa1": {
     "tarkovID": "5b4329f05acfc47a86086aa1",
@@ -23264,7 +23276,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 1786
+    "value": 1786,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_GasMask2"
+	]
   },
   "5b432c305acfc40019478128": {
     "tarkovID": "5b432c305acfc40019478128",
@@ -23314,7 +23329,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 6386
+    "value": 6386,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_GasMask2"
+	]
   },
   "60363c0c92ec1c31037959f5": {
     "tarkovID": "60363c0c92ec1c31037959f5",
@@ -23364,7 +23382,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 8386
+    "value": 8386,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_GasMask2"
+	]
   },
   "5bd071d786f7747e707b93a3": {
     "tarkovID": "5bd071d786f7747e707b93a3",
@@ -23414,7 +23435,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 5125
+    "value": 5125,
+	"sosigWearables":[
+		"SosigAccessory_Common_GoalieMask"
+	]
   },
   "6176a48d732a664031271438": {
     "tarkovID": "6176a48d732a664031271438",
@@ -23464,7 +23488,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 21125
+    "value": 21125,
+	"sosigWearables":[
+		"SosigAccessory_Common_GoalieMask"
+	]
   },
   "5bd0716d86f774171822ef4b": {
     "tarkovID": "5bd0716d86f774171822ef4b",
@@ -23514,7 +23541,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 2862
+    "value": 2862,
+	"sosigWearables":[
+		"SosigAccessory_Common_GoalieMask"
+	]
   },
   "5bd06f5d86f77427101ad47c": {
     "tarkovID": "5bd06f5d86f77427101ad47c",
@@ -23564,7 +23594,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 12533
+    "value": 12533,
+	"sosigWearables":[
+		"SosigAccessory_Common_GoalieMask"
+	]
   },
   "6176a40f0b8c0312ac75a3d3": {
     "tarkovID": "6176a40f0b8c0312ac75a3d3",
@@ -23614,7 +23647,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 25533
+    "value": 25533,
+	"sosigWearables":[
+		"SosigAccessory_Common_GoalieMask"
+	]
   },
   "5b432f3d5acfc4704b4a1dfb": {
     "tarkovID": "5b432f3d5acfc4704b4a1dfb",
@@ -23664,7 +23700,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 3211
+    "value": 3211,
+	"sosigWearables":[
+		"SosigAccessoryCommonBalaklavaGrey"
+	]
   },
   "5e54f79686f7744022011103": {
     "tarkovID": "5e54f79686f7744022011103",
@@ -23714,7 +23753,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 94900
+    "value": 94900,
+	"sosigWearables":[
+		"SosigAccessory_Common_SafteyGoggles"
+	]
   },
   "5b4326435acfc433000ed01d": {
     "tarkovID": "5b4326435acfc433000ed01d",
@@ -23764,7 +23806,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 5244
+    "value": 5244,
+	"sosigWearables":[
+		"SosigAccessory_Common_Bandana_Tartan_Red"
+	]
   },
   "5e71f6be86f77429f2683c44": {
     "tarkovID": "5e71f6be86f77429f2683c44",
@@ -23814,7 +23859,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 487754
+    "value": 487754,
+	"sosigWearables":[
+		"SosigAccessory_Common_Bandana_Tartan_Purple"
+	]
   },
   "5b432b2f5acfc4771e1c6622": {
     "tarkovID": "5b432b2f5acfc4771e1c6622",
@@ -23864,7 +23912,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 23941
+    "value": 23941,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_GasMask1"
+	]
   },
   "5ab8f85d86f7745cd93a1cf5": {
     "tarkovID": "5ab8f85d86f7745cd93a1cf5",
@@ -23914,7 +23965,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 4258
+    "value": 4258,
+	"sosigWearables":[
+		"SosigAccessoryCommonBalaklavaGreen"
+	]
   },
   "5b4325355acfc40019478126": {
     "tarkovID": "5b4325355acfc40019478126",
@@ -23964,7 +24018,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 4040
+    "value": 4040,
+	"sosigWearables":[
+		"SosigAccessoryCommonBalaklavaGreen"
+	]
   },
   "5e54f76986f7740366043752": {
     "tarkovID": "5e54f76986f7740366043752",
@@ -24014,7 +24071,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 42000
+    "value": 42000,
+	"sosigWearables":[
+		"SosigAccessory_Common_Bandana_Plain_Black"
+	]
   },
   "5e71fad086f77422443d4604": {
     "tarkovID": "5e71fad086f77422443d4604",
@@ -24064,7 +24124,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 32000
+    "value": 32000,
+	"sosigWearables":[
+		"SosigAccessory_Common_Bandana_Plain_Purple"
+	]
   },
   "5b432b6c5acfc4001a599bf0": {
     "tarkovID": "5b432b6c5acfc4001a599bf0",
@@ -24114,7 +24177,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 6211
+    "value": 6211,
+	"sosigWearables":[
+		"SosigAccessory_Common_GoalieMask"
+	]
   },
   "5fd8d28367cb5e077335170f": {
     "tarkovID": "5fd8d28367cb5e077335170f",
@@ -24164,7 +24230,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 44300
+    "value": 44300,
+	"sosigWearables":[
+		"SosigAccessoryCommonBalaklavaGrey"
+	]
   },
   "60a7ad3a0c5cb24b0134664a": {
     "tarkovID": "60a7ad3a0c5cb24b0134664a",
@@ -24214,7 +24283,10 @@
     "buffEffects": [],
     "value": 26000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_WelderMask_CamoLEMON"
+	]
   },
   "60a7ad2a2198820d95707a2e": {
     "tarkovID": "60a7ad2a2198820d95707a2e",
@@ -24264,7 +24336,10 @@
     "buffEffects": [],
     "value": 26000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_WelderMask_CamoLEMON"
+	]
   },
   "5b432be65acfc433000ed01f": {
     "tarkovID": "5b432be65acfc433000ed01f",
@@ -26763,7 +26838,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 21709
+    "value": 21709,
+	"sosigWearables":[
+		"Sosig_MF2_Blue_SC_headset"
+	]
   },
   "5b432b965acfc47a8774094e": {
     "tarkovID": "5b432b965acfc47a8774094e",
@@ -26812,7 +26890,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 11962
+    "value": 11962,
+	"sosigWearables":[
+		"Sosig_MF2_Blue_SC_headset"
+	]
   },
   "6033fa48ffd42c541047f728": {
     "tarkovID": "6033fa48ffd42c541047f728",
@@ -26861,7 +26942,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 17000
+    "value": 17000,
+	"sosigWearables":[
+		"Sosig_MF2_Blue_SC_headset"
+	]
   },
   "5aa2ba71e5b5b000137b758f": {
     "tarkovID": "5aa2ba71e5b5b000137b758f",
@@ -26910,7 +26994,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 23154
+    "value": 23154,
+	"sosigWearables":[
+		"Sosig_MF2_Blue_SC_headset"
+	]
   },
   "5c165d832e2216398b5a7e36": {
     "tarkovID": "5c165d832e2216398b5a7e36",
@@ -26959,7 +27046,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 34500
+    "value": 34500,
+	"sosigWearables":[
+		"Sosig_MF2_Blue_SC_headset"
+	]
   },
   "5e4d34ca86f774264f758330": {
     "tarkovID": "5e4d34ca86f774264f758330",
@@ -27008,7 +27098,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 30100
+    "value": 30100,
+	"sosigWearables":[
+		"Sosig_MF2_Blue_SC_headset"
+	]
   },
   "5f60cd6cf2bcbb675b00dac6": {
     "tarkovID": "5f60cd6cf2bcbb675b00dac6",
@@ -27057,7 +27150,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 36100
+    "value": 36100,
+	"sosigWearables":[
+		"Sosig_MF2_Blue_SC_headset"
+	]
   },
   "5a7c4850e899ef00150be885": {
     "tarkovID": "5a7c4850e899ef00150be885",
@@ -39534,7 +39630,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 3454
+    "value": 3454,
+	"sosigWearables":[
+		"SosigAccessoryCommonBalaklavaBrown"
+	]
   },
   "591ae8f986f77406f854be45": {
     "tarkovID": "591ae8f986f77406f854be45",
@@ -41820,7 +41919,10 @@
     "buffEffects": [],
     "value": 16000,
     "modulGroup": null,
-    "modulPart": null
+    "modulPart": null,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_GasMask1"
+	]
   },
   "62a09e08de7ac81993580532": {
     "tarkovID": "62a09e08de7ac81993580532",
@@ -41870,7 +41972,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 41621
+    "value": 41621,
+	"sosigWearables":[
+		"SosigAccessory_Tactical_GasMask1"
+	]
   },
   "62a5c2c98ec41a51b34739c0": {
     "tarkovID": "62a5c2c98ec41a51b34739c0",
@@ -41920,7 +42025,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 14984
+    "value": 14984,
+	"sosigWearables":[
+		"SosigAccessory_Common_GoalieMask"
+	]
   },
   "62a5c333ec21e50cad3b5dc6": {
     "tarkovID": "62a5c333ec21e50cad3b5dc6",
@@ -41970,7 +42078,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 13955
+    "value": 13955,
+	"sosigWearables":[
+		"SosigAccessory_Common_GoalieMask"
+	]
   },
   "62a5c41e8ec41a51b34739c3": {
     "tarkovID": "62a5c41e8ec41a51b34739c3",
@@ -42020,7 +42131,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 14497
+    "value": 14497,
+	"sosigWearables":[
+		"SosigAccessory_Common_GoalieMask"
+	]
   },
   "62a61bbf8ec41a51b34758d2": {
     "tarkovID": "62a61bbf8ec41a51b34758d2",
@@ -42219,7 +42333,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 197360
+    "value": 197360,
+	"sosigWearables":[
+		"Sosig_MF2_Blue_SC_headset"
+	]
   },
   "628e4dd1f477aa12234918aa": {
     "tarkovID": "628e4dd1f477aa12234918aa",
@@ -43166,7 +43283,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 919097
+    "value": 919097,
+	"sosigWearables":[
+		"SosigAccessory_Common_GoalieMask"
+	]
   },
   "63626d904aa74b8fe30ab426": {
     "tarkovID": "63626d904aa74b8fe30ab426",
@@ -43216,7 +43336,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 741454
+    "value": 741454,
+	"sosigWearables":[
+		"SosigAccessoryCommonBalaklavaBlue"
+	]
   },
   "5a16b9fffcdbcb0176308b34": {
     "tarkovID": "5a16b9fffcdbcb0176308b34",
@@ -43265,7 +43388,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 46636
+    "value": 46636,
+	"sosigWearables":[
+		"Sosig_MF2_Blue_SC_headset"
+	]
   },
   "5c066ef40db834001966a595": {
     "tarkovID": "5c066ef40db834001966a595",
