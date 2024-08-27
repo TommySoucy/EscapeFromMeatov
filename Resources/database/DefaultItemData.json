@@ -24389,7 +24389,18 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 2755
+    "value": 2755,
+	"sosigWearables":[
+		"SosigGlassesAngular",
+		"SosigGlassesChic",
+		"SosigGlassesHipster",
+		"SosigGlassesLibrarian",
+		"SosigGlassesOwl",
+		"SosigGlassesRectangular",
+		"SosigGlassesRound",
+		"SosigGlassesSpectacles",
+		"SosigGlassesSpectaclesSmall"
+	]
   },
   "5d6d2ef3a4b93618084f58bd": {
     "tarkovID": "5d6d2ef3a4b93618084f58bd",
@@ -24439,7 +24450,18 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 6700
+    "value": 6700,
+	"sosigWearables":[
+		"SosigGlassesAngular",
+		"SosigGlassesChic",
+		"SosigGlassesHipster",
+		"SosigGlassesLibrarian",
+		"SosigGlassesOwl",
+		"SosigGlassesRectangular",
+		"SosigGlassesRound",
+		"SosigGlassesSpectacles",
+		"SosigGlassesSpectaclesSmall"
+	]
   },
   "5aa2b9aee5b5b00015693121": {
     "tarkovID": "5aa2b9aee5b5b00015693121",
@@ -24489,7 +24511,18 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 3580
+    "value": 3580,
+	"sosigWearables":[
+		"SosigGlassesAngular",
+		"SosigGlassesChic",
+		"SosigGlassesHipster",
+		"SosigGlassesLibrarian",
+		"SosigGlassesOwl",
+		"SosigGlassesRectangular",
+		"SosigGlassesRound",
+		"SosigGlassesSpectacles",
+		"SosigGlassesSpectaclesSmall"
+	]
   },
   "5d5fca1ea4b93635fd598c07": {
     "tarkovID": "5d5fca1ea4b93635fd598c07",
@@ -24539,7 +24572,18 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 3500
+    "value": 3500,
+	"sosigWearables":[
+		"SosigGlassesAngular",
+		"SosigGlassesChic",
+		"SosigGlassesHipster",
+		"SosigGlassesLibrarian",
+		"SosigGlassesOwl",
+		"SosigGlassesRectangular",
+		"SosigGlassesRound",
+		"SosigGlassesSpectacles",
+		"SosigGlassesSpectaclesSmall"
+	]
   },
   "5d6d2e22a4b9361bd5780d05": {
     "tarkovID": "5d6d2e22a4b9361bd5780d05",
@@ -24589,7 +24633,18 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 5600
+    "value": 5600,
+	"sosigWearables":[
+		"SosigGlassesAngular",
+		"SosigGlassesChic",
+		"SosigGlassesHipster",
+		"SosigGlassesLibrarian",
+		"SosigGlassesOwl",
+		"SosigGlassesRectangular",
+		"SosigGlassesRound",
+		"SosigGlassesSpectacles",
+		"SosigGlassesSpectaclesSmall"
+	]
   },
   "5e71f70186f77429ee09f183": {
     "tarkovID": "5e71f70186f77429ee09f183",
@@ -24639,7 +24694,18 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 25600
+    "value": 25600,
+	"sosigWearables":[
+		"SosigGlassesAngular",
+		"SosigGlassesChic",
+		"SosigGlassesHipster",
+		"SosigGlassesLibrarian",
+		"SosigGlassesOwl",
+		"SosigGlassesRectangular",
+		"SosigGlassesRound",
+		"SosigGlassesSpectacles",
+		"SosigGlassesSpectaclesSmall"
+	]
   },
   "59e770b986f7742cbd762754": {
     "tarkovID": "59e770b986f7742cbd762754",
@@ -24689,7 +24755,18 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 2181
+    "value": 2181,
+	"sosigWearables":[
+		"SosigGlassesAngular",
+		"SosigGlassesChic",
+		"SosigGlassesHipster",
+		"SosigGlassesLibrarian",
+		"SosigGlassesOwl",
+		"SosigGlassesRectangular",
+		"SosigGlassesRound",
+		"SosigGlassesSpectacles",
+		"SosigGlassesSpectaclesSmall"
+	]
   },
   "5c1a1cc52e221602b3136e3d": {
     "tarkovID": "5c1a1cc52e221602b3136e3d",
@@ -24739,7 +24816,18 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 4700
+    "value": 4700,
+	"sosigWearables":[
+		"SosigGlassesAngular",
+		"SosigGlassesChic",
+		"SosigGlassesHipster",
+		"SosigGlassesLibrarian",
+		"SosigGlassesOwl",
+		"SosigGlassesRectangular",
+		"SosigGlassesRound",
+		"SosigGlassesSpectacles",
+		"SosigGlassesSpectaclesSmall"
+	]
   },
   "603409c80ca681766b6a0fb2": {
     "tarkovID": "603409c80ca681766b6a0fb2",
@@ -24789,7 +24877,18 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 12000
+    "value": 12000,
+	"sosigWearables":[
+		"SosigGlassesAngular",
+		"SosigGlassesChic",
+		"SosigGlassesHipster",
+		"SosigGlassesLibrarian",
+		"SosigGlassesOwl",
+		"SosigGlassesRectangular",
+		"SosigGlassesRound",
+		"SosigGlassesSpectacles",
+		"SosigGlassesSpectaclesSmall"
+	]
   },
   "557ff21e4bdc2d89578b4586": {
     "tarkovID": "557ff21e4bdc2d89578b4586",
@@ -24839,7 +24938,18 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 1669
+    "value": 1669,
+	"sosigWearables":[
+		"SosigGlassesAngular",
+		"SosigGlassesChic",
+		"SosigGlassesHipster",
+		"SosigGlassesLibrarian",
+		"SosigGlassesOwl",
+		"SosigGlassesRectangular",
+		"SosigGlassesRound",
+		"SosigGlassesSpectacles",
+		"SosigGlassesSpectaclesSmall"
+	]
   },
   "5c0d32fcd174af02a1659c75": {
     "tarkovID": "5c0d32fcd174af02a1659c75",
@@ -24889,7 +24999,18 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 3200
+    "value": 3200,
+	"sosigWearables":[
+		"SosigGlassesAngular",
+		"SosigGlassesChic",
+		"SosigGlassesHipster",
+		"SosigGlassesLibrarian",
+		"SosigGlassesOwl",
+		"SosigGlassesRectangular",
+		"SosigGlassesRound",
+		"SosigGlassesSpectacles",
+		"SosigGlassesSpectaclesSmall"
+	]
   },
   "5aa2b923e5b5b000137b7589": {
     "tarkovID": "5aa2b923e5b5b000137b7589",
@@ -24939,7 +25060,18 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 3084
+    "value": 3084,
+	"sosigWearables":[
+		"SosigGlassesAngular",
+		"SosigGlassesChic",
+		"SosigGlassesHipster",
+		"SosigGlassesLibrarian",
+		"SosigGlassesOwl",
+		"SosigGlassesRectangular",
+		"SosigGlassesRound",
+		"SosigGlassesSpectacles",
+		"SosigGlassesSpectaclesSmall"
+	]
   },
   "5aa2b986e5b5b00014028f4c": {
     "tarkovID": "5aa2b986e5b5b00014028f4c",
@@ -24989,7 +25121,18 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 2028
+    "value": 2028,
+	"sosigWearables":[
+		"SosigGlassesAngular",
+		"SosigGlassesChic",
+		"SosigGlassesHipster",
+		"SosigGlassesLibrarian",
+		"SosigGlassesOwl",
+		"SosigGlassesRectangular",
+		"SosigGlassesRound",
+		"SosigGlassesSpectacles",
+		"SosigGlassesSpectaclesSmall"
+	]
   },
   "5b43271c5acfc432ff4dce65": {
     "tarkovID": "5b43271c5acfc432ff4dce65",
@@ -40603,7 +40746,10 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 25527
+    "value": 25527,
+	"sosigWearables":[
+		"SosigAccessory_Common_SafteyGoggles"
+	]
   },
   "61c18db6dfd64163ea78fbb4": {
     "tarkovID": "61c18db6dfd64163ea78fbb4",
@@ -42234,7 +42380,18 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 53456
+    "value": 53456,
+	"sosigWearables":[
+		"SosigGlassesAngular",
+		"SosigGlassesChic",
+		"SosigGlassesHipster",
+		"SosigGlassesLibrarian",
+		"SosigGlassesOwl",
+		"SosigGlassesRectangular",
+		"SosigGlassesRound",
+		"SosigGlassesSpectacles",
+		"SosigGlassesSpectaclesSmall"
+	]
   },
   "62a61c988ec41a51b34758d5": {
     "tarkovID": "62a61c988ec41a51b34758d5",
@@ -42284,7 +42441,18 @@
     "buffEffects": [],
     "modulGroup": null,
     "modulPart": null,
-    "value": 31266
+    "value": 31266,
+	"sosigWearables":[
+		"SosigGlassesAngular",
+		"SosigGlassesChic",
+		"SosigGlassesHipster",
+		"SosigGlassesLibrarian",
+		"SosigGlassesOwl",
+		"SosigGlassesRectangular",
+		"SosigGlassesRound",
+		"SosigGlassesSpectacles",
+		"SosigGlassesSpectaclesSmall"
+	]
   },
   "628e4e576d783146b124c64d": {
     "tarkovID": "628e4e576d783146b124c64d",
