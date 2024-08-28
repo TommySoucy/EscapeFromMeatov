@@ -37,7 +37,7 @@ namespace EFM
         /// </summary>
         public Dictionary<string, Dictionary<MeatovItemData, int>> loot;
 
-        public BotInventory(JObject botData)
+        public BotInventory(JObject botData, bool PMC, bool USEC)
         {
             TODO: // Take into account blocksEarpiece, blocksEyewear, etc
             equipment = new Dictionary<string, MeatovItemData>();
@@ -356,6 +356,7 @@ namespace EFM
                                 }
                             }
                         }
+                        todo e: // add dogtags if PMC
 
                         break;
                     }

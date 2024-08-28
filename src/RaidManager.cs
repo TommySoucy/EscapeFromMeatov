@@ -189,16 +189,21 @@ namespace EFM
             if(Mod.botData.TryGetValue(USEC ? "usec" : "bear", out JObject botData))
             {
                 // Generate sosig template
+                // Time until skirmish when recognizing an enemy entity will increase faster due to StateBailCheck_ShouldISkirmish patch
+                // ADS time will be faster due to SosigHand.Hold patch
+                // Supression will decrease faster due to SuppresionUpdate patch
                 SosigConfigTemplate sosigTemplate = ScriptableObject.CreateInstance<SosigConfigTemplate>();
                 sosigTemplate.RegistersPassiveThreats = true;
                 sosigTemplate.DoesDropWeaponsOnBallistic = false;
-                // Supression will decrease faster due to SuppresionUpdate patch
-                TODO e: // Implement SuppresionUpdate patch
-                sosigTemplate.SuppressionMult = 0.05f; // Minimum 20 supression events to fully supress
-                // Time until skirmish when recognizing an enemy entity will increase faster  due to StateBailCheck_ShouldISkirmish patch
-                TODO e: // Implement StateBailCheck_ShouldISkirmish patch
-                // ADS time will be much faster due to SosigHand.Hold patch
-                TODO e: // Implement sosigHand.Hold patch
+                sosigTemplate.ShudderThreshold = 1000; // High number, sosig should probably just never shudder
+                sosigTemplate.ConfusionThreshold = 1000; // High number, sosig should probably just never be consfused
+                sosigTemplate.ConfusionMultiplier = 0;
+                sosigTemplate.ConfusionTimeMax = 0;
+                // Note that stun settings are unmodified
+                sosigTemplate.CanBeKnockedOut = false;
+                sosigTemplate.MaxUnconsciousTime = 0;
+                sosigTemplate.CanBeGrabbed = false;
+                sosigTemplate.SuppressionMult = 0.05f; // Minimum 20 supression events to fully suppress
 
                 // Generate inventory
                 BotInventory botInventory = new BotInventory(botData);
@@ -212,6 +217,24 @@ namespace EFM
                 if(enemyIFF > 31)
                 {
                     enemyIFF = 2;
+                }
+
+                if(Networking.currentInstance != null)
+                {
+                    using (Packet packet = new Packet(setRaidenemyIFFPacketID))
+                    {
+                        packet.Write(Networking.currentInstance.ID);
+                        packet.Write(enemyIFF);
+
+                        if (ThreadManager.host)
+                        {
+                            ServerSend.SendTCPDataToAll(packet, true);
+                        }
+                        else
+                        {
+                            ClientSend.SendTCPData(packet, true);
+                        }
+                    }
                 }
             }
             else

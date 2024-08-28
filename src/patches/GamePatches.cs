@@ -8,7 +8,6 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
-using static EFM.MeatovItem;
 
 namespace EFM
 {
@@ -470,6 +469,24 @@ namespace EFM
             PatchController.Verify(selectOriginal, harmony, true);
             harmony.Patch(updateDisplayOriginal, new HarmonyMethod(updateDisplayPrefix));
             harmony.Patch(selectOriginal, new HarmonyMethod(selectPrefix));
+
+            // SosigPatch
+            MethodInfo supressionUpdateOriginal = typeof(Sosig).GetMethod("SuppresionUpdate", BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo supressionUpdatePrefix = typeof(SosigPatch).GetMethod("SuppresionUpdatePrefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo stateBailCheckShouldISkirmishOriginal = typeof(Sosig).GetMethod("StateBailCheck_ShouldISkirmish", BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo stateBailCheckShouldISkirmishPrefix = typeof(SosigPatch).GetMethod("StateBailCheck_ShouldISkirmishPrefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            PatchController.Verify(supressionUpdateOriginal, harmony, true);
+            PatchController.Verify(stateBailCheckShouldISkirmishOriginal, harmony, true);
+            harmony.Patch(supressionUpdateOriginal, new HarmonyMethod(supressionUpdatePrefix));
+            harmony.Patch(stateBailCheckShouldISkirmishOriginal, new HarmonyMethod(stateBailCheckShouldISkirmishPrefix));
+
+            // SosigHandPatch
+            MethodInfo sosigHandHoldOriginal = typeof(SosigHand).GetMethod("Hold", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo sosigHandHoldPrefix = typeof(SosigHandPatch).GetMethod("HoldPrefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            PatchController.Verify(sosigHandHoldOriginal, harmony, true);
+            harmony.Patch(sosigHandHoldOriginal, new HarmonyMethod(sosigHandHoldPrefix));
         }
     }
 
@@ -5227,6 +5244,246 @@ namespace EFM
                     }
                 }
             }
+        }
+    }
+
+    // Patches Sosig
+    class SosigPatch
+    {
+        static bool SuppresionUpdatePrefix(Sosig __instance)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
+            if (__instance.m_isInvuln || __instance.m_isDamResist)
+            {
+                __instance.m_suppressionLevel = 0f;
+            }
+            // No matter body state, decrease suppression level faster
+            if (__instance.m_suppressionLevel > 0f)
+            {
+                __instance.m_suppressionLevel -= Time.deltaTime * 5f;
+            }
+
+            return false;
+        }
+
+        static bool StateBailCheck_ShouldISkirmishPrefix(Sosig __instance, ref bool __result)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
+            if (__instance.m_isBlinded)
+            {
+                __result = false;
+                return false;
+            }
+            if (__instance.Priority.HasFreshTarget())
+            {
+                if (__instance.Priority.IsTargetEntity() && !__instance.Priority.GetTargetEntity().IsPassiveEntity)
+                {
+                    // Recognition time is now 0.5s if not investigating, and 0.05s if investigating
+                    float num = 2f;
+                    if (__instance.CurrentOrder == Sosig.SosigOrder.Investigate)
+                    {
+                        num = 20f;
+                    }
+                    if (__instance.m_entityRecognition < 1f)
+                    {
+                        __instance.m_entityRecognition += Time.deltaTime * num;
+                    }
+                    if (__instance.m_entityRecognition >= 1f)
+                    {
+                        __instance.SetCurrentOrder(Sosig.SosigOrder.Skirmish);
+                        __result = true;
+                        return false;
+                    }
+                }
+                else if (__instance.m_entityRecognition > 0f)
+                {
+                    __instance.m_entityRecognition -= Time.deltaTime;
+                }
+                if (__instance.CurrentOrder != Sosig.SosigOrder.Investigate && __instance.m_alertnessLevel >= 1f)
+                {
+                    if (__instance.Priority.GetTargetEntity() != null && __instance.Priority.GetTargetEntity().IsPassiveEntity)
+                    {
+                        __instance.Priority.DisregardEntity(__instance.Priority.GetTargetEntity());
+                    }
+                    __instance.SetCurrentOrder(Sosig.SosigOrder.Investigate);
+                    __instance.m_investigateCooldown = UnityEngine.Random.Range(8f, 11f);
+                    __result = true;
+                    return false;
+                }
+            }
+            else if (__instance.m_entityRecognition > 0f)
+            {
+                __instance.m_entityRecognition -= Time.deltaTime;
+            }
+
+            __result = false;
+
+            return false;
+        }
+    }
+
+    // Patches SosigHand
+    class SosigHandPatch
+    {
+        static bool HoldPrefix(SosigHand __instance)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
+            if (!__instance.IsHoldingObject || __instance.HeldObject == null)
+            {
+                return false;
+            }
+            if (__instance.Root == null)
+            {
+                return false;
+            }
+            __instance.UpdateGunHandlingPose();
+            Vector3 position = __instance.Target.position;
+            Quaternion rotation = __instance.Target.rotation;
+            Vector3 position2 = __instance.HeldObject.RecoilHolder.position;
+            Quaternion rotation2 = __instance.HeldObject.RecoilHolder.rotation;
+            if (__instance.HeldObject.O.IsHeld)
+            {
+                float num = Vector3.Distance(position, position2);
+                if (num > 0.7f)
+                {
+                    __instance.DropHeldObject();
+                    return false;
+                }
+            }
+            else
+            {
+                float num2 = Vector3.Distance(position, position2);
+                if (num2 < 0.2f)
+                {
+                    __instance.m_timeAwayFromTarget = 0f;
+                }
+                else
+                {
+                    __instance.m_timeAwayFromTarget += Time.deltaTime;
+                    if (__instance.m_timeAwayFromTarget > 1f)
+                    {
+                        __instance.HeldObject.O.RootRigidbody.position = position;
+                        __instance.HeldObject.O.RootRigidbody.rotation = rotation;
+                    }
+                }
+            }
+            if ((__instance.HeldObject.Type == SosigWeapon.SosigWeaponType.Melee || __instance.HeldObject.Type == SosigWeapon.SosigWeaponType.Grenade) && __instance.HeldObject.O.MP.IsMeleeWeapon)
+            {
+                Vector3 vector = __instance.Target.position - __instance.m_lastPos;
+                vector *= 1f / Time.deltaTime;
+                __instance.HeldObject.O.SetFakeHand(vector, __instance.Target.position);
+            }
+            float d = 0f;
+            float d2 = 0f;
+            float num3 = 0f;
+            if (__instance.m_posedToward != null && __instance.Pose != SosigHand.SosigHandPose.Melee)
+            {
+                if (__instance.HasActiveAimPoint)
+                {
+                    if (__instance.Pose == SosigHand.SosigHandPose.Aimed)
+                    {
+                        d = __instance.vertOffsets[__instance.m_curFiringPose_Aimed];
+                        d2 = __instance.forwardOffsets[__instance.m_curFiringPose_Aimed];
+                        num3 = __instance.tiltLerpOffsets[__instance.m_curFiringPose_Aimed];
+                    }
+                    else if (__instance.Pose == SosigHand.SosigHandPose.HipFire)
+                    {
+                        d = __instance.vertOffsets[__instance.m_curFiringPose_Hip];
+                        d2 = __instance.forwardOffsets[__instance.m_curFiringPose_Hip];
+                        num3 = __instance.tiltLerpOffsets[__instance.m_curFiringPose_Hip];
+                    }
+                }
+                Transform transform = __instance.S.Links[1].transform;
+                float num4 = 4f;
+                if (__instance.S.IsFrozen)
+                {
+                    num4 = 0.25f;
+                }
+                if (__instance.S.IsSpeedUp)
+                {
+                    num4 = 8f;
+                }
+                __instance.Target.position = Vector3.Lerp(position, __instance.m_posedToward.position + transform.up * d + __instance.m_posedToward.forward * d2, Time.deltaTime * num4);
+                __instance.Target.rotation = Quaternion.Slerp(rotation, __instance.m_posedToward.rotation, Time.deltaTime * num4);
+            }
+            Vector3 b = position2;
+            Quaternion rotation3 = rotation2;
+            Vector3 a = position;
+            Quaternion lhs = rotation;
+            if (__instance.HasActiveAimPoint && (__instance.Pose == SosigHand.SosigHandPose.HipFire || __instance.Pose == SosigHand.SosigHandPose.Aimed))
+            {
+                float num5 = 0f;
+                float num6 = 0f;
+                if (__instance.Pose == SosigHand.SosigHandPose.HipFire)
+                {
+                    num5 = __instance.HeldObject.Hipfire_HorizontalLimit;
+                    num6 = __instance.HeldObject.Hipfire_VerticalLimit;
+                }
+                if (__instance.Pose == SosigHand.SosigHandPose.Aimed)
+                {
+                    num5 = __instance.HeldObject.Aim_HorizontalLimit;
+                    num6 = __instance.HeldObject.Aim_VerticalLimit;
+                }
+                Vector3 vector2 = __instance.m_aimTowardPoint - position;
+                Vector3 forward = __instance.Target.forward;
+                Vector3 current = Vector3.RotateTowards(forward, Vector3.ProjectOnPlane(vector2, __instance.Target.right), num6 * 0.0174533f, 0f);
+                Vector3 forward2 = Vector3.RotateTowards(current, vector2, num5 * 0.0174533f, 0f);
+                if (num3 > 0f)
+                {
+                    Vector3 localPosition = __instance.Target.transform.localPosition;
+                    localPosition.z = 0f;
+                    localPosition.y = 0f;
+                    localPosition.Normalize();
+                    Vector3 upwards = Vector3.Slerp(__instance.Target.up, localPosition.x * -__instance.Target.right, num3);
+                    lhs = Quaternion.LookRotation(forward2, upwards);
+                }
+                else
+                {
+                    lhs = Quaternion.LookRotation(forward2, __instance.Target.up);
+                }
+            }
+            Vector3 a2 = a - b;
+            Quaternion quaternion = lhs * Quaternion.Inverse(rotation3);
+            float deltaTime = Time.deltaTime;
+            float num7;
+            Vector3 a3;
+            quaternion.ToAngleAxis(out num7, out a3);
+            float d3 = 0.5f;
+            if (__instance.S.IsConfused)
+            {
+                d3 = 0.1f;
+            }
+            if (__instance.S.IsStunned || __instance.S.IsUnconscious)
+            {
+                d3 = 0.02f;
+            }
+            if (num7 > 180f)
+            {
+                num7 -= 360f;
+            }
+            // Make ADS faster
+            if (num7 != 0f)
+            {
+                Vector3 target = deltaTime * num7 * a3 * __instance.S.AttachedRotationMultiplier * __instance.HeldObject.PosRotMult * d3;
+                __instance.HeldObject.O.RootRigidbody.angularVelocity = Vector3.MoveTowards(__instance.HeldObject.O.RootRigidbody.angularVelocity, target, __instance.S.AttachedRotationFudge * 5 * Time.fixedDeltaTime);
+            }
+            Vector3 target2 = a2 * __instance.S.AttachedPositionMultiplier * 0.5f * __instance.HeldObject.PosStrengthMult * deltaTime;
+            __instance.HeldObject.O.RootRigidbody.velocity = Vector3.MoveTowards(__instance.HeldObject.O.RootRigidbody.velocity, target2, __instance.S.AttachedPositionFudge * 5 * deltaTime);
+            __instance.m_lastPos = __instance.Target.position;
+
+            return false;
         }
     }
 
