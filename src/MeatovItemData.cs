@@ -173,7 +173,16 @@ namespace EFM
         public RagFairWishlistItemView ragFairWishlistItemView;
 
         // Sosig equivalent
-        public List<FVRObject> sosigEquivalents;
+        public List<FVRObject> sosigItems;
+        public List<FVRObject> sosigEarpiece;
+        public List<FVRObject> sosigHeadwear;
+        public List<FVRObject> sosigFacewear;
+        public List<FVRObject> sosigTorso;
+        public List<FVRObject> sosigBackpack;
+        public bool sosigAbdoMatchTorso; // Item in abdo should only be used with the item in torso with the same index
+        public Dictionary<FVRObject, bool> sosigAbdo; // False value means no leg
+        public bool sosigLegMatchAbdo; // Item in leg should only be used with the item in abdo with the same index
+        public List<FVRObject> sosigLeg;
 
         // Events
         public delegate void OnItemFoundDelegate();
@@ -398,33 +407,134 @@ namespace EFM
 
             if (data["sosigItems"] != null)
             {
-                sosigEquivalents = new List<FVRObject>();
-                JArray sosigItems = data["sosigItems"] as JArray;
-                for(int i=0; i < sosigItems.Count; ++i)
+                sosigItems = new List<FVRObject>();
+                JArray sosigItemData = data["sosigItems"] as JArray;
+                for(int i=0; i < sosigItemData.Count; ++i)
                 {
-                    if(IM.OD.TryGetValue(sosigItems[i].ToString(), out FVRObject sosigItem))
+                    if(IM.OD.TryGetValue(sosigItemData[i].ToString(), out FVRObject sosigItem))
                     {
-                        sosigEquivalents.Add(sosigItem);
+                        sosigItems.Add(sosigItem);
                     }
                     else
                     {
-                        Mod.LogError("Could not find sosig item: " + sosigItems[i].ToString()+" for item "+tarkovID);
+                        Mod.LogError("Could not find sosig item: " + sosigItemData[i].ToString()+" for item "+tarkovID);
                     }
                 }
             }
             if (data["sosigWearables"] != null)
             {
-                sosigEquivalents = new List<FVRObject>();
-                JArray sosigWearables = data["sosigWearables"] as JArray;
-                for (int i = 0; i < sosigWearables.Count; ++i)
+                if (data["sosigWearables"]["earpiece"] != null)
                 {
-                    if (IM.OD.TryGetValue(sosigWearables[i].ToString(), out FVRObject sosigWearable))
+                    sosigEarpiece = new List<FVRObject>();
+                    JArray sosigWearables = data["sosigWearables"]["earpiece"] as JArray;
+                    for (int i = 0; i < sosigWearables.Count; ++i)
                     {
-                        sosigEquivalents.Add(sosigWearable);
+                        if (IM.OD.TryGetValue(sosigWearables[i].ToString(), out FVRObject sosigWearable))
+                        {
+                            sosigEarpiece.Add(sosigWearable);
+                        }
+                        else
+                        {
+                            Mod.LogError("Could not find sosig earpiece: " + sosigWearables[i].ToString() + " for item " + tarkovID);
+                        }
                     }
-                    else
+                }
+                if (data["sosigWearables"]["headwear"] != null)
+                {
+                    sosigHeadwear = new List<FVRObject>();
+                    JArray sosigWearables = data["sosigWearables"]["headwear"] as JArray;
+                    for (int i = 0; i < sosigWearables.Count; ++i)
                     {
-                        Mod.LogError("Could not find sosig wearable: " + sosigWearables[i].ToString() + " for item " + tarkovID);
+                        if (IM.OD.TryGetValue(sosigWearables[i].ToString(), out FVRObject sosigWearable))
+                        {
+                            sosigHeadwear.Add(sosigWearable);
+                        }
+                        else
+                        {
+                            Mod.LogError("Could not find sosig headwear: " + sosigWearables[i].ToString() + " for item " + tarkovID);
+                        }
+                    }
+                }
+                if (data["sosigWearables"]["facewear"] != null)
+                {
+                    sosigFacewear = new List<FVRObject>();
+                    JArray sosigWearables = data["sosigWearables"]["facewear"] as JArray;
+                    for (int i = 0; i < sosigWearables.Count; ++i)
+                    {
+                        if (IM.OD.TryGetValue(sosigWearables[i].ToString(), out FVRObject sosigWearable))
+                        {
+                            sosigFacewear.Add(sosigWearable);
+                        }
+                        else
+                        {
+                            Mod.LogError("Could not find sosig facewear: " + sosigWearables[i].ToString() + " for item " + tarkovID);
+                        }
+                    }
+                }
+                if (data["sosigWearables"]["torso"] != null)
+                {
+                    sosigTorso = new List<FVRObject>();
+                    JArray sosigWearables = data["sosigWearables"]["torso"] as JArray;
+                    for (int i = 0; i < sosigWearables.Count; ++i)
+                    {
+                        if (IM.OD.TryGetValue(sosigWearables[i].ToString(), out FVRObject sosigWearable))
+                        {
+                            sosigTorso.Add(sosigWearable);
+                        }
+                        else
+                        {
+                            Mod.LogError("Could not find sosig torso: " + sosigWearables[i].ToString() + " for item " + tarkovID);
+                        }
+                    }
+                }
+                if (data["sosigWearables"]["backpack"] != null)
+                {
+                    sosigBackpack = new List<FVRObject>();
+                    JArray sosigWearables = data["sosigWearables"]["backpack"] as JArray;
+                    for (int i = 0; i < sosigWearables.Count; ++i)
+                    {
+                        if (IM.OD.TryGetValue(sosigWearables[i].ToString(), out FVRObject sosigWearable))
+                        {
+                            sosigBackpack.Add(sosigWearable);
+                        }
+                        else
+                        {
+                            Mod.LogError("Could not find sosig backpack: " + sosigWearables[i].ToString() + " for item " + tarkovID);
+                        }
+                    }
+                }
+                if (data["sosigWearables"]["abdo"] != null)
+                {
+                    sosigAbdoMatchTorso = (bool)data["sosigWearables"]["abdoMatchTorso"];
+                    sosigAbdo = new Dictionary<FVRObject, bool>();
+                    Dictionary<string, bool> sosigWearables = data["sosigWearables"]["abdo"].ToObject<Dictionary<string, bool>>();
+                    foreach (KeyValuePair<string, bool> abdoEntry in sosigWearables)
+                    {
+                        if (IM.OD.TryGetValue(abdoEntry.Key, out FVRObject sosigWearable))
+                        {
+                            sosigAbdo.Add(sosigWearable, abdoEntry.Value);
+                        }
+                        else
+                        {
+                            Mod.LogError("Could not find sosig abdo: " + abdoEntry.Key + " for item " + tarkovID);
+                        }
+                    }
+                }
+                if (data["sosigWearables"]["leg"] != null)
+                {
+                    sosigLegMatchAbdo = (bool)data["sosigWearables"]["legMatchAbdo"];
+                    sosigLeg = new List<FVRObject>();
+                    JArray sosigWearables = data["sosigWearables"]["leg"] as JArray;
+                    for (int i = 0; i < sosigWearables.Count; ++i)
+                    {
+                        if (IM.OD.TryGetValue(sosigWearables[i].ToString(), out FVRObject sosigWearable))
+                        {
+                            sosigLeg.Add(sosigWearable);
+                        }
+                        else
+                        {
+                            Mod.LogError("Could not find sosig leg: " + sosigWearables[i].ToString() + " for item " + tarkovID);
+                        }
                     }
                 }
             }

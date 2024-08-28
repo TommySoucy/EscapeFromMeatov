@@ -20,6 +20,7 @@ namespace EFM
 
         public Spawn spawn; // Spawn used
         public bool AIPMCSpawned;
+        public int enemyIFF = 2; // Players are 0, Scavs are 1, PMCs and scav bosses get incremental IFF
 
         public void Awake()
         {
@@ -98,7 +99,7 @@ namespace EFM
         {
             if (spawn.square)
             {
-                return new Vector3(spawn.transform.position.x + UnityEngine.Random.Range(-spawn.range, spawn.range), spawn.transform.position.y, spawn.transform.position.z + UnityEngine.Random.Range(-spawn.range, spawn.range);
+                return new Vector3(spawn.transform.position.x + UnityEngine.Random.Range(-spawn.range, spawn.range), spawn.transform.position.y, spawn.transform.position.z + UnityEngine.Random.Range(-spawn.range, spawn.range));
             }
             else
             {
@@ -194,13 +195,12 @@ namespace EFM
                 BotInventory botInventory = new BotInventory(botData);
 
                 // Generate outfit from inventory
-                SosigOutfitConfig outfitConfig = botInventory.GetOutfitConfig();
+                List<FVRObject>[] botOutfit = botInventory.GetOutfit(true);
 
-                // Generate route through PMCNavPoints
+                // Generate route through PMCNavPoints, use CommandPathTo once spawned to order the Sosig through them
                 TODO e:
 
-                TODO: // Should not be default template
-                AnvilManager.Run(SpawnSosig(spawn, botInventory, new SosigConfigTemplate(), outfitConfig));
+                AnvilManager.Run(SpawnSosig(spawn, botInventory, new SosigConfigTemplate(), botOutfit));
             }
             else
             {
@@ -208,8 +208,7 @@ namespace EFM
             }
         }
 
-        public IEnumerator SpawnSosig(Spawn spawn, BotInventory botInventory, SosigConfigTemplate template, SosigOutfitConfig outfit,
-                                      GameObject weaponPrefab, GameObject weaponPrefab2, GameObject weaponPrefab3, int IFF)
+        public IEnumerator SpawnSosig(Spawn spawn, BotInventory botInventory, SosigConfigTemplate template, List<FVRObject>[] outfit, int IFF)
         {
             yield return IM.OD["SosigBody"].GetGameObjectAsync();
             GameObject sosigPrefab = IM.OD["SosigBody"].GetGameObject();
