@@ -189,7 +189,16 @@ namespace EFM
             if(Mod.botData.TryGetValue(USEC ? "usec" : "bear", out JObject botData))
             {
                 // Generate sosig template
-                TODO e:
+                SosigConfigTemplate sosigTemplate = ScriptableObject.CreateInstance<SosigConfigTemplate>();
+                sosigTemplate.RegistersPassiveThreats = true;
+                sosigTemplate.DoesDropWeaponsOnBallistic = false;
+                // Supression will decrease faster due to SuppresionUpdate patch
+                TODO e: // Implement SuppresionUpdate patch
+                sosigTemplate.SuppressionMult = 0.05f; // Minimum 20 supression events to fully supress
+                // Time until skirmish when recognizing an enemy entity will increase faster  due to StateBailCheck_ShouldISkirmish patch
+                TODO e: // Implement StateBailCheck_ShouldISkirmish patch
+                // ADS time will be much faster due to SosigHand.Hold patch
+                TODO e: // Implement sosigHand.Hold patch
 
                 // Generate inventory
                 BotInventory botInventory = new BotInventory(botData);
@@ -197,10 +206,13 @@ namespace EFM
                 // Generate outfit from inventory
                 List<FVRObject>[] botOutfit = botInventory.GetOutfit(true);
 
-                // Generate route through PMCNavPoints, use CommandPathTo once spawned to order the Sosig through them
-                TODO e:
+                AnvilManager.Run(SpawnSosig(spawn, botInventory, new SosigConfigTemplate(), botOutfit, enemyIFF++));
 
-                AnvilManager.Run(SpawnSosig(spawn, botInventory, new SosigConfigTemplate(), botOutfit));
+                // Loop IFF once we've reached max
+                if(enemyIFF > 31)
+                {
+                    enemyIFF = 2;
+                }
             }
             else
             {
