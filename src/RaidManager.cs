@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Valve.Newtonsoft.Json.Linq;
-using Valve.VR.InteractionSystem;
 
 namespace EFM
 {
@@ -242,7 +241,7 @@ namespace EFM
                 // Generate outfit from inventory
                 List<FVRObject>[] botOutfit = botInventory.GetOutfit(true);
 
-                AnvilManager.Run(SpawnSosig(spawn, botInventory, new SosigConfigTemplate(), botOutfit, enemyIFF++));
+                AnvilManager.Run(SpawnSosig(spawn, botInventory, new SosigConfigTemplate(), botOutfit, enemyIFF++, true, USEC));
 
                 // Loop IFF once we've reached max
                 if(enemyIFF > 31)
@@ -276,7 +275,7 @@ namespace EFM
             }
         }
 
-        public IEnumerator SpawnSosig(Spawn spawn, BotInventory botInventory, SosigConfigTemplate template, List<FVRObject>[] outfit, int IFF)
+        public IEnumerator SpawnSosig(Spawn spawn, BotInventory botInventory, SosigConfigTemplate template, List<FVRObject>[] outfit, int IFF, bool PMC, bool USEC)
         {
             yield return IM.OD["SosigBody"].GetGameObjectAsync();
             GameObject sosigPrefab = IM.OD["SosigBody"].GetGameObject();
@@ -286,11 +285,105 @@ namespace EFM
                 yield break;
             }
 
-            GameObject sosigObject = Instantiate(sosigPrefab, GetSpawnPosition(spawn), Quaternion.identity);
+            Vector3 spawnPos = GetSpawnPosition(spawn);
+            GameObject sosigObject = Instantiate(sosigPrefab, spawnPos, Quaternion.identity);
             Sosig sosig = sosigObject.GetComponentInChildren<Sosig>();
             sosig.Configure(template);
             sosig.SetIFF(IFF);
             AI AIScript = sosigObject.AddComponent<AI>();
+            AIScript.botInventory = botInventory;
+            AIScript.PMC = PMC;
+            AIScript.USEC = USEC;
+
+            // Equip sosig items
+            sosig.InitHands();
+            sosig.Inventory.Init();
+            sosig.Inventory.FillAllAmmo();
+            if (botInventory.equipment.TryGetValue("FirstPrimaryWeapon", out MeatovItemData firstPrimaryWeaponData) && firstPrimaryWeaponData.sosigItems != null && firstPrimaryWeaponData.sosigItems.Count > 0)
+            {
+                FVRObject firstPrimaryWeaponFVROObject = firstPrimaryWeaponData.sosigItems[UnityEngine.Random.Range(0, firstPrimaryWeaponData.sosigItems.Count)];
+                yield return firstPrimaryWeaponFVROObject.GetGameObjectAsync();
+                GameObject firstPrimaryWeaponPrefab = firstPrimaryWeaponFVROObject.GetGameObject();
+                if (firstPrimaryWeaponPrefab == null)
+                {
+                    Mod.LogError("Failed to get FirstPrimaryWeapon prefab for " + firstPrimaryWeaponData.tarkovID);
+                }
+                else
+                {
+                    SosigWeapon component = UnityEngine.Object.Instantiate<GameObject>(firstPrimaryWeaponPrefab, spawnPos + Vector3.up * 0.1f, Quaternion.identity).GetComponent<SosigWeapon>();
+                    component.SetAutoDestroy(true);
+                    component.O.SpawnLockable = false;
+                    component.O.IsPickUpLocked = true;
+                    component.SetAmmoClamping(true);
+                    component.IsShakeReloadable = false;
+                    sosig.ForceEquip(component);
+                }
+            }
+
+            if (sosig.Inventory.IsThereAFreeSlot() && botInventory.equipment.TryGetValue("SecondPrimaryWeapon", out MeatovItemData secondPrimaryWeaponData) && secondPrimaryWeaponData.sosigItems != null && secondPrimaryWeaponData.sosigItems.Count > 0)
+            {
+                FVRObject secondPrimaryWeaponFVROObject = secondPrimaryWeaponData.sosigItems[UnityEngine.Random.Range(0, secondPrimaryWeaponData.sosigItems.Count)];
+                yield return secondPrimaryWeaponFVROObject.GetGameObjectAsync();
+                GameObject secondPrimaryWeaponPrefab = secondPrimaryWeaponFVROObject.GetGameObject();
+                if (secondPrimaryWeaponPrefab == null)
+                {
+                    Mod.LogError("Failed to get SecondPrimaryWeapon prefab for " + secondPrimaryWeaponData.tarkovID);
+                }
+                else
+                {
+                    SosigWeapon component2 = UnityEngine.Object.Instantiate<GameObject>(secondPrimaryWeaponPrefab, spawnPos + Vector3.up * 0.1f, Quaternion.identity).GetComponent<SosigWeapon>();
+                    component2.SetAutoDestroy(true);
+                    component2.O.SpawnLockable = false;
+                    component2.O.IsPickUpLocked = true;
+                    component2.SetAmmoClamping(true);
+                    component2.IsShakeReloadable = false;
+                    sosig.ForceEquip(component2);
+                }
+            }
+
+            if (sosig.Inventory.IsThereAFreeSlot() && botInventory.equipment.TryGetValue("Holster", out MeatovItemData holsterWeaponData) && holsterWeaponData.sosigItems != null && holsterWeaponData.sosigItems.Count > 0)
+            {
+                FVRObject holsterWeaponFVROObject = holsterWeaponData.sosigItems[UnityEngine.Random.Range(0, holsterWeaponData.sosigItems.Count)];
+                yield return holsterWeaponFVROObject.GetGameObjectAsync();
+                GameObject holsterWeaponPrefab = holsterWeaponFVROObject.GetGameObject();
+                if (holsterWeaponPrefab == null)
+                {
+                    Mod.LogError("Failed to get Holster prefab for " + holsterWeaponData.tarkovID);
+                }
+                else
+                {
+                    SosigWeapon component2 = UnityEngine.Object.Instantiate<GameObject>(holsterWeaponPrefab, spawnPos + Vector3.up * 0.1f, Quaternion.identity).GetComponent<SosigWeapon>();
+                    component2.SetAutoDestroy(true);
+                    component2.O.SpawnLockable = false;
+                    component2.O.IsPickUpLocked = true;
+                    component2.SetAmmoClamping(true);
+                    component2.IsShakeReloadable = false;
+                    sosig.ForceEquip(component2);
+                }
+            }
+
+            if (sosig.Inventory.IsThereAFreeSlot() && botInventory.equipment.TryGetValue("Scabbard", out MeatovItemData scabbardWeaponData) && scabbardWeaponData.sosigItems != null && scabbardWeaponData.sosigItems.Count > 0)
+            {
+                FVRObject scabbardWeaponFVROObject = scabbardWeaponData.sosigItems[UnityEngine.Random.Range(0, scabbardWeaponData.sosigItems.Count)];
+                yield return scabbardWeaponFVROObject.GetGameObjectAsync();
+                GameObject scabbardWeaponPrefab = scabbardWeaponFVROObject.GetGameObject();
+                if (scabbardWeaponPrefab == null)
+                {
+                    Mod.LogError("Failed to get Scabbard prefab for " + scabbardWeaponData.tarkovID);
+                }
+                else
+                {
+                    SosigWeapon component2 = UnityEngine.Object.Instantiate<GameObject>(scabbardWeaponPrefab, spawnPos + Vector3.up * 0.1f, Quaternion.identity).GetComponent<SosigWeapon>();
+                    component2.SetAutoDestroy(true);
+                    component2.O.SpawnLockable = false;
+                    component2.O.IsPickUpLocked = true;
+                    component2.SetAmmoClamping(true);
+                    component2.IsShakeReloadable = false;
+                    sosig.ForceEquip(component2);
+                }
+            }
+
+            TODO: // Do what TNH_Manager.SpawnAccesoryToLink does to spawn outfit
         }
 
         public void OnDestroy()

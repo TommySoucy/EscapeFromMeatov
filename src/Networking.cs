@@ -595,15 +595,35 @@ namespace EFM
                     else
                     {
                         int spawnIndex = -1;
+                        bool consume = false;
                         if (PMC)
                         {
-                            spawnIndex = currentInstance.PMCSpawnIndices[UnityEngine.Random.Range(0, currentInstance.PMCSpawnIndices.Count)];
+                            if (currentInstance.PMCSpawnIndices.Count > 0)
+                            {
+                                spawnIndex = currentInstance.PMCSpawnIndices[UnityEngine.Random.Range(0, currentInstance.PMCSpawnIndices.Count)];
+                                consume = true;
+                            }
+                            else // No more unused indices, will have to spawn with another PMC
+                            {
+                                spawnIndex = UnityEngine.Random.Range(0, RaidManager.instance.PMCSpawns.Count);
+                            }
                         }
                         else
                         {
-                            spawnIndex = currentInstance.ScavSpawnIndices[UnityEngine.Random.Range(0, currentInstance.ScavSpawnIndices.Count)];
+                            if (currentInstance.ScavSpawnIndices.Count > 0)
+                            {
+                                spawnIndex = currentInstance.ScavSpawnIndices[UnityEngine.Random.Range(0, currentInstance.ScavSpawnIndices.Count)];
+                                consume = true;
+                            }
+                            else // No more unused indices, will have to reuse a scav spawn
+                            {
+                                spawnIndex = UnityEngine.Random.Range(0, RaidManager.instance.scavSpawns.Count);
+                            }
                         }
-                        currentInstance.ConsumeSpawn(spawnIndex, PMC, RaidManager.instance.PMCSpawns.Count, RaidManager.instance.scavSpawns.Count, true);
+                        if (consume)
+                        {
+                            currentInstance.ConsumeSpawn(spawnIndex, PMC, RaidManager.instance.PMCSpawns.Count, RaidManager.instance.scavSpawns.Count, true);
+                        }
 
                         using (Packet newPacket = new Packet(spawnReturnPacketID))
                         {
@@ -804,15 +824,35 @@ namespace EFM
                     else
                     {
                         int spawnIndex = -1;
+                        bool consume = false;
                         if (PMC)
                         {
-                            spawnIndex = currentInstance.PMCSpawnIndices[UnityEngine.Random.Range(0, currentInstance.PMCSpawnIndices.Count)];
+                            if(currentInstance.PMCSpawnIndices.Count > 0)
+                            {
+                                spawnIndex = currentInstance.PMCSpawnIndices[UnityEngine.Random.Range(0, currentInstance.PMCSpawnIndices.Count)];
+                                consume = true;
+                            }
+                            else // No more unused indices, will have to spawn with another PMC
+                            {
+                                spawnIndex = UnityEngine.Random.Range(0, RaidManager.instance.PMCSpawns.Count);
+                            }
                         }
                         else
                         {
-                            spawnIndex = currentInstance.ScavSpawnIndices[UnityEngine.Random.Range(0, currentInstance.ScavSpawnIndices.Count)];
+                            if (currentInstance.ScavSpawnIndices.Count > 0)
+                            {
+                                spawnIndex = currentInstance.ScavSpawnIndices[UnityEngine.Random.Range(0, currentInstance.ScavSpawnIndices.Count)];
+                                consume = true;
+                            }
+                            else // No more unused indices, will have to reuse a scav spawn
+                            {
+                                spawnIndex = UnityEngine.Random.Range(0, RaidManager.instance.scavSpawns.Count);
+                            }
                         }
-                        currentInstance.ConsumeSpawn(spawnIndex, PMC, RaidManager.instance.PMCSpawns.Count, RaidManager.instance.scavSpawns.Count, true);
+                        if (consume)
+                        {
+                            currentInstance.ConsumeSpawn(spawnIndex, PMC, RaidManager.instance.PMCSpawns.Count, RaidManager.instance.scavSpawns.Count, true);
+                        }
 
                         using(Packet newPacket = new Packet(spawnReturnPacketID))
                         {
