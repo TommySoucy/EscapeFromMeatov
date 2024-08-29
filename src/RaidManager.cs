@@ -299,6 +299,7 @@ namespace EFM
             sosig.InitHands();
             sosig.Inventory.Init();
             sosig.Inventory.FillAllAmmo();
+            TODO: // Put the repetitive weapon code in a method
             if (botInventory.equipment.TryGetValue("FirstPrimaryWeapon", out MeatovItemData firstPrimaryWeaponData) && firstPrimaryWeaponData.sosigItems != null && firstPrimaryWeaponData.sosigItems.Count > 0)
             {
                 FVRObject firstPrimaryWeaponFVROObject = firstPrimaryWeaponData.sosigItems[UnityEngine.Random.Range(0, firstPrimaryWeaponData.sosigItems.Count)];
@@ -383,7 +384,21 @@ namespace EFM
                 }
             }
 
-            TODO: // Do what TNH_Manager.SpawnAccesoryToLink does to spawn outfit
+            // Spawn outfit
+            for(int i=0; i < outfit.Length; ++i)
+            {
+                if(outfit[i] != null)
+                {
+                    for(int j = 0; j < outfit[i].Count; ++j)
+                    {
+                        yield return outfit[i][j].GetGameObjectAsync();
+                        GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(outfit[i][j].GetGameObject(), sosig.Links[i].transform.position, sosig.Links[i].transform.rotation);
+                        gameObject.transform.SetParent(sosig.Links[i].transform);
+                        SosigWearable component = gameObject.GetComponent<SosigWearable>();
+                        component.RegisterWearable(sosig.Links[i]);
+                    }
+                }
+            }
         }
 
         public void OnDestroy()
