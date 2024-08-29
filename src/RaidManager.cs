@@ -14,6 +14,8 @@ namespace EFM
         public int maxPMCCount;
         public List<Spawn> PMCSpawns; 
         public List<Spawn> scavSpawns; 
+        public List<Extraction> PMCExtractions; 
+        public List<Extraction> scavExtractions; 
         public List<Transform> PMCNavPoints; 
 
         public bool control; // Whether we control the raid (Only relevant if MP)
@@ -21,6 +23,7 @@ namespace EFM
         public Spawn spawn; // Spawn used
         public bool AIPMCSpawned;
         public int enemyIFF = 2; // Players are 0, Scavs are 1, PMCs and scav bosses get incremental IFF
+        public List<Extraction> activeExtractions;
 
         public void Awake()
         {
@@ -117,12 +120,89 @@ namespace EFM
                 }
                 Networking.spawnRequests.Clear();
             }
+
+            TODO e: // Spawn loose loot
         }
 
         public void Spawn(Spawn spawn)
         {
+            Vector3 spawnPosition = GetSpawnPosition(spawn);
             GM.CurrentSceneSettings.DeathResetPoint = spawn.transform;
-            GM.CurrentMovementManager.TeleportToPoint(GetSpawnPosition(spawn), true);
+            GM.CurrentMovementManager.TeleportToPoint(spawnPosition, true);
+
+            // Choose extractions
+            List<Extraction> extractionsToUse = Mod.charChoicePMC ? PMCExtractions : scavExtractions;
+            List<Extraction> noRestrictionExtractions = new List<Extraction>();
+            List<Extraction> restrictionExtractions = new List<Extraction>();
+            for(int i=0; i < extractionsToUse.Count; ++i)
+            {
+                Extraction extraction = extractionsToUse[i];
+                extraction.distToSpawn = Vector3.Distance(spawnPosition, extraction.transform.position);
+
+                // Find which list to add to depending if the extraction has any restrictions
+                List<Extraction> extractionListToAdd = null;
+                if ((extraction.activeTimes != null && extraction.activeTimes.Count > 0)
+                    || (extraction.itemRequirements != null && extraction.itemRequirements.Count > 0)
+                    || (extraction.itemWhitelist != null && extraction.itemWhitelist.Count > 0)
+                    || (extraction.itemBlacklist != null && extraction.itemBlacklist.Count > 0))
+                {
+                    extractionListToAdd = restrictionExtractions;
+                }
+                else
+                {
+                    extractionListToAdd = noRestrictionExtractions;
+                }
+
+                // Add to the list in order of distance to spawn
+                if (extractionListToAdd.Count == 0)
+                {
+                    extractionListToAdd.Add(extraction);
+                }
+                else
+                {
+                    for (int j = 0; j < extractionListToAdd.Count; ++j)
+                    {
+                        if (extraction.distToSpawn < extractionListToAdd[j].distToSpawn)
+                        {
+                            extractionListToAdd.Insert(j, extraction);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Add a third (min 1) of the farthest no restriction extractions we found
+            activeExtractions = new List<Extraction>();
+            if (noRestrictionExtractions.Count == 0)
+            {
+                Mod.LogError("There are no extraction without restrictions, possibility of extraction from this raid is not guaranteed");
+            }
+            else
+            {
+                int count = Mathf.Max(1, noRestrictionExtractions.Count / 3);
+                for (int i = noRestrictionExtractions.Count - 1, j = 0; i >= 0 && j < count; --i, ++j)
+                {
+                    noRestrictionExtractions[i].active = true;
+                    noRestrictionExtractions[i].extractionsIndex = activeExtractions.Count;
+                    activeExtractions.Add(noRestrictionExtractions[i]);
+                }
+            }
+
+            // Add half (min 1) the restriction extractions, chosen randomly
+            if (noRestrictionExtractions.Count > 0)
+            {
+                int count = Mathf.Max(1, restrictionExtractions.Count / 2);
+                for (int j = 0; j < count; ++j)
+                {
+                    int rand = UnityEngine.Random.Range(0, restrictionExtractions.Count);
+                    if (!restrictionExtractions[rand].active)
+                    {
+                        restrictionExtractions[rand].active = true;
+                        restrictionExtractions[rand].extractionsIndex = activeExtractions.Count;
+                        activeExtractions.Add(restrictionExtractions[rand]);
+                    }
+                }
+            }
         }
 
         public Vector3 GetSpawnPosition(Spawn spawn)
@@ -399,6 +479,15 @@ namespace EFM
                     }
                 }
             }
+
+            // Activate behavior
+            TODO e: // Use Sosig.CommandPathTo to make them go through points
+            TODO e: // Make patch to make sosigs go to a random valid extraction once they finish their path or there is only enough time to reach extraction
+            sosig.CurrentOrder = Sosig.SosigOrder.Wander;
+            sosig.FallbackOrder = Sosig.SosigOrder.Wander;
+            sosig.CommandGuardPoint(spawnPos, true);
+            sosig.SetDominantGuardDirection(UnityEngine.Random.onUnitSphere);
+            sosig.SetGuardInvestigateDistanceThreshold(25f);
         }
 
         public void OnDestroy()
