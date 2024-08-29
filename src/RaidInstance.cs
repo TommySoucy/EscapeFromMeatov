@@ -20,6 +20,7 @@ namespace EFM
         public List<int> ScavSpawnIndices;
         public int consumedSpawnCount;
         public bool AIPMCSpawned;
+        public int enemyIFF = 2;
 
         public RaidInstance(int ID, string map, bool timeIs0, bool spawnTogether)
         {

@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Valve.Newtonsoft.Json.Linq;
+using Valve.VR.InteractionSystem;
 
 namespace EFM
 {
@@ -46,6 +47,7 @@ namespace EFM
                 // Request spawn from controller if necessary
                 using (Packet packet = new Packet(Networking.requestSpawnPacketID))
                 {
+                    packet.Write(Networking.currentInstance.ID);
                     packet.Write(H3MP.GameManager.ID);
                     packet.Write(Mod.charChoicePMC);
 
@@ -58,6 +60,9 @@ namespace EFM
                         ClientSend.SendTCPData(packet, true);
                     }
                 }
+
+                // Store that we requested spawn so we can do it again if host changes before we receive it
+                Networking.spawnRequested = true;
             }
         }
 
@@ -86,6 +91,32 @@ namespace EFM
                     spawn = scavSpawns[spawnIndex];
                     Spawn(spawn);
                 }
+
+                // Process already existing spawn requests
+                for(int i=0; i < Networking.spawnRequests.Count; ++i)
+                {
+                    int spawnIndex = -1;
+                    if (Networking.spawnRequests[i].PMC)
+                    {
+                        spawnIndex = Networking.currentInstance.PMCSpawnIndices[UnityEngine.Random.Range(0, Networking.currentInstance.PMCSpawnIndices.Count)];
+                    }
+                    else
+                    {
+                        spawnIndex = Networking.currentInstance.ScavSpawnIndices[UnityEngine.Random.Range(0, Networking.currentInstance.ScavSpawnIndices.Count)];
+                    }
+                    Networking.currentInstance.ConsumeSpawn(spawnIndex, Networking.spawnRequests[i].PMC, RaidManager.instance.PMCSpawns.Count, RaidManager.instance.scavSpawns.Count, true);
+
+                    using (Packet newPacket = new Packet(Networking.spawnReturnPacketID))
+                    {
+                        newPacket.Write(Networking.spawnRequests[i].instanceID);
+                        newPacket.Write(Networking.spawnRequests[i].playerID);
+                        newPacket.Write(spawnIndex);
+                        newPacket.Write(Networking.spawnRequests[i].PMC);
+
+                        ServerSend.SendTCPData(Networking.spawnRequests[i].playerID, newPacket, true);
+                    }
+                }
+                Networking.spawnRequests.Clear();
             }
         }
 
@@ -221,7 +252,9 @@ namespace EFM
 
                 if(Networking.currentInstance != null)
                 {
-                    using (Packet packet = new Packet(setRaidenemyIFFPacketID))
+                    Networking.currentInstance.enemyIFF = enemyIFF;
+
+                    using (Packet packet = new Packet(Networking.setRaidEnemyIFFPacketID))
                     {
                         packet.Write(Networking.currentInstance.ID);
                         packet.Write(enemyIFF);
@@ -257,6 +290,15 @@ namespace EFM
             Sosig sosig = sosigObject.GetComponentInChildren<Sosig>();
             sosig.Configure(template);
             sosig.SetIFF(IFF);
+            AI AIScript = sosigObject.AddComponent<AI>();
+        }
+
+        public void OnDestroy()
+        {
+            if(Networking.spawnRequests.Count > 0)
+            {
+                Networking.spawnRequests.Clear();
+            }
         }
     }
 }

@@ -3797,6 +3797,7 @@ namespace EFM
                 }
 
                 Networking.currentInstance = null;
+                Networking.spawnRequested = false;
             }
         }
 

@@ -1,5 +1,8 @@
-﻿using H3MP.Networking;
+﻿using FistVR;
+using H3MP;
+using H3MP.Networking;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace EFM
 {
@@ -14,10 +17,17 @@ namespace EFM
         public static RaidInstance currentInstance;
         public static Dictionary<int, RaidInstance> raidInstances = new Dictionary<int, RaidInstance>();
         public static bool setLatestInstance;
+        public static List<SpawnRequest> spawnRequests = new List<SpawnRequest>();
+        public static bool spawnRequested;
 
         public static int addInstancePacketID; // AddEFMInstancePacketID
         public static int setPlayerReadynessPacketID; // SetEFMInstancePlayerReadyness
         public static int setInstanceWaitingPacketID; // SetEFMInstanceWaitingPacketID
+        public static int setRaidEnemyIFFPacketID; // SetEFMInstanceEnemyIFFPacketID
+        public static int setInstanceAIPMCSpawnedPacketID; // SetEFMInstanceAIPMCSpawnedPacketID
+        public static int requestSpawnPacketID; // RequestEFMRaidSpawnPacketID
+        public static int spawnReturnPacketID; // EFMRaidSpawnReturnPacketID
+        public static int consumeSpawnPacketID; // ConsumeEFMInstanceSpawnPacketID
 
         public static void OnConnection()
         {
@@ -71,6 +81,41 @@ namespace EFM
                     setInstanceWaitingPacketID = Server.RegisterCustomPacketType("SetEFMInstanceWaitingPacketID");
                 }
                 H3MP.Mod.customPacketHandlers[setInstanceWaitingPacketID] = SetInstanceWaitingServerHandler;
+
+                // Set enemy IFF
+                if (!H3MP.Mod.registeredCustomPacketIDs.TryGetValue("SetEFMInstanceEnemyIFFPacketID", out setRaidEnemyIFFPacketID))
+                {
+                    setRaidEnemyIFFPacketID = Server.RegisterCustomPacketType("SetEFMInstanceEnemyIFFPacketID");
+                }
+                H3MP.Mod.customPacketHandlers[setRaidEnemyIFFPacketID] = SetRaidEnemyIFFServerHandler;
+
+                // Set AI PMC Spawned
+                if (!H3MP.Mod.registeredCustomPacketIDs.TryGetValue("SetEFMInstanceAIPMCSpawnedPacketID", out setInstanceAIPMCSpawnedPacketID))
+                {
+                    setInstanceAIPMCSpawnedPacketID = Server.RegisterCustomPacketType("SetEFMInstanceAIPMCSpawnedPacketID");
+                }
+                H3MP.Mod.customPacketHandlers[setInstanceAIPMCSpawnedPacketID] = SetInstanceAIPMCSpawnedServerHandler;
+
+                // Request spawn
+                if (!H3MP.Mod.registeredCustomPacketIDs.TryGetValue("RequestEFMRaidSpawnPacketID", out requestSpawnPacketID))
+                {
+                    requestSpawnPacketID = Server.RegisterCustomPacketType("RequestEFMRaidSpawnPacketID");
+                }
+                H3MP.Mod.customPacketHandlers[requestSpawnPacketID] = RequestSpawnServerHandler;
+
+                // Spawn return
+                if (!H3MP.Mod.registeredCustomPacketIDs.TryGetValue("EFMRaidSpawnReturnPacketID", out spawnReturnPacketID))
+                {
+                    spawnReturnPacketID = Server.RegisterCustomPacketType("EFMRaidSpawnReturnPacketID");
+                }
+                H3MP.Mod.customPacketHandlers[spawnReturnPacketID] = SpawnReturnServerHandler;
+
+                // Consume spawn
+                if (!H3MP.Mod.registeredCustomPacketIDs.TryGetValue("ConsumeEFMInstanceSpawnPacketID", out consumeSpawnPacketID))
+                {
+                    consumeSpawnPacketID = Server.RegisterCustomPacketType("ConsumeEFMInstanceSpawnPacketID");
+                }
+                H3MP.Mod.customPacketHandlers[consumeSpawnPacketID] = ConsumeSpawnServerHandler;
             }
             else
             {
@@ -109,6 +154,66 @@ namespace EFM
                     ClientSend.RegisterCustomPacketType("SetEFMInstanceWaitingPacketID");
                     H3MP.Mod.CustomPacketHandlerReceived += SetEFMInstanceWaitingPacketIDReceived;
                 }
+
+                // Set enemy IFF
+                if (H3MP.Mod.registeredCustomPacketIDs.TryGetValue("SetEFMInstanceEnemyIFFPacketID", out int customSetRaidEnemyIFFPacketID))
+                {
+                    setRaidEnemyIFFPacketID = customSetRaidEnemyIFFPacketID;
+                    H3MP.Mod.customPacketHandlers[setRaidEnemyIFFPacketID] = SetEnemyIFFClientHandler;
+                }
+                else
+                {
+                    ClientSend.RegisterCustomPacketType("SetEFMInstanceEnemyIFFPacketID");
+                    H3MP.Mod.CustomPacketHandlerReceived += SetEnemyIFFPacketIDReceived;
+                }
+
+                // Set AI PMC Spawned
+                if (H3MP.Mod.registeredCustomPacketIDs.TryGetValue("SetEFMInstanceAIPMCSpawnedPacketID", out int customSetInstanceAIPMCSpawnedPacketID))
+                {
+                    setInstanceAIPMCSpawnedPacketID = customSetInstanceAIPMCSpawnedPacketID;
+                    H3MP.Mod.customPacketHandlers[setInstanceAIPMCSpawnedPacketID] = SetInstanceAIPMCSpawnedClientHandler;
+                }
+                else
+                {
+                    ClientSend.RegisterCustomPacketType("SetEFMInstanceAIPMCSpawnedPacketID");
+                    H3MP.Mod.CustomPacketHandlerReceived += SetInstanceAIPMCSpawnedPacketIDReceived;
+                }
+
+                // Request spawn
+                if (H3MP.Mod.registeredCustomPacketIDs.TryGetValue("RequestEFMRaidSpawnPacketID", out int customRequestSpawnPacketID))
+                {
+                    requestSpawnPacketID = customRequestSpawnPacketID;
+                    H3MP.Mod.customPacketHandlers[requestSpawnPacketID] = RequestSpawnClientHandler;
+                }
+                else
+                {
+                    ClientSend.RegisterCustomPacketType("RequestEFMRaidSpawnPacketID");
+                    H3MP.Mod.CustomPacketHandlerReceived += RequestSpawnPacketIDReceived;
+                }
+
+                // Spawn return
+                if (H3MP.Mod.registeredCustomPacketIDs.TryGetValue("EFMRaidSpawnReturnPacketID", out int customSpawnReturnPacketID))
+                {
+                    spawnReturnPacketID = customSpawnReturnPacketID;
+                    H3MP.Mod.customPacketHandlers[spawnReturnPacketID] = SpawnReturnClientHandler;
+                }
+                else
+                {
+                    ClientSend.RegisterCustomPacketType("EFMRaidSpawnReturnPacketID");
+                    H3MP.Mod.CustomPacketHandlerReceived += SpawnReturnPacketIDReceived;
+                }
+
+                // Consume spawn
+                if (H3MP.Mod.registeredCustomPacketIDs.TryGetValue("ConsumeEFMInstanceSpawnPacketID", out int customConsumeSpawnPacketID))
+                {
+                    consumeSpawnPacketID = customConsumeSpawnPacketID;
+                    H3MP.Mod.customPacketHandlers[consumeSpawnPacketID] = ConsumeSpawnClientHandler;
+                }
+                else
+                {
+                    ClientSend.RegisterCustomPacketType("ConsumeEFMInstanceSpawnPacketID");
+                    H3MP.Mod.CustomPacketHandlerReceived += ConsumeSpawnPacketIDReceived;
+                }
             }
         }
 
@@ -122,6 +227,12 @@ namespace EFM
 
         public static void OnPlayerInstanceChanged(int ID, int previousInstanceID, int newInstanceID)
         {
+            // Ignore if this is us
+            if(ID == GameManager.ID)
+            {
+                return;
+            }
+
             // Remove from previous instance
             if (raidInstances.TryGetValue(previousInstanceID, out RaidInstance previousInstance))
             {
@@ -143,6 +254,34 @@ namespace EFM
                     if (currentInstance != null && currentInstance.ID == previousInstanceID && HideoutController.instance != null)
                     {
                         HideoutController.instance.PopulatePlayerList();
+                    }
+                }
+
+                // If host has changed
+                if(preHost != previousInstance.players[0] && spawnRequested)
+                {
+                    if(GameManager.ID == previousInstance.players[0])
+                    {
+                        spawnRequested = false;
+                    }
+                    else
+                    {
+                        // Rerequest to new host
+                        using (Packet packet = new Packet(Networking.requestSpawnPacketID))
+                        {
+                            packet.Write(currentInstance.ID);
+                            packet.Write(H3MP.GameManager.ID);
+                            packet.Write(Mod.charChoicePMC);
+
+                            if (ThreadManager.host)
+                            {
+                                ServerSend.SendTCPData(Networking.currentInstance.players[0], packet, true);
+                            }
+                            else
+                            {
+                                ClientSend.SendTCPData(packet, true);
+                            }
+                        }
                     }
                 }
             }
@@ -202,6 +341,56 @@ namespace EFM
                 setInstanceWaitingPacketID = ID;
                 H3MP.Mod.customPacketHandlers[setInstanceWaitingPacketID] = SetInstanceWaitingClientHandler;
                 H3MP.Mod.CustomPacketHandlerReceived -= SetEFMInstanceWaitingPacketIDReceived;
+            }
+        }
+
+        public static void SetEnemyIFFPacketIDReceived(string identifier, int ID)
+        {
+            if (identifier.Equals("SetEFMInstanceEnemyIFFPacketID"))
+            {
+                setRaidEnemyIFFPacketID = ID;
+                H3MP.Mod.customPacketHandlers[setRaidEnemyIFFPacketID] = SetEnemyIFFClientHandler;
+                H3MP.Mod.CustomPacketHandlerReceived -= SetEnemyIFFPacketIDReceived;
+            }
+        }
+
+        public static void SetInstanceAIPMCSpawnedPacketIDReceived(string identifier, int ID)
+        {
+            if (identifier.Equals("SetEFMInstanceAIPMCSpawnedPacketID"))
+            {
+                setInstanceAIPMCSpawnedPacketID = ID;
+                H3MP.Mod.customPacketHandlers[setInstanceAIPMCSpawnedPacketID] = SetInstanceAIPMCSpawnedClientHandler;
+                H3MP.Mod.CustomPacketHandlerReceived -= SetInstanceAIPMCSpawnedPacketIDReceived;
+            }
+        }
+
+        public static void RequestSpawnPacketIDReceived(string identifier, int ID)
+        {
+            if (identifier.Equals("RequestEFMRaidSpawnPacketID"))
+            {
+                requestSpawnPacketID = ID;
+                H3MP.Mod.customPacketHandlers[requestSpawnPacketID] = RequestSpawnClientHandler;
+                H3MP.Mod.CustomPacketHandlerReceived -= RequestSpawnPacketIDReceived;
+            }
+        }
+
+        public static void SpawnReturnPacketIDReceived(string identifier, int ID)
+        {
+            if (identifier.Equals("EFMRaidSpawnReturnPacketID"))
+            {
+                spawnReturnPacketID = ID;
+                H3MP.Mod.customPacketHandlers[spawnReturnPacketID] = SpawnReturnClientHandler;
+                H3MP.Mod.CustomPacketHandlerReceived -= SpawnReturnPacketIDReceived;
+            }
+        }
+
+        public static void ConsumeSpawnPacketIDReceived(string identifier, int ID)
+        {
+            if (identifier.Equals("ConsumeEFMInstanceSpawnPacketID"))
+            {
+                consumeSpawnPacketID = ID;
+                H3MP.Mod.customPacketHandlers[consumeSpawnPacketID] = ConsumeSpawnClientHandler;
+                H3MP.Mod.CustomPacketHandlerReceived -= ConsumeSpawnPacketIDReceived;
             }
         }
 
@@ -316,7 +505,7 @@ namespace EFM
                     newPacket.Write(clientID);
                     newPacket.Write(ready);
 
-                    ServerSend.SendTCPDataToAll(newPacket, true);
+                    ServerSend.SendTCPDataToAll(clientID, newPacket, true);
                 }
             }
         }
@@ -343,7 +532,160 @@ namespace EFM
                     newPacket.Write(instanceID);
                     newPacket.Write(waiting);
 
-                    ServerSend.SendTCPDataToAll(newPacket, true);
+                    ServerSend.SendTCPDataToAll(clientID, newPacket, true);
+                }
+            }
+        }
+
+        public static void SetRaidEnemyIFFServerHandler(int clientID, Packet packet)
+        {
+            int instanceID = packet.ReadInt();
+            int enemyIFF = packet.ReadInt();
+
+            if(raidInstances.TryGetValue(instanceID, out RaidInstance raidInstance) && raidInstance.players[0] == clientID)
+            {
+                raidInstance.enemyIFF = enemyIFF;
+
+                // Send to all clients
+                using (Packet newPacket = new Packet(setRaidEnemyIFFPacketID))
+                {
+                    newPacket.Write(instanceID);
+                    newPacket.Write(enemyIFF);
+
+                    ServerSend.SendTCPDataToAll(clientID, newPacket, true);
+                }
+            }
+        }
+
+        public static void SetInstanceAIPMCSpawnedServerHandler(int clientID, Packet packet)
+        {
+            int instanceID = packet.ReadInt();
+            bool spawned = packet.ReadBool();
+
+            if(raidInstances.TryGetValue(instanceID, out RaidInstance raidInstance) && raidInstance.players[0] == clientID)
+            {
+                raidInstance.AIPMCSpawned = spawned;
+
+                // Send to all clients
+                using (Packet newPacket = new Packet(setInstanceAIPMCSpawnedPacketID))
+                {
+                    newPacket.Write(instanceID);
+                    newPacket.Write(spawned);
+
+                    ServerSend.SendTCPDataToAll(clientID, newPacket, true);
+                }
+            }
+        }
+
+        public static void RequestSpawnServerHandler(int clientID, Packet packet)
+        {
+            int instanceID = packet.ReadInt();
+            int playerID = packet.ReadInt();
+            bool PMC = packet.ReadBool();
+
+            if(raidInstances.TryGetValue(instanceID, out RaidInstance raidInstance))
+            {
+                // We are instance host
+                if(raidInstance.players[0] == GameManager.ID)
+                {
+                    if(RaidManager.instance == null)
+                    {
+                        spawnRequests.Add(new SpawnRequest(instanceID, playerID, PMC));
+                    }
+                    else
+                    {
+                        int spawnIndex = -1;
+                        if (PMC)
+                        {
+                            spawnIndex = currentInstance.PMCSpawnIndices[UnityEngine.Random.Range(0, currentInstance.PMCSpawnIndices.Count)];
+                        }
+                        else
+                        {
+                            spawnIndex = currentInstance.ScavSpawnIndices[UnityEngine.Random.Range(0, currentInstance.ScavSpawnIndices.Count)];
+                        }
+                        currentInstance.ConsumeSpawn(spawnIndex, PMC, RaidManager.instance.PMCSpawns.Count, RaidManager.instance.scavSpawns.Count, true);
+
+                        using (Packet newPacket = new Packet(spawnReturnPacketID))
+                        {
+                            newPacket.Write(instanceID);
+                            newPacket.Write(playerID);
+                            newPacket.Write(spawnIndex);
+                            newPacket.Write(PMC);
+
+                            ServerSend.SendTCPData(playerID, newPacket, true);
+                        }
+                    }
+                }
+                else // Instance host is someone else, relay to them
+                {
+                    using (Packet newPacket = new Packet(requestSpawnPacketID))
+                    {
+                        newPacket.Write(instanceID);
+                        newPacket.Write(playerID);
+                        newPacket.Write(PMC);
+
+                        ServerSend.SendTCPData(raidInstance.players[0], newPacket, true);
+                    }
+                }
+            }
+        }
+
+        public static void SpawnReturnServerHandler(int clientID, Packet packet)
+        {
+            int instanceID = packet.ReadInt();
+            int playerID = packet.ReadInt();
+            int spawnIndex = packet.ReadInt();
+            bool PMC = packet.ReadBool();
+
+            if(playerID == GameManager.ID)
+            {
+                if(currentInstance != null && spawnRequested)
+                {
+                    spawnRequested = false;
+
+                    if(RaidManager.instance != null)
+                    {
+                        RaidManager.instance.spawn = PMC ? RaidManager.instance.PMCSpawns[spawnIndex] : RaidManager.instance.scavSpawns[spawnIndex];
+                        RaidManager.instance.Spawn(RaidManager.instance.spawn);
+                    }
+                }
+            }
+            else
+            {
+                using (Packet newPacket = new Packet(requestSpawnPacketID))
+                {
+                    newPacket.Write(instanceID);
+                    newPacket.Write(playerID);
+                    newPacket.Write(spawnIndex);
+                    newPacket.Write(PMC);
+
+                    ServerSend.SendTCPData(playerID, newPacket, true);
+                }
+            }
+        }
+
+        public static void ConsumeSpawnServerHandler(int clientID, Packet packet)
+        {
+            int instanceID = packet.ReadInt();
+            int spawnIndex = packet.ReadInt();
+            bool PMC = packet.ReadBool();
+            int PMCSpawnCount = packet.ReadInt();
+            int scavSpawnCount = packet.ReadInt();
+
+            if (raidInstances.TryGetValue(instanceID, out RaidInstance raidInstance) && raidInstance.players[0] == clientID)
+            {
+                raidInstance.ConsumeSpawn(spawnIndex, PMC, PMCSpawnCount, scavSpawnCount, false);
+
+                // Send to all clients
+                using (Packet newPacket = new Packet(consumeSpawnPacketID))
+                {
+                    newPacket.Write(instanceID);
+                    newPacket.Write(spawnIndex);
+                    newPacket.Write(PMC);
+                    newPacket.Write(PMCSpawnCount);
+                    newPacket.Write(scavSpawnCount);
+
+                    ServerSend.SendTCPDataToAll(clientID, newPacket, true);
                 }
             }
         }
@@ -420,6 +762,123 @@ namespace EFM
                     HideoutController.instance.OnWaitingInstanceStartClicked();
                 }
             }
+        }
+
+        public static void SetEnemyIFFClientHandler(int clientID, Packet packet)
+        {
+            int instanceID = packet.ReadInt();
+            int enemyIFF = packet.ReadInt();
+
+            if (raidInstances.TryGetValue(instanceID, out RaidInstance raidInstance))
+            {
+                raidInstance.enemyIFF = enemyIFF;
+            }
+        }
+
+        public static void SetInstanceAIPMCSpawnedClientHandler(int clientID, Packet packet)
+        {
+            int instanceID = packet.ReadInt();
+            bool spawned = packet.ReadBool();
+
+            if (raidInstances.TryGetValue(instanceID, out RaidInstance raidInstance))
+            {
+                raidInstance.AIPMCSpawned = spawned;
+            }
+        }
+
+        public static void RequestSpawnClientHandler(int clientID, Packet packet)
+        {
+            int instanceID = packet.ReadInt();
+            int playerID = packet.ReadInt();
+            bool PMC = packet.ReadBool();
+
+            if (raidInstances.TryGetValue(instanceID, out RaidInstance raidInstance))
+            {
+                // We are instance host
+                if (raidInstance.players[0] == GameManager.ID)
+                {
+                    if (RaidManager.instance == null)
+                    {
+                        spawnRequests.Add(new SpawnRequest(instanceID, playerID, PMC));
+                    }
+                    else
+                    {
+                        int spawnIndex = -1;
+                        if (PMC)
+                        {
+                            spawnIndex = currentInstance.PMCSpawnIndices[UnityEngine.Random.Range(0, currentInstance.PMCSpawnIndices.Count)];
+                        }
+                        else
+                        {
+                            spawnIndex = currentInstance.ScavSpawnIndices[UnityEngine.Random.Range(0, currentInstance.ScavSpawnIndices.Count)];
+                        }
+                        currentInstance.ConsumeSpawn(spawnIndex, PMC, RaidManager.instance.PMCSpawns.Count, RaidManager.instance.scavSpawns.Count, true);
+
+                        using(Packet newPacket = new Packet(spawnReturnPacketID))
+                        {
+                            newPacket.Write(instanceID);
+                            newPacket.Write(playerID);
+                            newPacket.Write(spawnIndex);
+                            newPacket.Write(PMC);
+
+                            ClientSend.SendTCPData(newPacket, true);
+                        }
+                    }
+                }
+                // else // Instance host is someone else. Possible if host changed while request was being sent.
+                // This case will be handle b the player who requested, who, upon seeing that the host changed, if they haven't received 
+                // their requested spawn yet, will rerequest it
+            }
+        }
+
+        public static void SpawnReturnClientHandler(int clientID, Packet packet)
+        {
+            int instanceID = packet.ReadInt();
+            int playerID = packet.ReadInt();
+            int spawnIndex = packet.ReadInt();
+            bool PMC = packet.ReadBool();
+
+            if (playerID == GameManager.ID)
+            {
+                if (currentInstance != null && spawnRequested)
+                {
+                    spawnRequested = false;
+
+                    if (RaidManager.instance != null)
+                    {
+                        RaidManager.instance.spawn = PMC ? RaidManager.instance.PMCSpawns[spawnIndex] : RaidManager.instance.scavSpawns[spawnIndex];
+                        RaidManager.instance.Spawn(RaidManager.instance.spawn);
+                    }
+                }
+            }
+        }
+
+        public static void ConsumeSpawnClientHandler(int clientID, Packet packet)
+        {
+            int instanceID = packet.ReadInt();
+            int spawnIndex = packet.ReadInt();
+            bool PMC = packet.ReadBool();
+            int PMCSpawnCount = packet.ReadInt();
+            int scavSpawnCount = packet.ReadInt();
+
+            if (raidInstances.TryGetValue(instanceID, out RaidInstance raidInstance))
+            {
+                raidInstance.ConsumeSpawn(spawnIndex, PMC, PMCSpawnCount, scavSpawnCount, false);
+            }
+        }
+    }
+
+    public class SpawnRequest
+    {
+        public int instanceID;
+        public int playerID;
+        public bool PMC;
+
+        public SpawnRequest(int instanceID, int playerID, bool PMC)
+        {
+            this.instanceID = instanceID;
+            this.playerID = playerID;
+            this.PMC = PMC;
         }
     }
 }
