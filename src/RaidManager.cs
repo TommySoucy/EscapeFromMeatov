@@ -1,9 +1,12 @@
 ﻿using FistVR;
 using H3MP.Networking;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using Valve.Newtonsoft.Json.Linq;
+using static EFM.ContainmentVolume;
 
 namespace EFM
 {
@@ -16,23 +19,25 @@ namespace EFM
         public List<Spawn> scavSpawns; 
         public List<Extraction> PMCExtractions; 
         public List<Extraction> scavExtractions; 
-        public List<Transform> PMCNavPoints; 
+        public List<Transform> PMCNavPoints;
+        public bool loadMapDataFromDB; // Whether we want to load the map's data from DB (If the data is from vanilla tarkov for example, and we already have the data)
+        public string pathToData; // Only relevant if loadMapDataFromDB
+        public List<LooseLootPoint> looseLootPoints;
 
+        [NonSerialized]
         public bool control; // Whether we control the raid (Only relevant if MP)
-
+        [NonSerialized]
         public Spawn spawn; // Spawn used
+        [NonSerialized]
         public bool AIPMCSpawned;
+        [NonSerialized]
         public int enemyIFF = 2; // Players are 0, Scavs are 1, PMCs and scav bosses get incremental IFF
+        [NonSerialized]
         public List<Extraction> activeExtractions;
 
         public void Awake()
         {
             instance = this;
-
-            if(PMCSpawns.Count < 1)
-            {
-                Mod.LogError("Raid does not have at least 1 PMC spawns, expect errors");
-            }
         }
 
         public void Start()
@@ -121,7 +126,392 @@ namespace EFM
                 Networking.spawnRequests.Clear();
             }
 
-            TODO e: // Spawn loose loot
+            SpawnLooseLoot();
+        }
+
+        public void SpawnLooseLoot()
+        {
+            if (loadMapDataFromDB)
+            {
+                looseLootPoints = new List<LooseLootPoint>();
+
+                JObject looseLootData = JObject.Parse(File.ReadAllText(pathToData));
+
+                TODO: // spawnpointsForced should only be spawned if at least one of the items is needed for an active quest
+                JArray forced = looseLootData["spawnpointsForced"] as JArray;
+                for(int i=0; i < forced.Count; ++i)
+                {
+                    AddLooseLootPoint(forced[i], "LooseLootPointForced", i);
+                }
+                JArray normal = looseLootData["spawnpoints"] as JArray;
+                for(int i=0; i < forced.Count; ++i)
+                {
+                    AddLooseLootPoint(forced[i], "LooseLootPoint", i);
+                }
+            }
+
+            if(looseLootPoints.Count > 0)
+            {
+                for(int i=0; i < looseLootPoints.Count; ++i)
+                {
+                    switch (looseLootPoints[i].mode)
+                    {
+                        case LooseLootPoint.Mode.SpecificItems:
+                            int totalWeight = looseLootPoints[i].totalProbabilityWeight;
+                            if (totalWeight == -1)
+                            {
+                                totalWeight = 0;
+                                for (int j=0; j<looseLootPoints[i].itemProbabilityWeight.Count;++j)
+                                {
+                                    totalWeight += looseLootPoints[i].itemProbabilityWeight[j];
+                                }
+                            }
+
+                            int randSelection = UnityEngine.Random.Range(0, totalWeight);
+                            int selectedIndex = -1;
+                            for (int j = 0; j < looseLootPoints[i].itemProbabilityWeight.Count; ++j)
+                            {
+                                totalWeight += looseLootPoints[i].itemProbabilityWeight[j];
+
+                                if (randSelection < totalWeight)
+                                {
+                                    selectedIndex = j;
+                                    break;
+                                }
+                            }
+
+                            string tarkovID = looseLootPoints[i].items[selectedIndex];
+                            if (Mod.defaultItemData.TryGetValue(tarkovID, out MeatovItemData specificItemData))
+                            {
+                                Vector3 position = looseLootPoints[i].transform.position;
+                                Quaternion rotation = looseLootPoints[i].transform.rotation;
+                                if(looseLootPoints[i].transformData != null && looseLootPoints[i].transformData.Count > 0)
+                                {
+                                    KeyValuePair<Vector3, Vector3> data = looseLootPoints[i].transformData[UnityEngine.Random.Range(0, looseLootPoints[i].transformData.Count)];
+                                    position = data.Key;
+                                    rotation = Quaternion.Euler(data.Value);
+                                }
+                                if (looseLootPoints[i].randomRotation)
+                                {
+                                    rotation = UnityEngine.Random.rotation;
+                                }
+                                SpawnItem(specificItemData, looseLootPoints[i].itemStack[selectedIndex], position, rotation, true);
+                            }
+                            else
+                            {
+                                if(!Mod.oldItemMap.TryGetValue(tarkovID, out JToken itemMapValue))
+                                {
+                                    Mod.LogError("Raid tried to spawn specific item loose loot "+ tarkovID + " but item is missing");
+                                }
+                            }
+                            break;
+                        case LooseLootPoint.Mode.Category:
+                            if(Mod.itemsByParents.TryGetValue(looseLootPoints[i].category, out List<MeatovItemData> categoryItemDatas))
+                            {
+                                MeatovItemData categoryItem = categoryItemDatas[UnityEngine.Random.Range(0, categoryItemDatas.Count)];
+                                Vector3 position = looseLootPoints[i].transform.position;
+                                Quaternion rotation = looseLootPoints[i].transform.rotation;
+                                if (looseLootPoints[i].transformData != null && looseLootPoints[i].transformData.Count > 0)
+                                {
+                                    KeyValuePair<Vector3, Vector3> data = looseLootPoints[i].transformData[UnityEngine.Random.Range(0, looseLootPoints[i].transformData.Count)];
+                                    position = data.Key;
+                                    rotation = Quaternion.Euler(data.Value);
+                                }
+                                if (looseLootPoints[i].randomRotation)
+                                {
+                                    rotation = UnityEngine.Random.rotation;
+                                }
+                                SpawnItem(categoryItem, 1, position, rotation, true);
+                            }
+                            else
+                            {
+                                Mod.LogError("Could not find itemsByParents entry for " + looseLootPoints[i].category+" for loose loot point");
+                            }
+                            break;
+                        case LooseLootPoint.Mode.Rarity:
+                            if (Mod.itemsByRarity.TryGetValue(looseLootPoints[i].rarity, out List<MeatovItemData> rarityItemDatas))
+                            {
+                                MeatovItemData rarityItem = rarityItemDatas[UnityEngine.Random.Range(0, rarityItemDatas.Count)];
+                                Vector3 position = looseLootPoints[i].transform.position;
+                                Quaternion rotation = looseLootPoints[i].transform.rotation;
+                                if (looseLootPoints[i].transformData != null && looseLootPoints[i].transformData.Count > 0)
+                                {
+                                    KeyValuePair<Vector3, Vector3> data = looseLootPoints[i].transformData[UnityEngine.Random.Range(0, looseLootPoints[i].transformData.Count)];
+                                    position = data.Key;
+                                    rotation = Quaternion.Euler(data.Value);
+                                }
+                                if (looseLootPoints[i].randomRotation)
+                                {
+                                    rotation = UnityEngine.Random.rotation;
+                                }
+                                SpawnItem(rarityItem, 1, position, rotation, true);
+                            }
+                            else
+                            {
+                                Mod.LogError("Could not find itemsByRarity entry for " + looseLootPoints[i].rarity + " for loose loot point");
+                            }
+                            break;
+                    }
+                }
+            }
+            else
+            {
+                Mod.LogError("No loose loot points, no loose loot will be spawned");
+            }
+        }
+
+        public bool SpawnItem(MeatovItemData itemData, int amount, Vector3 position, Quaternion rotation, bool foundInRaid = false, SpawnItemReturnDelegate del = null)
+        {
+            int amountToSpawn = amount;
+            if (itemData.index == -1)
+            {
+                // Spawn vanilla item will handle the updating of proper elements
+                AnvilManager.Run(SpawnVanillaItem(itemData, amountToSpawn, position, rotation, foundInRaid, del));
+
+                return true;
+            }
+            else
+            {
+                GameObject itemPrefab = Mod.GetItemPrefab(itemData.index);
+                List<GameObject> objectsList = new List<GameObject>();
+                List<MeatovItem> itemsSpawned = new List<MeatovItem>();
+                while (amountToSpawn > 0)
+                {
+                    GameObject spawnedItem = Instantiate(itemPrefab);
+                    MeatovItem meatovItem = spawnedItem.GetComponent<MeatovItem>();
+                    meatovItem.SetData(itemData);
+                    meatovItem.foundInRaid = foundInRaid;
+                    objectsList.Add(spawnedItem);
+
+                    // Set stack and remove amount to spawn
+                    if (meatovItem.maxStack > 1)
+                    {
+                        if (amountToSpawn > meatovItem.maxStack)
+                        {
+                            meatovItem.stack = meatovItem.maxStack;
+                            amountToSpawn -= meatovItem.maxStack;
+                        }
+                        else // amountToSpawn <= itemCIW.maxStack
+                        {
+                            meatovItem.stack = amountToSpawn;
+                            amountToSpawn = 0;
+                        }
+                    }
+                    else
+                    {
+                        --amountToSpawn;
+                    }
+
+                    spawnedItem.transform.position = position;
+                    spawnedItem.transform.rotation = rotation;
+
+                    itemsSpawned.Add(meatovItem);
+                }
+
+                if (del != null)
+                {
+                    del(itemsSpawned);
+                }
+
+                return false;
+            }
+        }
+
+        public IEnumerator SpawnVanillaItem(MeatovItemData itemData, int count, Vector3 position, Quaternion rotation, bool foundInRaid = false, SpawnItemReturnDelegate del = null)
+        {
+            yield return IM.OD[itemData.H3ID].GetGameObjectAsync();
+            GameObject itemPrefab = IM.OD[itemData.H3ID].GetGameObject();
+            if (itemPrefab == null)
+            {
+                Mod.LogError("Failed to get vanilla prefab for " + itemData.tarkovID + ":" + itemData.H3ID + " to spawn in containment volume " + name);
+                yield break;
+            }
+            FVRPhysicalObject physObj = itemPrefab.GetComponent<FVRPhysicalObject>();
+            GameObject itemObject = null;
+            List<MeatovItem> itemsSpawned = new List<MeatovItem>();
+            if (physObj is FVRFireArmRound && count > 1) // Multiple rounds, must spawn an ammobox
+            {
+                int countLeft = count;
+                float boxCountLeft = count / 120.0f;
+                while (boxCountLeft > 0)
+                {
+                    int amount = 0;
+                    if (countLeft > 30)
+                    {
+                        itemObject = GameObject.Instantiate(Mod.GetItemPrefab(716));
+
+                        if (countLeft <= 120)
+                        {
+                            amount = countLeft;
+                            countLeft = 0;
+                        }
+                        else
+                        {
+                            amount = 120;
+                            countLeft -= 120;
+                        }
+                    }
+                    else
+                    {
+                        itemObject = GameObject.Instantiate(Mod.GetItemPrefab(715));
+
+                        amount = countLeft;
+                        countLeft = 0;
+                    }
+
+                    MeatovItem meatovItem = itemObject.GetComponent<MeatovItem>();
+                    meatovItem.SetData(itemData);
+                    meatovItem.foundInRaid = foundInRaid;
+                    FVRFireArmMagazine asMagazine = meatovItem.physObj as FVRFireArmMagazine;
+                    FVRFireArmRound round = physObj as FVRFireArmRound;
+                    asMagazine.RoundType = round.RoundType;
+                    meatovItem.roundClass = round.RoundClass;
+                    for (int j = 0; j < amount; ++j)
+                    {
+                        asMagazine.AddRound(meatovItem.roundClass, false, false);
+                    }
+
+                    itemObject.transform.position = position;
+                    itemObject.transform.rotation = rotation;
+
+                    boxCountLeft = countLeft / 120.0f;
+
+                    itemsSpawned.Add(meatovItem);
+                }
+            }
+            else // Not a round, or just 1, spawn as normal
+            {
+                for (int i = 0; i < count; ++i)
+                {
+                    itemObject = GameObject.Instantiate(itemPrefab);
+
+                    MeatovItem meatovItem = itemObject.GetComponent<MeatovItem>();
+                    meatovItem.SetData(itemData);
+                    meatovItem.foundInRaid = foundInRaid;
+
+                    itemObject.transform.position = position + Vector3.up * 0.2f;
+                    itemObject.transform.rotation = rotation;
+
+                    itemsSpawned.Add(meatovItem);
+                }
+            }
+
+            if (del != null)
+            {
+                del(itemsSpawned);
+            }
+
+            yield break;
+        }
+
+        public void AddLooseLootPoint(JToken pointData, string objectName, int index)
+        {
+            JToken templateData = pointData["template"];
+            GameObject looseLootPointObject = new GameObject(objectName + index);
+            LooseLootPoint looseLootPoint = looseLootPointObject.AddComponent<LooseLootPoint>();
+            looseLootPoint.probability = (float)pointData["probability"];
+            looseLootPoint.isKinematic = !(bool)templateData["useGravity"];
+            JToken positionData = templateData["Position"];
+            looseLootPointObject.transform.position = new Vector3((float)positionData["x"], (float)positionData["y"], (float)positionData["z"]);
+            looseLootPoint.randomRotation = (bool)templateData["randomRotation"];
+            if (!looseLootPoint.randomRotation)
+            {
+                JToken rotationData = templateData["Rotation"];
+                looseLootPointObject.transform.rotation = Quaternion.Euler((float)rotationData["x"], (float)rotationData["y"], (float)rotationData["z"]);
+            }
+            if ((bool)templateData["IsGroupPosition"])
+            {
+                looseLootPoint.transformData = new List<KeyValuePair<Vector3, Vector3>>();
+
+                JArray groupPositions = templateData["GroupPositions"] as JArray;
+                for (int i = 0; i < groupPositions.Count; ++i)
+                {
+                    JToken groupPositionData = groupPositions[i]["Position"];
+                    Vector3 position = new Vector3((float)groupPositionData["x"], (float)groupPositionData["y"], (float)groupPositionData["z"]);
+                    Vector3 rotation = Vector3.zero;
+                    if (!looseLootPoint.randomRotation)
+                    {
+                        JToken groupRotationData = groupPositions[i]["Rotation"];
+                        rotation = new Vector3((float)groupRotationData["x"], (float)groupRotationData["y"], (float)groupRotationData["z"]);
+                    }
+
+                    looseLootPoint.transformData.Add(new KeyValuePair<Vector3, Vector3>(position, rotation));
+                }
+            }
+            looseLootPoint.mode = LooseLootPoint.Mode.SpecificItems;
+            looseLootPoint.items = new List<string>();
+            looseLootPoint.itemProbabilityWeight = new List<int>();
+            looseLootPoint.itemStack = new List<int>();
+            JArray items = templateData["items"] as JArray;
+            JArray distribution = null;
+            if(pointData["itemDistribution"] != null)
+            {
+                distribution = pointData["itemDistribution"] as JArray;
+            }
+            int totalWeight = 0;
+            Dictionary<string, int> parentEntries = new Dictionary<string, int>();
+            Dictionary<string, int> parentEntrieStacks = new Dictionary<string, int>();
+            for(int i = 0; i < items.Count; ++i)
+            {
+                if (items[i]["parentId"] != null && items[i]["upd"] != null && items[i]["upd"]["StackObjectsCount"] != null)
+                {
+                    string parentID = items[i]["parentId"].ToString();
+                    int parentIndex = -1;
+                    if (parentEntries.TryGetValue(parentID, out parentIndex))
+                    {
+                        looseLootPoint.itemStack[parentIndex] = (int)items[i]["upd"]["StackObjectsCount"];
+                    }
+                    else
+                    {
+                        parentEntrieStacks.Add(parentID, (int)items[i]["upd"]["StackObjectsCount"]);
+                    }
+                    continue;
+                }
+                string tarkovID = items[i]["_tpl"].ToString();
+                string lookupID = items[i]["_id"].ToString();
+                parentEntries.Add(tarkovID, looseLootPoint.items.Count);
+                looseLootPoint.items.Add(tarkovID);
+                int parentStack = 1;
+                if(items[i]["upd"] != null && items[i]["upd"]["StackObjectsCount"] != null)
+                {
+                    looseLootPoint.itemStack.Add((int)items[i]["upd"]["StackObjectsCount"]);
+                }
+                else if(parentEntrieStacks.TryGetValue(lookupID, out parentStack))
+                {
+                    looseLootPoint.itemStack.Add(parentStack);
+                }
+                else
+                {
+                    looseLootPoint.itemStack.Add(1);
+                }
+                if (distribution == null)
+                {
+                    looseLootPoint.itemProbabilityWeight.Add(1);
+                    ++totalWeight;
+                }
+                else
+                {
+
+                    bool found = false;
+                    for(int j=0; j < distribution.Count; ++j)
+                    {
+                        if (distribution[j]["composedKey"]["key"].ToString().Equals(lookupID))
+                        {
+                            int relativeProbability = (int)distribution[j]["relativeProbability"];
+                            looseLootPoint.itemProbabilityWeight.Add(relativeProbability);
+                            totalWeight += relativeProbability;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found)
+                    {
+                        looseLootPoint.itemProbabilityWeight.Add(1);
+                        ++totalWeight;
+                    }
+                }
+            }
+            looseLootPoint.totalProbabilityWeight = totalWeight;
         }
 
         public void Spawn(Spawn spawn)

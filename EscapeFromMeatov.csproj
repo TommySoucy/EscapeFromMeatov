@@ -91,6 +91,7 @@
     <Compile Include="src\ItemRewardView.cs" />
     <Compile Include="src\ItemView.cs" />
     <Compile Include="src\KillData.cs" />
+    <Compile Include="src\LooseLootPoint.cs" />
     <Compile Include="src\MeatovItem.cs" />
     <Compile Include="src\DamageVolume.cs" />
     <Compile Include="src\IDescribable.cs" />
