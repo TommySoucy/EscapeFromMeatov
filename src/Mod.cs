@@ -11,6 +11,7 @@ using Valve.VR;
 using UnityEngine.UI;
 using ModularWorkshop;
 using System.Security.AccessControl;
+using System.Linq;
 
 namespace EFM
 {
@@ -113,6 +114,8 @@ namespace EFM
         public static bool skipNextInstantiation;
         public static Dictionary<FVRInteractiveObject, MeatovItem> meatovItemByInteractive = new Dictionary<FVRInteractiveObject, MeatovItem>();
         public static Dictionary<string, Dictionary<string, byte>> noneModulParts; // Dict of "None" modul workshop parts by part ID by group ID
+        public static string usedExtraction;
+        public static RaidManager.RaidStatus raidStatus;
 
         // Player
         private static int _level = 1;
@@ -4575,9 +4578,20 @@ namespace EFM
             }
         }
 
-        public static void AddRaidMapRequirements(string mapName, Dictionary<string, int> requirements)
+        public static void AddRaidMapRequirements(string mapName, string requirementItemsString, string requirementCountsString)
         {
-            if(requirements == null || requirements.Count == 0)
+            List<string> requirementItems = new List<string>();
+            List<int> requirementCounts = new List<int>();
+
+            string[] itemSplit = requirementItemsString.Split(',');
+            string[] countSplit = requirementCountsString.Split(',');
+            for(int i=0; i < itemSplit.Length; ++i)
+            {
+                requirementItems.Add(itemSplit[i]);
+                requirementCounts.Add(int.Parse(countSplit[i]));
+            }
+
+            if (requirementItems == null || requirementItems.Count == 0)
             {
                 return;
             }
@@ -4590,7 +4604,12 @@ namespace EFM
                 }
                 else
                 {
-                    raidMapEntryRequirements.Add(mapName, requirements);
+                    Dictionary<string, int> reqDict = new Dictionary<string, int>();
+                    for(int i=0; i < requirementItems.Count; ++i)
+                    {
+                        reqDict.Add(requirementItems[i], requirementCounts[i]);
+                    }
+                    raidMapEntryRequirements.Add(mapName, reqDict);
                 }
             }
             else

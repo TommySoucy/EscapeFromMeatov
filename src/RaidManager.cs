@@ -6,17 +6,26 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using Valve.Newtonsoft.Json.Linq;
-using static EFM.ContainmentVolume;
 
 namespace EFM
 {
     public class RaidManager : MonoBehaviour
     {
+        public enum RaidStatus
+        {
+            Success,
+            RunThrough,
+            KIA,
+            MIA
+        }
+
         public static RaidManager instance { get; private set; }
 
+        public float raidTime; // Amount of time to complete the raid, in seconds
         public int maxPMCCount;
         public List<Spawn> PMCSpawns; 
         public List<Spawn> scavSpawns; 
+        public List<Spawn> scavBossSpawns; 
         public List<Extraction> PMCExtractions; 
         public List<Extraction> scavExtractions; 
         public List<Transform> PMCNavPoints;
@@ -34,7 +43,14 @@ namespace EFM
         public int enemyIFF = 2; // Players are 0, Scavs are 1, PMCs and scav bosses get incremental IFF
         [NonSerialized]
         public List<Extraction> activeExtractions;
+        [NonSerialized]
+        public float raidTimeLeft;
+        [NonSerialized]
+        public float time;
 
+        public delegate void SpawnItemReturnDelegate(List<MeatovItem> itemsSpawned);
+
+        TODO: // Implement doors
         public void Awake()
         {
             instance = this;
@@ -42,7 +58,12 @@ namespace EFM
 
         public void Start()
         {
+            raidTimeLeft = raidTime;
+
+            InitTime();
+
             UpdateControl();
+
             if (control)
             {
                 Init();
@@ -71,6 +92,26 @@ namespace EFM
                 // Store that we requested spawn so we can do it again if host changes before we receive it
                 Networking.spawnRequested = true;
             }
+        }
+
+        public long GetTimeSeconds()
+        {
+            DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            return Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalSeconds);
+        }
+
+        public void InitTime()
+        {
+            long longTime = GetTimeSeconds();
+            long clampedTime = longTime % 86400; // Clamp to 24 hours because thats the relevant range
+            int scaledTime = (int)((clampedTime * UIController.meatovTimeMultiplier) % 86400);
+            time = scaledTime;
+        }
+
+        public void UpdateTime()
+        {
+            time += UnityEngine.Time.deltaTime * UIController.meatovTimeMultiplier;
+            time %= 86400;
         }
 
         public void Init()
@@ -614,19 +655,21 @@ namespace EFM
             UpdateControl();
             if (control)
             {
+                TODO: // Spawn scav bosses
+
                 // Check if can spawn initial AI PMC
                 if (!AIPMCSpawned)
                 {
-                    if(Networking.currentInstance == null)
+                    if (Networking.currentInstance == null)
                     {
                         int spawnCount = Mod.charChoicePMC ? maxPMCCount - 1 : maxPMCCount;
-                        for(int i=0; i < spawnCount; ++i)
+                        for (int i = 0; i < spawnCount; ++i)
                         {
                             SpawnPMC();
                         }
                         AIPMCSpawned = true;
                     }
-                    else if(Networking.currentInstance.consumedSpawnCount >= Networking.currentInstance.players.Count)
+                    else if (Networking.currentInstance.consumedSpawnCount >= Networking.currentInstance.players.Count)
                     {
                         int spawnCount = maxPMCCount - (PMCSpawns.Count - Networking.currentInstance.PMCSpawnIndices.Count);
                         for (int i = 0; i < spawnCount; ++i)
@@ -650,6 +693,14 @@ namespace EFM
                         }
                     }
                 }
+            }
+
+            UpdateTime();
+
+            raidTimeLeft -= Time.deltaTime;
+            if(raidTimeLeft <= 0)
+            {
+                TODO: // Implement raid ending, MIA in this case
             }
         }
 
@@ -871,13 +922,32 @@ namespace EFM
             }
 
             // Activate behavior
-            TODO e: // Use Sosig.CommandPathTo to make them go through points
-            TODO e: // Make patch to make sosigs go to a random valid extraction once they finish their path or there is only enough time to reach extraction
+            TODO1: // Use Sosig.CommandPathTo to make them go through points
+            TODO0: // Make patch to make sosigs go to a random valid extraction once they finish their path or there is only enough time to reach extraction
             sosig.CurrentOrder = Sosig.SosigOrder.Wander;
             sosig.FallbackOrder = Sosig.SosigOrder.Wander;
             sosig.CommandGuardPoint(spawnPos, true);
             sosig.SetDominantGuardDirection(UnityEngine.Random.onUnitSphere);
             sosig.SetGuardInvestigateDistanceThreshold(25f);
+        }
+
+        public void EndRaid(RaidStatus status)
+        {
+            Mod.raidStatus = status;
+
+            if(status == RaidStatus.Success || status == RaidStatus.RunThrough)
+            {
+                // Secure all items player has on them
+                Mod.SecureItems();
+            }
+            else // MIA, KIA
+            {
+                // Secure only the pouch
+                Mod.SecureItems(false);
+            }
+
+            // Main scene components will get secured on load start and unsecured upon arrival
+            UIController.LoadHideout(-1, true);
         }
 
         public void OnDestroy()

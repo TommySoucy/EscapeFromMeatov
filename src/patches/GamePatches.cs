@@ -74,26 +74,26 @@ namespace EFM
             PatchController.Verify(beginInteractionPatchOriginal, harmony, false);
             harmony.Patch(beginInteractionPatchOriginal, new HarmonyMethod(beginInteractionPatchPrefix));
 
-            //// DamagePatch
-            //MethodInfo damagePatchOriginal = typeof(FVRPlayerHitbox).GetMethod("Damage", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(Damage) }, null);
-            //MethodInfo damagePatchPrefix = typeof(DamagePatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            // DamagePatch
+            MethodInfo damagePatchOriginal = typeof(FVRPlayerHitbox).GetMethod("Damage", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(Damage) }, null);
+            MethodInfo damagePatchPrefix = typeof(DamagePatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            //PatchController.Verify(damagePatchOriginal, harmony, true);
-            //harmony.Patch(damagePatchOriginal, new HarmonyMethod(damagePatchPrefix));
+            PatchController.Verify(damagePatchOriginal, harmony, true);
+            harmony.Patch(damagePatchOriginal, new HarmonyMethod(damagePatchPrefix));
 
-            //// DamageFloatPatch
-            //MethodInfo damageFloatPatchOriginal = typeof(FVRPlayerHitbox).GetMethod("Damage", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(float) }, null);
-            //MethodInfo damageFloatPatchPrefix = typeof(DamageFloatPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            // DamageFloatPatch
+            MethodInfo damageFloatPatchOriginal = typeof(FVRPlayerHitbox).GetMethod("Damage", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(float) }, null);
+            MethodInfo damageFloatPatchPrefix = typeof(DamageFloatPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            //PatchController.Verify(damageFloatPatchOriginal, harmony, true);
-            //harmony.Patch(damageFloatPatchOriginal, new HarmonyMethod(damageFloatPatchPrefix));
+            PatchController.Verify(damageFloatPatchOriginal, harmony, true);
+            harmony.Patch(damageFloatPatchOriginal, new HarmonyMethod(damageFloatPatchPrefix));
 
-            //// DamageDealtPatch
-            //MethodInfo damageDealtPatchOriginal = typeof(FVRPlayerHitbox).GetMethod("Damage", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(DamageDealt) }, null);
-            //MethodInfo damageDealtPatchPrefix = typeof(DamageDealtPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            // DamageDealtPatch
+            MethodInfo damageDealtPatchOriginal = typeof(FVRPlayerHitbox).GetMethod("Damage", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(DamageDealt) }, null);
+            MethodInfo damageDealtPatchPrefix = typeof(DamageDealtPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            //PatchController.Verify(damageDealtPatchOriginal, harmony, true);
-            //harmony.Patch(damageDealtPatchOriginal, new HarmonyMethod(damageDealtPatchPrefix));
+            PatchController.Verify(damageDealtPatchOriginal, harmony, true);
+            harmony.Patch(damageDealtPatchOriginal, new HarmonyMethod(damageDealtPatchPrefix));
 
             // HandTestColliderPatch
             MethodInfo handTestColliderPatchOriginal = typeof(FVRViveHand).GetMethod("TestCollider", BindingFlags.Public | BindingFlags.Instance);
@@ -2062,18 +2062,11 @@ namespace EFM
 
         public static bool RegisterPlayerHit(int partIndex, float totalDamage, bool FromSelf)
         {
-            if (GM.CurrentSceneSettings.DoesDamageGetRegistered && GM.CurrentSceneSettings.DeathResetPoint != null && !GM.IsDead())
+            if (GM.CurrentSceneSettings.DoesDamageGetRegistered && !GM.IsDead())
             {
                 Mod.AddSkillExp(Skill.damageTakenAction * totalDamage, 2);
 
-                GM.CurrentPlayerBody.Health -= totalDamage;
-
                 GM.CurrentPlayerBody.HitEffect();
-                if (GM.CurrentPlayerBody.Health <= 0f)
-                {
-                    //Mod.currentRaidManager.KillPlayer();
-                    return true;
-                }
 
                 // Parts other than head and thorax at zero distribute damage over all other parts
                 float[] destroyedMultiplier = new float[] { 0, 0, 1.5f, 0.7f, 0.7f, 1, 1 };
@@ -2094,7 +2087,7 @@ namespace EFM
                                 {
                                     if (Mod.GetHealth(0) <= 0 || Mod.GetHealth(1) <= 0)
                                     {
-                                        //Mod.currentRaidManager.KillPlayer();
+                                        TODO e: // Implement raid ending, KIA in this case
                                         return true;
                                     }
                                 }
@@ -2109,7 +2102,7 @@ namespace EFM
                 }
                 else if (Mod.GetHealth(partIndex) <= 0) // Part is head or thorax, destroyed
                 {
-                    //Mod.currentRaidManager.KillPlayer();
+                    TODO e: // Implement raid ending, KIA in this case
                     return true;
                 }
                 else // Part is head or thorax, not yet destroyed
@@ -2118,6 +2111,17 @@ namespace EFM
                     Mod.SetHealth(partIndex, Mathf.Clamp(Mod.GetHealth(partIndex) - totalDamage, 0, Mod.GetCurrentMaxHealth(partIndex)));
                 }
                 GM.CurrentSceneSettings.OnPlayerTookDamage(actualTotalDamage / 440f);
+
+                float totalHealth = 0;
+                for (int i = 0; i < Mod.GetHealthCount(); ++i)
+                {
+                    totalHealth += Mod.GetHealth(i);
+                }
+                if (totalHealth <= 0f)
+                {
+                    TODO e: // Implement raid ending, KIA in this case
+                    return true;
+                }
             }
             return false;
         }
@@ -2150,7 +2154,7 @@ namespace EFM
             float actualDamage = (float)damageData[1];
             if (actualDamage > 0.1f && __instance.IsActivated)
             {
-                if ( DamagePatch.RegisterPlayerHit((int)damageData[0], actualDamage, false))
+                if (DamagePatch.RegisterPlayerHit((int)damageData[0], actualDamage, false))
                 {
                     ___m_aud.PlayOneShot(__instance.AudClip_Reset, 0.4f);
                 }
@@ -2167,7 +2171,7 @@ namespace EFM
     // Patches FVRPlayerHitbox.Damage(DamageDealt) in order to implement our own armor's damage resistance
     class DamageDealtPatch
     {
-        static bool Prefix(DamageDealt dam, ref FVRPlayerHitbox __instance, ref AudioSource ___m_aud)
+        static bool Prefix(DamageDealt dam, FVRPlayerHitbox __instance, AudioSource ___m_aud)
         {
             if (!Mod.inMeatovScene)
             {
@@ -2191,7 +2195,7 @@ namespace EFM
             float actualDamage = (float)damageData[1];
             if (actualDamage > 0.1f && __instance.IsActivated)
             {
-                if ( DamagePatch.RegisterPlayerHit((int)damageData[0], actualDamage, false))
+                if (DamagePatch.RegisterPlayerHit((int)damageData[0], actualDamage, false))
                 {
                     ___m_aud.PlayOneShot(__instance.AudClip_Reset, 0.4f);
                 }

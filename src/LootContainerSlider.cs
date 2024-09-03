@@ -1,8 +1,4 @@
 ﻿using FistVR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 
 namespace EFM
@@ -19,10 +15,7 @@ namespace EFM
 
 		public override void Awake()
 		{
-			// Override interactive object awake entirely to prevent from being added to All because unnecessary
-			this.GameObject = gameObject;
-			this.Transform = transform;
-			this.m_colliders = GetComponentsInChildren<Collider>(true);
+            base.Awake();
 
 			EndInteractionIfDistant = false;
 		}
@@ -34,12 +27,7 @@ namespace EFM
 
 		public override bool IsInteractable()
 		{
-			return m_forceOpen || !hasKey || Mod.playerInventory.ContainsKey(keyID);
-		}
-
-		public void Reset()
-		{
-			transform.localPosition = new Vector3(0, -0.3f, posZ);
+			return m_forceOpen || !hasKey;
 		}
 
 		public override void UpdateInteraction(FVRViveHand hand)

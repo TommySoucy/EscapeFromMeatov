@@ -503,6 +503,12 @@ namespace EFM
                                 }
                             }
 
+                            // Secure all items player has
+                            if (Mod.charChoicePMC)
+                            {
+                                Mod.SecureItems();
+                            }
+
                             // Load raid scene
                             Mod.loadingToMeatovScene = true;
                             SteamVR_LoadLevel.Begin(Mod.mapChoiceName, false, 0.5f, 0f, 0f, 0f, 1f);
@@ -1581,6 +1587,7 @@ namespace EFM
             // Load player data only if we don't want to use the data from the PMC raid we just finished
             if (!Mod.justFinishedRaid || !Mod.charChoicePMC)
             {
+                TODO e: // Review with newly implemented raid ending
                 Mod.LogInfo("\t\tNot finished raid");
                 Mod.level = (int)loadedData["level"];
                 Mod.experience = (int)loadedData["experience"];
@@ -2013,6 +2020,9 @@ namespace EFM
 
         public void LoadPlayerItems()
         {
+            TODO e: // Load secured items instead if present
+                    // If the choicePMC is false, then just put the items on scav return node and keep loading items as normal
+
             if(loadedData["leftHand"] != null)
             {
                 // In case item is vanilla, in which case we use the vault system to save it,
