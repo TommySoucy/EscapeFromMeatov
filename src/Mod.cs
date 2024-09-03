@@ -61,9 +61,8 @@ namespace EFM
         public static List<AssetBundleCreateRequest> raidMapAdditiveBundleRequests;
         public static List<AssetBundleCreateRequest> raidMapPrefabBundleRequests;
         public static List<GameObject> securedMainSceneComponents;
-        public static List<GameObject> securedObjects;
-        public static FVRInteractiveObject securedLeftHandInteractable;
-        public static FVRInteractiveObject securedRightHandInteractable;
+        public static List<GameObject> securedObjects; // Other objects that needed to be secured that do not require special handling
+        public static GameObject[] securedItems; // Left hand, Right hand, Backpack, BodyArmor, EarPiece, HeadWear, FaceCover, EyeWear, Rig, Pouch, Right shoulder, Pockets
         public static int saveSlotIndex = -1;
         public static int currentQuickBeltConfiguration = -1;
         public static int firstCustomConfigIndex = -1;
@@ -80,6 +79,7 @@ namespace EFM
         public static int lootingExp = 0;
         public static int healingExp = 0;
         public static int explorationExp = 0;
+        public static int raidExp = 0;
         public static float raidTime = 0;
         public static bool loadingToMeatovScene;
         public static bool inMeatovScene;
@@ -109,7 +109,6 @@ namespace EFM
         public static List<FVRInteractiveObject> physObjColResetList;
         public static int physObjColResetNeeded;
         public static List<List<bool>> triggeredExplorationTriggers;
-        public static GameObject[] scavRaidReturnItems; // Hands, Equipment, Right shoulder, pockets
         public static GameObject instantiatedItem;
         public static bool skipNextInstantiation;
         public static Dictionary<FVRInteractiveObject, MeatovItem> meatovItemByInteractive = new Dictionary<FVRInteractiveObject, MeatovItem>();
@@ -3600,6 +3599,8 @@ namespace EFM
             {
                 StatusUI.instance.AddNotification(string.Format("Gained {0} experience.", actualXP));
             }
+
+            Mod.raidExp += actualXP;
         }
 
         public static void AddSkillExp(float xp, int skillIndex)
@@ -4029,74 +4030,24 @@ namespace EFM
             QualitySettings.lodBias = 2;
         }
 
-        private void UnsecureObjects()
+        public static void SecureItems(bool pouchOnly = false)
         {
-            if (securedObjects == null)
+
+        }
+
+        public static void UnsecureItems()
+        {
+            // Unsecure generic secured objects
+            if(securedObjects != null)
             {
-                securedObjects = new List<GameObject>();
-                return;
+                for (int i = 0; i < securedObjects.Count; ++i)
+                {
+                    SceneManager.MoveGameObjectToScene(securedObjects[i], SceneManager.GetActiveScene());
+                }
+                securedObjects.Clear();
             }
 
-            foreach (GameObject go in securedObjects)
-            {
-                SceneManager.MoveGameObjectToScene(go, SceneManager.GetActiveScene());
-            }
-            securedObjects.Clear();
-
-            if (Mod.justFinishedRaid && !Mod.charChoicePMC)
-            {
-                // Make sure that all scav return items are in their proper return nodes
-                Transform returnNodeParent = HideoutController.instance.transform.GetChild(1).GetChild(25);
-                for (int i = 0; i < 15; ++i)
-                {
-                    FVRPhysicalObject itemPhysObj = Mod.scavRaidReturnItems[i].GetComponent<FVRPhysicalObject>();
-                    itemPhysObj.StoreAndDestroyRigidbody();
-                    Transform currentNode = returnNodeParent.GetChild(i);
-                    Mod.scavRaidReturnItems[i].transform.parent = currentNode;
-                    Mod.scavRaidReturnItems[i].transform.position = currentNode.position;
-                    Mod.scavRaidReturnItems[i].transform.rotation = currentNode.rotation;
-
-                    if (i == 8) // Rig
-                    {
-                        MeatovItem CIW = Mod.scavRaidReturnItems[i].GetComponent<MeatovItem>();
-                        if (!CIW.open)
-                        {
-                            CIW.ToggleMode(false);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                // Make sure secured hand objects are put in hands
-                if (Mod.physObjColResetList == null)
-                {
-                    Mod.physObjColResetList = new List<FVRInteractiveObject>();
-                }
-                else
-                {
-                    Mod.physObjColResetList.Clear();
-                }
-                if (leftHand != null && leftHand.fvrHand != null)
-                {
-                    if (securedLeftHandInteractable != null)
-                    {
-                        // Set item's cols to NoCol for now so that it doesn't collide with anything on its way to the hand
-                        Mod.physObjColResetList.Add(securedLeftHandInteractable);
-                        Mod.physObjColResetNeeded = 5;
-                    }
-                    leftHand.fvrHand.ForceSetInteractable(securedLeftHandInteractable);
-                    securedLeftHandInteractable = null;
-                    if (securedRightHandInteractable != null)
-                    {
-                        // Set item's cols to NoCol for now so that it doesn't collide with anything on its way to the hand
-                        Mod.physObjColResetList.Add(securedRightHandInteractable);
-                        Mod.physObjColResetNeeded = 5;
-                    }
-                    rightHand.fvrHand.ForceSetInteractable(securedRightHandInteractable);
-                    securedRightHandInteractable = null;
-                }
-            }
+            TODO: // Unsecure securedItems
         }
 
         public static GameObject GetItemPrefab(int index)

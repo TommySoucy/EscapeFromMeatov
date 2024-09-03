@@ -162,8 +162,15 @@ namespace EFM
 
         public void Extract()
         {
-            Mod.usedExtraction = 
-            TODO: // Implement raid ending, conditional success in this case
+            // Runthrough if made less than 250xp or stayed in raid less than 5 minutes
+            if(Mod.charChoicePMC && (Mod.raidExp < 250 || Mod.raidTime < 300))
+            {
+                RaidManager.instance.EndRaid(RaidManager.RaidStatus.RunThrough, name);
+            }
+            else
+            {
+                RaidManager.instance.EndRaid(RaidManager.RaidStatus.Success, name);
+            }
         }
     }
 }

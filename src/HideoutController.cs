@@ -1587,7 +1587,6 @@ namespace EFM
             // Load player data only if we don't want to use the data from the PMC raid we just finished
             if (!Mod.justFinishedRaid || !Mod.charChoicePMC)
             {
-                TODO e: // Review with newly implemented raid ending
                 Mod.LogInfo("\t\tNot finished raid");
                 Mod.level = (int)loadedData["level"];
                 Mod.experience = (int)loadedData["experience"];
@@ -1630,6 +1629,8 @@ namespace EFM
             }
             else if (Mod.justFinishedRaid)
             {
+                TODO e: // Unsecure items if present
+                TODO e: // Review with newly implemented raid ending
                 for (int i = 0; i < 64; ++i)
                 {
                     Mod.skills[i].increasing = false;
@@ -2020,10 +2021,9 @@ namespace EFM
 
         public void LoadPlayerItems()
         {
-            TODO e: // Load secured items instead if present
-                    // If the choicePMC is false, then just put the items on scav return node and keep loading items as normal
+            TODO e: // If have secured items, put them on scav return node
 
-            if(loadedData["leftHand"] != null)
+            if (loadedData["leftHand"] != null)
             {
                 // In case item is vanilla, in which case we use the vault system to save it,
                 // we will only be getting the instantiated item later

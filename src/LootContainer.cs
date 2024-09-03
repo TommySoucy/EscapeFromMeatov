@@ -37,5 +37,7 @@ namespace EFM
 
         // Category
         public string category;
+
+        TODO
     }
 }

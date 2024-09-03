@@ -59,6 +59,7 @@ namespace EFM
         public void Start()
         {
             raidTimeLeft = raidTime;
+            Mod.raidTime = 0;
 
             InitTime();
 
@@ -112,6 +113,8 @@ namespace EFM
         {
             time += UnityEngine.Time.deltaTime * UIController.meatovTimeMultiplier;
             time %= 86400;
+
+            Mod.raidTime += Time.deltaTime;
         }
 
         public void Init()
@@ -700,7 +703,7 @@ namespace EFM
             raidTimeLeft -= Time.deltaTime;
             if(raidTimeLeft <= 0)
             {
-                TODO: // Implement raid ending, MIA in this case
+                EndRaid(RaidStatus.MIA);
             }
         }
 
@@ -931,9 +934,10 @@ namespace EFM
             sosig.SetGuardInvestigateDistanceThreshold(25f);
         }
 
-        public void EndRaid(RaidStatus status)
+        public void EndRaid(RaidStatus status, string usedExtraction = null)
         {
             Mod.raidStatus = status;
+            Mod.usedExtraction = usedExtraction;
 
             if(status == RaidStatus.Success || status == RaidStatus.RunThrough)
             {
@@ -943,7 +947,7 @@ namespace EFM
             else // MIA, KIA
             {
                 // Secure only the pouch
-                Mod.SecureItems(false);
+                Mod.SecureItems(true);
             }
 
             // Main scene components will get secured on load start and unsecured upon arrival

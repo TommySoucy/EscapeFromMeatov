@@ -538,6 +538,7 @@ namespace EFM
             MeatovItem CIW = objectToSecure.GetComponent<MeatovItem>();
             if (CIW != null)
             {
+                TODO e: // Test this, verify if still true
                 // Items inside a rig will not be attached to the rig, so much secure them separately
                 if (CIW.itemType == MeatovItem.ItemType.Rig || CIW.itemType == MeatovItem.ItemType.ArmoredRig)
                 {
@@ -570,16 +571,12 @@ namespace EFM
             }
             Mod.securedObjects.Clear();
 
-            // Secure the cameraRig
-            GameObject cameraRig = GameObject.Find("[CameraRig]Fixed");
-            Mod.securedObjects.Add(cameraRig);
-            GameObject.DontDestroyOnLoad(cameraRig);
-
             if (secureEquipment)
             {
                 // Secure held objects
                 if (Mod.leftHand != null && Mod.leftHand.fvrHand != null)
                 {
+                    TODO e: // Test this, verify if still true
                     // harnessed will be a root item and will be secured alongside the rig
                     // not harnessed will be dropped in the world following endInteraction and needs to be secured separately
                     Mod.securedLeftHandInteractable = Mod.leftHand.fvrHand.CurrentInteractable;
@@ -742,81 +739,6 @@ namespace EFM
                     }
                 }
             }
-
-            // Secure sceneSettings
-            GameObject sceneSettings = GameObject.Find("[SceneSettings_ModBlank_Simple]");
-            Mod.securedObjects.Add(sceneSettings);
-            GameObject.DontDestroyOnLoad(sceneSettings);
-
-            // Secure Pooled sources
-            FVRPooledAudioSource[] pooledAudioSources = FindObjectsOfTypeIncludingDisabled<FVRPooledAudioSource>();
-            foreach (FVRPooledAudioSource pooledAudioSource in pooledAudioSources)
-            {
-                Mod.securedObjects.Add(pooledAudioSource.gameObject);
-                GameObject.DontDestroyOnLoad(pooledAudioSource.gameObject);
-            }
-
-            // Secure grabbity spheres
-            FVRViveHand rightViveHand = cameraRig.transform.GetChild(0).gameObject.GetComponent<FVRViveHand>();
-            FVRViveHand leftViveHand = cameraRig.transform.GetChild(1).gameObject.GetComponent<FVRViveHand>();
-            Mod.securedObjects.Add(rightViveHand.Grabbity_HoverSphere.gameObject);
-            Mod.securedObjects.Add(rightViveHand.Grabbity_GrabSphere.gameObject);
-            GameObject.DontDestroyOnLoad(rightViveHand.Grabbity_HoverSphere.gameObject);
-            GameObject.DontDestroyOnLoad(rightViveHand.Grabbity_GrabSphere.gameObject);
-            Mod.securedObjects.Add(leftViveHand.Grabbity_HoverSphere.gameObject);
-            Mod.securedObjects.Add(leftViveHand.Grabbity_GrabSphere.gameObject);
-            GameObject.DontDestroyOnLoad(leftViveHand.Grabbity_HoverSphere.gameObject);
-            GameObject.DontDestroyOnLoad(leftViveHand.Grabbity_GrabSphere.gameObject);
-
-            // Secure MovementManager objects
-            Mod.securedObjects.Add(GM.CurrentMovementManager.MovementRig.gameObject);
-            GameObject.DontDestroyOnLoad(GM.CurrentMovementManager.MovementRig.gameObject);
-            // Movement arrows could be attached to movement manager if they are activated when we start loading
-            // So only add them to the list if their parent is null
-            GameObject touchPadArrows = (GameObject)(typeof(FVRMovementManager).GetField("m_touchpadArrows", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(GM.CurrentMovementManager));
-            if (touchPadArrows.transform.parent == null)
-            {
-                Mod.securedObjects.Add(touchPadArrows);
-                GameObject.DontDestroyOnLoad(touchPadArrows);
-            }
-            GameObject joystickTPArrows = (GameObject)(typeof(FVRMovementManager).GetField("m_joystickTPArrows", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(GM.CurrentMovementManager));
-            if (joystickTPArrows.transform.parent == null)
-            {
-                Mod.securedObjects.Add(joystickTPArrows);
-                GameObject.DontDestroyOnLoad(joystickTPArrows);
-            }
-            GameObject twinStickArrowsLeft = (GameObject)(typeof(FVRMovementManager).GetField("m_twinStickArrowsLeft", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(GM.CurrentMovementManager));
-            if (twinStickArrowsLeft.transform.parent == null)
-            {
-                Mod.securedObjects.Add(twinStickArrowsLeft);
-                GameObject.DontDestroyOnLoad(twinStickArrowsLeft);
-            }
-            GameObject twinStickArrowsRight = (GameObject)(typeof(FVRMovementManager).GetField("m_twinStickArrowsRight", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(GM.CurrentMovementManager));
-            if (twinStickArrowsRight.transform.parent == null)
-            {
-                Mod.securedObjects.Add(twinStickArrowsRight);
-                GameObject.DontDestroyOnLoad(twinStickArrowsRight);
-            }
-            GameObject floorHelper = (GameObject)(typeof(FVRMovementManager).GetField("m_floorHelper", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(GM.CurrentMovementManager));
-            Mod.securedObjects.Add(floorHelper);
-            GameObject.DontDestroyOnLoad(floorHelper);
-
-            if (Mod.doorLeftPrefab == null)
-            {
-                // Secure doors
-                Mod.doorLeftPrefab = GameObject.Instantiate(GameObject.Find("Door_KnobBolt_Left_Cherry"));
-                Mod.doorLeftPrefab.SetActive(false);
-                Mod.doorLeftPrefab.name = "Door_KnobBolt_Left_Cherry";
-                GameObject.DontDestroyOnLoad(Mod.doorLeftPrefab);
-                Mod.doorRightPrefab = GameObject.Instantiate(GameObject.Find("Door_KnobBolt_Right_Cherry"));
-                Mod.doorRightPrefab.SetActive(false);
-                Mod.doorRightPrefab.name = "Door_KnobBolt_Right_Cherry";
-                GameObject.DontDestroyOnLoad(Mod.doorRightPrefab);
-                Mod.doorDoublePrefab = GameObject.Instantiate(GameObject.Find("Door_KnobBolt_Double_Cherry"));
-                Mod.doorDoublePrefab.SetActive(false);
-                Mod.doorDoublePrefab.name = "Door_KnobBolt_Double_Cherry";
-                GameObject.DontDestroyOnLoad(Mod.doorDoublePrefab);
-            }
         }
 
         static T[] FindObjectsOfTypeIncludingDisabled<T>()
@@ -852,7 +774,7 @@ namespace EFM
     //     the scene, and will get destroyed along with it
     // -3: Like -2 but also destroys items in pockets
     //     Currently unused, it was supposed to be used on death to clear QBS completely,
-    //     but now we instead drop everything on death instead
+    //     but now we instead drop everything on death
     // -4: Destroy all slots, this essentially sets the QBS config to None
     class ConfigureQuickbeltPatch
     {
@@ -2087,7 +2009,10 @@ namespace EFM
                                 {
                                     if (Mod.GetHealth(0) <= 0 || Mod.GetHealth(1) <= 0)
                                     {
-                                        TODO e: // Implement raid ending, KIA in this case
+                                        if(RaidManager.instance != null)
+                                        {
+                                            RaidManager.instance.EndRaid(RaidManager.RaidStatus.KIA);
+                                        }
                                         return true;
                                     }
                                 }
@@ -2102,7 +2027,10 @@ namespace EFM
                 }
                 else if (Mod.GetHealth(partIndex) <= 0) // Part is head or thorax, destroyed
                 {
-                    TODO e: // Implement raid ending, KIA in this case
+                    if (RaidManager.instance != null)
+                    {
+                        RaidManager.instance.EndRaid(RaidManager.RaidStatus.KIA);
+                    }
                     return true;
                 }
                 else // Part is head or thorax, not yet destroyed
@@ -2119,7 +2047,10 @@ namespace EFM
                 }
                 if (totalHealth <= 0f)
                 {
-                    TODO e: // Implement raid ending, KIA in this case
+                    if (RaidManager.instance != null)
+                    {
+                        RaidManager.instance.EndRaid(RaidManager.RaidStatus.KIA);
+                    }
                     return true;
                 }
             }
