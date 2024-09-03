@@ -15,6 +15,7 @@ namespace EFM
 
         public ContainmentVolume volume;
 
+        TODO: // Add lock
         public float presenceProbability; // Probability of this loot container to even exist
         public int spawnAttemptCount; // Number of attempts to make of spawning an item in this loot container
         public int maxItemCount = -1; // -1 is unlimited
