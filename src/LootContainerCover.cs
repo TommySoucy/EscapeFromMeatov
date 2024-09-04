@@ -1,48 +1,45 @@
 ﻿using FistVR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 
 namespace EFM
 {
     public class LootContainerCover : FVRInteractiveObject
 	{
-		public string keyID;
-		public bool hasKey;
+		public LootContainer lootContainer;
+
 		public Transform Root;
-		private float rotAngle;
-		public float MinRot;
-		public float MaxRot;
-		private bool m_forceOpen;
+		public float minRot;
+		public float maxRot;
 
-		public override void Awake()
-		{
-			// Override interactive object awake entirely to prevent from being added to All because unnecessary
-			this.GameObject = gameObject;
-			this.Transform = transform;
-			this.m_colliders = GetComponentsInChildren<Collider>(true);
+		private bool forceOpen;
 
-			EndInteractionIfDistant = false; 
-		}
+        public float rotAngle;
+
+        public override void Awake()
+        {
+            base.Awake();
+
+            EndInteractionIfDistant = false;
+        }
 
 		public void ForceOpen()
 		{
-			m_forceOpen = true;
+			forceOpen = true;
 		}
 
 		public override bool IsInteractable()
 		{
-			return m_forceOpen || !hasKey || Mod.playerInventory.ContainsKey(keyID);
-		}
+			return forceOpen || lootContainer.lockScript == null || !lootContainer.lockScript.locked;
+        }
 
-		public void Reset()
-		{
-			base.transform.localEulerAngles = Vector3.zero;
-		}
+        public override void BeginInteraction(FVRViveHand hand)
+        {
+            base.BeginInteraction(hand);
 
-		public override void UpdateInteraction(FVRViveHand hand)
+            lootContainer.SpawnContents();
+        }
+
+        public override void UpdateInteraction(FVRViveHand hand)
 		{
 			base.UpdateInteraction(hand);
 			Vector3 vector = hand.Input.Pos - transform.position;
@@ -53,15 +50,15 @@ namespace EFM
 			{
 				rotAngle -= 360f;
 			}
-			if (Mathf.Abs(rotAngle - MinRot) < 5f)
+			if (Mathf.Abs(rotAngle - minRot) < 5f)
 			{
-				rotAngle = MinRot;
+				rotAngle = minRot;
 			}
-			if (Mathf.Abs(rotAngle - MaxRot) < 5f)
+			if (Mathf.Abs(rotAngle - maxRot) < 5f)
 			{
-				rotAngle = MaxRot;
+				rotAngle = maxRot;
 			}
-			if (rotAngle >= MinRot && rotAngle <= MaxRot)
+			if (rotAngle >= minRot && rotAngle <= maxRot)
 			{
 				transform.localEulerAngles = new Vector3(rotAngle, 0f, 0f);
 			}
