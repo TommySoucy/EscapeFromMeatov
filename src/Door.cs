@@ -79,9 +79,9 @@ namespace EFM
             }
         }
 
-        public void AttemptBreach()
+        public void AttemptBreach(bool correctSide)
         {
-            if (breachable || lockScript==null || !lockScript.locked)
+            if (correctSide && (breachable || lockScript==null || !lockScript.locked))
             {
                 audioSource.PlayOneShot(breachAudioClips[0]);
                 rotAngle = maxRot;
