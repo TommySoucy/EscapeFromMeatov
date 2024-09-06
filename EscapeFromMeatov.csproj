@@ -79,6 +79,7 @@
     <Compile Include="src\ConvexHullCalculator.cs" />
     <Compile Include="src\DevItemSpawner.cs" />
     <Compile Include="src\DevItemSpawnerEntry.cs" />
+    <Compile Include="src\Door.cs" />
     <Compile Include="src\EFMWristMenuSection.cs" />
     <Compile Include="src\Extensions.cs" />
     <Compile Include="src\Extraction.cs" />

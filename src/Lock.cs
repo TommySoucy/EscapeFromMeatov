@@ -13,7 +13,7 @@ namespace EFM
         public bool locked;
 
         public delegate void OnUnlockDelegate();
-        public static event OnUnlockDelegate OnUnlock;
+        public event OnUnlockDelegate OnUnlock;
 
         public void OnTriggerEnter(Collider other)
         {
