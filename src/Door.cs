@@ -12,6 +12,10 @@ namespace EFM
         public float minRot;
         public float maxRot;
         public List<Collider> blockingColliders; // Nav block colliders to disable once the door have been unlocked
+        public bool breachable; // Door could be breachable despite being locked
+        public AudioSource audioSource;
+        public AudioClip[] breachAudioClips; // 0: Success, 1: Fail
+        public ParticleSystem particleSystem;
 
         private bool forceOpen;
 
@@ -73,6 +77,23 @@ namespace EFM
             {
                 transform.localEulerAngles = new Vector3(rotAngle, 0f, 0f);
             }
+        }
+
+        public void AttemptBreach()
+        {
+            if (breachable || lockScript==null || !lockScript.locked)
+            {
+                audioSource.PlayOneShot(breachAudioClips[0]);
+                rotAngle = maxRot;
+                transform.localEulerAngles = new Vector3(rotAngle, 0f, 0f);
+
+            }
+            else
+            {
+                audioSource.PlayOneShot(breachAudioClips[1]);
+            }
+
+            particleSystem.Play();
         }
     }
 }
