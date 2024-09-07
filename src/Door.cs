@@ -1,4 +1,6 @@
 ﻿using FistVR;
+using H3MP;
+using H3MP.Networking;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -21,6 +23,8 @@ namespace EFM
 
         public float rotAngle;
 
+        public TrackedDoorData trackedDoorData;
+
         public override void Awake()
         {
             base.Awake();
@@ -33,13 +37,41 @@ namespace EFM
             }
         }
 
-        public void OnUnlock()
+        public void OnUnlock(bool toSend)
         {
             if(blockingColliders != null)
             {
                 for(int i = 0; i < blockingColliders.Count; ++i)
                 {
                     blockingColliders[i].enabled = false;
+                }
+            }
+
+            if (toSend && trackedDoorData != null)
+            {
+                // Take control
+                if (trackedDoorData.controller != GameManager.ID)
+                {
+                    trackedDoorData.TakeControlRecursive();
+                }
+
+
+                // Send unlock to others
+                if (Networking.currentInstance != null)
+                {
+                    using (Packet packet = new Packet(Networking.unlockDoorPacketID))
+                    {
+                        packet.Write(trackedDoorData.trackedID);
+
+                        if (ThreadManager.host)
+                        {
+                            ServerSend.SendTCPDataToAll(packet, true);
+                        }
+                        else
+                        {
+                            ClientSend.SendTCPData(packet, true);
+                        }
+                    }
                 }
             }
         }
@@ -79,7 +111,7 @@ namespace EFM
             }
         }
 
-        public void AttemptBreach(bool correctSide)
+        public void AttemptBreach(bool correctSide, bool toSend = true)
         {
             if (correctSide && (breachable || lockScript==null || !lockScript.locked))
             {
@@ -94,6 +126,34 @@ namespace EFM
             }
 
             particleSystem.Play();
+
+            if (toSend && trackedDoorData != null)
+            {
+                // Take control
+                if (trackedDoorData.controller != GameManager.ID)
+                {
+                    trackedDoorData.TakeControlRecursive();
+                }
+
+                // Send breach to others
+                if (Networking.currentInstance != null)
+                {
+                    using (Packet packet = new Packet(Networking.breachDoorPacketID))
+                    {
+                        packet.Write(trackedDoorData.trackedID);
+                        packet.Write(correctSide);
+
+                        if (ThreadManager.host)
+                        {
+                            ServerSend.SendTCPDataToAll(packet, true);
+                        }
+                        else
+                        {
+                            ClientSend.SendTCPData(packet, true);
+                        }
+                    }
+                }
+            }
         }
     }
 }

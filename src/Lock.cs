@@ -12,7 +12,7 @@ namespace EFM
         [NonSerialized]
         public bool locked;
 
-        public delegate void OnUnlockDelegate();
+        public delegate void OnUnlockDelegate(bool toSend);
         public event OnUnlockDelegate OnUnlock;
 
         public void OnTriggerEnter(Collider other)
@@ -22,22 +22,36 @@ namespace EFM
                 MeatovItem item = other.GetComponentInParent<MeatovItem>();
                 if (item != null && item.tarkovID.Equals("keyID"))
                 {
-                    locked = false;
-                    if(unlockClip != null && unlockAudioSource != null)
-                    {
-                        unlockAudioSource.PlayOneShot(unlockClip);
-                    }
-
-                    OnUnlockInvoke();
+                    UnlockAction();
                 }
             }
         }
 
-        public void OnUnlockInvoke()
+        public void UnlockAction(bool toSend = true)
+        {
+            locked = false;
+            if (unlockClip != null && unlockAudioSource != null)
+            {
+                unlockAudioSource.PlayOneShot(unlockClip);
+            }
+
+            OnUnlockInvoke(toSend);
+        }
+
+        public void LockAction()
+        {
+            locked = true;
+            if (unlockClip != null && unlockAudioSource != null)
+            {
+                unlockAudioSource.PlayOneShot(unlockClip);
+            }
+        }
+
+        public void OnUnlockInvoke(bool toSend)
         {
             if(OnUnlock != null)
             {
-                OnUnlock();
+                OnUnlock(toSend);
             }
         }
     }

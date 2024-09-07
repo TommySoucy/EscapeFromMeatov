@@ -1,6 +1,7 @@
 ﻿using FistVR;
 using H3MP;
 using H3MP.Networking;
+using H3MP.Tracking;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -28,6 +29,8 @@ namespace EFM
         public static int requestSpawnPacketID; // RequestEFMRaidSpawnPacketID
         public static int spawnReturnPacketID; // EFMRaidSpawnReturnPacketID
         public static int consumeSpawnPacketID; // ConsumeEFMInstanceSpawnPacketID
+        public static int breachDoorPacketID; // EFMBreachPacketID
+        public static int unlockDoorPacketID; // EFMUnlockDoorPacketID
 
         public static void OnConnection()
         {
@@ -116,6 +119,20 @@ namespace EFM
                     consumeSpawnPacketID = Server.RegisterCustomPacketType("ConsumeEFMInstanceSpawnPacketID");
                 }
                 H3MP.Mod.customPacketHandlers[consumeSpawnPacketID] = ConsumeSpawnServerHandler;
+
+                // Attempt door breach
+                if (!H3MP.Mod.registeredCustomPacketIDs.TryGetValue("EFMBreachPacketID", out breachDoorPacketID))
+                {
+                    breachDoorPacketID = Server.RegisterCustomPacketType("EFMBreachPacketID");
+                }
+                H3MP.Mod.customPacketHandlers[breachDoorPacketID] = BreachDoorServerHandler;
+
+                // Unlock door
+                if (!H3MP.Mod.registeredCustomPacketIDs.TryGetValue("EFMUnlockDoorPacketID", out unlockDoorPacketID))
+                {
+                    unlockDoorPacketID = Server.RegisterCustomPacketType("EFMUnlockDoorPacketID");
+                }
+                H3MP.Mod.customPacketHandlers[unlockDoorPacketID] = UnlockDoorServerHandler;
             }
             else
             {
@@ -213,6 +230,30 @@ namespace EFM
                 {
                     ClientSend.RegisterCustomPacketType("ConsumeEFMInstanceSpawnPacketID");
                     H3MP.Mod.CustomPacketHandlerReceived += ConsumeSpawnPacketIDReceived;
+                }
+
+                // Breach door
+                if (H3MP.Mod.registeredCustomPacketIDs.TryGetValue("EFMBreachPacketID", out int customBreachDoorPacketID))
+                {
+                    breachDoorPacketID = customBreachDoorPacketID;
+                    H3MP.Mod.customPacketHandlers[breachDoorPacketID] = BreachDoorClientHandler;
+                }
+                else
+                {
+                    ClientSend.RegisterCustomPacketType("EFMBreachPacketID");
+                    H3MP.Mod.CustomPacketHandlerReceived += BreachDoorPacketIDReceived;
+                }
+
+                // Unlock door
+                if (H3MP.Mod.registeredCustomPacketIDs.TryGetValue("EFMUnlockDoorPacketID", out int customUnlockDoorPacketID))
+                {
+                    unlockDoorPacketID = customUnlockDoorPacketID;
+                    H3MP.Mod.customPacketHandlers[unlockDoorPacketID] = UnlockDoorClientHandler;
+                }
+                else
+                {
+                    ClientSend.RegisterCustomPacketType("EFMUnlockDoorPacketID");
+                    H3MP.Mod.CustomPacketHandlerReceived += UnlockDoorPacketIDReceived;
                 }
             }
         }
@@ -391,6 +432,26 @@ namespace EFM
                 consumeSpawnPacketID = ID;
                 H3MP.Mod.customPacketHandlers[consumeSpawnPacketID] = ConsumeSpawnClientHandler;
                 H3MP.Mod.CustomPacketHandlerReceived -= ConsumeSpawnPacketIDReceived;
+            }
+        }
+
+        public static void BreachDoorPacketIDReceived(string identifier, int ID)
+        {
+            if (identifier.Equals("EFMBreachPacketID"))
+            {
+                breachDoorPacketID = ID;
+                H3MP.Mod.customPacketHandlers[breachDoorPacketID] = BreachDoorClientHandler;
+                H3MP.Mod.CustomPacketHandlerReceived -= BreachDoorPacketIDReceived;
+            }
+        }
+
+        public static void UnlockDoorPacketIDReceived(string identifier, int ID)
+        {
+            if (identifier.Equals("EFMUnlockDoorPacketID"))
+            {
+                unlockDoorPacketID = ID;
+                H3MP.Mod.customPacketHandlers[unlockDoorPacketID] = UnlockDoorClientHandler;
+                H3MP.Mod.CustomPacketHandlerReceived -= UnlockDoorPacketIDReceived;
             }
         }
 
@@ -710,6 +771,44 @@ namespace EFM
             }
         }
 
+        public static void BreachDoorServerHandler(int clientID, Packet packet)
+        {
+            int trackedID = packet.ReadInt();
+            bool correctSide = packet.ReadBool();
+
+            TrackedDoorData trackedDoor = Server.objects[trackedID] as TrackedDoorData;
+            if (trackedDoor != null && trackedDoor.physical != null)
+            {
+                trackedDoor.physicalDoor.physicalDoor.AttemptBreach(correctSide, false);
+            }
+
+            using(Packet newPacket = new Packet(breachDoorPacketID))
+            {
+                newPacket.Write(trackedID);
+                newPacket.Write(correctSide);
+
+                ServerSend.SendTCPDataToAll(newPacket, true);
+            }
+        }
+
+        public static void UnlockDoorServerHandler(int clientID, Packet packet)
+        {
+            int trackedID = packet.ReadInt();
+
+            TrackedDoorData trackedDoor = Server.objects[trackedID] as TrackedDoorData;
+            if (trackedDoor != null && trackedDoor.physical != null)
+            {
+                trackedDoor.physicalDoor.physicalDoor.lockScript.UnlockAction(false);
+            }
+
+            using(Packet newPacket = new Packet(unlockDoorPacketID))
+            {
+                newPacket.Write(trackedID);
+
+                ServerSend.SendTCPDataToAll(newPacket, true);
+            }
+        }
+
         ////////////// CLIENT HANDLERS
 
         public static void AddInstanceClientHandler(int clientID, Packet packet)
@@ -904,6 +1003,29 @@ namespace EFM
             if (raidInstances.TryGetValue(instanceID, out RaidInstance raidInstance))
             {
                 raidInstance.ConsumeSpawn(spawnIndex, PMC, PMCSpawnCount, scavSpawnCount, false);
+            }
+        }
+
+        public static void BreachDoorClientHandler(int clientID, Packet packet)
+        {
+            int trackedID = packet.ReadInt();
+            bool correctSide = packet.ReadBool();
+
+            TrackedDoorData trackedDoor = Client.objects[trackedID] as TrackedDoorData;
+            if (trackedDoor != null && trackedDoor.physical != null)
+            {
+                trackedDoor.physicalDoor.physicalDoor.AttemptBreach(correctSide, false);
+            }
+        }
+
+        public static void UnlockDoorClientHandler(int clientID, Packet packet)
+        {
+            int trackedID = packet.ReadInt();
+
+            TrackedDoorData trackedDoor = Client.objects[trackedID] as TrackedDoorData;
+            if (trackedDoor != null && trackedDoor.physical != null)
+            {
+                trackedDoor.physicalDoor.physicalDoor.lockScript.UnlockAction(false);
             }
         }
     }

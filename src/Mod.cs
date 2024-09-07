@@ -2081,6 +2081,16 @@ namespace EFM
 
                                 File.WriteAllText(path + "/database/DefaultItemData.json", itemDataToFix.ToString());
                                 break;
+                            case 24: // Get all implemented item IDs missing from IM.OD
+                                Mod.LogInfo("\tDebug: Get all implemented item IDs missing from IM.OD");
+                                foreach(KeyValuePair<string, MeatovItemData> implementedEntry in Mod.defaultItemData)
+                                {
+                                    if (!IM.OD.ContainsKey(implementedEntry.Value.H3ID))
+                                    {
+                                        Mod.LogError("\tMissing item: " + implementedEntry.Value.H3ID);
+                                    }
+                                }
+                                break;
                         }
                     }
                 }
