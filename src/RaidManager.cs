@@ -50,7 +50,6 @@ namespace EFM
 
         public delegate void SpawnItemReturnDelegate(List<MeatovItem> itemsSpawned);
 
-        TODO: // Implement doors
         public void Awake()
         {
             instance = this;
