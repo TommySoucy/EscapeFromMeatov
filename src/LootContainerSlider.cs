@@ -17,6 +17,8 @@ namespace EFM
 
 		public float newAxisMagnitude;
 
+		public TrackedLCSliderData trackedLCSliderData;
+
         public override void Awake()
 		{
             base.Awake();

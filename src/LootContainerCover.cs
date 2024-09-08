@@ -15,6 +15,8 @@ namespace EFM
 
         public float rotAngle;
 
+		public TrackedLCCoverData trackedLCCoverData;
+
         public override void Awake()
         {
             base.Awake();

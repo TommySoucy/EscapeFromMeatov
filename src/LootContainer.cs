@@ -1,4 +1,6 @@
-﻿using System;
+﻿using H3MP.Networking;
+using H3MP;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -44,6 +46,46 @@ namespace EFM
 
         [NonSerialized]
         public bool contentsSpawned;
+
+        public TrackedLootContainerData trackedLootContainerData;
+
+        public void Awake()
+        {
+            if (lockScript != null)
+            {
+                lockScript.OnUnlock += OnUnlock;
+            }
+        }
+
+        public void OnUnlock(bool toSend)
+        {
+            if (toSend && trackedLootContainerData != null)
+            {
+                // Take control
+                if (trackedLootContainerData.controller != GameManager.ID)
+                {
+                    trackedLootContainerData.TakeControlRecursive();
+                }
+
+                // Send unlock to others
+                if (Networking.currentInstance != null)
+                {
+                    using (Packet packet = new Packet(Networking.unlockLootContainerPacketID))
+                    {
+                        packet.Write(trackedLootContainerData.trackedID);
+
+                        if (ThreadManager.host)
+                        {
+                            ServerSend.SendTCPDataToAll(packet, true);
+                        }
+                        else
+                        {
+                            ClientSend.SendTCPData(packet, true);
+                        }
+                    }
+                }
+            }
+        }
 
         public void Start()
         {
@@ -178,6 +220,33 @@ namespace EFM
                         }
                     }
                     break;
+            }
+
+            if(trackedLootContainerData != null)
+            {
+                // Take control
+                if (trackedLootContainerData.controller != GameManager.ID)
+                {
+                    trackedLootContainerData.TakeControlRecursive();
+                }
+
+                // Send breach to others
+                if (Networking.currentInstance != null)
+                {
+                    using (Packet packet = new Packet(Networking.setLootContainerContentSpawnedPacketID))
+                    {
+                        packet.Write(trackedLootContainerData.trackedID);
+
+                        if (ThreadManager.host)
+                        {
+                            ServerSend.SendTCPDataToAll(packet, true);
+                        }
+                        else
+                        {
+                            ClientSend.SendTCPData(packet, true);
+                        }
+                    }
+                }
             }
         }
 

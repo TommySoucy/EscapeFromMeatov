@@ -250,6 +250,11 @@ namespace EFM
             base.WriteToPacket(packet, incrementOrder, full);
 
             packet.Write(rotAngle);
+
+            if (full)
+            {
+                packet.Write(locked);
+            }
         }
 
         public override void RemoveFromLocal()

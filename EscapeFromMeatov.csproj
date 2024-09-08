@@ -88,7 +88,13 @@
     <Compile Include="src\ExtractionLimitUI.cs" />
     <Compile Include="src\ExtractionUI.cs" />
     <Compile Include="src\FarmingView.cs" />
+    <Compile Include="src\H3MP\TrackedLCSlider.cs" />
+    <Compile Include="src\H3MP\TrackedLCCover.cs" />
+    <Compile Include="src\H3MP\TrackedLCSliderData.cs" />
+    <Compile Include="src\H3MP\TrackedLCCoverData.cs" />
+    <Compile Include="src\H3MP\TrackedLootContainer.cs" />
     <Compile Include="src\H3MP\TrackedDoor.cs" />
+    <Compile Include="src\H3MP\TrackedLootContainerData.cs" />
     <Compile Include="src\H3MP\TrackedDoorData.cs" />
     <Compile Include="src\HoverScrollProcessor.cs" />
     <Compile Include="src\ItemDescriptionListEntryUI.cs" />

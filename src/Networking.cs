@@ -31,6 +31,7 @@ namespace EFM
         public static int consumeSpawnPacketID; // ConsumeEFMInstanceSpawnPacketID
         public static int breachDoorPacketID; // EFMBreachPacketID
         public static int unlockDoorPacketID; // EFMUnlockDoorPacketID
+        public static int setLootContainerContentSpawnedPacketID; // SetEFMLootContainerContentSpawnedPacketID
 
         public static void OnConnection()
         {
@@ -133,6 +134,13 @@ namespace EFM
                     unlockDoorPacketID = Server.RegisterCustomPacketType("EFMUnlockDoorPacketID");
                 }
                 H3MP.Mod.customPacketHandlers[unlockDoorPacketID] = UnlockDoorServerHandler;
+
+                // Set LootContainer content spawned
+                if (!H3MP.Mod.registeredCustomPacketIDs.TryGetValue("SetEFMLootContainerContentSpawnedPacketID", out setLootContainerContentSpawnedPacketID))
+                {
+                    setLootContainerContentSpawnedPacketID = Server.RegisterCustomPacketType("SetEFMLootContainerContentSpawnedPacketID");
+                }
+                H3MP.Mod.customPacketHandlers[setLootContainerContentSpawnedPacketID] = SetLootContainerContentSpawnedServerHandler;
             }
             else
             {
@@ -254,6 +262,18 @@ namespace EFM
                 {
                     ClientSend.RegisterCustomPacketType("EFMUnlockDoorPacketID");
                     H3MP.Mod.CustomPacketHandlerReceived += UnlockDoorPacketIDReceived;
+                }
+
+                // Set LootContainer content spawned
+                if (H3MP.Mod.registeredCustomPacketIDs.TryGetValue("SetEFMLootContainerContentSpawnedPacketID", out int customSetLootContainerContentSpawnedPacketID))
+                {
+                    setLootContainerContentSpawnedPacketID = customSetLootContainerContentSpawnedPacketID;
+                    H3MP.Mod.customPacketHandlers[setLootContainerContentSpawnedPacketID] = SetLootContainerContentSpawnedClientHandler;
+                }
+                else
+                {
+                    ClientSend.RegisterCustomPacketType("SetEFMLootContainerContentSpawnedPacketID");
+                    H3MP.Mod.CustomPacketHandlerReceived += SetLootContainerContentSpawnedPacketIDReceived;
                 }
             }
         }
@@ -452,6 +472,16 @@ namespace EFM
                 unlockDoorPacketID = ID;
                 H3MP.Mod.customPacketHandlers[unlockDoorPacketID] = UnlockDoorClientHandler;
                 H3MP.Mod.CustomPacketHandlerReceived -= UnlockDoorPacketIDReceived;
+            }
+        }
+
+        public static void SetLootContainerContentSpawnedPacketIDReceived(string identifier, int ID)
+        {
+            if (identifier.Equals("SetEFMLootContainerContentSpawnedPacketID"))
+            {
+                setLootContainerContentSpawnedPacketID = ID;
+                H3MP.Mod.customPacketHandlers[setLootContainerContentSpawnedPacketID] = SetLootContainerContentSpawnedClientHandler;
+                H3MP.Mod.CustomPacketHandlerReceived -= SetLootContainerContentSpawnedPacketIDReceived;
             }
         }
 
@@ -796,12 +826,40 @@ namespace EFM
             int trackedID = packet.ReadInt();
 
             TrackedDoorData trackedDoor = Server.objects[trackedID] as TrackedDoorData;
-            if (trackedDoor != null && trackedDoor.physical != null)
+            if (trackedDoor != null)
             {
-                trackedDoor.physicalDoor.physicalDoor.lockScript.UnlockAction(false);
+                trackedDoor.locked = false;
+
+                if (trackedDoor.physical != null)
+                {
+                    trackedDoor.physicalDoor.physicalDoor.lockScript.UnlockAction(false);
+                }
             }
 
             using(Packet newPacket = new Packet(unlockDoorPacketID))
+            {
+                newPacket.Write(trackedID);
+
+                ServerSend.SendTCPDataToAll(newPacket, true);
+            }
+        }
+
+        public static void SetLootContainerContentSpawnedServerHandler(int clientID, Packet packet)
+        {
+            int trackedID = packet.ReadInt();
+
+            TrackedLootContainerData trackedLootContainer = Server.objects[trackedID] as TrackedLootContainerData;
+            if (trackedLootContainer != null)
+            {
+                trackedLootContainer.spawnedContents = true;
+
+                if (trackedLootContainer.physical != null)
+                {
+                    trackedLootContainer.physicalLootContainer.physicalLootContainer.contentsSpawned = true;
+                }
+            }
+
+            using(Packet newPacket = new Packet(setLootContainerContentSpawnedPacketID))
             {
                 newPacket.Write(trackedID);
 
@@ -1023,9 +1081,30 @@ namespace EFM
             int trackedID = packet.ReadInt();
 
             TrackedDoorData trackedDoor = Client.objects[trackedID] as TrackedDoorData;
-            if (trackedDoor != null && trackedDoor.physical != null)
+            if (trackedDoor != null)
             {
-                trackedDoor.physicalDoor.physicalDoor.lockScript.UnlockAction(false);
+                trackedDoor.locked = false;
+
+                if (trackedDoor.physical != null)
+                {
+                    trackedDoor.physicalDoor.physicalDoor.lockScript.UnlockAction(false);
+                }
+            }
+        }
+
+        public static void SetLootContainerContentSpawnedClientHandler(int clientID, Packet packet)
+        {
+            int trackedID = packet.ReadInt();
+
+            TrackedLootContainerData trackedLootContainer = Client.objects[trackedID] as TrackedLootContainerData;
+            if (trackedLootContainer != null)
+            {
+                trackedLootContainer.spawnedContents = true;
+
+                if (trackedLootContainer.physical != null)
+                {
+                    trackedLootContainer.physicalLootContainer.physicalLootContainer.contentsSpawned = true;
+                }
             }
         }
     }
