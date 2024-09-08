@@ -22,9 +22,6 @@ namespace EFM
         public bool AIPMCSpawned;
         public int enemyIFF = 2;
 
-        TODO: // Must keep track of which loot containers have been opened so anyone who joins knows, should do that with a custom Tracked type so we can update the angle of the cover or dist of drawer
-        TODO: // Must keep track of which doors have been opened so anyone who joins knows, should do that with a custom Tracked type so we can update the angle of the cover or dist of drawer
-
         public RaidInstance(int ID, string map, bool timeIs0, bool spawnTogether)
         {
             this.ID = ID;
