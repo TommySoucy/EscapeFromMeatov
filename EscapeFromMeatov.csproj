@@ -96,6 +96,8 @@
     <Compile Include="src\H3MP\TrackedDoor.cs" />
     <Compile Include="src\H3MP\TrackedLootContainerData.cs" />
     <Compile Include="src\H3MP\TrackedDoorData.cs" />
+    <Compile Include="src\H3MP\TrackedMeatovItem.cs" />
+    <Compile Include="src\H3MP\TrackedMeatovItemData.cs" />
     <Compile Include="src\HoverScrollProcessor.cs" />
     <Compile Include="src\ItemDescriptionListEntryUI.cs" />
     <Compile Include="src\ItemDescriptionUI.cs" />

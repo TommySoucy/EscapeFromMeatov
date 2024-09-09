@@ -105,21 +105,14 @@ namespace EFM
         public int upgradeWarnCount = 0;
         [NonSerialized]
         public List<MeshRenderer> highlightRenderers;
-        [NonSerialized]
         public int compatibilityValue; // 0: Does not need mag or round, 1: Needs mag, 2: Needs round, 3: Needs both
-        [NonSerialized]
         public bool usesMags; // Could be clip
-        [NonSerialized]
         public bool usesAmmoContainers; // Could be internal mag or revolver
-        [NonSerialized]
         public FireArmMagazineType magType;
-        [NonSerialized]
         public FireArmClipType clipType;
         public FireArmRoundType roundType;
         [NonSerialized]
         public bool inAll;
-        [NonSerialized]
-        public int creditCost; // Value of item in rubles
         private bool _insured;
 		public bool insured 
 		{
