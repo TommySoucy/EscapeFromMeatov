@@ -335,7 +335,166 @@ namespace EFM
             previousAmount = amount;
             amount = updatedMeatovItem.amount;
 
-            cont from ehre// do physical update
+            if(physical != null)
+            {
+                if(previousParentSlotIndex != parentSlotIndex)
+                {
+                    if(parent != -1)
+                    {
+                        TrackedMeatovItemData parentMeatovItemData = (ThreadManager.host ? Server.objects : Client.objects)[parent] as TrackedMeatovItemData;
+                        if (parentSlotIndex == -1)
+                        {
+                            if(physicalMeatovItem.physicalMeatovItem.physObj.QuickbeltSlot != null)
+                            {
+                                // Remove from any parent QBS it might be in
+                                List<RigSlot> rigSlots = parentMeatovItemData.physicalMeatovItem.physicalMeatovItem.rigSlots;
+                                for (int i = 0; i < rigSlots.Count; ++i)
+                                {
+                                    if(rigSlots[i] == physicalItem.physicalItem.QuickbeltSlot)
+                                    {
+                                        physicalMeatovItem.physicalMeatovItem.physObj.SetQuickBeltSlot(null);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // Remove from current QBS if in QBS
+                            if (physicalMeatovItem.physicalMeatovItem.physObj.QuickbeltSlot != null)
+                            {
+                                physicalMeatovItem.physicalMeatovItem.physObj.SetQuickBeltSlot(null);
+                            }
+
+                            // Add to correct parent QBS
+                            physicalMeatovItem.physicalMeatovItem.physObj.SetQuickBeltSlot(parentMeatovItemData.physicalMeatovItem.physicalMeatovItem.rigSlots[parentSlotIndex]);
+                        }
+                    }
+                }
+                physicalMeatovItem.physicalMeatovItem.insured = insured;
+                physicalMeatovItem.physicalMeatovItem.foundInRaid = foundInRaid;
+                if(previousMode != mode || previousOpen != open)
+                {
+                    physicalMeatovItem.physicalMeatovItem.UpdateMode(mode, open);
+                }
+                physicalMeatovItem.physicalMeatovItem.broken = broken;
+                physicalMeatovItem.physicalMeatovItem.stack = stack;
+                physicalMeatovItem.physicalMeatovItem.amount = amount;
+            }
+        }
+
+        public override void UpdateFromPacket(Packet packet, bool full = false)
+        {
+            base.UpdateFromPacket(packet, full);
+
+            if (full)
+            {
+                tarkovID = packet.ReadString();
+                dogtagLevel = packet.ReadInt();
+                dogtagName = packet.ReadString();
+            }
+
+            previousParentSlotIndex = parentSlotIndex;
+            parentSlotIndex = packet.ReadInt();
+            previousInsured = insured;
+            insured = packet.ReadBool();
+            previousFoundInRaid = foundInRaid;
+            foundInRaid = packet.ReadBool();
+            previousMode = mode;
+            mode = packet.ReadInt();
+            previousOpen = open;
+            open = packet.ReadBool();
+            previousBroken = broken;
+            broken = packet.ReadBool();
+            previousStack = stack;
+            stack = packet.ReadInt();
+            previousAmount = amount;
+            amount = packet.ReadInt();
+
+            if (physical != null)
+            {
+                if (previousParentSlotIndex != parentSlotIndex)
+                {
+                    if (parent != -1)
+                    {
+                        TrackedMeatovItemData parentMeatovItemData = (ThreadManager.host ? Server.objects : Client.objects)[parent] as TrackedMeatovItemData;
+                        if (parentSlotIndex == -1)
+                        {
+                            if (physicalMeatovItem.physicalMeatovItem.physObj.QuickbeltSlot != null)
+                            {
+                                // Remove from any parent QBS it might be in
+                                List<RigSlot> rigSlots = parentMeatovItemData.physicalMeatovItem.physicalMeatovItem.rigSlots;
+                                for (int i = 0; i < rigSlots.Count; ++i)
+                                {
+                                    if (rigSlots[i] == physicalItem.physicalItem.QuickbeltSlot)
+                                    {
+                                        physicalMeatovItem.physicalMeatovItem.physObj.SetQuickBeltSlot(null);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // Remove from current QBS if in QBS
+                            if (physicalMeatovItem.physicalMeatovItem.physObj.QuickbeltSlot != null)
+                            {
+                                physicalMeatovItem.physicalMeatovItem.physObj.SetQuickBeltSlot(null);
+                            }
+
+                            // Add to correct parent QBS
+                            physicalMeatovItem.physicalMeatovItem.physObj.SetQuickBeltSlot(parentMeatovItemData.physicalMeatovItem.physicalMeatovItem.rigSlots[parentSlotIndex]);
+                        }
+                    }
+                }
+                physicalMeatovItem.physicalMeatovItem.insured = insured;
+                physicalMeatovItem.physicalMeatovItem.foundInRaid = foundInRaid;
+                if (previousMode != mode || previousOpen != open)
+                {
+                    physicalMeatovItem.physicalMeatovItem.UpdateMode(mode, open);
+                }
+                physicalMeatovItem.physicalMeatovItem.broken = broken;
+                physicalMeatovItem.physicalMeatovItem.stack = stack;
+                physicalMeatovItem.physicalMeatovItem.amount = amount;
+            }
+        }
+
+        public override bool Update(bool full = false)
+        {
+            bool updated = base.Update(full);
+
+            // Phys could be null if we were given control of the item while we were loading and we haven't instantiated it on our side yet
+            if (physical == null)
+            {
+                return false;
+            }
+
+            if (full)
+            {
+                tarkovID = physicalMeatovItem.physicalMeatovItem.tarkovID;
+                dogtagLevel = physicalMeatovItem.physicalMeatovItem.dogtagLevel;
+                dogtagName = physicalMeatovItem.physicalMeatovItem.dogtagName;
+            }
+
+            cont from here // Update data with physical  object state
+            previousParentSlotIndex = parentSlotIndex;
+            parentSlotIndex = packet.ReadInt();
+            previousInsured = insured;
+            insured = packet.ReadBool();
+            previousFoundInRaid = foundInRaid;
+            foundInRaid = packet.ReadBool();
+            previousMode = mode;
+            mode = packet.ReadInt();
+            previousOpen = open;
+            open = packet.ReadBool();
+            previousBroken = broken;
+            broken = packet.ReadBool();
+            previousStack = stack;
+            stack = packet.ReadInt();
+            previousAmount = amount;
+            amount = packet.ReadInt();
+
+            return updated || previousActiveControl != underActiveControl || !previousPos.Equals(position) || !previousRot.Equals(rotation);
         }
     }
 }

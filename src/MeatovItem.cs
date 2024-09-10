@@ -1877,6 +1877,27 @@ namespace EFM
 			return actualAmountUsed; 
         }
 
+        public void UpdateMode(int mode, bool open)
+        {
+            switch (itemType)
+            {
+                case ItemType.Rig:
+                case ItemType.ArmoredRig:
+                case ItemType.Backpack:
+                case ItemType.Container:
+                case ItemType.Pouch:
+                case ItemType.LootContainer:
+                    if(this.open != open)
+                    {
+                        ToggleMode(false);
+                    }
+                    break;
+                case ItemType.Money:
+                    SetMode(mode);
+                    break;
+            }
+        }
+
 		public void ToggleMode(bool inHand, bool isRightHand = false)
 		{
             // Can't open item that has a parent item (ex.: backpack in volume)
