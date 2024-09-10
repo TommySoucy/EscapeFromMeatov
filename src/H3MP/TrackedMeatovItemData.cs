@@ -22,7 +22,6 @@ namespace EFM
         public string dogtagName;
 
         // State
-        public int previousParentSlotIndex = -1;
         public int parentSlotIndex = -1;
         public bool previousInsured;
         public bool insured;
@@ -47,7 +46,6 @@ namespace EFM
         public TrackedMeatovItemData(Packet packet, string typeID, int trackedID) : base(packet, typeID, trackedID)
         {
             // Update
-            parentSlotIndex = packet.ReadInt();
             insured = packet.ReadBool();
             foundInRaid = packet.ReadBool();
             mode = packet.ReadInt();
@@ -58,6 +56,7 @@ namespace EFM
 
             // Full
             tarkovID = packet.ReadString();
+            parentSlotIndex = packet.ReadInt();
             dogtagLevel = packet.ReadInt();
             dogtagName = packet.ReadString();
         }
@@ -240,14 +239,14 @@ namespace EFM
                             // This means we assume a meatov item cannot be attached to a parent that has both a container volume AND some other attachment system
                             // like vanilla mount. We should probably check for stuff like that, but currently, no such meatov item exists
                             TrackedMeatovItemData parentMeatovItemData = parentObject as TrackedMeatovItemData;
-                            if (parentSlotIndex = -1 && parentMeatovItemData.physicalMeatovItem.physicalMeatovItem.containerVolume != null)
+                            if (parentSlotIndex == -1 && parentMeatovItemData.physicalMeatovItem.physicalMeatovItem.containerVolume != null)
                             {
                                 parentMeatovItemData.physicalMeatovItem.physicalMeatovItem.containerVolume.AddItem(physicalMeatovItem.physicalMeatovItem, true);
                             }
                             else if(parentSlotIndex != -1 && parentMeatovItemData.physicalMeatovItem.physicalMeatovItem.rigSlots != null 
-                                && parentMeatovItemData.physicalMeatovItem.physicalMeatovItem.rigslots.Count > parentSlotIndex)
+                                && parentMeatovItemData.physicalMeatovItem.physicalMeatovItem.rigSlots.Count > parentSlotIndex)
                             {
-                                physicalMeatovItem.physicalMeatovItem.physObj.SetQuickBeltSlot(parentMeatovItemData.physicalMeatovItem.physicalMeatovItem.rigslots[parentSlotIndex]);
+                                physicalMeatovItem.physicalMeatovItem.physObj.SetQuickBeltSlot(parentMeatovItemData.physicalMeatovItem.physicalMeatovItem.rigSlots[parentSlotIndex]);
                             }
                         }
                     }
@@ -280,14 +279,14 @@ namespace EFM
                         if (childObject is TrackedMeatovItemData)
                         {
                             TrackedMeatovItemData childMeatovItemData = childObject as TrackedMeatovItemData;
-                            if (childMeatovItemData.parentSlotIndex = -1 && physicalMeatovItem.physicalMeatovItem.containerVolume != null)
+                            if (childMeatovItemData.parentSlotIndex == -1 && physicalMeatovItem.physicalMeatovItem.containerVolume != null)
                             {
                                 physicalMeatovItem.physicalMeatovItem.containerVolume.AddItem(childMeatovItemData.physicalMeatovItem.physicalMeatovItem, true);
                             }
                             else if (childMeatovItemData.parentSlotIndex != -1 && physicalMeatovItem.physicalMeatovItem.rigSlots != null
-                                && physicalMeatovItem.physicalMeatovItem.rigslots.Count > childMeatovItemData.parentSlotIndex)
+                                && physicalMeatovItem.physicalMeatovItem.rigSlots.Count > childMeatovItemData.parentSlotIndex)
                             {
-                                childMeatovItemData.physicalMeatovItem.physicalMeatovItem.physObj.SetQuickBeltSlot(physicalMeatovItem.physicalMeatovItem.rigslots[childMeatovItemData.parentSlotIndex]);
+                                childMeatovItemData.physicalMeatovItem.physicalMeatovItem.physObj.SetQuickBeltSlot(physicalMeatovItem.physicalMeatovItem.rigSlots[childMeatovItemData.parentSlotIndex]);
                             }
                         }
 
@@ -311,15 +310,6 @@ namespace EFM
 
             TrackedMeatovItemData updatedMeatovItem = updatedObject as TrackedMeatovItemData;
 
-            if (full)
-            {
-                tarkovID = updatedMeatovItem.tarkovID;
-                dogtagLevel = updatedMeatovItem.dogtagLevel;
-                dogtagName = updatedMeatovItem.dogtagName;
-            }
-
-            previousParentSlotIndex = parentSlotIndex;
-            parentSlotIndex = updatedMeatovItem.parentSlotIndex;
             previousInsured = insured;
             insured = updatedMeatovItem.insured;
             previousFoundInRaid = foundInRaid;
@@ -335,9 +325,26 @@ namespace EFM
             previousAmount = amount;
             amount = updatedMeatovItem.amount;
 
-            if(physical != null)
+            if (full)
             {
-                if(previousParentSlotIndex != parentSlotIndex)
+                tarkovID = updatedMeatovItem.tarkovID;
+                parentSlotIndex = updatedMeatovItem.parentSlotIndex;
+                dogtagLevel = updatedMeatovItem.dogtagLevel;
+                dogtagName = updatedMeatovItem.dogtagName;
+            }
+
+            if (physical != null)
+            {
+                physicalMeatovItem.physicalMeatovItem.insured = insured;
+                physicalMeatovItem.physicalMeatovItem.foundInRaid = foundInRaid;
+                if (previousMode != mode || previousOpen != open)
+                {
+                    physicalMeatovItem.physicalMeatovItem.UpdateMode(mode, open);
+                }
+                physicalMeatovItem.physicalMeatovItem.broken = broken;
+                physicalMeatovItem.physicalMeatovItem.stack = stack;
+                physicalMeatovItem.physicalMeatovItem.amount = amount;
+                if (full)
                 {
                     if(parent != -1)
                     {
@@ -371,15 +378,6 @@ namespace EFM
                         }
                     }
                 }
-                physicalMeatovItem.physicalMeatovItem.insured = insured;
-                physicalMeatovItem.physicalMeatovItem.foundInRaid = foundInRaid;
-                if(previousMode != mode || previousOpen != open)
-                {
-                    physicalMeatovItem.physicalMeatovItem.UpdateMode(mode, open);
-                }
-                physicalMeatovItem.physicalMeatovItem.broken = broken;
-                physicalMeatovItem.physicalMeatovItem.stack = stack;
-                physicalMeatovItem.physicalMeatovItem.amount = amount;
             }
         }
 
@@ -387,15 +385,6 @@ namespace EFM
         {
             base.UpdateFromPacket(packet, full);
 
-            if (full)
-            {
-                tarkovID = packet.ReadString();
-                dogtagLevel = packet.ReadInt();
-                dogtagName = packet.ReadString();
-            }
-
-            previousParentSlotIndex = parentSlotIndex;
-            parentSlotIndex = packet.ReadInt();
             previousInsured = insured;
             insured = packet.ReadBool();
             previousFoundInRaid = foundInRaid;
@@ -411,9 +400,26 @@ namespace EFM
             previousAmount = amount;
             amount = packet.ReadInt();
 
+            if (full)
+            {
+                tarkovID = packet.ReadString();
+                parentSlotIndex = packet.ReadInt();
+                dogtagLevel = packet.ReadInt();
+                dogtagName = packet.ReadString();
+            }
+
             if (physical != null)
             {
-                if (previousParentSlotIndex != parentSlotIndex)
+                physicalMeatovItem.physicalMeatovItem.insured = insured;
+                physicalMeatovItem.physicalMeatovItem.foundInRaid = foundInRaid;
+                if (previousMode != mode || previousOpen != open)
+                {
+                    physicalMeatovItem.physicalMeatovItem.UpdateMode(mode, open);
+                }
+                physicalMeatovItem.physicalMeatovItem.broken = broken;
+                physicalMeatovItem.physicalMeatovItem.stack = stack;
+                physicalMeatovItem.physicalMeatovItem.amount = amount;
+                if (full)
                 {
                     if (parent != -1)
                     {
@@ -447,15 +453,6 @@ namespace EFM
                         }
                     }
                 }
-                physicalMeatovItem.physicalMeatovItem.insured = insured;
-                physicalMeatovItem.physicalMeatovItem.foundInRaid = foundInRaid;
-                if (previousMode != mode || previousOpen != open)
-                {
-                    physicalMeatovItem.physicalMeatovItem.UpdateMode(mode, open);
-                }
-                physicalMeatovItem.physicalMeatovItem.broken = broken;
-                physicalMeatovItem.physicalMeatovItem.stack = stack;
-                physicalMeatovItem.physicalMeatovItem.amount = amount;
             }
         }
 
@@ -472,29 +469,119 @@ namespace EFM
             if (full)
             {
                 tarkovID = physicalMeatovItem.physicalMeatovItem.tarkovID;
+                parentSlotIndex = -1;
+                if (physicalMeatovItem.physicalMeatovItem.physObj.QuickbeltSlot != null && parent != -1)
+                {
+                    TrackedMeatovItemData parentMeatovItemData = (ThreadManager.host ? Server.objects : Client.objects)[parent] as TrackedMeatovItemData;
+                    if (parentMeatovItemData != null)
+                    {
+                        for(int i=0; i< parentMeatovItemData.physicalMeatovItem.physicalMeatovItem.rigSlots.Count; ++i)
+                        {
+                            if(physicalMeatovItem.physicalMeatovItem.physObj.QuickbeltSlot == parentMeatovItemData.physicalMeatovItem.physicalMeatovItem.rigSlots[i])
+                            {
+                                parentSlotIndex = i;
+                                break;
+                            }
+                        }
+                    }
+                }
                 dogtagLevel = physicalMeatovItem.physicalMeatovItem.dogtagLevel;
                 dogtagName = physicalMeatovItem.physicalMeatovItem.dogtagName;
             }
 
-            cont from here // Update data with physical  object state
-            previousParentSlotIndex = parentSlotIndex;
-            parentSlotIndex = packet.ReadInt();
             previousInsured = insured;
-            insured = packet.ReadBool();
+            insured = physicalMeatovItem.physicalMeatovItem.insured;
             previousFoundInRaid = foundInRaid;
-            foundInRaid = packet.ReadBool();
+            foundInRaid = physicalMeatovItem.physicalMeatovItem.foundInRaid;
             previousMode = mode;
-            mode = packet.ReadInt();
+            mode = physicalMeatovItem.physicalMeatovItem.mode;
             previousOpen = open;
-            open = packet.ReadBool();
+            open = physicalMeatovItem.physicalMeatovItem.open;
             previousBroken = broken;
-            broken = packet.ReadBool();
+            broken = physicalMeatovItem.physicalMeatovItem.broken;
             previousStack = stack;
-            stack = packet.ReadInt();
+            stack = physicalMeatovItem.physicalMeatovItem.stack;
             previousAmount = amount;
-            amount = packet.ReadInt();
+            amount = physicalMeatovItem.physicalMeatovItem.amount;
 
-            return updated || previousActiveControl != underActiveControl || !previousPos.Equals(position) || !previousRot.Equals(rotation);
+            return updated || previousInsured != insured || previousFoundInRaid != foundInRaid || previousMode != mode || previousOpen != open || previousBroken != broken || previousStack != stack || previousAmount != amount;
+        }
+
+        public override bool NeedsUpdate()
+        {
+            return base.NeedsUpdate() || previousInsured != insured || previousFoundInRaid != foundInRaid || previousMode != mode || previousOpen != open || previousBroken != broken || previousStack != stack || previousAmount != amount;
+        }
+
+        public override void RemoveFromLocal()
+        {
+            base.RemoveFromLocal();
+
+            // Manage unknown lists
+            if (trackedID == -1)
+            {
+                // If not tracked, make sure we remove from tracked lists in case object was unawoken
+                if (physicalItem != null && physicalItem.physicalItem != null)
+                {
+                    trackedMeatovItemByMeatovItem.Remove(physicalMeatovItem.physicalMeatovItem);
+                }
+            }
+        }
+
+        public override void WriteToPacket(Packet packet, bool incrementOrder, bool full)
+        {
+            base.WriteToPacket(packet, incrementOrder, full);
+
+            packet.Write(insured);
+            packet.Write(foundInRaid);
+            packet.Write(mode);
+            packet.Write(broken);
+            packet.Write(stack);
+            packet.Write(amount);
+
+            if (full)
+            {
+                packet.Write(tarkovID);
+                packet.Write(parentSlotIndex);
+                packet.Write(dogtagLevel);
+                packet.Write(dogtagName);
+            }
+        }
+
+        public override void ParentChanged()
+        {
+            base.ParentChanged();
+
+            if (parent != -1)
+            {
+                TrackedMeatovItemData parentMeatovItemData = (ThreadManager.host ? Server.objects : Client.objects)[parent] as TrackedMeatovItemData;
+                if (parentSlotIndex == -1)
+                {
+                    if (physicalMeatovItem.physicalMeatovItem.physObj.QuickbeltSlot != null)
+                    {
+                        // Remove from any parent QBS it might be in
+                        List<RigSlot> rigSlots = parentMeatovItemData.physicalMeatovItem.physicalMeatovItem.rigSlots;
+                        for (int i = 0; i < rigSlots.Count; ++i)
+                        {
+                            if (rigSlots[i] == physicalItem.physicalItem.QuickbeltSlot)
+                            {
+                                physicalMeatovItem.physicalMeatovItem.physObj.SetQuickBeltSlot(null);
+                                break;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // Remove from current QBS if in QBS
+                    if (physicalMeatovItem.physicalMeatovItem.physObj.QuickbeltSlot != null)
+                    {
+                        physicalMeatovItem.physicalMeatovItem.physObj.SetQuickBeltSlot(null);
+                    }
+
+                    // Add to correct parent QBS
+                    physicalMeatovItem.physicalMeatovItem.physObj.SetQuickBeltSlot(parentMeatovItemData.physicalMeatovItem.physicalMeatovItem.rigSlots[parentSlotIndex]);
+                }
+            }
         }
     }
 }
