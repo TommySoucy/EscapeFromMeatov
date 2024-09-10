@@ -712,6 +712,28 @@ namespace EFM
             H3MP.Networking.Client.OnDisconnect += Networking.OnDisconnection;
             H3MP.Networking.Server.OnServerClose += Networking.OnDisconnection;
 
+            // Register tracked types
+            if (!H3MP.Mod.trackedObjectTypesByName.ContainsKey("TrackedDoorData"))
+            {
+                H3MP.Mod.modInstance.AddTrackedType(typeof(TrackedDoorData));
+            }
+            if (!H3MP.Mod.trackedObjectTypesByName.ContainsKey("TrackedLCCoverData"))
+            {
+                H3MP.Mod.modInstance.AddTrackedType(typeof(TrackedLCCoverData));
+            }
+            if (!H3MP.Mod.trackedObjectTypesByName.ContainsKey("TrackedLCSliderData"))
+            {
+                H3MP.Mod.modInstance.AddTrackedType(typeof(TrackedLCSliderData));
+            }
+            if (!H3MP.Mod.trackedObjectTypesByName.ContainsKey("TrackedLootContainerData"))
+            {
+                H3MP.Mod.modInstance.AddTrackedType(typeof(TrackedLootContainerData));
+            }
+            if (!H3MP.Mod.trackedObjectTypesByName.ContainsKey("TrackedMeatovItemData"))
+            {
+                H3MP.Mod.modInstance.AddTrackedType(typeof(TrackedMeatovItemData));
+            }
+
             Init();
         }
 
