@@ -1,9 +1,6 @@
-﻿using FistVR;
-using H3MP;
+﻿using H3MP;
 using H3MP.Networking;
-using H3MP.Tracking;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace EFM
 {

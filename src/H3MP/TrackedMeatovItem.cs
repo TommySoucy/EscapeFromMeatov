@@ -1,5 +1,7 @@
-﻿using H3MP;
+﻿using FistVR;
+using H3MP;
 using H3MP.Tracking;
+using UnityEngine.SceneManagement;
 
 namespace EFM
 {
@@ -7,6 +9,22 @@ namespace EFM
     {
         public TrackedMeatovItemData meatovItemData;
         public MeatovItem physicalMeatovItem;
+
+        public override void Unsecure()
+        {
+            if(securedCode >= 515 && securedCode <= 521)
+            {
+                SceneManager.MoveGameObjectToScene(gameObject, SceneManager.GetActiveScene());
+
+                physicalItem.SetQuickBeltSlot(StatusUI.instance.equipmentSlots[securedCode - 515]);
+
+                securedCode = -1;
+            }
+            else
+            {
+                base.Unsecure();
+            }
+        }
 
         protected override void OnDestroy()
         {

@@ -512,6 +512,31 @@ namespace EFM
             return base.NeedsUpdate() || previousInsured != insured || previousFoundInRaid != foundInRaid || previousMode != mode || previousOpen != open || previousBroken != broken || previousStack != stack || previousAmount != amount;
         }
 
+        public override bool IsControlled(out int interactionID)
+        {
+            bool controlled = base.IsControlled(out interactionID);
+
+            bool inEquipmentSlot = false;
+            if (!controlled)
+            {
+                interactionID = -1;
+                if (physicalItem.physicalItem.QuickbeltSlot != null && StatusUI.instance != null)
+                {
+                    for (int i = 0; i < StatusUI.instance.equipmentSlots.Length; ++i)
+                    {
+                        if (StatusUI.instance.equipmentSlots[i] == physicalItem.physicalItem.QuickbeltSlot)
+                        {
+                            interactionID = i + 515; // Equipment slot 515-521
+                            inEquipmentSlot = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return controlled || inEquipmentSlot;
+        }
+
         public override void RemoveFromLocal()
         {
             base.RemoveFromLocal();
