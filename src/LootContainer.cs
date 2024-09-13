@@ -20,6 +20,7 @@ namespace EFM
 
         public ContainmentVolume volume;
         public Lock lockScript;
+        public GameObject volumeRoot; // Only used if this is a togglable container
 
         public float presenceProbability; // Probability of this loot container to even exist
         public int spawnAttemptCount; // Number of attempts to make of spawning an item in this loot container, overridden by StaticLootData mode
@@ -92,6 +93,16 @@ namespace EFM
             if(UnityEngine.Random.value > presenceProbability)
             {
                 Destroy(gameObject);
+            }
+        }
+
+        public void ToggleMode()
+        {
+            volumeRoot.SetActive(volumeRoot.activeSelf);
+
+            if (volumeRoot.activeSelf)
+            {
+                SpawnContents();
             }
         }
 

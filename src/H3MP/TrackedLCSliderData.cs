@@ -94,14 +94,14 @@ namespace EFM
             data.localTrackedID = GameManager.objects.Count;
             GameManager.objects.Add(data);
 
+            // Keep a reference in the door itself
+            data.physicalLCSlider.physicalLCSlider.trackedLCSliderData = data;
+
             // Call an init update because the one in awake won't be called because data was not set yet
             if (trackedLCSlider.awoken)
             {
                 trackedLCSlider.data.Update(true);
             }
-
-            // Keep a reference in the door itself
-            data.physicalLCSlider.physicalLCSlider.trackedLCSliderData = data;
 
             return trackedLCSlider;
         }
@@ -138,6 +138,8 @@ namespace EFM
             trackedLCSliderByLCSlider.Add(physicalLCSlider.physicalLCSlider, physicalLCSlider);
             GameManager.trackedObjectByObject.Add(physicalLCSlider.physicalLCSlider, physicalLCSlider);
             GameManager.trackedObjectByInteractive.Add(physicalLCSlider.physicalLCSlider, physicalLCSlider);
+
+            physicalLCSlider.physicalLCSlider.trackedLCSliderData = this;
 
             // Initially set itself
             UpdateFromData(this, true);

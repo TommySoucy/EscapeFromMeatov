@@ -935,18 +935,19 @@ namespace EFM
 
         public void EndRaid(RaidStatus status, string usedExtraction = null)
         {
+            Mod.justFinishedRaid = true;
             Mod.raidStatus = status;
             Mod.usedExtraction = usedExtraction;
 
             if(status == RaidStatus.Success || status == RaidStatus.RunThrough)
             {
                 // Secure all items player has on them
-                Mod.SecureItems();
+                Mod.SecureItems("MeatovHideout");
             }
             else // MIA, KIA
             {
                 // Secure only the pouch
-                Mod.SecureItems(true);
+                Mod.SecureItems("MeatovHideout", true);
             }
 
             // Main scene components will get secured on load start and unsecured upon arrival

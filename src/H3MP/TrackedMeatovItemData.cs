@@ -132,6 +132,9 @@ namespace EFM
             data.localTrackedID = GameManager.objects.Count;
             GameManager.objects.Add(data);
 
+            // Keep a reference in MeatovItem itself
+            data.physicalMeatovItem.physicalMeatovItem.trackedMeatovItemData = data;
+
             // Call an init update because the one in awake won't be called because data was not set yet
             if (trackedMeatovItem.updateFunc != null)
             {
@@ -526,7 +529,7 @@ namespace EFM
                     {
                         if (StatusUI.instance.equipmentSlots[i] == physicalItem.physicalItem.QuickbeltSlot)
                         {
-                            interactionID = i + 515; // Equipment slot 515-521
+                            interactionID = i + 515; // Equipment slot 515-522
                             inEquipmentSlot = true;
                             break;
                         }

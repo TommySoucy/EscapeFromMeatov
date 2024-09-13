@@ -96,14 +96,14 @@ namespace EFM
             data.localTrackedID = GameManager.objects.Count;
             GameManager.objects.Add(data);
 
+            // Keep a reference in the door itself
+            data.physicalDoor.physicalDoor.trackedDoorData = data;
+
             // Call an init update because the one in awake won't be called because data was not set yet
             if (trackedDoor.awoken)
             {
                 trackedDoor.data.Update(true);
             }
-
-            // Keep a reference in the door itself
-            data.physicalDoor.physicalDoor.trackedDoorData = data;
 
             return trackedDoor;
         }
@@ -140,6 +140,8 @@ namespace EFM
             trackedDoorByDoor.Add(physicalDoor.physicalDoor, physicalDoor);
             GameManager.trackedObjectByObject.Add(physicalDoor.physicalDoor, physicalDoor);
             GameManager.trackedObjectByInteractive.Add(physicalDoor.physicalDoor, physicalDoor);
+
+            physicalDoor.physicalDoor.trackedDoorData = this;
 
             // Initially set itself
             UpdateFromData(this, true);

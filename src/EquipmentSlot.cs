@@ -23,6 +23,8 @@ namespace EFM
         public static bool wearingEyewear;
         public static MeatovItem currentEyewear;
 
+        public MeatovItem.ItemType equipmentType;
+
         public static void WearEquipment(MeatovItem item)
         {
             Mod.LogInfo("WearEquipment called on " + item.gameObject.name);
@@ -231,7 +233,5 @@ namespace EFM
             currentBackpack = null;
             currentPouch = null;
         }
-
-        public MeatovItem.ItemType equipmentType;
     }
 }

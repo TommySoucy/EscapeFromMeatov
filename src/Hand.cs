@@ -6,7 +6,8 @@ namespace EFM
     public class Hand : MonoBehaviour
     {
         public Hand otherHand;
-        public MeatovItem collidingTogglable;
+        public MeatovItem collidingTogglableItem;
+        public LootContainer collidingTogglableLC;
         public Collider togglableCollider;
         public ContainmentVolume collidingVolume;
         public Collider volumeCollider;
@@ -29,25 +30,31 @@ namespace EFM
 
         private void Update()
         {
-            if (fvrHand.CurrentInteractable == null && collidingTogglable != null)
+            if (fvrHand.CurrentInteractable == null && (collidingTogglableItem != null || collidingTogglableLC != null))
             {
                 if (fvrHand.IsInStreamlinedMode)
                 {
                     if (fvrHand.Input.AXButtonDown)
                     {
-                        switch (collidingTogglable.itemType)
+                        if(collidingTogglableItem != null)
                         {
-                            case MeatovItem.ItemType.ArmoredRig:
-                            case MeatovItem.ItemType.Rig:
-                            case MeatovItem.ItemType.Backpack:
-                            case MeatovItem.ItemType.BodyArmor:
-                            case MeatovItem.ItemType.Container:
-                            case MeatovItem.ItemType.Pouch:
-                            case MeatovItem.ItemType.LootContainer:
-                                collidingTogglable.ToggleMode(false, fvrHand.IsThisTheRightHand);
-                                break;
-                            default:
-                                break;
+                            switch (collidingTogglableItem.itemType)
+                            {
+                                case MeatovItem.ItemType.ArmoredRig:
+                                case MeatovItem.ItemType.Rig:
+                                case MeatovItem.ItemType.Backpack:
+                                case MeatovItem.ItemType.BodyArmor:
+                                case MeatovItem.ItemType.Container:
+                                case MeatovItem.ItemType.Pouch:
+                                    collidingTogglableItem.ToggleMode(false, fvrHand.IsThisTheRightHand);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            collidingTogglableLC.ToggleMode();
                         }
                     }
                 }
@@ -63,19 +70,25 @@ namespace EFM
                         {
                             if (Vector2.Angle(touchpadAxes, Vector2.down) <= 45f)
                             {
-                                switch (collidingTogglable.itemType)
+                                if (collidingTogglableItem != null)
                                 {
-                                    case MeatovItem.ItemType.ArmoredRig:
-                                    case MeatovItem.ItemType.Rig:
-                                    case MeatovItem.ItemType.Backpack:
-                                    case MeatovItem.ItemType.BodyArmor:
-                                    case MeatovItem.ItemType.Container:
-                                    case MeatovItem.ItemType.Pouch:
-                                    case MeatovItem.ItemType.LootContainer:
-                                        collidingTogglable.ToggleMode(false, fvrHand.IsThisTheRightHand);
-                                        break;
-                                    default:
-                                        break;
+                                    switch (collidingTogglableItem.itemType)
+                                    {
+                                        case MeatovItem.ItemType.ArmoredRig:
+                                        case MeatovItem.ItemType.Rig:
+                                        case MeatovItem.ItemType.Backpack:
+                                        case MeatovItem.ItemType.BodyArmor:
+                                        case MeatovItem.ItemType.Container:
+                                        case MeatovItem.ItemType.Pouch:
+                                            collidingTogglableItem.ToggleMode(false, fvrHand.IsThisTheRightHand);
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                }
+                                else
+                                {
+                                    collidingTogglableLC.ToggleMode();
                                 }
                             }
                         }
@@ -126,12 +139,21 @@ namespace EFM
 
                     if (meatovItem != null)
                     {
-                        if (meatovItem.itemType == MeatovItem.ItemType.LootContainer
-                            || meatovItem.itemType == MeatovItem.ItemType.Container
+                        if (meatovItem.itemType == MeatovItem.ItemType.Container
                             || meatovItem.itemType == MeatovItem.ItemType.Backpack
                             || meatovItem.itemType == MeatovItem.ItemType.Pouch)
                         {
-                            collidingTogglable = meatovItem;
+                            collidingTogglableItem = meatovItem;
+                            togglableCollider = collider;
+                            fvrHand.Buzz(fvrHand.Buzzer.Buzz_OnHoverInteractive);
+                        }
+                    }
+                    else
+                    {
+                        LootContainer lc = collider.GetComponent<LootContainer>();
+                        if(lc != null)
+                        {
+                            collidingTogglableLC = lc;
                             togglableCollider = collider;
                             fvrHand.Buzz(fvrHand.Buzzer.Buzz_OnHoverInteractive);
                         }
@@ -152,6 +174,8 @@ namespace EFM
             {
                 collidingVolume = null;
                 volumeCollider = null;
+                collidingTogglableItem = null;
+                collidingTogglableLC = null;
             }
         }
 

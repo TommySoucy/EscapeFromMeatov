@@ -32,8 +32,6 @@ namespace EFM
             Eyewear = 14,
             Headwear = 15,
 
-            LootContainer = 16,
-
             DogTag = 17,
 
             Weapon = 18,
@@ -462,6 +460,8 @@ namespace EFM
         public delegate void OnSightingRangeChangedDelegate();
         public event OnSightingRangeChangedDelegate OnSightingRangeChanged;
 
+        public TrackedMeatovItemData trackedMeatovItemData;
+
         private void Awake()
 		{
             Mod.LogInfo("Meatov item "+tarkovID+":" + H3ID + " awake");
@@ -654,10 +654,7 @@ namespace EFM
                 modRenderer.material.color = data.color;
             }
 
-            if (itemType != ItemType.LootContainer)
-            {
-                _mode = volumes.Length - 1; // Set default mode to the last index of volumes, closed empty for containers and rigs
-            }
+            _mode = volumes.Length - 1; // Set default mode to the last index of volumes, closed empty for containers and rigs
             modeInitialized = true;
 
             if (itemType == ItemType.Rig || itemType == ItemType.ArmoredRig)
@@ -1886,7 +1883,6 @@ namespace EFM
                 case ItemType.Backpack:
                 case ItemType.Container:
                 case ItemType.Pouch:
-                case ItemType.LootContainer:
                     if(this.open != open)
                     {
                         ToggleMode(false);
@@ -1927,13 +1923,6 @@ namespace EFM
 					SetContainerOpen(true, isRightHand);
 					volumeIndicator.SetActive(true);
 					volumeIndicatorText.text = (containingVolume / 1000f).ToString("0.00") + "/" + (maxVolume / 1000f).ToString("0.00");
-				}
-				else if(itemType == ItemType.LootContainer)
-				{
-					SetContainerOpen(true, isRightHand);
-					gameObject.GetComponent<LootContainer>().shouldSpawnItems = true;
-
-					Mod.AddSkillExp(Skill.searchAction, 30);
 				}
 			}
 			else

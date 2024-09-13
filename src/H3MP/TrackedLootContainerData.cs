@@ -89,14 +89,14 @@ namespace EFM
             data.localTrackedID = GameManager.objects.Count;
             GameManager.objects.Add(data);
 
+            // Keep a reference in the LootContainer itself
+            data.physicalLootContainer.physicalLootContainer.trackedLootContainerData = data;
+
             // Call an init update because the one in awake won't be called because data was not set yet
             if (trackedLootContainer.awoken)
             {
                 trackedLootContainer.data.Update(true);
             }
-
-            // Keep a reference in the LootContainer itself
-            data.physicalLootContainer.physicalLootContainer.trackedLootContainerData = data;
 
             return trackedLootContainer;
         }
@@ -132,6 +132,9 @@ namespace EFM
 
             trackedLootContainerByLootContainer.Add(physicalLootContainer.physicalLootContainer, physicalLootContainer);
             GameManager.trackedObjectByObject.Add(physicalLootContainer.physicalLootContainer, physicalLootContainer);
+
+            // Keep a reference in the LootContainer itself
+            physicalLootContainer.physicalLootContainer.trackedLootContainerData = this;
 
             // Initially set itself
             UpdateFromData(this, true);

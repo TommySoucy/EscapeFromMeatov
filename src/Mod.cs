@@ -62,7 +62,8 @@ namespace EFM
         public static List<AssetBundleCreateRequest> raidMapPrefabBundleRequests;
         public static List<GameObject> securedMainSceneComponents;
         public static List<GameObject> securedObjects; // Other objects that needed to be secured that do not require special handling
-        public static GameObject[] securedItems; // Left hand, Right hand, Backpack, BodyArmor, EarPiece, HeadWear, FaceCover, EyeWear, Rig, Pouch, Right shoulder, Pockets
+        public static MeatovItem[] securedItems; // Left hand, Right hand, Backpack, BodyArmor, EarPiece, HeadWear, FaceCover, EyeWear, Rig, Pouch, Right shoulder, Pockets
+        public static List<MeatovItem> securedSlotItems;
         public static int saveSlotIndex = -1;
         public static int currentQuickBeltConfiguration = -1;
         public static int firstCustomConfigIndex = -1;
@@ -713,6 +714,7 @@ namespace EFM
             H3MP.Networking.Server.OnServerClose += Networking.OnDisconnection;
 
             // Register tracked types
+            TODO e: // Add our own data to H3MP's modular parts
             if (!H3MP.Mod.trackedObjectTypesByName.ContainsKey("TrackedDoorData"))
             {
                 H3MP.Mod.modInstance.AddTrackedType(typeof(TrackedDoorData));
@@ -4062,12 +4064,188 @@ namespace EFM
             QualitySettings.lodBias = 2;
         }
 
-        public static void SecureItems(bool pouchOnly = false)
+        public static void SecureItems(string destination, bool pouchOnly = false)
         {
+            TODO: // Verify that if we are securing the player body by securing main scene components, do we need to secure stuff if hands and slots?
+                  // We shouldn't need to if the slot items are attached to the player body, because i think status ui also is attached to player(?)
+            if(securedObjects == null)
+            {
+                securedObjects = new List<GameObject>();
+                securedItems = new MeatovItem[8];
+                securedSlotItems = new List<MeatovItem>();
+            }
+            else
+            {
+                securedObjects.Clear();
+                for (int i = 0; i < securedItems.Length; ++i)
+                {
+                    securedItems[i] = null;
+                }
+                securedSlotItems.Clear();
+            }
 
+
+            if (pouchOnly)
+            {
+                if(StatusUI.instance.equipmentSlots[7].CurObject != null)
+                {
+                    securedItems[9] = StatusUI.instance.equipmentSlots[7].CurObject.GetComponent<MeatovItem>();
+                    securedItems[9].physObj.SetQuickBeltSlot(null);
+                    DontDestroyOnLoad(securedItems[9].gameObject);
+
+                    if (securedItems[9].trackedMeatovItemData != null)
+                    {
+                        securedItems[9].trackedMeatovItemData.SetScene(destination, true);
+                    }
+
+                    SecureAdditionalObjects(securedItems[9], destination);
+                }
+            }
+            else
+            {
+                if (Mod.leftHand.heldItem != null)
+                {
+                    MeatovItem item = Mod.leftHand.heldItem;
+
+                    item.physObj.ForceBreakInteraction();
+                    DontDestroyOnLoad(item.gameObject);
+                    securedItems[0] = item;
+
+                    if (item.trackedMeatovItemData != null)
+                    {
+                        item.trackedMeatovItemData.SetScene(destination, true);
+                    }
+
+                    SecureAdditionalObjects(item, destination);
+                }
+                if (Mod.rightHand.heldItem != null)
+                {
+                    MeatovItem item = Mod.rightHand.heldItem;
+
+                    item.physObj.ForceBreakInteraction();
+                    DontDestroyOnLoad(item.gameObject);
+                    securedItems[1] = item;
+
+                    if (item.trackedMeatovItemData != null)
+                    {
+                        item.trackedMeatovItemData.SetScene(destination, true);
+                    }
+
+                    SecureAdditionalObjects(item, destination);
+                }
+                for (int i = 0; i < GM.CurrentPlayerBody.QBSlots_Internal.Count; ++i)
+                {
+                    if (GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject == null)
+                    {
+                        securedSlotItems.Add(null);
+                    }
+                    else
+                    {
+                        MeatovItem item = GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject.GetComponent<MeatovItem>();
+                        if (item == null)
+                        {
+                            securedSlotItems.Add(null);
+                        }
+                        else
+                        {
+                            securedSlotItems.Add(item);
+
+                            item.physObj.SetQuickBeltSlot(null);
+                            DontDestroyOnLoad(item.gameObject);
+
+                            if (item.trackedMeatovItemData != null)
+                            {
+                                item.trackedMeatovItemData.SetScene(destination, true);
+                            }
+
+                            SecureAdditionalObjects(item, destination);
+                        }
+                    }
+                }
+                for (int i = 0; i < GM.CurrentPlayerBody.QBSlots_Added.Count; ++i)
+                {
+                    if (GM.CurrentPlayerBody.QBSlots_Added[i].CurObject == null)
+                    {
+                        securedSlotItems.Add(null);
+                    }
+                    else
+                    {
+                        MeatovItem item = GM.CurrentPlayerBody.QBSlots_Added[i].CurObject.GetComponent<MeatovItem>();
+                        if (item == null)
+                        {
+                            securedSlotItems.Add(null);
+                        }
+                        else
+                        {
+                            securedSlotItems.Add(item);
+
+                            item.physObj.SetQuickBeltSlot(null);
+                            DontDestroyOnLoad(item.gameObject);
+
+                            if (item.trackedMeatovItemData != null)
+                            {
+                                item.trackedMeatovItemData.SetScene(destination, true);
+                            }
+
+                            SecureAdditionalObjects(item, destination);
+                        }
+                    }
+                }
+                for (int i = 0; i < StatusUI.instance.equipmentSlots.Length; ++i)
+                {
+                    if (StatusUI.instance.equipmentSlots[i].CurObject != null)
+                    {
+                        MeatovItem item = StatusUI.instance.equipmentSlots[i].CurObject.GetComponent<MeatovItem>();
+                        item.physObj.SetQuickBeltSlot(null);
+                        DontDestroyOnLoad(item.gameObject);
+                        securedItems[i + 2] = item;
+
+                        if (item.trackedMeatovItemData != null)
+                        {
+                            item.trackedMeatovItemData.SetScene(destination, true);
+                        }
+
+                        SecureAdditionalObjects(item, destination);
+                    }
+                }
+            }
         }
 
-        public static void UnsecureItems()
+        public static void SecureAdditionalObjects(MeatovItem item, string destination)
+        {
+            // Items inside a rig will not be attached to the rig, so much secure them separately
+            TODO: // Verify if this is still necessary
+            if (item.itemType == MeatovItem.ItemType.Rig || item.itemType == MeatovItem.ItemType.ArmoredRig)
+            {
+                foreach (MeatovItem innerItem in item.itemsInSlots)
+                {
+                    // Check if not already secured
+                    if (innerItem != null && !innerItem.gameObject.scene.name.Equals("DontDestroyOnLoad"))
+                    {
+                        DontDestroyOnLoad(innerItem.gameObject);
+                        securedObjects.Add(innerItem.gameObject);
+                        if (innerItem.trackedMeatovItemData != null)
+                        {
+                            innerItem.trackedMeatovItemData.SetScene(destination, true);
+                        }
+                        SecureAdditionalObjects(innerItem, destination);
+                    }
+                }
+            }
+
+            // Secure any laser pointer hit objects
+            LaserPointer[] laserPointers = item.GetComponentsInChildren<LaserPointer>();
+            foreach (LaserPointer laserPointer in laserPointers)
+            {
+                if (laserPointer.BeamHitPoint != null && laserPointer.BeamHitPoint.transform.parent == null)
+                {
+                    DontDestroyOnLoad(laserPointer.BeamHitPoint);
+                    securedObjects.Add(laserPointer.BeamHitPoint);
+                }
+            }
+        }
+
+        public static void UnsecureItems(bool scav = false)
         {
             // Unsecure generic secured objects
             if(securedObjects != null)
@@ -4079,7 +4257,49 @@ namespace EFM
                 securedObjects.Clear();
             }
 
-            TODO: // Unsecure securedItems
+            // Unsecure hand and equipment items
+            for(int i=0; i < securedItems.Length; ++i)
+            {
+                SceneManager.MoveGameObjectToScene(securedItems[i].gameObject, SceneManager.GetActiveScene());
+
+                if (scav)
+                {
+                    securedItems[i].transform.parent = HideoutController.instance.scavReturnNode;
+                }
+                else
+                {
+                    if (i == 0)
+                    {
+                        Mod.leftHand.fvrHand.ForceSetInteractable(securedItems[i].physObj);
+                    }
+                    else if(i == 1)
+                    {
+                        Mod.rightHand.fvrHand.ForceSetInteractable(securedItems[i].physObj);
+                    }
+                    else
+                    {
+                        securedItems[i].physObj.SetQuickBeltSlot(StatusUI.instance.equipmentSlots[i - 2]);
+                    }
+                }
+            }
+
+            // Unsecure slot items
+            for (int i = 0; i < securedSlotItems.Count; ++i)
+            {
+                if(securedSlotItems[i] != null)
+                {
+                    SceneManager.MoveGameObjectToScene(securedSlotItems[i].gameObject, SceneManager.GetActiveScene());
+
+                    if (scav)
+                    {
+                        securedItems[i].transform.parent = HideoutController.instance.scavReturnNode;
+                    }
+                    else
+                    {
+                        securedItems[i].physObj.SetQuickBeltSlot(i < GM.CurrentPlayerBody.QBSlots_Internal.Count ? GM.CurrentPlayerBody.QBSlots_Internal[i] : GM.CurrentPlayerBody.QBSlots_Added[i + GM.CurrentPlayerBody.QBSlots_Internal.Count]);
+                    }
+                }
+            }
         }
 
         public static GameObject GetItemPrefab(int index)

@@ -1,5 +1,4 @@
-﻿using FistVR;
-using H3MP;
+﻿using H3MP;
 using H3MP.Tracking;
 using UnityEngine.SceneManagement;
 
@@ -12,7 +11,7 @@ namespace EFM
 
         public override void Unsecure()
         {
-            if(securedCode >= 515 && securedCode <= 521)
+            if(securedCode >= 515 && securedCode <= 522)
             {
                 SceneManager.MoveGameObjectToScene(gameObject, SceneManager.GetActiveScene());
 

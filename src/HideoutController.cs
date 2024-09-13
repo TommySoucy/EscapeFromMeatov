@@ -506,7 +506,7 @@ namespace EFM
                             // Secure all items player has
                             if (Mod.charChoicePMC)
                             {
-                                Mod.SecureItems();
+                                Mod.SecureItems(Mod.mapChoiceName);
                             }
 
                             // Load raid scene
@@ -1587,7 +1587,7 @@ namespace EFM
             // Load player data only if we don't want to use the data from the PMC raid we just finished
             if (!Mod.justFinishedRaid || !Mod.charChoicePMC)
             {
-                Mod.LogInfo("\t\tNot finished raid");
+                Mod.LogInfo("\t\tNot finished raid or was scav, loading player from save");
                 Mod.level = (int)loadedData["level"];
                 Mod.experience = (int)loadedData["experience"];
                 Mod.SetHealthArray(loadedData["health"].ToObject<float[]>());
@@ -1629,13 +1629,18 @@ namespace EFM
             }
             else if (Mod.justFinishedRaid)
             {
-                TODO e: // Unsecure items if present
-                TODO e: // Review with newly implemented raid ending
+                Mod.LogInfo("\t\tFinished raid, not loading player from save");
                 for (int i = 0; i < 64; ++i)
                 {
                     Mod.skills[i].increasing = false;
                     Mod.skills[i].dimishingReturns = false;
                     Mod.skills[i].raidProgress = 0;
+                }
+
+                // If we were PMC in raid, unsecure secured items
+                if (Mod.charChoicePMC)
+                {
+                    Mod.UnsecureItems();
                 }
             }
             Mod.LogInfo("\t0");
@@ -2021,7 +2026,8 @@ namespace EFM
 
         public void LoadPlayerItems()
         {
-            TODO e: // If have secured items, put them on scav return node
+            // If have secured items, unsecured them on scav return node
+            Mod.UnsecureItems(true);
 
             if (loadedData["leftHand"] != null)
             {
