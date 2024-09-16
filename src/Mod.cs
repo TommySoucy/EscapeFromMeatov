@@ -712,9 +712,11 @@ namespace EFM
             H3MP.Mod.OnConnection += Networking.OnConnection;
             H3MP.Networking.Client.OnDisconnect += Networking.OnDisconnection;
             H3MP.Networking.Server.OnServerClose += Networking.OnDisconnection;
+            H3MP.Tracking.TrackedItem.AddModulPartData += Networking.AddModulPartData;
+            H3MP.Tracking.TrackedItem.ReadModulPartData += Networking.ReadModulPartData;
+            H3MP.Tracking.TrackedItem.PreConfigureModulPartData += Networking.PreConfigureModulPartData;
 
             // Register tracked types
-            TODO e: // Add our own data to H3MP's modular parts
             if (!H3MP.Mod.trackedObjectTypesByName.ContainsKey("TrackedDoorData"))
             {
                 H3MP.Mod.modInstance.AddTrackedType(typeof(TrackedDoorData));

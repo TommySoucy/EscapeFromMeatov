@@ -3619,7 +3619,7 @@ namespace EFM
                                 }
                                 partItem.SetData(partData);
                                 // Since the item got instantiated directly on an already parented object, we want to make sure we set the meatov parenting properly
-                                // Note that despite this being here, it usually (if ever?) does not work because the parent weapon gets its meatovitem after
+                                // Note that despite this being here, it usually (if not always?) does not work because the parent weapon gets its meatovitem after
                                 partItem.OnTransformParentChanged();
                                 foundData = true;
                                 break;
@@ -5179,6 +5179,8 @@ namespace EFM
             {
                 __instance._selectedPart = toDisplay == null ? 0 : toDisplay[__instance.PartButtons.Length * __instance._pageIndex + i].Key;
                 ModularWeaponPartPatch.overrideItem = toDisplay[__instance.PartButtons.Length * __instance._pageIndex + i].Value;
+
+                // If this is a none item, make sure we don't try to add a meatov item to it and find data for it
                 if(ModularWeaponPartPatch.overrideItem == null)
                 {
                     ModularWeaponPartPatch.overrideItemNone = true;

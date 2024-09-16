@@ -1,6 +1,14 @@
-﻿using H3MP;
+﻿using FFmpeg.AutoGen;
+using H3MP;
 using H3MP.Networking;
+using H3MP.Tracking;
+using ModularWorkshop;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Text;
+using System.Text.RegularExpressions;
+using static RootMotion.FinalIK.IKSolver;
 
 namespace EFM
 {
@@ -30,6 +38,7 @@ namespace EFM
         public static int unlockDoorPacketID; // EFMUnlockDoorPacketID
         public static int unlockLootContainerPacketID; // EFMUnlockLootContainerPacketID
         public static int setLootContainerContentSpawnedPacketID; // SetEFMLootContainerContentSpawnedPacketID
+        public static int setModulPartDataPacketID; // SetEFMModulPartDataPacketID
 
         public static void OnConnection()
         {
@@ -146,6 +155,13 @@ namespace EFM
                     unlockLootContainerPacketID = Server.RegisterCustomPacketType("EFMUnlockLootContainerPacketID");
                 }
                 H3MP.Mod.customPacketHandlers[unlockLootContainerPacketID] = UnlockLootContainerServerHandler;
+
+                // Set modul part data
+                if (!H3MP.Mod.registeredCustomPacketIDs.TryGetValue("SetEFMModulPartDataPacketID", out setModulPartDataPacketID))
+                {
+                    setModulPartDataPacketID = Server.RegisterCustomPacketType("SetEFMModulPartDataPacketID");
+                }
+                H3MP.Mod.customPacketHandlers[setModulPartDataPacketID] = SetModulPartDataServerHandler;
             }
             else
             {
@@ -292,6 +308,18 @@ namespace EFM
                     ClientSend.RegisterCustomPacketType("EFMUnlockLootContainerPacketID");
                     H3MP.Mod.CustomPacketHandlerReceived += UnlockLootcontainerPacketIDReceived;
                 }
+
+                // Set modul part data
+                if (H3MP.Mod.registeredCustomPacketIDs.TryGetValue("SetEFMModulPartDataPacketID", out int customSetModulPartDataPacketID))
+                {
+                    setModulPartDataPacketID = customSetModulPartDataPacketID;
+                    H3MP.Mod.customPacketHandlers[setModulPartDataPacketID] = SetModulPartDataClientHandler;
+                }
+                else
+                {
+                    ClientSend.RegisterCustomPacketType("SetEFMModulPartDataPacketID");
+                    H3MP.Mod.CustomPacketHandlerReceived += SetModulPartDataPacketIDReceived;
+                }
             }
         }
 
@@ -387,6 +415,74 @@ namespace EFM
                     {
                         bestPotentialObjectHost = currentInstance.players[i];
                         return;
+                    }
+                }
+            }
+        }
+
+        public static void AddModulPartData(List<byte> buffer, string groupID, string selectedPart, IDictionary pointDict, TrackedItem trackedItem)
+        {
+            ModularWeaponPartsAttachmentPoint point = pointDict[groupID] as ModularWeaponPartsAttachmentPoint;
+            if (point != null)
+            {
+                MeatovItem partMeatovItem = point.ModularPartPoint.GetComponent<MeatovItem>();
+
+                buffer.AddRange(new byte[] { 5, 7, 18 }); // EFM, to identify EFM relevant data amongst custom data
+                if (partMeatovItem == null)
+                {
+                    // None part will be indicated by 0 length tarkov ID
+                    buffer.Add(0);
+                }
+                else
+                {
+                    buffer.Add((byte)partMeatovItem.tarkovID.Length);
+                    buffer.AddRange(Encoding.ASCII.GetBytes(partMeatovItem.tarkovID));
+                    int data = 0;
+                    data |= (partMeatovItem.insured ? 1 : 0);
+                    data <<= 1;
+                    data |= (partMeatovItem.foundInRaid ? 1 : 0);
+                    buffer.Add((byte)data);
+                }
+            }
+        }
+
+        public static void PreConfigureModulPartData(byte[] additionalData, int offset, string groupID, IDictionary pointDict, TrackedItem trackedItem)
+        {
+            // Just set override to none so no default item data gets set on the newly configure part when it gets enabled
+            // This obviously makes the assumption that whenever this is called, we are guaranteed that a part will be enabled before ReadModulPartData
+            ModularWeaponPartPatch.overrideItemNone = true;
+        }
+
+        public static void ReadModulPartData(byte[] additionalData, int offset, string groupID, IDictionary pointDict, TrackedItem trackedItem)
+        {
+            ModularWeaponPartsAttachmentPoint point = pointDict[groupID] as ModularWeaponPartsAttachmentPoint;
+            if (point != null)
+            {
+                MeatovItem partMeatovItem = point.ModularPartPoint.GetComponent<MeatovItem>();
+                if (partMeatovItem == null)
+                {
+                    for (int i = offset; i < additionalData.Length - 2; ++i) 
+                    {
+                        // Find EFM data
+                        if (additionalData[i] == 5 && additionalData[i+1] == 7 && additionalData[i+2] == 18)
+                        {
+                            i += 3;
+
+                            byte tarkovIDLength = additionalData[i++];
+                            // 0 tarkovIDLength indicates none part, so we don't want to add a meatovItem
+                            if (tarkovIDLength > 0)
+                            {
+                                partMeatovItem = point.ModularPartPoint.gameObject.AddComponent<MeatovItem>();
+                                string tarkovID = Encoding.ASCII.GetString(additionalData, i, tarkovIDLength);
+                                i += tarkovIDLength;
+                                partMeatovItem.SetData(Mod.defaultItemData[tarkovID]);
+                                byte data = additionalData[i++];
+                                partMeatovItem.foundInRaid = (data & 1) == 1;
+                                partMeatovItem.insured = ((data >> 1) & 1) == 1;
+                            }
+
+                            break;
+                        }
                     }
                 }
             }
@@ -509,6 +605,16 @@ namespace EFM
                 unlockLootContainerPacketID = ID;
                 H3MP.Mod.customPacketHandlers[unlockLootContainerPacketID] = UnlockLootContainerClientHandler;
                 H3MP.Mod.CustomPacketHandlerReceived -= UnlockLootcontainerPacketIDReceived;
+            }
+        }
+
+        public static void SetModulPartDataPacketIDReceived(string identifier, int ID)
+        {
+            if (identifier.Equals("SetEFMModulPartDataPacketID"))
+            {
+                setModulPartDataPacketID = ID;
+                H3MP.Mod.customPacketHandlers[setModulPartDataPacketID] = SetModulPartDataClientHandler;
+                H3MP.Mod.CustomPacketHandlerReceived -= SetModulPartDataPacketIDReceived;
             }
         }
 
@@ -917,6 +1023,92 @@ namespace EFM
             }
         }
 
+        public static void SetModulPartDataServerHandler(int clientID, Packet packet)
+        {
+            int trackedID = packet.ReadInt();
+
+            TrackedItemData trackedItemData = Server.objects[trackedID] as TrackedItemData;
+            if (trackedItemData != null)
+            {
+                string givenGroupID = packet.ReadString();
+                bool FIR = packet.ReadBool();
+                bool insured = packet.ReadBool();
+
+                int offset = 0;
+                int partCount = BitConverter.ToInt32(trackedItemData.additionalData, offset);
+                offset += 4;
+                for (int j = 0; j < partCount; ++j)
+                {
+                    int groupIDLength = BitConverter.ToInt32(trackedItemData.additionalData, offset);
+                    offset += 4;
+                    string groupID = Encoding.ASCII.GetString(trackedItemData.additionalData, offset, groupIDLength);
+                    offset += groupIDLength;
+                    int partLength = BitConverter.ToInt32(trackedItemData.additionalData, offset);
+                    offset += 4;
+                    offset += partLength;
+
+                    offset += 4; // To skip the custom data length
+
+                    if (givenGroupID.Equals(groupID))
+                    {
+                        for (int i = offset; i < trackedItemData.additionalData.Length - 2; ++i)
+                        {
+                            // Find EFM data
+                            if (trackedItemData.additionalData[i] == 5 && trackedItemData.additionalData[i + 1] == 7 && trackedItemData.additionalData[i + 2] == 18)
+                            {
+                                i += 3;
+
+                                byte tarkovIDLength = trackedItemData.additionalData[i++];
+                                if (tarkovIDLength > 0)
+                                {
+                                    i += tarkovIDLength;
+                                    trackedItemData.additionalData[i] = (byte)(((0 | (insured ? 1 : 0)) << 1) | (FIR ? 1 : 0));
+                                }
+
+                                break;
+                            }
+                        }
+                    }
+                    else // Not part we want to modify data of
+                    {
+                        int customDataLength = BitConverter.ToInt32(trackedItemData.additionalData, offset);
+                        offset += customDataLength;
+                        offset += 4;
+                    }
+                }
+
+                if (trackedItemData.physical != null)
+                {
+                    IModularWeapon modularWeapon = trackedItemData.physicalItem.dataObject as IModularWeapon;
+                    Dictionary<string, ModularWeaponPartsAttachmentPoint> pointDict = modularWeapon.AllAttachmentPoints;
+                    MeatovItem partMeatovItem = pointDict[givenGroupID].ModularPartPoint.GetComponent<MeatovItem>();
+                    if(partMeatovItem != null)
+                    {
+                        if(partMeatovItem.foundInRaid != FIR)
+                        {
+                            partMeatovItem.dontProcessPartFIRChanged = true;
+                            partMeatovItem.foundInRaid = FIR;
+                        }
+                        if(partMeatovItem.insured != insured)
+                        {
+                            partMeatovItem.dontProcessPartInsuredChanged = true;
+                            partMeatovItem.insured = insured;
+                        }
+                    }
+                }
+
+                using (Packet newPacket = new Packet(setModulPartDataPacketID))
+                {
+                    newPacket.Write(trackedID);
+                    newPacket.Write(givenGroupID);
+                    newPacket.Write(FIR);
+                    newPacket.Write(insured);
+
+                    ServerSend.SendTCPDataToAll(clientID, newPacket, true);
+                }
+            }
+        }
+
         ////////////// CLIENT HANDLERS
 
         public static void AddInstanceClientHandler(int clientID, Packet packet)
@@ -1170,6 +1362,82 @@ namespace EFM
                 if (trackedLootContainer.physical != null)
                 {
                     trackedLootContainer.physicalLootContainer.physicalLootContainer.contentsSpawned = true;
+                }
+            }
+        }
+
+        public static void SetModulPartDataClientHandler(int clientID, Packet packet)
+        {
+            int trackedID = packet.ReadInt();
+
+            TrackedItemData trackedItemData = Client.objects[trackedID] as TrackedItemData;
+            if (trackedItemData != null)
+            {
+                string givenGroupID = packet.ReadString();
+                bool FIR = packet.ReadBool();
+                bool insured = packet.ReadBool();
+
+                int offset = 0;
+                int partCount = BitConverter.ToInt32(trackedItemData.additionalData, offset);
+                offset += 4;
+                for (int j = 0; j < partCount; ++j)
+                {
+                    int groupIDLength = BitConverter.ToInt32(trackedItemData.additionalData, offset);
+                    offset += 4;
+                    string groupID = Encoding.ASCII.GetString(trackedItemData.additionalData, offset, groupIDLength);
+                    offset += groupIDLength;
+                    int partLength = BitConverter.ToInt32(trackedItemData.additionalData, offset);
+                    offset += 4;
+                    offset += partLength;
+
+                    offset += 4; // To skip the custom data length
+
+                    if (givenGroupID.Equals(groupID))
+                    {
+                        for (int i = offset; i < trackedItemData.additionalData.Length - 2; ++i)
+                        {
+                            // Find EFM data
+                            if (trackedItemData.additionalData[i] == 5 && trackedItemData.additionalData[i + 1] == 7 && trackedItemData.additionalData[i + 2] == 18)
+                            {
+                                i += 3;
+
+                                byte tarkovIDLength = trackedItemData.additionalData[i++];
+                                if (tarkovIDLength > 0)
+                                {
+                                    i += tarkovIDLength;
+                                    trackedItemData.additionalData[i] = (byte)(((0 | (insured ? 1 : 0)) << 1) | (FIR ? 1 : 0));
+                                }
+
+                                break;
+                            }
+                        }
+                    }
+                    else // Not part we want to modify data of
+                    {
+                        int customDataLength = BitConverter.ToInt32(trackedItemData.additionalData, offset);
+                        offset += customDataLength;
+                        offset += 4;
+                    }
+                }
+
+                if (trackedItemData.physical != null)
+                {
+                    IModularWeapon modularWeapon = trackedItemData.physicalItem.dataObject as IModularWeapon;
+                    Dictionary<string, ModularWeaponPartsAttachmentPoint> pointDict = modularWeapon.AllAttachmentPoints;
+                    MeatovItem partMeatovItem = pointDict[givenGroupID].ModularPartPoint.GetComponent<MeatovItem>();
+                    if (partMeatovItem != null)
+                    {
+                        if (partMeatovItem.foundInRaid != FIR)
+                        {
+                            partMeatovItem.dontProcessPartFIRChanged = true;
+                            partMeatovItem.foundInRaid = FIR;
+                        }
+                        if (partMeatovItem.insured != insured)
+                        {
+                            partMeatovItem.dontProcessPartInsuredChanged = true;
+                            partMeatovItem.insured = insured;
+                        }
+                    }
                 }
             }
         }

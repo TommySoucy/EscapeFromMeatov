@@ -1,4 +1,6 @@
 ﻿using FistVR;
+using H3MP.Networking;
+using H3MP.Tracking;
 using HarmonyLib;
 using ModularWorkshop;
 using System;
@@ -120,6 +122,7 @@ namespace EFM
                 _insured = value;
                 if(preValue != _insured)
                 {
+                    UpdateInsuredStatus(preValue);
                     OnInsuredChangedInvoke();
                 }
 			}
@@ -461,6 +464,8 @@ namespace EFM
         public event OnSightingRangeChangedDelegate OnSightingRangeChanged;
 
         public TrackedMeatovItemData trackedMeatovItemData;
+        public bool dontProcessPartFIRChanged;
+        public bool dontProcessPartInsuredChanged;
 
         private void Awake()
 		{
@@ -2108,8 +2113,98 @@ namespace EFM
                     parentVolume.AddItemFIR(this);
                 }
             }
+
+            // Check if we need to update our data in a parent modular weapon tracked item
+            if (dontProcessPartFIRChanged)
+            {
+                dontProcessPartFIRChanged = false;
+            }
+            else
+            {
+                if (H3MP.Mod.managerObject != null && trackedMeatovItemData == null)
+                {
+                    TrackedItem[] parentTrackedItems = GetComponentsInParent<TrackedItem>();
+                    for (int i = 0; i < parentTrackedItems.Length; ++i)
+                    {
+                        if (parentTrackedItems[i].physicalItem != null && parentTrackedItems[i].physicalItem is IModularWeapon)
+                        {
+                            IModularWeapon modularWeapon = parentTrackedItems[i].physicalItem as IModularWeapon;
+                            if (modularWeapon.AllAttachmentPoints.TryGetValue(modGroup, out ModularWeaponPartsAttachmentPoint point))
+                            {
+                                // We are a part of an H3MP tracked modular weapon, must update weapon's additional data
+                                parentTrackedItems[i].itemData.CollectExternalData();
+
+                                // Tell others
+                                using (Packet packet = new Packet(Networking.setModulPartDataPacketID))
+                                {
+                                    packet.Write(parentTrackedItems[i].itemData.trackedID);
+                                    packet.Write(modGroup);
+                                    packet.Write(foundInRaid);
+                                    packet.Write(insured);
+
+                                    if (ThreadManager.host)
+                                    {
+                                        ServerSend.SendTCPDataToAll(packet, true);
+                                    }
+                                    else
+                                    {
+                                        ClientSend.SendTCPData(packet, true);
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
+        public void UpdateInsuredStatus(bool preValue)
+        {
+            // Check if we need to update our data in a parent modular weapon tracked item
+            if (dontProcessPartInsuredChanged)
+            {
+                dontProcessPartInsuredChanged = false;
+            }
+            else
+            {
+                if (H3MP.Mod.managerObject != null && trackedMeatovItemData == null)
+                {
+                    TrackedItem[] parentTrackedItems = GetComponentsInParent<TrackedItem>();
+                    for (int i = 0; i < parentTrackedItems.Length; ++i)
+                    {
+                        if (parentTrackedItems[i].physicalItem != null && parentTrackedItems[i].physicalItem is IModularWeapon)
+                        {
+                            IModularWeapon modularWeapon = parentTrackedItems[i].physicalItem as IModularWeapon;
+                            if (modularWeapon.AllAttachmentPoints.TryGetValue(modGroup, out ModularWeaponPartsAttachmentPoint point))
+                            {
+                                // We are a part of an H3MP tracked modular weapon, must update weapon's additional data
+                                parentTrackedItems[i].itemData.CollectExternalData();
+
+                                // Tell others
+                                using (Packet packet = new Packet(Networking.setModulPartDataPacketID))
+                                {
+                                    packet.Write(parentTrackedItems[i].itemData.trackedID);
+                                    packet.Write(modGroup);
+                                    packet.Write(foundInRaid);
+                                    packet.Write(insured);
+
+                                    if (ThreadManager.host)
+                                    {
+                                        ServerSend.SendTCPDataToAll(packet, true);
+                                    }
+                                    else
+                                    {
+                                        ClientSend.SendTCPData(packet, true);
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         public DescriptionPack GetDescriptionPack()
         {
