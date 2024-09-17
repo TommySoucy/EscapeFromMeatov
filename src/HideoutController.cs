@@ -59,6 +59,8 @@ namespace EFM
         public GameObject[] saveConfirmTexts;
         public Transform[] optionPages;
         public Transform mapListParent;
+        public GameObject mapListNextButton;
+        public GameObject mapListPreviousButton;
         public GameObject mapListEntryPrefab;
         public int mapListPage;
         // H3MP
@@ -94,6 +96,8 @@ namespace EFM
         public Transform waitingInstancePlayerListParent;
         public GameObject waitingInstancePlayerListEntryPrefab;
         public GameObject waitingInstanceStartButton;
+        public GameObject waitingInstancePlayerListPreviousButton;
+        public GameObject waitingInstancePlayerListNextButton;
         public GameObject loadingPage;
         public Text loadingPercentageText;
         public GameObject waitForDeployPage;
@@ -3320,6 +3324,34 @@ namespace EFM
             instancesNextButton.SetActive(true);
         }
 
+        public void OnMapListNextClicked()
+        {
+            clickAudio.Play();
+            ++mapListPage;
+
+            PopulateMapList();
+
+            if (mapListPage == Mod.availableRaidMaps.Count / 6)
+            {
+                mapListNextButton.SetActive(false);
+            }
+            mapListPreviousButton.SetActive(true);
+        }
+
+        public void OnMapListPreviousClicked()
+        {
+            clickAudio.Play();
+            --instancesListPage;
+
+            PopulateMapList();
+
+            if (mapListPage == 0)
+            {
+                mapListPreviousButton.SetActive(false);
+            }
+            mapListNextButton.SetActive(true);
+        }
+
         public void OnPlayerItemInventoryChanged(int difference)
         {
             PopulateInstancesList();
@@ -3343,6 +3375,9 @@ namespace EFM
                 instancesListPage = maxPage;
             }
 
+            instancesNextButton.SetActive(instancesListPage < maxPage);
+            instancesPreviousButton.SetActive(instancesListPage > 0);
+
             int i = -1;
             foreach(KeyValuePair<int, RaidInstance> instanceDataEntry in Networking.raidInstances)
             {
@@ -3358,15 +3393,15 @@ namespace EFM
                 }
 
                 // Can only join an instance with a map we have installed
+                bool unfulfilled = false;
                 if (!Mod.availableRaidMaps.ContainsKey(instanceDataEntry.Value.map))
                 {
-                    continue;
+                    unfulfilled = true;
                 }
 
                 // Can only join an instance with a map we have requirements for
-                if(Mod.raidMapEntryRequirements.TryGetValue(instanceDataEntry.Value.map, out Dictionary<string, int> itemRequirements))
+                if (!unfulfilled && Mod.raidMapEntryRequirements.TryGetValue(instanceDataEntry.Value.map, out Dictionary<string, int> itemRequirements))
                 {
-                    bool unfulfilled = false;
                     foreach(KeyValuePair<string, int> item in itemRequirements)
                     {
                         int currentCount = 0;
@@ -3376,16 +3411,12 @@ namespace EFM
                             break;
                         }
                     }
-                    if (unfulfilled)
-                    {
-                        continue;
-                    }
                 }
 
                 // Can only join instance if we can choose PMC (Not ongoing) or scav (our scav timer is over and scav return node has been cleared)
-                if(!instanceDataEntry.Value.waiting && (scavTimer > 0 || scavReturnNode.childCount > 0))
+                if(!unfulfilled && !instanceDataEntry.Value.waiting && (scavTimer > 0 || scavReturnNode.childCount > 0))
                 {
-                    continue;
+                    unfulfilled = true;
                 }
 
                 GameObject newInstanceListEntry = Instantiate(instanceEntryPrefab, instancesParent);
@@ -3393,7 +3424,14 @@ namespace EFM
 
                 int index = instanceDataEntry.Key;
                 newInstanceListEntry.GetComponentInChildren<Text>().text = "Instance " + instanceDataEntry.Value.ID;
-                newInstanceListEntry.GetComponentInChildren<Button>().onClick.AddListener(() => { OnInstanceClicked(index); });
+                if (unfulfilled)
+                {
+                    newInstanceListEntry.GetComponentInChildren<Text>().color = Color.red;
+                }
+                else
+                {
+                    newInstanceListEntry.GetComponentInChildren<Button>().onClick.AddListener(() => { OnInstanceClicked(index); });
+                }
             }
         }
 
@@ -3542,6 +3580,15 @@ namespace EFM
                 Destroy(child.gameObject);
             }
 
+            int maxPage = (Mod.availableRaidMaps.Count - 1) / 6;
+            if (newInstanceMapListPage > maxPage)
+            {
+                newInstanceMapListPage = maxPage;
+            }
+
+            newInstanceNextButton.SetActive(newInstanceMapListPage < maxPage);
+            newInstancePreviousButton.SetActive(newInstanceMapListPage > 0);
+
             int i = -1;
             foreach (KeyValuePair<string, string> raidMap in Mod.availableRaidMaps)
             {
@@ -3556,9 +3603,9 @@ namespace EFM
                     break;
                 }
 
+                bool unfulfilled = false;
                 if (Mod.raidMapEntryRequirements.TryGetValue(raidMap.Key, out Dictionary<string, int> itemRequirements))
                 {
-                    bool unfulfilled = false;
                     foreach (KeyValuePair<string, int> item in itemRequirements)
                     {
                         int currentCount = 0;
@@ -3568,10 +3615,6 @@ namespace EFM
                             break;
                         }
                     }
-                    if (unfulfilled)
-                    {
-                        continue;
-                    }
                 }
 
                 GameObject newInstanceMapListEntry = Instantiate(newInstanceMapListEntryPrefab, newInstanceMapListParent);
@@ -3579,7 +3622,14 @@ namespace EFM
 
                 string mapName = raidMap.Key;
                 newInstanceMapListEntry.GetComponentInChildren<Text>().text = mapName;
-                newInstanceMapListEntry.GetComponentInChildren<Button>().onClick.AddListener(() => { OnNewInstanceMapClicked(mapName); });
+                if (unfulfilled)
+                {
+                    newInstanceMapListEntry.GetComponentInChildren<Text>().color = Color.red;
+                }
+                else
+                {
+                    newInstanceMapListEntry.GetComponentInChildren<Button>().onClick.AddListener(() => { OnNewInstanceMapClicked(mapName); });
+                }
 
                 if (Mod.mapChoiceName.Equals("mapName"))
                 {
@@ -3598,6 +3648,15 @@ namespace EFM
                 Destroy(child.gameObject);
             }
 
+            int maxPage = (Mod.availableRaidMaps.Count - 1) / 6;
+            if (mapListPage > maxPage)
+            {
+                mapListPage = maxPage;
+            }
+
+            mapListNextButton.SetActive(mapListPage < maxPage);
+            mapListPreviousButton.SetActive(mapListPage > 0);
+
             int i = -1;
             foreach (KeyValuePair<string, string> raidMap in Mod.availableRaidMaps)
             {
@@ -3612,9 +3671,9 @@ namespace EFM
                     break;
                 }
 
+                bool unfulfilled = false;
                 if (Mod.raidMapEntryRequirements.TryGetValue(raidMap.Key, out Dictionary<string, int> itemRequirements))
                 {
-                    bool unfulfilled = false;
                     foreach (KeyValuePair<string, int> item in itemRequirements)
                     {
                         int currentCount = 0;
@@ -3624,10 +3683,6 @@ namespace EFM
                             break;
                         }
                     }
-                    if (unfulfilled)
-                    {
-                        continue;
-                    }
                 }
 
                 GameObject newMapListEntry = Instantiate(mapListEntryPrefab, mapListParent);
@@ -3635,7 +3690,14 @@ namespace EFM
 
                 string mapName = raidMap.Key;
                 newMapListEntry.GetComponentInChildren<Text>().text = mapName;
-                newMapListEntry.GetComponentInChildren<Button>().onClick.AddListener(() => { OnMapClicked(mapName); });
+                if (unfulfilled)
+                {
+                    newMapListEntry.GetComponentInChildren<Text>().color = Color.red;
+                }
+                else
+                {
+                    newMapListEntry.GetComponentInChildren<Button>().onClick.AddListener(() => { OnMapClicked(mapName); });
+                }
 
                 if (Mod.mapChoiceName.Equals("mapName"))
                 {
@@ -3832,6 +3894,9 @@ namespace EFM
                 waitingPlayerListPage = maxPage;
             }
 
+            waitingInstancePlayerListNextButton.SetActive(waitingPlayerListPage < maxPage);
+            waitingInstancePlayerListPreviousButton.SetActive(waitingPlayerListPage > 0);
+
             for (int i= waitingPlayerListPage * 6; i< Networking.currentInstance.players.Count;++i)
             {
                 if (waitingInstancePlayerListParent.childCount == 7)
@@ -3873,6 +3938,34 @@ namespace EFM
             waitingInstancePlayerListPage.SetActive(true);
 
             UpdateStartButton();
+        }
+
+        public void OnWaitingInstancePlayerListPreviousClicked()
+        {
+            clickAudio.Play();
+
+            --waitingPlayerListPage;
+            PopulatePlayerList();
+
+            if (waitingPlayerListPage == 0)
+            {
+                waitingInstancePlayerListPreviousButton.SetActive(false);
+            }
+            waitingInstancePlayerListNextButton.SetActive(true);
+        }
+
+        public void OnWaitingInstancePlayerListNextClicked()
+        {
+            clickAudio.Play();
+
+            ++waitingPlayerListPage;
+            PopulatePlayerList();
+
+            if (waitingPlayerListPage == Networking.currentInstance.players.Count / 6)
+            {
+                waitingInstancePlayerListNextButton.SetActive(false);
+            }
+            waitingInstancePlayerListPreviousButton.SetActive(true);
         }
 
         public void OnWaitingInstancePlayerListBackClicked()
