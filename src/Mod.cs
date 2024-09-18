@@ -4691,7 +4691,7 @@ namespace EFM
             }
 
             // Find plugins directory
-            string currentDirectory = Directory.GetCurrentDirectory();
+            string currentDirectory = Path.GetDirectoryName(Assembly.GetAssembly(typeof(Mod)).Location);
             DirectoryInfo currentParentDirectory = Directory.GetParent(currentDirectory);
             while (currentParentDirectory != null && !currentParentDirectory.Name.Equals("plugins"))
             {
@@ -4718,7 +4718,7 @@ namespace EFM
         public static void AddRaidMapAdditive(string mapName, string bundleName)
         {
             // Find plugins directory
-            string currentDirectory = Directory.GetCurrentDirectory();
+            string currentDirectory = Path.GetDirectoryName(Assembly.GetAssembly(typeof(Mod)).Location);
             DirectoryInfo currentParentDirectory = Directory.GetParent(currentDirectory);
             while (currentParentDirectory != null && !currentParentDirectory.Name.Equals("plugins"))
             {
@@ -4752,7 +4752,7 @@ namespace EFM
         public static void AddRaidMapPrefab(string mapName, string bundleName)
         {
             // Find plugins directory
-            string currentDirectory = Directory.GetCurrentDirectory();
+            string currentDirectory = Path.GetDirectoryName(Assembly.GetAssembly(typeof(Mod)).Location);
             DirectoryInfo currentParentDirectory = Directory.GetParent(currentDirectory);
             while (currentParentDirectory != null && !currentParentDirectory.Name.Equals("plugins"))
             {
