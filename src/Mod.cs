@@ -2989,10 +2989,10 @@ namespace EFM
 
         private void LoadDefaultAssets()
         {
-            defaultBundle = AssetBundle.LoadFromFile(Mod.path + "/Assets/EFMDefaults.ab");
+            defaultBundle = AssetBundle.LoadFromFile(Mod.path + "/Assets/efmdefaults.ab");
             mainMenuPointable = defaultBundle.LoadAsset<GameObject>("MainMenuPointable");
 
-            mainMenuBundle = AssetBundle.LoadFromFile(Mod.path + "/Assets/EFMMainMenu.ab");
+            mainMenuBundle = AssetBundle.LoadFromFile(Mod.path + "/Assets/efmmainmenu.ab");
             string[] bundledScenes = mainMenuBundle.GetAllScenePaths();
             Mod.LogInfo("Got " + bundledScenes.Length + " bundled scenes");
             for(int i=0; i < bundledScenes.Length; ++i)
@@ -4828,7 +4828,7 @@ namespace EFM
             string[] files = Directory.GetFiles(directory);
             for (int i=0; i < files.Length; ++i)
             {
-                if (files[i].EndsWith(bundleName))
+                if (files[i].EndsWith(bundleName, StringComparison.OrdinalIgnoreCase))
                 {
                     fullPath = files[i];
                     return true;

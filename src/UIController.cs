@@ -126,21 +126,21 @@ namespace EFM
                 loadingHideoutSlotIndex = slotIndex;
                 loadingHideoutLatest = latest;
 
-                Mod.playerBundleRequest = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/EFMPlayer.ab");
+                Mod.playerBundleRequest = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/efmplayer.ab");
                 Mod.itemsBundlesRequests = new AssetBundleCreateRequest[5];
                 Mod.itemsBundles = new AssetBundle[5];
                 for (int i = 0; i < 5; ++i) 
                 {
-                    Mod.itemsBundlesRequests[i] = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/EFMItems" + i + ".ab");
+                    Mod.itemsBundlesRequests[i] = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/efmitems" + i + ".ab");
                 }
-                Mod.itemIconsBundleRequest = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/EFMItemIcons.ab");
-                Mod.hideoutBundleRequest = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/EFMHideout.ab");
-                Mod.hideoutAssetsBundleRequest = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/EFMHideoutAssets.ab");
+                Mod.itemIconsBundleRequest = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/efmitemicons.ab");
+                Mod.hideoutBundleRequest = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/efmhideout.ab");
+                Mod.hideoutAssetsBundleRequest = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/efmhideoutAssets.ab");
                 Mod.hideoutAreaBundleRequests = new AssetBundleCreateRequest[6];
                 Mod.hideoutAreaBundles = new AssetBundle[6];
                 for(int i=0; i< Mod.hideoutAreaBundleRequests.Length; ++i)
                 {
-                    Mod.hideoutAreaBundleRequests[i] = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/EFMHideoutAreas"+i+".ab");
+                    Mod.hideoutAreaBundleRequests[i] = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/efmhideoutAreas"+i+".ab");
                 }
                 return;
             }
