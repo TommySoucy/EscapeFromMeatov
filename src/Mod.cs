@@ -10,12 +10,12 @@ using Valve.Newtonsoft.Json.Linq;
 using Valve.VR;
 using UnityEngine.UI;
 using ModularWorkshop;
-using System.Security.AccessControl;
-using System.Linq;
 
 namespace EFM
 {
     [BepInPlugin(pluginGuid, pluginName, pluginVersion)]
+    [BepInDependency("VIP.TommySoucy.H3MP", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("h3vr.cityrobo.ModularWorkshopManager", BepInDependency.DependencyFlags.HardDependency)]
     public class Mod : BaseUnityPlugin
     {
         // BepinEx
