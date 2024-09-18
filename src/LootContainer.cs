@@ -23,6 +23,7 @@ namespace EFM
         public GameObject volumeRoot; // Only used if this is a togglable container
 
         public float presenceProbability; // Probability of this loot container to even exist
+        public bool togglable; // Should be true if no slider or cover
         public int spawnAttemptCount; // Number of attempts to make of spawning an item in this loot container, overridden by StaticLootData mode
         public int maxItemCount = -1; // -1 is unlimited
         public int maxVolume = -1; // -1 is unlimited, in ml

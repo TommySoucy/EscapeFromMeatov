@@ -1,4 +1,5 @@
 ﻿using FistVR;
+using System;
 using UnityEngine;
 
 namespace EFM
@@ -15,6 +16,7 @@ namespace EFM
 
 		private bool forceOpen;
 
+		[NonSerialized]
 		public float newAxisMagnitude;
 
 		public TrackedLCSliderData trackedLCSliderData;

@@ -433,11 +433,15 @@ namespace EFM
             MethodInfo supressionUpdatePrefix = typeof(SosigPatch).GetMethod("SuppresionUpdatePrefix", BindingFlags.NonPublic | BindingFlags.Static);
             MethodInfo stateBailCheckShouldISkirmishOriginal = typeof(Sosig).GetMethod("StateBailCheck_ShouldISkirmish", BindingFlags.NonPublic | BindingFlags.Instance);
             MethodInfo stateBailCheckShouldISkirmishPrefix = typeof(SosigPatch).GetMethod("StateBailCheck_ShouldISkirmishPrefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo executeDoorManipulationOriginal = typeof(Sosig).GetMethod("ExecuteDoorManipulation", BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo executeDoorManipulationPrefix = typeof(SosigPatch).GetMethod("ExecuteDoorManipulationPrefix", BindingFlags.NonPublic | BindingFlags.Static);
 
             PatchController.Verify(supressionUpdateOriginal, harmony, true);
             PatchController.Verify(stateBailCheckShouldISkirmishOriginal, harmony, true);
+            PatchController.Verify(executeDoorManipulationOriginal, harmony, true);
             harmony.Patch(supressionUpdateOriginal, new HarmonyMethod(supressionUpdatePrefix));
             harmony.Patch(stateBailCheckShouldISkirmishOriginal, new HarmonyMethod(stateBailCheckShouldISkirmishPrefix));
+            harmony.Patch(executeDoorManipulationOriginal, new HarmonyMethod(executeDoorManipulationPrefix));
 
             // SosigHandPatch
             MethodInfo sosigHandHoldOriginal = typeof(SosigHand).GetMethod("Hold", BindingFlags.Public | BindingFlags.Instance);
@@ -445,6 +449,21 @@ namespace EFM
 
             PatchController.Verify(sosigHandHoldOriginal, harmony, true);
             harmony.Patch(sosigHandHoldOriginal, new HarmonyMethod(sosigHandHoldPrefix));
+
+            // NavMeshLinkExtensionPatch
+            MethodInfo navMeshLinkExtensionInitDoorOriginal = typeof(NavMeshLinkExtension).GetMethod("InitDoor", BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo navMeshLinkExtensionInitDoorPrefix = typeof(NavMeshLinkExtensionPatch).GetMethod("InitDoorPrefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo navMeshLinkExtensionTraverseOriginal = typeof(NavMeshLinkExtension).GetMethod("Traverse_Door", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo navMeshLinkExtensionTraversePrefix = typeof(NavMeshLinkExtensionPatch).GetMethod("TraversePrefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo navMeshLinkExtensionUpdateOriginal = typeof(NavMeshLinkExtension).GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo navMeshLinkExtensionUpdatePrefix = typeof(NavMeshLinkExtensionPatch).GetMethod("UpdatePrefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            PatchController.Verify(navMeshLinkExtensionInitDoorOriginal, harmony, true);
+            PatchController.Verify(navMeshLinkExtensionTraverseOriginal, harmony, true);
+            PatchController.Verify(navMeshLinkExtensionUpdateOriginal, harmony, true);
+            harmony.Patch(navMeshLinkExtensionInitDoorOriginal, new HarmonyMethod(navMeshLinkExtensionInitDoorPrefix));
+            harmony.Patch(navMeshLinkExtensionTraverseOriginal, new HarmonyMethod(navMeshLinkExtensionTraversePrefix));
+            harmony.Patch(navMeshLinkExtensionUpdateOriginal, new HarmonyMethod(navMeshLinkExtensionUpdatePrefix));
         }
     }
 
@@ -4703,6 +4722,67 @@ namespace EFM
     // Patches Sosig
     class SosigPatch
     {
+        static bool ExecuteDoorManipulationPrefix(Sosig __instance, ref float linkTime)
+        {
+            if (!Mod.inMeatovScene || !(__instance.m_currentlinkExtension is NavMeshLinkDoor))
+            {
+                return true;
+            }
+
+            NavMeshLinkDoor doorLink = __instance.m_currentlinkExtension as NavMeshLinkDoor;
+            bool isFromInside = doorLink.IsFromInside;
+            bool closed = doorLink.EFMDoor.closedMinRot ? doorLink.EFMDoor.rotAngle == doorLink.EFMDoor.minRot : doorLink.EFMDoor.rotAngle == doorLink.EFMDoor.maxRot;
+            bool cantManipulate = closed && doorLink.EFMDoor.lockScript != null && doorLink.EFMDoor.lockScript.locked;
+            bool flag4 = __instance.HasABrain;
+            flag4 = (__instance.m_alertnessLevel <= 0.5f && __instance.m_pathWith != null && __instance.m_pathWith.Count <= 1);
+            if (!__instance.HasABrain)
+            {
+                flag4 = false;
+            }
+            float num = linkTime + Time.deltaTime;
+            if (cantManipulate) // Door closed and locked 
+            {
+                AI AIScript = __instance.GetComponent<AI>();
+                int keyCount = 0;
+                if (AIScript.botInventory.inventory.TryGetValue(doorLink.EFMDoor.lockScript.keyID, out keyCount) && keyCount > 0) // Have key
+                {
+                    doorLink.EFMDoor.lockScript.UnlockAction(true);
+                    doorLink.EFMDoor.Open();
+                }
+                else if (doorLink.EFMDoor.breachable) // Missing key, but breachable, try to breach if on correct side
+                {
+                    for (int i = 0; i < doorLink.EFMDoor.breachers.Length; ++i)
+                    {
+                        if (doorLink.EFMDoor.breachers[i].correctSide)
+                        {
+                            Vector3 sosigVector = __instance.Links[1].transform.position - doorLink.EFMDoor.breachers[i].directionCheckTransform.position;
+                            if (Vector3.Angle(doorLink.EFMDoor.breachers[i].directionCheckTransform.forward, sosigVector) < 90)
+                            {
+                                doorLink.EFMDoor.AttemptBreach(doorLink.EFMDoor.breachers[i].correctSide);
+                            }
+                        }
+                    }
+                }
+            }
+            else // Door manipulatable
+            {
+                // Open fully if not already
+                if(doorLink.EFMDoor.closedMinRot ? doorLink.EFMDoor.rotAngle != doorLink.EFMDoor.maxRot : doorLink.EFMDoor.rotAngle != doorLink.EFMDoor.minRot)
+                {
+                    doorLink.EFMDoor.Open();
+                }
+            }
+            linkTime = num;
+
+            // Fail the link traversal if door is still closed
+            if (doorLink.EFMDoor.closedMinRot ? doorLink.EFMDoor.rotAngle == doorLink.EFMDoor.minRot : doorLink.EFMDoor.rotAngle == doorLink.EFMDoor.maxRot)
+            {
+                __instance.EndLink(false);
+            }
+
+            return false;
+        }
+
         static bool SuppresionUpdatePrefix(Sosig __instance)
         {
             if (!Mod.inMeatovScene)
@@ -5193,6 +5273,79 @@ namespace EFM
                 __instance.PBButton_ApplySkin();
             }
             __instance.UpdateDisplay();
+
+            return false;
+        }
+    }
+
+    public class NavMeshLinkExtensionPatch
+    {
+        static bool InitDoorPrefix(NavMeshLinkExtension __instance)
+        {
+            if (!Mod.inMeatovScene || !(__instance is NavMeshLinkDoor))
+            {
+                return true;
+            }
+
+            __instance.m_hasInit = true;
+
+            return false;
+        }
+
+        static bool TraversePrefix(NavMeshLinkExtension __instance, ref float lerp, float speed, Sosig S, Vector3 endPos, Vector3 startPos)
+        {
+            if (!Mod.inMeatovScene || !(__instance is NavMeshLinkDoor))
+            {
+                return true;
+            }
+
+            speed = Mathf.Clamp(speed, 0f, 1.5f);
+            S.Agent.transform.position = Vector3.MoveTowards(S.Agent.transform.position, endPos, Time.deltaTime * speed);
+            lerp = __instance.InverseLerp(startPos, endPos, S.Agent.transform.position);
+            lerp = Mathf.Clamp(lerp, 0f, 1f);
+            if (Vector3.Distance(S.Agent.transform.position, endPos) < 0.0025f)
+            {
+                S.EndLink(true);
+            }
+
+            return false;
+        }
+
+        static bool UpdatePrefix(NavMeshLinkExtension __instance)
+        {
+            if (!Mod.inMeatovScene || !(__instance is NavMeshLinkDoor))
+            {
+                return true;
+            }
+
+            if (__instance.Type == NavMeshLinkExtension.NavMeshLinkType.Door)
+            {
+                NavMeshLinkDoor doorLink = __instance as NavMeshLinkDoor;
+                if (doorLink.EFMDoor.closedMinRot ? doorLink.EFMDoor.rotAngle == doorLink.EFMDoor.minRot : doorLink.EFMDoor.rotAngle == doorLink.EFMDoor.maxRot)
+                {
+                    if (!__instance.Door.IsLocked())
+                    {
+                        __instance.Link.costOverride = __instance.DoorLinkCosts.y;
+                    }
+                    else
+                    {
+                        __instance.Link.costOverride = __instance.DoorLinkCosts.z;
+                    }
+                }
+                else
+                {
+                    __instance.Link.costOverride = __instance.DoorLinkCosts.x;
+                    __instance.m_doorOpenAttempts = 0;
+                }
+                if (!__instance.m_hasInit)
+                {
+                    __instance.initDelay -= Time.deltaTime;
+                    if (__instance.initDelay <= 0f)
+                    {
+                        __instance.InitDoor();
+                    }
+                }
+            }
 
             return false;
         }

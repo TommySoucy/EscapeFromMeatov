@@ -1,5 +1,6 @@
 ﻿using FistVR;
 using HarmonyLib;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Valve.Newtonsoft.Json.Linq;
@@ -37,8 +38,11 @@ namespace EFM
         /// </summary>
         public Dictionary<string, Dictionary<MeatovItemData, int>> loot;
 
+        public Dictionary<string, int> inventory; // All item counts by tarkovID
+
         public BotInventory(JObject botData)
         {
+            inventory = new Dictionary<string, int>();
             TODO: // Take into account blocksEarpiece, blocksEyewear, etc
             equipment = new Dictionary<string, MeatovItemData>();
             Dictionary<string, int> equipmentChances = botData["chances"]["equipment"].ToObject<Dictionary<string, int>>();
@@ -62,6 +66,16 @@ namespace EFM
                             if(Mod.defaultItemData.TryGetValue(weight.Key, out MeatovItemData itemData))
                             {
                                 equipment.Add(equipmentChance.Key, itemData);
+
+                                if (inventory.ContainsKey(itemData.tarkovID))
+                                {
+                                    ++inventory[itemData.tarkovID];
+                                }
+                                else
+                                {
+                                    inventory.Add(itemData.tarkovID, 1);
+                                }
+
                                 break;
                             }
                             else
@@ -108,13 +122,23 @@ namespace EFM
                                 string itemID = itemList[UnityEngine.Random.Range(0, itemList.Count)].ToString();
                                 if (Mod.defaultItemData.TryGetValue(itemID, out MeatovItemData itemData))
                                 {
+                                    int stack = UnityEngine.Random.Range(1, itemData.maxStack + 1);
                                     if (itemDict.ContainsKey(itemData))
                                     {
-                                        itemDict[itemData] += UnityEngine.Random.Range(1, itemData.maxStack + 1);
+                                        itemDict[itemData] += stack;
                                     }
                                     else
                                     {
-                                        itemDict.Add(itemData, UnityEngine.Random.Range(1, itemData.maxStack + 1));
+                                        itemDict.Add(itemData, stack);
+                                    }
+
+                                    if (inventory.ContainsKey(itemData.tarkovID))
+                                    {
+                                        inventory[itemData.tarkovID] += stack;
+                                    }
+                                    else
+                                    {
+                                        inventory.Add(itemData.tarkovID, stack);
                                     }
                                 }
                                 else
@@ -135,13 +159,23 @@ namespace EFM
                                 string itemID = itemList[UnityEngine.Random.Range(0, itemList.Count)].ToString();
                                 if (Mod.defaultItemData.TryGetValue(itemID, out MeatovItemData itemData))
                                 {
+                                    int stack = UnityEngine.Random.Range(1, itemData.maxStack + 1);
                                     if (itemDict.ContainsKey(itemData))
                                     {
-                                        itemDict[itemData] += UnityEngine.Random.Range(1, itemData.maxStack + 1);
+                                        itemDict[itemData] += stack;
                                     }
                                     else
                                     {
-                                        itemDict.Add(itemData, UnityEngine.Random.Range(1, itemData.maxStack + 1));
+                                        itemDict.Add(itemData, stack);
+                                    }
+
+                                    if (inventory.ContainsKey(itemData.tarkovID))
+                                    {
+                                        inventory[itemData.tarkovID] += stack;
+                                    }
+                                    else
+                                    {
+                                        inventory.Add(itemData.tarkovID, stack);
                                     }
                                 }
                                 else
@@ -162,13 +196,23 @@ namespace EFM
                                 string itemID = itemList[UnityEngine.Random.Range(0, itemList.Count)].ToString();
                                 if (Mod.defaultItemData.TryGetValue(itemID, out MeatovItemData itemData))
                                 {
+                                    int stack = UnityEngine.Random.Range(1, itemData.maxStack + 1);
                                     if (itemDict.ContainsKey(itemData))
                                     {
-                                        itemDict[itemData] += UnityEngine.Random.Range(1, itemData.maxStack + 1);
+                                        itemDict[itemData] += stack;
                                     }
                                     else
                                     {
-                                        itemDict.Add(itemData, UnityEngine.Random.Range(1, itemData.maxStack + 1));
+                                        itemDict.Add(itemData, stack);
+                                    }
+
+                                    if (inventory.ContainsKey(itemData.tarkovID))
+                                    {
+                                        inventory[itemData.tarkovID] += stack;
+                                    }
+                                    else
+                                    {
+                                        inventory.Add(itemData.tarkovID, stack);
                                     }
                                 }
                                 else
@@ -189,13 +233,23 @@ namespace EFM
                                 string itemID = itemList[UnityEngine.Random.Range(0, itemList.Count)].ToString();
                                 if (Mod.defaultItemData.TryGetValue(itemID, out MeatovItemData itemData))
                                 {
+                                    int stack = UnityEngine.Random.Range(1, itemData.maxStack + 1);
                                     if (itemDict.ContainsKey(itemData))
                                     {
-                                        itemDict[itemData] += UnityEngine.Random.Range(1, itemData.maxStack + 1);
+                                        itemDict[itemData] += stack;
                                     }
                                     else
                                     {
-                                        itemDict.Add(itemData, UnityEngine.Random.Range(1, itemData.maxStack + 1));
+                                        itemDict.Add(itemData, stack);
+                                    }
+
+                                    if (inventory.ContainsKey(itemData.tarkovID))
+                                    {
+                                        inventory[itemData.tarkovID] += stack;
+                                    }
+                                    else
+                                    {
+                                        inventory.Add(itemData.tarkovID, stack);
                                     }
                                 }
                                 else
@@ -216,13 +270,23 @@ namespace EFM
                                     MeatovItemData itemData = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
                                     if (Mod.IDDescribedInList(itemData.tarkovID, new List<string>(itemData.parents), itemCountWeight.Value["whitelist"].ToObject<List<string>>(), null))
                                     {
+                                        int stack = UnityEngine.Random.Range(1, itemData.maxStack + 1);
                                         if (itemDict.ContainsKey(itemData))
                                         {
-                                            itemDict[itemData] += UnityEngine.Random.Range(1, itemData.maxStack + 1);
+                                            itemDict[itemData] += stack;
                                         }
                                         else
                                         {
-                                            itemDict.Add(itemData, UnityEngine.Random.Range(1, itemData.maxStack + 1));
+                                            itemDict.Add(itemData, stack);
+                                        }
+
+                                        if (inventory.ContainsKey(itemData.tarkovID))
+                                        {
+                                            inventory[itemData.tarkovID] += stack;
+                                        }
+                                        else
+                                        {
+                                            inventory.Add(itemData.tarkovID, stack);
                                         }
                                     }
                                 }
@@ -237,13 +301,23 @@ namespace EFM
                                     MeatovItemData itemData = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
                                     if (Mod.IDDescribedInList(itemData.tarkovID, new List<string>(itemData.parents), itemCountWeight.Value["whitelist"].ToObject<List<string>>(), null))
                                     {
+                                        int stack = UnityEngine.Random.Range(1, itemData.maxStack + 1);
                                         if (itemDict.ContainsKey(itemData))
                                         {
-                                            itemDict[itemData] += UnityEngine.Random.Range(1, itemData.maxStack + 1);
+                                            itemDict[itemData] += stack;
                                         }
                                         else
                                         {
-                                            itemDict.Add(itemData, UnityEngine.Random.Range(1, itemData.maxStack + 1));
+                                            itemDict.Add(itemData, stack);
+                                        }
+
+                                        if (inventory.ContainsKey(itemData.tarkovID))
+                                        {
+                                            inventory[itemData.tarkovID] += stack;
+                                        }
+                                        else
+                                        {
+                                            inventory.Add(itemData.tarkovID, stack);
                                         }
                                     }
                                 }
@@ -258,13 +332,23 @@ namespace EFM
                                     MeatovItemData itemData = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
                                     if (Mod.IDDescribedInList(itemData.tarkovID, new List<string>(itemData.parents), itemCountWeight.Value["whitelist"].ToObject<List<string>>(), null))
                                     {
+                                        int stack = UnityEngine.Random.Range(1, itemData.maxStack + 1);
                                         if (itemDict.ContainsKey(itemData))
                                         {
-                                            itemDict[itemData] += UnityEngine.Random.Range(1, itemData.maxStack + 1);
+                                            itemDict[itemData] += stack;
                                         }
                                         else
                                         {
-                                            itemDict.Add(itemData, UnityEngine.Random.Range(1, itemData.maxStack + 1));
+                                            itemDict.Add(itemData, stack);
+                                        }
+
+                                        if (inventory.ContainsKey(itemData.tarkovID))
+                                        {
+                                            inventory[itemData.tarkovID] += stack;
+                                        }
+                                        else
+                                        {
+                                            inventory.Add(itemData.tarkovID, stack);
                                         }
                                     }
                                 }
@@ -278,6 +362,15 @@ namespace EFM
                                 {
                                     MeatovItemData itemData = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
                                     itemDict.Add(itemData, maxCount);
+
+                                    if (inventory.ContainsKey(itemData.tarkovID))
+                                    {
+                                        inventory[itemData.tarkovID] += maxCount;
+                                    }
+                                    else
+                                    {
+                                        inventory.Add(itemData.tarkovID, maxCount);
+                                    }
                                 }
                                 else
                                 {
@@ -290,6 +383,15 @@ namespace EFM
                                 {
                                     MeatovItemData itemData = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
                                     itemDict.Add(itemData, maxCount);
+
+                                    if (inventory.ContainsKey(itemData.tarkovID))
+                                    {
+                                        inventory[itemData.tarkovID] += maxCount;
+                                    }
+                                    else
+                                    {
+                                        inventory.Add(itemData.tarkovID, maxCount);
+                                    }
                                 }
                                 else
                                 {
@@ -302,6 +404,15 @@ namespace EFM
                                 {
                                     MeatovItemData itemData = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
                                     itemDict.Add(itemData, maxCount);
+
+                                    if (inventory.ContainsKey(itemData.tarkovID))
+                                    {
+                                        inventory[itemData.tarkovID] += maxCount;
+                                    }
+                                    else
+                                    {
+                                        inventory.Add(itemData.tarkovID, maxCount);
+                                    }
                                 }
                                 else
                                 {
@@ -318,13 +429,23 @@ namespace EFM
                                     MeatovItemData itemData = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
                                     if (Mod.IDDescribedInList(itemData.tarkovID, new List<string>(itemData.parents), itemCountWeight.Value["whitelist"].ToObject<List<string>>(), null))
                                     {
+                                        int stack = UnityEngine.Random.Range(1, itemData.maxStack + 1);
                                         if (itemDict.ContainsKey(itemData))
                                         {
-                                            itemDict[itemData] += UnityEngine.Random.Range(1, itemData.maxStack + 1);
+                                            itemDict[itemData] += stack;
                                         }
                                         else
                                         {
-                                            itemDict.Add(itemData, UnityEngine.Random.Range(1, itemData.maxStack + 1));
+                                            itemDict.Add(itemData, stack);
+                                        }
+
+                                        if (inventory.ContainsKey(itemData.tarkovID))
+                                        {
+                                            inventory[itemData.tarkovID] += stack;
+                                        }
+                                        else
+                                        {
+                                            inventory.Add(itemData.tarkovID, stack);
                                         }
                                     }
                                 }
@@ -351,7 +472,17 @@ namespace EFM
                                     MeatovItemData itemData = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
                                     if (Mod.IDDescribedInList(itemData.tarkovID, new List<string>(itemData.parents), itemCountWeight.Value["whitelist"].ToObject<List<string>>(), null))
                                     {
-                                        itemDict.Add(itemData, UnityEngine.Random.Range(1, itemData.maxStack + 1));
+                                        int stack = UnityEngine.Random.Range(1, itemData.maxStack + 1);
+                                        itemDict.Add(itemData, stack);
+
+                                        if (inventory.ContainsKey(itemData.tarkovID))
+                                        {
+                                            inventory[itemData.tarkovID] += stack;
+                                        }
+                                        else
+                                        {
+                                            inventory.Add(itemData.tarkovID, stack);
+                                        }
                                     }
                                 }
                             }

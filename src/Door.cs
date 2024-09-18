@@ -13,11 +13,13 @@ namespace EFM
         public Transform Root;
         public float minRot;
         public float maxRot;
+        public bool closedMinRot; // Whether the door being at min rot means it is closed
         public List<Collider> blockingColliders; // Nav block colliders to disable once the door have been unlocked
+        public DoorBreacher[] breachers;
         public bool breachable; // Door could be breachable despite being locked
         public AudioSource audioSource;
         public AudioClip[] breachAudioClips; // 0: Success, 1: Fail
-        public ParticleSystem particleSystem;
+        public ParticleSystem[] particleSystems;
 
         private bool forceOpen;
 
@@ -111,21 +113,38 @@ namespace EFM
             }
         }
 
+        public void Open()
+        {
+            rotAngle = closedMinRot ? maxRot : minRot;
+            transform.localEulerAngles = new Vector3(rotAngle, 0f, 0f);
+
+            if (trackedDoorData != null)
+            {
+                // Take control
+                if (trackedDoorData.controller != GameManager.ID)
+                {
+                    trackedDoorData.TakeControlRecursive();
+                }
+            }
+        }
+
         public void AttemptBreach(bool correctSide, bool toSend = true)
         {
             if (correctSide && (breachable || lockScript==null || !lockScript.locked))
             {
                 audioSource.PlayOneShot(breachAudioClips[0]);
-                rotAngle = maxRot;
+                rotAngle = closedMinRot ? maxRot : minRot;
                 transform.localEulerAngles = new Vector3(rotAngle, 0f, 0f);
-
             }
             else
             {
                 audioSource.PlayOneShot(breachAudioClips[1]);
             }
 
-            particleSystem.Play();
+            for(int i=0; i < particleSystems.Length; ++i)
+            {
+                particleSystems[i].Play();
+            }
 
             if (toSend && trackedDoorData != null)
             {

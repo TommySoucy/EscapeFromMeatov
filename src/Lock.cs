@@ -20,7 +20,7 @@ namespace EFM
             if (locked)
             {
                 MeatovItem item = other.GetComponentInParent<MeatovItem>();
-                if (item != null && item.tarkovID.Equals("keyID"))
+                if (item != null && item.tarkovID.Equals(keyID))
                 {
                     UnlockAction();
                 }

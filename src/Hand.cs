@@ -151,7 +151,7 @@ namespace EFM
                     else
                     {
                         LootContainer lc = collider.GetComponent<LootContainer>();
-                        if(lc != null)
+                        if(lc != null && lc.togglable)
                         {
                             collidingTogglableLC = lc;
                             togglableCollider = collider;
