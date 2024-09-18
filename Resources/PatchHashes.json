@@ -39,5 +39,18 @@
   "FVRWristMenu2.Update0": -198629212,
   "FVRWristMenu2.Awake0": 1595657826,
   "ModularWorkshopUI.UpdateDisplay0": -1883138698,
-  "ModularWorkshopUI.PButton_Select70807150": 947587618
+  "ModularWorkshopUI.PButton_Select70807150": 947587618,
+  "FVRPlayerHitbox.Damage2039707535": 1114503849,
+  "FVRPlayerHitbox.Damage-1818398616": -341427554,
+  "FVRPlayerHitbox.Damage-1829663943": 1151639139,
+  "ModularWeaponPart.DisablePart0": -618216879,
+  "FVRInteractiveObject.BeginInteraction-1405017133": -785653279,
+  "FVRInteractiveObject.EndInteraction-1405017133": 2013334464,
+  "Sosig.SuppresionUpdate0": 1574834113,
+  "Sosig.StateBailCheck_ShouldISkirmish0": 1920930228,
+  "Sosig.ExecuteDoorManipulation-1361643556": 406821122,
+  "SosigHand.Hold0": 1727828194,
+  "NavMeshLinkExtension.InitDoor0": -455043471,
+  "NavMeshLinkExtension.Traverse_Door1194998041": -51859631,
+  "NavMeshLinkExtension.Update0": -1214935498
 }
