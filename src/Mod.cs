@@ -2113,7 +2113,19 @@ namespace EFM
                                 {
                                     if (!IM.OD.ContainsKey(implementedEntry.Value.H3ID))
                                     {
-                                        Mod.LogError("\tMissing item: " + implementedEntry.Value.H3ID);
+                                        if (implementedEntry.Value.H3ID.Equals("868") && implementedEntry.Value.modGroup != null && implementedEntry.Value.modPart != null)
+                                        {
+                                            if(!ModularWorkshopManager.ModularWorkshopPartsGroupsDictionary.TryGetValue(implementedEntry.Value.modGroup, out ModularWorkshopPartsDefinition partDef) 
+                                                || !partDef.PartsDictionary.ContainsKey(implementedEntry.Value.modPart))
+                                            {
+                                                Mod.LogError("\tMissing modul part item: " + implementedEntry.Value.tarkovID + ":" + implementedEntry.Value.name+" for "+ implementedEntry.Value.modGroup+":"+ implementedEntry.Value.modPart);
+                                            }
+
+                                        }
+                                        else
+                                        {
+                                            Mod.LogError("\tMissing item: " + implementedEntry.Value.H3ID + ":" + implementedEntry.Value.tarkovID + ":" + implementedEntry.Value.name);
+                                        }
                                     }
                                 }
                                 break;
