@@ -22,7 +22,6 @@ namespace EFM
 
         public static RaidManager instance { get; private set; }
 
-        TODO: // Add day/night bool to raid maps so a map can only be selected if the correct time is selected
         public float raidTime; // Amount of time to complete the raid, in seconds
         public int maxPMCCount;
         public List<Spawn> PMCSpawns;
@@ -821,7 +820,7 @@ namespace EFM
                 // Generate outfit from inventory
                 List<FVRObject>[] botOutfit = botInventory.GetOutfit(true);
 
-                AnvilManager.Run(SpawnSosig(spawn, botInventory, sosigTemplate, botOutfit, enemyIFF++, true, false, USEC));
+                AnvilManager.Run(SpawnSosig(spawn, botInventory, sosigTemplate, botOutfit, enemyIFF++, 500, true, false, USEC));
 
                 // Loop IFF once we've reached max
                 if(enemyIFF > 31)
@@ -908,7 +907,7 @@ namespace EFM
                 // Generate outfit from inventory
                 List<FVRObject>[] botOutfit = botInventory.GetOutfit(true);
 
-                AnvilManager.Run(SpawnSosig(spawn, botInventory, sosigTemplate, botOutfit, 1, false, true, false));
+                AnvilManager.Run(SpawnSosig(spawn, botInventory, sosigTemplate, botOutfit, 1, 200, false, true, false));
 
                 ++activeScavCount;
 
@@ -1003,7 +1002,7 @@ namespace EFM
                         // Generate outfit from inventory
                         List<FVRObject>[] botOutfit = botInventory.GetOutfit(true);
 
-                        AnvilManager.Run(SpawnSosig(selectedSpawn, botInventory, sosigTemplate, botOutfit, enemyIFF, false, false, false));
+                        AnvilManager.Run(SpawnSosig(selectedSpawn, botInventory, sosigTemplate, botOutfit, enemyIFF, 600, false, false, false));
 
                         // Spawn squadmembers if necessary
                         if(selectedSpawn.squadMembers != null && selectedSpawn.squadMembers.Count > 0)
@@ -1037,7 +1036,7 @@ namespace EFM
                                         // Generate outfit from inventory
                                         List<FVRObject>[] squadMemberBotOutfit = squadMemberBotInventory.GetOutfit(true);
 
-                                        AnvilManager.Run(SpawnSosig(selectedSpawn, squadMemberBotInventory, squadMemberSosigTemplate, squadMemberBotOutfit, enemyIFF, false, false, false));
+                                        AnvilManager.Run(SpawnSosig(selectedSpawn, squadMemberBotInventory, squadMemberSosigTemplate, squadMemberBotOutfit, enemyIFF, 500, false, false, false));
                                     }
                                     else
                                     {
@@ -1080,7 +1079,7 @@ namespace EFM
                                         // Generate outfit from inventory
                                         List<FVRObject>[] squadMemberBotOutfit = squadMemberBotInventory.GetOutfit(true);
 
-                                        AnvilManager.Run(SpawnSosig(selectedSpawn, squadMemberBotInventory, squadMemberSosigTemplate, squadMemberBotOutfit, enemyIFF, false, false, false));
+                                        AnvilManager.Run(SpawnSosig(selectedSpawn, squadMemberBotInventory, squadMemberSosigTemplate, squadMemberBotOutfit, enemyIFF, 500, false, false, false));
                                     }
                                     else
                                     {
@@ -1125,8 +1124,7 @@ namespace EFM
             }
         }
 
-        TODO :// Add experience
-        public IEnumerator SpawnSosig(Spawn spawn, BotInventory botInventory, SosigConfigTemplate template, List<FVRObject>[] outfit, int IFF, bool PMC, bool scav, bool USEC)
+        public IEnumerator SpawnSosig(Spawn spawn, BotInventory botInventory, SosigConfigTemplate template, List<FVRObject>[] outfit, int IFF, int experienceReward, bool PMC, bool scav, bool USEC)
         {
             yield return IM.OD["SosigBody"].GetGameObjectAsync();
             GameObject sosigPrefab = IM.OD["SosigBody"].GetGameObject();
@@ -1142,6 +1140,7 @@ namespace EFM
                 TrackedSosigData.OnCollectAdditionalData += Networking.OnSosigCollectData;
 
                 Networking.botInventory = botInventory;
+                Networking.experienceReward = experienceReward;
                 Networking.PMC = PMC;
                 Networking.scav = scav;
                 Networking.USEC = USEC;
@@ -1154,6 +1153,7 @@ namespace EFM
             {
                 AI AIScript = sosigObject.AddComponent<AI>();
                 AIScript.botInventory = botInventory;
+                AIScript.experienceReward = experienceReward;
                 AIScript.PMC = PMC;
                 AIScript.scav = scav;
                 AIScript.USEC = USEC;
