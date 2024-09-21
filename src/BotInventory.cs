@@ -40,6 +40,39 @@ namespace EFM
 
         public Dictionary<string, int> inventory; // All item counts by tarkovID
 
+        public BotInventory(Dictionary<string, MeatovItemData> equipment, Dictionary<string, Dictionary<MeatovItemData, int>> loot)
+        {
+            this.equipment = equipment;
+            this.loot = loot;
+
+            inventory = new Dictionary<string, int>();
+            foreach (KeyValuePair<string, MeatovItemData> equipmentEntry in equipment)
+            {
+                if (inventory.ContainsKey(equipmentEntry.Key))
+                {
+                    ++inventory[equipmentEntry.Key];
+                }
+                else
+                {
+                    inventory.Add(equipmentEntry.Key, 1);
+                }
+            }
+            foreach (KeyValuePair<string, Dictionary<MeatovItemData, int>> lootEntry in loot)
+            {
+                foreach (KeyValuePair<MeatovItemData, int> innerEntry in lootEntry.Value)
+                {
+                    if (inventory.ContainsKey(innerEntry.Key.tarkovID))
+                    {
+                        inventory[innerEntry.Key.tarkovID] += innerEntry.Value;
+                    }
+                    else
+                    {
+                        inventory.Add(innerEntry.Key.tarkovID, innerEntry.Value);
+                    }
+                }
+            }
+        }
+
         public BotInventory(JObject botData)
         {
             inventory = new Dictionary<string, int>();
@@ -807,6 +840,126 @@ namespace EFM
             }
 
             return linkOutfit;
+        }
+
+        public static string GetEquipmentNameByIndex(int index)
+        {
+            switch (index)
+            {
+                case 0:
+                    return "ArmBand";
+                case 1:
+                    return "ArmorVest";
+                case 2:
+                    return "Backpack";
+                case 3:
+                    return "Earpiece";
+                case 4:
+                    return "Eyewear";
+                case 5:
+                    return "FaceCover";
+                case 6:
+                    return "FirstPrimaryWeapon";
+                case 7:
+                    return "Headwear";
+                case 8:
+                    return "Holster";
+                case 9:
+                    return "Scabbard";
+                case 10:
+                    return "SecondPrimaryWeapon";
+                case 11:
+                    return "TacticalVest";
+            }
+
+            return null;
+        }
+
+        public static int GetIndexByEquipmentName(string equipmentName) 
+        {
+            switch (equipmentName)
+            {
+                case "ArmBand":
+                    return 0;
+                case "ArmorVest":
+                    return 1;
+                case "Backpack":
+                    return 2;
+                case "Earpiece":
+                    return 3;
+                case "Eyewear":
+                    return 4;
+                case "FaceCover":
+                    return 5;
+                case "FirstPrimaryWeapon":
+                    return 6;
+                case "Headwear":
+                    return 7;
+                case "Holster":
+                    return 8;
+                case "Scabbard":
+                    return 9;
+                case "SecondPrimaryWeapon":
+                    return 10;
+                case "TacticalVest":
+                    return 11;
+            }
+
+            return -1;
+        }
+
+        public static string GetLootNameByIndex(int index)
+        {
+            switch (index)
+            {
+                case 0:
+                    return "backpackLoot";
+                case 1:
+                    return "drugs";
+                case 2:
+                    return "grenades";
+                case 3:
+                    return "healing";
+                case 4:
+                    return "magazines";
+                case 5:
+                    return "pocketLoot";
+                case 6:
+                    return "specialItems";
+                case 7:
+                    return "stims";
+                case 8:
+                    return "vestLoot";
+            }
+
+            return null;
+        }
+
+        public static int GetIndexByLootName(string lootName) 
+        {
+            switch (lootName)
+            {
+                case "backpackLoot":
+                    return 0;
+                case "drugs":
+                    return 1;
+                case "grenades":
+                    return 2;
+                case "healing":
+                    return 3;
+                case "magazines":
+                    return 4;
+                case "pocketLoot":
+                    return 5;
+                case "specialItems":
+                    return 6;
+                case "stims":
+                    return 7;
+                case "vestLoot":
+                    return 8;
+            }
+
+            return -1;
         }
     }
 }

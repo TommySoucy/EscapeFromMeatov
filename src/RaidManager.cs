@@ -1,5 +1,6 @@
 ﻿using FistVR;
 using H3MP.Networking;
+using H3MP.Tracking;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -1124,6 +1125,7 @@ namespace EFM
             }
         }
 
+        TODO :// Add experience
         public IEnumerator SpawnSosig(Spawn spawn, BotInventory botInventory, SosigConfigTemplate template, List<FVRObject>[] outfit, int IFF, bool PMC, bool scav, bool USEC)
         {
             yield return IM.OD["SosigBody"].GetGameObjectAsync();
@@ -1135,15 +1137,31 @@ namespace EFM
             }
 
             Vector3 spawnPos = GetSpawnPosition(spawn);
+            if(Networking.currentInstance != null)
+            {
+                TrackedSosigData.OnCollectAdditionalData += Networking.OnSosigCollectData;
+
+                Networking.botInventory = botInventory;
+                Networking.PMC = PMC;
+                Networking.scav = scav;
+                Networking.USEC = USEC;
+            }
             GameObject sosigObject = Instantiate(sosigPrefab, spawnPos, Quaternion.identity);
             Sosig sosig = sosigObject.GetComponentInChildren<Sosig>();
             sosig.Configure(template);
             sosig.SetIFF(IFF);
-            AI AIScript = sosigObject.AddComponent<AI>();
-            AIScript.botInventory = botInventory;
-            AIScript.PMC = PMC;
-            AIScript.scav = scav;
-            AIScript.USEC = USEC;
+            if (Networking.currentInstance == null)
+            {
+                AI AIScript = sosigObject.AddComponent<AI>();
+                AIScript.botInventory = botInventory;
+                AIScript.PMC = PMC;
+                AIScript.scav = scav;
+                AIScript.USEC = USEC;
+            }
+            else
+            {
+                TrackedSosigData.OnCollectAdditionalData -= Networking.OnSosigCollectData;
+            }
 
             // Equip sosig items
             sosig.InitHands();

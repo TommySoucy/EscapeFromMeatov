@@ -1,4 +1,5 @@
 ﻿using FFmpeg.AutoGen;
+using FistVR;
 using H3MP;
 using H3MP.Networking;
 using H3MP.Tracking;
@@ -7,8 +8,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using System.Text.RegularExpressions;
-using static RootMotion.FinalIK.IKSolver;
 
 namespace EFM
 {
@@ -25,6 +24,13 @@ namespace EFM
         public static bool setLatestInstance;
         public static List<SpawnRequest> spawnRequests = new List<SpawnRequest>();
         public static bool spawnRequested;
+
+        // Tracked AI data
+        public static int experienceReward;
+        public static bool PMC;
+        public static bool scav;
+        public static bool USEC;
+        public static BotInventory botInventory;
 
         public static int addInstancePacketID; // AddEFMInstancePacketID
         public static int setPlayerReadynessPacketID; // SetEFMInstancePlayerReadyness
@@ -69,6 +75,7 @@ namespace EFM
             H3MP.GameManager.OnPlayerInstanceChanged += OnPlayerInstanceChanged;
             H3MP.Mod.OnGetBestPotentialObjectHost += OnGetBestPotentialObjectHost;
             H3MP.GameManager.OnInstanceLeft += HideoutController.OnInstanceLeft;
+            TrackedSosigData.OnProcessAdditionalData += OnSosigProcessData;
 
             // Setup custom packets
             if (ThreadManager.host)
@@ -349,6 +356,7 @@ namespace EFM
             H3MP.GameManager.OnPlayerInstanceChanged -= OnPlayerInstanceChanged;
             H3MP.Mod.OnGetBestPotentialObjectHost -= OnGetBestPotentialObjectHost;
             H3MP.GameManager.OnInstanceLeft -= HideoutController.OnInstanceLeft;
+            TrackedSosigData.OnProcessAdditionalData -= OnSosigProcessData;
         }
 
         public static void OnPlayerInstanceChanged(int ID, int previousInstanceID, int newInstanceID)
@@ -438,6 +446,123 @@ namespace EFM
                     }
                 }
             }
+        }
+
+        public static void OnSosigCollectData(ref bool collected, TrackedSosigData sosig)
+        {
+            // Only write if in raid
+            if (RaidManager.instance == null)
+            {
+                return;
+            }
+
+            AI AIScript = sosig.physicalSosig.physicalSosig.gameObject.AddComponent<AI>();
+            AIScript.botInventory = botInventory;
+            AIScript.experienceReward = experienceReward;
+            AIScript.PMC = PMC;
+            AIScript.scav = scav;
+            AIScript.USEC = USEC;
+
+            List<byte> data = new List<byte>();
+
+            data.Add((byte)botInventory.equipment.Count);
+            foreach (KeyValuePair<string, MeatovItemData> equipmentEntry in botInventory.equipment)
+            {
+                data.Add((byte)BotInventory.GetIndexByEquipmentName(equipmentEntry.Key));
+                data.Add((byte)equipmentEntry.Value.tarkovID.Length);
+                data.AddRange(Encoding.ASCII.GetBytes(equipmentEntry.Value.tarkovID));
+            }
+
+            data.Add((byte)botInventory.loot.Count);
+            foreach (KeyValuePair<string, Dictionary<MeatovItemData, int>> lootEntry in botInventory.loot)
+            {
+                data.Add((byte)BotInventory.GetIndexByLootName(lootEntry.Key));
+                data.AddRange(BitConverter.GetBytes(lootEntry.Value.Count));
+                foreach(KeyValuePair<MeatovItemData, int> lootSubEntry in lootEntry.Value)
+                {
+                    data.Add((byte)lootSubEntry.Key.tarkovID.Length);
+                    data.AddRange(Encoding.ASCII.GetBytes(lootSubEntry.Key.tarkovID));
+                    data.AddRange(BitConverter.GetBytes(lootSubEntry.Value));
+                }
+            }
+
+            data.AddRange(BitConverter.GetBytes(experienceReward));
+
+            int boolData = 0;
+            boolData |= (PMC ? 1 : 0);
+            boolData <<= 1;
+            boolData |= (scav ? 1 : 0);
+            boolData <<= 1;
+            boolData |= (USEC ? 1 : 0);
+            data.Add((byte)boolData);
+
+            sosig.data = data.ToArray();
+
+            collected = true;
+        }
+
+        public static void OnSosigProcessData(ref bool processed, TrackedSosigData sosig)
+        {
+            // Only process if in raid
+            if (RaidManager.instance == null)
+            {
+                return;
+            }
+
+            AI AIScript = sosig.physicalSosig.physicalSosig.gameObject.AddComponent<AI>();
+
+            Dictionary<string, MeatovItemData> equipment = new Dictionary<string, MeatovItemData>();
+            int offset = 0;
+            byte equipmentCount = sosig.data[offset++];
+            for (int i = 0; i < equipmentCount; ++i) 
+            {
+                byte equipmentIndex = sosig.data[offset++];
+                byte tarkovIDLength = sosig.data[offset++];
+                string tarkovID = Encoding.ASCII.GetString(sosig.data, offset, tarkovIDLength);
+                offset += tarkovIDLength;
+                if (Mod.defaultItemData.TryGetValue(tarkovID, out MeatovItemData itemData))
+                {
+                    equipment.Add(BotInventory.GetEquipmentNameByIndex(equipmentIndex), itemData);
+                }
+            }
+            Dictionary<string, Dictionary<MeatovItemData, int>> loot = new Dictionary<string, Dictionary<MeatovItemData, int>>();
+            byte lootCount = sosig.data[offset++];
+            for(int i=0; i < lootCount; ++i)
+            {
+                byte lootIndex = sosig.data[offset++];
+                string lootName = BotInventory.GetLootNameByIndex(lootIndex);
+                byte currentLootCount = sosig.data[offset++];
+                for(int j=0; j < currentLootCount; ++j)
+                {
+                    byte tarkovIDLength = sosig.data[offset++];
+                    string tarkovID = Encoding.ASCII.GetString(sosig.data, offset, tarkovIDLength);
+                    offset += tarkovIDLength;
+                    int itemCount = BitConverter.ToInt32(sosig.data, offset);
+                    offset += 4;
+                    if (Mod.defaultItemData.TryGetValue(tarkovID, out MeatovItemData itemData))
+                    {
+                        if(loot.TryGetValue(lootName, out Dictionary<MeatovItemData, int> innerDict))
+                        {
+                            innerDict.Add(itemData, itemCount);
+                        }
+                        else
+                        {
+                            loot.Add(lootName, new Dictionary<MeatovItemData, int>() { { itemData, itemCount } });
+                        }
+                    }
+                }
+            }
+            AIScript.botInventory = new BotInventory(equipment, loot);
+
+            AIScript.experienceReward = BitConverter.ToInt32(sosig.data, offset);
+            offset += 4;
+
+            byte boolData = sosig.data[offset++];
+            AIScript.USEC = (boolData & 1) == 1;
+            AIScript.scav = ((boolData >> 1) & 1) == 1;
+            AIScript.PMC = ((boolData >> 2) & 1) == 1;
+
+            processed = true;
         }
 
         public static void AddModulPartData(List<byte> buffer, string groupID, string selectedPart, IDictionary pointDict, TrackedItem trackedItem)
