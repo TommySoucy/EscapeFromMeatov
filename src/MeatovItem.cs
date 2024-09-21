@@ -1294,6 +1294,73 @@ namespace EFM
                                 Mod.consumeUI.transform.localRotation = Quaternion.Euler(25, 0, 0);
                                 Mod.consumeUI.gameObject.SetActive(true);
                                 validConsumePress = true;
+
+                                // Check for targetted part
+                                if (StatusUI.instance.IsOpen())
+                                {
+                                    float minDist = float.MaxValue;
+                                    int minIndex = -1;
+                                    for(int i=0; i < StatusUI.instance.partImages.Length; ++i)
+                                    {
+                                        float dist = Vector3.Distance(hand.transform.position, StatusUI.instance.partImages[i].transform.position);
+                                        if(dist < minDist)
+                                        {
+                                            minDist = dist;
+                                            minIndex = i;
+                                        }
+                                    }
+
+                                    if(minIndex == -1 || minDist > 0.2)
+                                    {
+                                        if(targettedPart != -1)
+                                        {
+                                            StatusUI.instance.partLabels[targettedPart].color = Color.white;
+                                            if(Mod.GetHealth(targettedPart) <= 0)
+                                            {
+                                                StatusUI.instance.partImages[targettedPart].color = Color.black;
+                                            }
+                                            else
+                                            {
+                                                StatusUI.instance.partImages[targettedPart].color = Color.Lerp(Color.red, Color.white, Mod.GetHealth(targettedPart) / Mod.GetCurrentMaxHealth(targettedPart));
+                                            }
+                                        }
+                                        targettedPart = -1;
+                                    }
+                                    else
+                                    {
+                                        if (targettedPart != minIndex)
+                                        {
+                                            StatusUI.instance.partLabels[targettedPart].color = Color.white;
+                                            if (Mod.GetHealth(targettedPart) <= 0)
+                                            {
+                                                StatusUI.instance.partImages[targettedPart].color = Color.black;
+                                            }
+                                            else
+                                            {
+                                                StatusUI.instance.partImages[targettedPart].color = Color.Lerp(Color.red, Color.white, Mod.GetHealth(targettedPart) / Mod.GetCurrentMaxHealth(targettedPart));
+                                            }
+                                        }
+                                        targettedPart = minIndex;
+                                        StatusUI.instance.partLabels[targettedPart].color = Color.green;
+                                        StatusUI.instance.partImages[targettedPart].color = Color.green;
+                                    }
+                                }
+                                else
+                                {
+                                    if (targettedPart != -1)
+                                    {
+                                        StatusUI.instance.partLabels[targettedPart].color = Color.white;
+                                        if (Mod.GetHealth(targettedPart) <= 0)
+                                        {
+                                            StatusUI.instance.partImages[targettedPart].color = Color.black;
+                                        }
+                                        else
+                                        {
+                                            StatusUI.instance.partImages[targettedPart].color = Color.Lerp(Color.red, Color.white, Mod.GetHealth(targettedPart) / Mod.GetCurrentMaxHealth(targettedPart));
+                                        }
+                                    }
+                                    targettedPart = -1;
+                                }
                             }
                             break;
                         default:
@@ -1446,7 +1513,22 @@ namespace EFM
 					{
 						Destroy();
 					}
-				}
+
+                    if (targettedPart != -1)
+                    {
+                        StatusUI.instance.partLabels[targettedPart].color = Color.white;
+                        if (Mod.GetHealth(targettedPart) <= 0)
+                        {
+                            StatusUI.instance.partImages[targettedPart].color = Color.black;
+                        }
+                        else
+                        {
+                            StatusUI.instance.partImages[targettedPart].color = Color.Lerp(Color.red, Color.white, Mod.GetHealth(targettedPart) / Mod.GetCurrentMaxHealth(targettedPart));
+                        }
+                    }
+                    targettedPart = -1;
+
+                }
                 else if (validPlantingPress)
                 {
                     validPlantingPress = false;
