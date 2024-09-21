@@ -3280,6 +3280,7 @@ namespace EFM
             Mod.timeChoiceIs0 = true;
             timeChoice0CheckText.text = "X";
             timeChoice1CheckText.text = "";
+            PopulateNewInstanceMapList();
             Mod.PMCSpawnTogether = true;
             newInstanceSpawnTogetherCheckText.text = "X";
             Mod.mapChoiceName = null;
@@ -3539,6 +3540,8 @@ namespace EFM
 
             timeChoice0CheckText.text = "X";
             timeChoice1CheckText.text = "";
+
+            PopulateNewInstanceMapList();
         }
 
         public void OnNewInstanceTime1Clicked()
@@ -3549,6 +3552,8 @@ namespace EFM
 
             timeChoice0CheckText.text = "";
             timeChoice1CheckText.text = "X";
+
+            PopulateNewInstanceMapList();
         }
 
         public void OnNewInstanceSpawnTogetherClicked()
@@ -3593,6 +3598,20 @@ namespace EFM
                 }
 
                 bool unfulfilled = false;
+                bool day = false;
+                if (Mod.availableRaidMapDay.TryGetValue(raidMap.Key, out day))
+                {
+                    // Day is from 21600 to 64800
+                    // Night is from 0 to 21600 and 64800 to 86400
+                    if (day)
+                    {
+                        unfulfilled = (time >= 0 && time < 21600) || (time >= 64800 && time <= 86400);
+                    }
+                    else
+                    {
+                        unfulfilled = time >= 21600 && time < 64800;
+                    }
+                }
                 if (Mod.raidMapEntryRequirements.TryGetValue(raidMap.Key, out Dictionary<string, int> itemRequirements))
                 {
                     foreach (KeyValuePair<string, int> item in itemRequirements)
@@ -3628,8 +3647,6 @@ namespace EFM
             }
         }
 
-        TODO: // When populating map list, we now need to check which time we've selected and check if map available during that time
-        TODO: // When selecting time, we need to re populate map lists to match
         public void PopulateMapList()
         {
             while (mapListParent.childCount > 1)
@@ -3663,7 +3680,21 @@ namespace EFM
                 }
 
                 bool unfulfilled = false;
-                if (Mod.raidMapEntryRequirements.TryGetValue(raidMap.Key, out Dictionary<string, int> itemRequirements))
+                bool day = false;
+                if(Mod.availableRaidMapDay.TryGetValue(raidMap.Key, out day))
+                {
+                    // Day is from 21600 to 64800
+                    // Night is from 0 to 21600 and 64800 to 86400
+                    if (day)
+                    {
+                        unfulfilled = (time >= 0 && time < 21600) || (time >= 64800 && time <= 86400);
+                    }
+                    else
+                    {
+                        unfulfilled = time >= 21600 && time < 64800;
+                    }
+                }
+                if (!unfulfilled && Mod.raidMapEntryRequirements.TryGetValue(raidMap.Key, out Dictionary<string, int> itemRequirements))
                 {
                     foreach (KeyValuePair<string, int> item in itemRequirements)
                     {
