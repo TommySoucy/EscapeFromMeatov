@@ -21,11 +21,14 @@ namespace EFM
 
         public static RaidManager instance { get; private set; }
 
+        TODO: // Add day/night bool to raid maps so a map can only be selected if the correct time is selected
         public float raidTime; // Amount of time to complete the raid, in seconds
         public int maxPMCCount;
-        public List<Spawn> PMCSpawns; 
-        public List<Spawn> scavSpawns; 
-        public List<Spawn> scavBossSpawns; 
+        public List<Spawn> PMCSpawns;
+        public int maxScavCount; // Max amount of scavs that can be active at once
+        public float scavSpawnInterval;
+        public List<ScavSpawn> scavSpawns; 
+        public List<ScavBossSpawn> scavBossSpawns; 
         public List<Extraction> PMCExtractions; 
         public List<Extraction> scavExtractions; 
         public List<Transform> PMCNavPoints;
@@ -41,6 +44,10 @@ namespace EFM
         public bool AIPMCSpawned;
         [NonSerialized]
         public int enemyIFF = 2; // Players are 0, Scavs are 1, PMCs and scav bosses get incremental IFF
+        [NonSerialized]
+        public float scavSpawnTimer;
+        [NonSerialized]
+        public int activeScavCount;
         [NonSerialized]
         public List<Extraction> activeExtractions;
         [NonSerialized]
@@ -59,6 +66,7 @@ namespace EFM
         {
             raidTimeLeft = raidTime;
             Mod.raidTime = 0;
+            scavSpawnTimer = scavSpawnInterval;
 
             InitTime();
 
@@ -67,9 +75,14 @@ namespace EFM
             if (control)
             {
                 Init();
+
+                GM.CurrentSceneSettings.SosigKillEvent += OnSosigKill;
             }
             else // We don't control
             {
+                enemyIFF = Networking.currentInstance.enemyIFF;
+                activeScavCount = Networking.currentInstance.activeScavCount;
+
                 AIPMCSpawned = Networking.currentInstance.AIPMCSpawned;
 
                 // Request spawn from controller if necessary
@@ -91,6 +104,38 @@ namespace EFM
 
                 // Store that we requested spawn so we can do it again if host changes before we receive it
                 Networking.spawnRequested = true;
+            }
+        }
+
+        public void OnSosigKill(Sosig sosig)
+        {
+            if (control)
+            {
+                AI ai = sosig.GetComponent<AI>();
+                if(ai != null && ai.scav)
+                {
+                    --activeScavCount;
+
+                    if (Networking.currentInstance != null)
+                    {
+                        Networking.currentInstance.activeScavCount = activeScavCount;
+
+                        using (Packet packet = new Packet(Networking.setRaidActiveScavCountPacketID))
+                        {
+                            packet.Write(Networking.currentInstance.ID);
+                            packet.Write(activeScavCount);
+
+                            if (ThreadManager.host)
+                            {
+                                ServerSend.SendTCPDataToAll(packet, true);
+                            }
+                            else
+                            {
+                                ClientSend.SendTCPData(packet, true);
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -170,6 +215,8 @@ namespace EFM
             }
 
             SpawnLooseLoot();
+
+            SpawnScavBosses();
         }
 
         public void SpawnLooseLoot()
@@ -657,7 +704,16 @@ namespace EFM
             UpdateControl();
             if (control)
             {
-                TODO: // Spawn scav bosses
+                if(activeScavCount < maxScavCount)
+                {
+                    scavSpawnTimer -= Time.deltaTime;
+                    if(scavSpawnTimer < 0)
+                    {
+                        SpawnScav();
+
+                        scavSpawnTimer = scavSpawnInterval;
+                    }
+                }
 
                 // Check if can spawn initial AI PMC
                 if (!AIPMCSpawned)
@@ -764,7 +820,7 @@ namespace EFM
                 // Generate outfit from inventory
                 List<FVRObject>[] botOutfit = botInventory.GetOutfit(true);
 
-                AnvilManager.Run(SpawnSosig(spawn, botInventory, new SosigConfigTemplate(), botOutfit, enemyIFF++, true, USEC));
+                AnvilManager.Run(SpawnSosig(spawn, botInventory, sosigTemplate, botOutfit, enemyIFF++, true, false, USEC));
 
                 // Loop IFF once we've reached max
                 if(enemyIFF > 31)
@@ -798,7 +854,277 @@ namespace EFM
             }
         }
 
-        public IEnumerator SpawnSosig(Spawn spawn, BotInventory botInventory, SosigConfigTemplate template, List<FVRObject>[] outfit, int IFF, bool PMC, bool USEC)
+        public void SpawnScav()
+        {
+            // Find spawn
+            ScavSpawn spawn = scavSpawns[UnityEngine.Random.Range(0, scavSpawns.Count)];
+            string botDataName = null;
+            if (spawn.random)
+            {
+                if(UnityEngine.Random.value < 0.5f)
+                {
+                    botDataName = "assault";
+                }
+                else
+                {
+                    botDataName = "marksman";
+                }
+            }
+            else
+            {
+                if (spawn.marksman)
+                {
+                    botDataName = "marksman";
+                }
+                else
+                {
+                    botDataName = "assault";
+                }
+            }
+
+            if(Mod.botData.TryGetValue(botDataName, out JObject botData))
+            {
+                // Generate sosig template
+                // Time until skirmish when recognizing an enemy entity will increase faster due to StateBailCheck_ShouldISkirmish patch
+                // ADS time will be faster due to SosigHand.Hold patch
+                // Supression will decrease faster due to SuppresionUpdate patch
+                SosigConfigTemplate sosigTemplate = ScriptableObject.CreateInstance<SosigConfigTemplate>();
+                sosigTemplate.RegistersPassiveThreats = true;
+                sosigTemplate.DoesDropWeaponsOnBallistic = false;
+                sosigTemplate.ShudderThreshold = 1000; // High number, sosig should probably just never shudder
+                sosigTemplate.ConfusionThreshold = 1000; // High number, sosig should probably just never be consfused
+                sosigTemplate.ConfusionMultiplier = 0;
+                sosigTemplate.ConfusionTimeMax = 0;
+                // Note that stun settings are unmodified
+                sosigTemplate.CanBeKnockedOut = false;
+                sosigTemplate.MaxUnconsciousTime = 0;
+                sosigTemplate.CanBeGrabbed = false;
+                sosigTemplate.SuppressionMult = 0.05f; // Minimum 20 supression events to fully suppress
+
+                // Generate inventory
+                BotInventory botInventory = new BotInventory(botData);
+
+                // Generate outfit from inventory
+                List<FVRObject>[] botOutfit = botInventory.GetOutfit(true);
+
+                AnvilManager.Run(SpawnSosig(spawn, botInventory, sosigTemplate, botOutfit, 1, false, true, false));
+
+                ++activeScavCount;
+
+                if (Networking.currentInstance != null)
+                {
+                    Networking.currentInstance.activeScavCount = activeScavCount;
+
+                    using (Packet packet = new Packet(Networking.setRaidActiveScavCountPacketID))
+                    {
+                        packet.Write(Networking.currentInstance.ID);
+                        packet.Write(activeScavCount);
+
+                        if (ThreadManager.host)
+                        {
+                            ServerSend.SendTCPDataToAll(packet, true);
+                        }
+                        else
+                        {
+                            ClientSend.SendTCPData(packet, true);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                Mod.LogError("Could not get botdata to spawn scav "+botDataName);
+            }
+        }
+
+        public void SpawnScavBosses()
+        {
+            Dictionary<ScavBossSpawn, byte> consumedSpawns = new System.Collections.Generic.Dictionary<ScavBossSpawn, byte>();
+            for(int i=0; i < scavBossSpawns.Count; ++i)
+            {
+                if (consumedSpawns.ContainsKey(scavBossSpawns[i]))
+                {
+                    continue;
+                }
+
+                List<ScavBossSpawn> spawnGroup = scavBossSpawns[i].spawnGroup == null ? new List<ScavBossSpawn>() : scavBossSpawns[i].spawnGroup;
+                if (!spawnGroup.Contains(scavBossSpawns[i]))
+                {
+                    spawnGroup.Add(scavBossSpawns[i]);
+                }
+                for (int j = 0; j < spawnGroup.Count; ++j)
+                {
+                    consumedSpawns.Add(spawnGroup[j], 0);
+                }
+
+                int totalWeight = scavBossSpawns[i].totalGroupWeight;
+                int randSelection = UnityEngine.Random.Range(0, totalWeight);
+                int currentWeight = 0;
+                ScavBossSpawn selectedSpawn = null;
+                for(int j=0; j < spawnGroup.Count; ++j)
+                {
+                    currentWeight += spawnGroup[j].groupWeight;
+                    if (randSelection < currentWeight)
+                    {
+                        selectedSpawn = spawnGroup[j];
+                    }
+                }
+
+                if (selectedSpawn != null)
+                {
+                    if(UnityEngine.Random.value > selectedSpawn.probability)
+                    {
+                        continue;
+                    }
+
+                    if (Mod.botData.TryGetValue(selectedSpawn.bossID, out JObject botData))
+                    {
+                        // Generate sosig template
+                        // Time until skirmish when recognizing an enemy entity will increase faster due to StateBailCheck_ShouldISkirmish patch
+                        // ADS time will be faster due to SosigHand.Hold patch
+                        // Supression will decrease faster due to SuppresionUpdate patch
+                        SosigConfigTemplate sosigTemplate = ScriptableObject.CreateInstance<SosigConfigTemplate>();
+                        sosigTemplate.RegistersPassiveThreats = true;
+                        sosigTemplate.DoesDropWeaponsOnBallistic = false;
+                        sosigTemplate.ShudderThreshold = 1000; // High number, sosig should probably just never shudder
+                        sosigTemplate.ConfusionThreshold = 1000; // High number, sosig should probably just never be consfused
+                        sosigTemplate.ConfusionMultiplier = 0;
+                        sosigTemplate.ConfusionTimeMax = 0;
+                        // Note that stun settings are unmodified
+                        sosigTemplate.CanBeKnockedOut = false;
+                        sosigTemplate.MaxUnconsciousTime = 0;
+                        sosigTemplate.CanBeGrabbed = false;
+                        sosigTemplate.SuppressionMult = 0.05f; // Minimum 20 supression events to fully suppress
+
+                        // Generate inventory
+                        BotInventory botInventory = new BotInventory(botData);
+
+                        // Generate outfit from inventory
+                        List<FVRObject>[] botOutfit = botInventory.GetOutfit(true);
+
+                        AnvilManager.Run(SpawnSosig(selectedSpawn, botInventory, sosigTemplate, botOutfit, enemyIFF, false, false, false));
+
+                        // Spawn squadmembers if necessary
+                        if(selectedSpawn.squadMembers != null && selectedSpawn.squadMembers.Count > 0)
+                        {
+                            if (selectedSpawn.spawnAllSquadMembers)
+                            {
+                                for (int j = 0; j < selectedSpawn.squadMembers.Count; ++j) 
+                                {
+                                    if (Mod.botData.TryGetValue(selectedSpawn.squadMembers[j], out JObject squadMemberBotData))
+                                    {
+                                        // Generate sosig template
+                                        // Time until skirmish when recognizing an enemy entity will increase faster due to StateBailCheck_ShouldISkirmish patch
+                                        // ADS time will be faster due to SosigHand.Hold patch
+                                        // Supression will decrease faster due to SuppresionUpdate patch
+                                        SosigConfigTemplate squadMemberSosigTemplate = ScriptableObject.CreateInstance<SosigConfigTemplate>();
+                                        squadMemberSosigTemplate.RegistersPassiveThreats = true;
+                                        squadMemberSosigTemplate.DoesDropWeaponsOnBallistic = false;
+                                        squadMemberSosigTemplate.ShudderThreshold = 1000; // High number, sosig should probably just never shudder
+                                        squadMemberSosigTemplate.ConfusionThreshold = 1000; // High number, sosig should probably just never be consfused
+                                        squadMemberSosigTemplate.ConfusionMultiplier = 0;
+                                        squadMemberSosigTemplate.ConfusionTimeMax = 0;
+                                        // Note that stun settings are unmodified
+                                        squadMemberSosigTemplate.CanBeKnockedOut = false;
+                                        squadMemberSosigTemplate.MaxUnconsciousTime = 0;
+                                        squadMemberSosigTemplate.CanBeGrabbed = false;
+                                        squadMemberSosigTemplate.SuppressionMult = 0.05f; // Minimum 20 supression events to fully suppress
+
+                                        // Generate inventory
+                                        BotInventory squadMemberBotInventory = new BotInventory(squadMemberBotData);
+
+                                        // Generate outfit from inventory
+                                        List<FVRObject>[] squadMemberBotOutfit = squadMemberBotInventory.GetOutfit(true);
+
+                                        AnvilManager.Run(SpawnSosig(selectedSpawn, squadMemberBotInventory, squadMemberSosigTemplate, squadMemberBotOutfit, enemyIFF, false, false, false));
+                                    }
+                                    else
+                                    {
+                                        Mod.LogError("Could not get botdata to spawn scav boss: " + selectedSpawn.bossID+" squad member: "+ selectedSpawn.squadMembers[j]);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                for(int j=0; j < selectedSpawn.squadMembersSpawnAttempts; ++j)
+                                {
+                                    if (UnityEngine.Random.value > selectedSpawn.squadMembersSpawnProbability)
+                                    {
+                                        continue;
+                                    }
+
+                                    string randomMember = selectedSpawn.squadMembers[UnityEngine.Random.Range(0, selectedSpawn.squadMembers.Count)];
+                                    if (Mod.botData.TryGetValue(randomMember, out JObject squadMemberBotData))
+                                    {
+                                        // Generate sosig template
+                                        // Time until skirmish when recognizing an enemy entity will increase faster due to StateBailCheck_ShouldISkirmish patch
+                                        // ADS time will be faster due to SosigHand.Hold patch
+                                        // Supression will decrease faster due to SuppresionUpdate patch
+                                        SosigConfigTemplate squadMemberSosigTemplate = ScriptableObject.CreateInstance<SosigConfigTemplate>();
+                                        squadMemberSosigTemplate.RegistersPassiveThreats = true;
+                                        squadMemberSosigTemplate.DoesDropWeaponsOnBallistic = false;
+                                        squadMemberSosigTemplate.ShudderThreshold = 1000; // High number, sosig should probably just never shudder
+                                        squadMemberSosigTemplate.ConfusionThreshold = 1000; // High number, sosig should probably just never be consfused
+                                        squadMemberSosigTemplate.ConfusionMultiplier = 0;
+                                        squadMemberSosigTemplate.ConfusionTimeMax = 0;
+                                        // Note that stun settings are unmodified
+                                        squadMemberSosigTemplate.CanBeKnockedOut = false;
+                                        squadMemberSosigTemplate.MaxUnconsciousTime = 0;
+                                        squadMemberSosigTemplate.CanBeGrabbed = false;
+                                        squadMemberSosigTemplate.SuppressionMult = 0.05f; // Minimum 20 supression events to fully suppress
+
+                                        // Generate inventory
+                                        BotInventory squadMemberBotInventory = new BotInventory(squadMemberBotData);
+
+                                        // Generate outfit from inventory
+                                        List<FVRObject>[] squadMemberBotOutfit = squadMemberBotInventory.GetOutfit(true);
+
+                                        AnvilManager.Run(SpawnSosig(selectedSpawn, squadMemberBotInventory, squadMemberSosigTemplate, squadMemberBotOutfit, enemyIFF, false, false, false));
+                                    }
+                                    else
+                                    {
+                                        Mod.LogError("Could not get botdata to spawn scav boss: " + selectedSpawn.bossID + " squad member: " + randomMember);
+                                    }
+                                }
+                            }
+                        }
+
+                        // Loop IFF once we've reached max
+                        ++enemyIFF;
+                        if (enemyIFF > 31)
+                        {
+                            enemyIFF = 2;
+                        }
+
+                        if (Networking.currentInstance != null)
+                        {
+                            Networking.currentInstance.enemyIFF = enemyIFF;
+
+                            using (Packet packet = new Packet(Networking.setRaidEnemyIFFPacketID))
+                            {
+                                packet.Write(Networking.currentInstance.ID);
+                                packet.Write(enemyIFF);
+
+                                if (ThreadManager.host)
+                                {
+                                    ServerSend.SendTCPDataToAll(packet, true);
+                                }
+                                else
+                                {
+                                    ClientSend.SendTCPData(packet, true);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Mod.LogError("Could not get botdata to spawn scav boss: "+ selectedSpawn.bossID);
+                    }
+                }
+            }
+        }
+
+        public IEnumerator SpawnSosig(Spawn spawn, BotInventory botInventory, SosigConfigTemplate template, List<FVRObject>[] outfit, int IFF, bool PMC, bool scav, bool USEC)
         {
             yield return IM.OD["SosigBody"].GetGameObjectAsync();
             GameObject sosigPrefab = IM.OD["SosigBody"].GetGameObject();
@@ -816,6 +1142,7 @@ namespace EFM
             AI AIScript = sosigObject.AddComponent<AI>();
             AIScript.botInventory = botInventory;
             AIScript.PMC = PMC;
+            AIScript.scav = scav;
             AIScript.USEC = USEC;
 
             // Equip sosig items
@@ -924,13 +1251,16 @@ namespace EFM
             }
 
             // Activate behavior
-            TODO1: // Use Sosig.CommandPathTo to make them go through points
             TODO0: // Make patch to make sosigs go to a random valid extraction once they finish their path or there is only enough time to reach extraction
+            PMCNavPoints.Shuffle();
+            sosig.CommandPathTo(PMCNavPoints, 0.5f, new Vector2(10, 60), 1, Sosig.SosigMoveSpeed.Walking, Sosig.PathLoopType.Loop, null, 1, 1, true, 10);
+            /*
             sosig.CurrentOrder = Sosig.SosigOrder.Wander;
             sosig.FallbackOrder = Sosig.SosigOrder.Wander;
             sosig.CommandGuardPoint(spawnPos, true);
             sosig.SetDominantGuardDirection(UnityEngine.Random.onUnitSphere);
             sosig.SetGuardInvestigateDistanceThreshold(25f);
+            */
         }
 
         public void EndRaid(RaidStatus status, string usedExtraction = null)

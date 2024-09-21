@@ -23,6 +23,9 @@ namespace EFM
         public Text level;
         public RectTransform expBarFill;
         public Text experienceText;
+        TODO: // Set these in asset
+        public Text[] partLabels;
+        TODO: // Use these as locations for healing item selection and then to show that the part is selected, make text green
         public Image[] partImages; // Head, Thorax, Stomach, LeftArm, RightArm, LeftLeg, RightLeg
         public GameObject[] effectIcons; // Contusion, Toxin, Painkiller, Tremor, TunnelVision, Dehydration, Encumbered, Overencumbered, Fatigue, OverweightFatigue
         public Text[] partHealth;  // Head, Thorax, Stomach, LeftArm, RightArm, LeftLeg, RightLeg

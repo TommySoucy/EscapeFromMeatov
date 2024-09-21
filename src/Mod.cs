@@ -109,7 +109,7 @@ namespace EFM
         public static int attachmentCheckNeeded;
         public static List<FVRInteractiveObject> physObjColResetList;
         public static int physObjColResetNeeded;
-        public static List<List<bool>> triggeredExplorationTriggers;
+        public static List<string> triggeredExperienceTriggers;
         public static GameObject instantiatedItem;
         public static bool skipNextInstantiation;
         public static Dictionary<FVRInteractiveObject, MeatovItem> meatovItemByInteractive = new Dictionary<FVRInteractiveObject, MeatovItem>();
@@ -629,6 +629,7 @@ namespace EFM
         public static Dictionary<string, JObject> lootContainersByName;
         public static Dictionary<string, AudioClip[]> itemSounds;
         public static Dictionary<string, string> availableRaidMaps = new Dictionary<string, string>();
+        public static Dictionary<string, bool> availableRaidMapDay = new Dictionary<string, bool>();
         public static Dictionary<string, List<string>> availableRaidMapAdditives = new Dictionary<string, List<string>>();
         public static Dictionary<string, List<string>> availableRaidMapPrefabs = new Dictionary<string, List<string>>();
         public static Dictionary<string, Dictionary<string, int>> raidMapEntryRequirements = new Dictionary<string, Dictionary<string, int>>();
@@ -4694,7 +4695,7 @@ namespace EFM
             return num3 + ((num4 != 0L) ? ("." + num4) : "") + "M";
         }
 
-        public static void AddRaidMap(string mapName, string bundleName)
+        public static void AddRaidMap(string mapName, string bundleName, bool day)
         {
             if (availableRaidMaps.TryGetValue(mapName, out string existingFullPath))
             {
@@ -4720,6 +4721,7 @@ namespace EFM
             {
                 // Add if found
                 availableRaidMaps.Add(mapName, fullPath);
+                availableRaidMapDay.Add(mapName, day);
             }
             else
             {

@@ -30,6 +30,7 @@ namespace EFM
         public static int setPlayerReadynessPacketID; // SetEFMInstancePlayerReadyness
         public static int setInstanceWaitingPacketID; // SetEFMInstanceWaitingPacketID
         public static int setRaidEnemyIFFPacketID; // SetEFMInstanceEnemyIFFPacketID
+        public static int setRaidActiveScavCountPacketID; // SetEFMInstanceActiveScavCountPacketID
         public static int setInstanceAIPMCSpawnedPacketID; // SetEFMInstanceAIPMCSpawnedPacketID
         public static int requestSpawnPacketID; // RequestEFMRaidSpawnPacketID
         public static int spawnReturnPacketID; // EFMRaidSpawnReturnPacketID
@@ -99,6 +100,13 @@ namespace EFM
                     setRaidEnemyIFFPacketID = Server.RegisterCustomPacketType("SetEFMInstanceEnemyIFFPacketID");
                 }
                 H3MP.Mod.customPacketHandlers[setRaidEnemyIFFPacketID] = SetRaidEnemyIFFServerHandler;
+
+                // Set active scav count
+                if (!H3MP.Mod.registeredCustomPacketIDs.TryGetValue("SetEFMInstanceActiveScavCountPacketID", out setRaidActiveScavCountPacketID))
+                {
+                    setRaidActiveScavCountPacketID = Server.RegisterCustomPacketType("SetEFMInstanceActiveScavCountPacketID");
+                }
+                H3MP.Mod.customPacketHandlers[setRaidActiveScavCountPacketID] = SetRaidActiveScavCountServerHandler;
 
                 // Set AI PMC Spawned
                 if (!H3MP.Mod.registeredCustomPacketIDs.TryGetValue("SetEFMInstanceAIPMCSpawnedPacketID", out setInstanceAIPMCSpawnedPacketID))
@@ -211,6 +219,18 @@ namespace EFM
                 {
                     ClientSend.RegisterCustomPacketType("SetEFMInstanceEnemyIFFPacketID");
                     H3MP.Mod.CustomPacketHandlerReceived += SetEnemyIFFPacketIDReceived;
+                }
+
+                // Set active scav count
+                if (H3MP.Mod.registeredCustomPacketIDs.TryGetValue("SetEFMInstanceActiveScavCountPacketID", out int customSetActiveScavCountPacketID))
+                {
+                    setRaidActiveScavCountPacketID = customSetActiveScavCountPacketID;
+                    H3MP.Mod.customPacketHandlers[setRaidActiveScavCountPacketID] = SetActiveScavCountClientHandler;
+                }
+                else
+                {
+                    ClientSend.RegisterCustomPacketType("SetEFMInstanceActiveScavCountPacketID");
+                    H3MP.Mod.CustomPacketHandlerReceived += SetActiveScavCountPacketIDReceived;
                 }
 
                 // Set AI PMC Spawned
@@ -438,8 +458,13 @@ namespace EFM
                     buffer.Add((byte)partMeatovItem.tarkovID.Length);
                     buffer.AddRange(Encoding.ASCII.GetBytes(partMeatovItem.tarkovID));
                     int data = 0;
+                    // Note that whether an item (physical or modul part like in this case) is insured, never changes in raid
+                    // So we don't need to sync the change of that state
                     data |= (partMeatovItem.insured ? 1 : 0);
                     data <<= 1;
+                    TODO: // Check if even want to write this, because whether an item is found in raid
+                    // should be independent from player to player. To another player, a player's item should not
+                    // be found in raid, like in tarkov
                     data |= (partMeatovItem.foundInRaid ? 1 : 0);
                     buffer.Add((byte)data);
                 }
@@ -525,6 +550,16 @@ namespace EFM
                 setRaidEnemyIFFPacketID = ID;
                 H3MP.Mod.customPacketHandlers[setRaidEnemyIFFPacketID] = SetEnemyIFFClientHandler;
                 H3MP.Mod.CustomPacketHandlerReceived -= SetEnemyIFFPacketIDReceived;
+            }
+        }
+
+        public static void SetActiveScavCountPacketIDReceived(string identifier, int ID)
+        {
+            if (identifier.Equals("SetEFMInstanceActiveScavCountPacketID"))
+            {
+                setRaidActiveScavCountPacketID = ID;
+                H3MP.Mod.customPacketHandlers[setRaidActiveScavCountPacketID] = SetActiveScavCountClientHandler;
+                H3MP.Mod.CustomPacketHandlerReceived -= SetActiveScavCountPacketIDReceived;
             }
         }
 
@@ -775,6 +810,26 @@ namespace EFM
                 {
                     newPacket.Write(instanceID);
                     newPacket.Write(enemyIFF);
+
+                    ServerSend.SendTCPDataToAll(clientID, newPacket, true);
+                }
+            }
+        }
+
+        public static void SetRaidActiveScavCountServerHandler(int clientID, Packet packet)
+        {
+            int instanceID = packet.ReadInt();
+            int activeScavCount = packet.ReadInt();
+
+            if(raidInstances.TryGetValue(instanceID, out RaidInstance raidInstance) && raidInstance.players[0] == clientID)
+            {
+                raidInstance.activeScavCount = activeScavCount;
+
+                // Send to all clients
+                using (Packet newPacket = new Packet(setRaidActiveScavCountPacketID))
+                {
+                    newPacket.Write(instanceID);
+                    newPacket.Write(activeScavCount);
 
                     ServerSend.SendTCPDataToAll(clientID, newPacket, true);
                 }
@@ -1191,6 +1246,17 @@ namespace EFM
             if (raidInstances.TryGetValue(instanceID, out RaidInstance raidInstance))
             {
                 raidInstance.enemyIFF = enemyIFF;
+            }
+        }
+
+        public static void SetActiveScavCountClientHandler(int clientID, Packet packet)
+        {
+            int instanceID = packet.ReadInt();
+            int activeScavCount = packet.ReadInt();
+
+            if (raidInstances.TryGetValue(instanceID, out RaidInstance raidInstance))
+            {
+                raidInstance.activeScavCount = activeScavCount;
             }
         }
 

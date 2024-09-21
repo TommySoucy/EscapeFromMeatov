@@ -83,7 +83,7 @@ namespace EFM
                 waitingTaskConditions.Remove(ID);
             }
 
-            TODO: // Make sure to make the UI subscribe to the task state changed and condition fulfillment changed events so it can set its elements in consequence
+            TODO e: // Make sure to make the UI subscribe to the task state changed and condition fulfillment changed events so it can set its elements in consequence
             startConditions = new List<Condition>();
             SetupConditions(startConditions, TaskState.Available, questData.Value["conditions"]["AvailableForStart"] as JArray);
             finishConditions = new List<Condition>();

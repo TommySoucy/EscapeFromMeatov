@@ -178,7 +178,33 @@ namespace EFM
         public ItemView marketInsureItemView;
         [NonSerialized]
         public RagFairSellItemView ragFairSellItemView;
-        //public LeaveItemProcessor leaveItemProcessor;
+        [NonSerialized]
+        public Hand plantingHand;
+        [NonSerialized]
+        public float plantingTimer;
+        [NonSerialized]
+        public bool validPlantingPress;
+        private ItemPlantZone _currentPlantZone;
+        public ItemPlantZone currentPlantZone
+        {
+            get
+            {
+                return _currentPlantZone;
+            }
+
+            set
+            {
+                if(value == null)
+                {
+                    validPlantingPress = false;
+                    plantingHand.planting = false;
+                    plantingHand = null;
+                    Mod.consumeUI.gameObject.SetActive(false);
+                    plantingTimer = 0;
+                }
+                _currentPlantZone = value;
+            }
+        }
 
         // Equipment
         [Header("Equipment")]
@@ -336,12 +362,6 @@ namespace EFM
         private float consumableTimer;
         [NonSerialized]
         private bool validConsumePress;
-        [NonSerialized]
-        private bool validLeaveItemPress;
-        [NonSerialized]
-        private float leaveItemTime = -1;
-        [NonSerialized]
-        private float leavingTimer;
         [NonSerialized]
         public int targettedPart = -1; // TODO: Implement
 		private static int breakPartExperience = -1;
@@ -1179,99 +1199,126 @@ namespace EFM
 			// If usage button started being pressed this frame
 			if (usageButtonDown)
 			{
-                switch (itemType)
+                if(currentPlantZone == null)
                 {
-                    case ItemType.ArmoredRig:
-                    case ItemType.Rig:
-                    case ItemType.Backpack:
-                    case ItemType.BodyArmor:
-                    case ItemType.Container:
-                    case ItemType.Pouch:
-                        ToggleMode(true, hand.IsThisTheRightHand);
-                        break;
-                    case ItemType.Money:
-                        if (splittingStack)
-                        {
-                            // End splitting
-                            if (splitAmount != stack && splitAmount != 0)
+                    switch (itemType)
+                    {
+                        case ItemType.ArmoredRig:
+                        case ItemType.Rig:
+                        case ItemType.Backpack:
+                        case ItemType.BodyArmor:
+                        case ItemType.Container:
+                        case ItemType.Pouch:
+                            ToggleMode(true, hand.IsThisTheRightHand);
+                            break;
+                        case ItemType.Money:
+                            if (splittingStack)
                             {
-                                stack -= splitAmount;
+                                // End splitting
+                                if (splitAmount != stack && splitAmount != 0)
+                                {
+                                    stack -= splitAmount;
 
-                                MeatovItem splitItem = Instantiate(Mod.GetItemPrefab(index), hand.transform.position + hand.transform.forward * 0.2f, Quaternion.identity).GetComponent<MeatovItem>();
-                                splitItem.stack = splitAmount;
-                                splitItem.UpdateInventories();
+                                    MeatovItem splitItem = Instantiate(Mod.GetItemPrefab(index), hand.transform.position + hand.transform.forward * 0.2f, Quaternion.identity).GetComponent<MeatovItem>();
+                                    splitItem.stack = splitAmount;
+                                    splitItem.UpdateInventories();
+                                }
+                                // else the chosen amount is 0 or max, meaning cancel the split
+                                CancelSplit();
                             }
-                            // else the chosen amount is 0 or max, meaning cancel the split
-                            CancelSplit();
-                        }
-                        else
-                        {
-                            // Cancel market amount choosing if active
-                            if(HideoutController.instance != null)
+                            else
                             {
-                                HideoutController.instance.marketManager.choosingBuyAmount = false;
-                                HideoutController.instance.marketManager.choosingRagfairBuyAmount = false;
-                                HideoutController.instance.marketManager.startedChoosingThisFrame = false;
+                                // Cancel market amount choosing if active
+                                if (HideoutController.instance != null)
+                                {
+                                    HideoutController.instance.marketManager.choosingBuyAmount = false;
+                                    HideoutController.instance.marketManager.choosingRagfairBuyAmount = false;
+                                    HideoutController.instance.marketManager.startedChoosingThisFrame = false;
+                                }
+
+                                // Start splitting
+                                Mod.stackSplitUI.gameObject.SetActive(true);
+                                Mod.stackSplitUI.transform.position = hand.transform.position + hand.transform.forward * 0.2f;
+                                Mod.stackSplitUI.transform.rotation = Quaternion.Euler(0, hand.transform.eulerAngles.y, 0);
+                                stackSplitStartPosition = hand.transform.position;
+                                stackSplitRightVector = hand.transform.right;
+                                stackSplitRightVector.y = 0;
+
+                                splittingStack = true;
+                                Mod.amountChoiceUIUp = true;
+                                Mod.splittingItem = this;
                             }
-
-                            // Start splitting
-                            Mod.stackSplitUI.gameObject.SetActive(true);
-                            Mod.stackSplitUI.transform.position = hand.transform.position + hand.transform.forward * 0.2f;
-                            Mod.stackSplitUI.transform.rotation = Quaternion.Euler(0, hand.transform.eulerAngles.y, 0);
-                            stackSplitStartPosition = hand.transform.position;
-                            stackSplitRightVector = hand.transform.right;
-                            stackSplitRightVector.y = 0;
-
-                            splittingStack = true;
-                            Mod.amountChoiceUIUp = true;
-                            Mod.splittingItem = this;
-                        }
-                        break;
-                    default:
-                        break;
+                            break;
+                        default:
+                            break;
+                    }
                 }
+                // else // We have current plant zone, and we want to use usage button for that instead
             }
 
             // If usage button is being pressed this frame
             if (usageButtonPressed)
-			{
-                switch (itemType)
+            {
+                if (currentPlantZone == null)
                 {
-                    case ItemType.Consumable:
-                        if (!EFMHand.otherHand.consuming)
-                        {
-                            EFMHand.consuming = true;
-
-                            // Increment timer
-                            consumableTimer += Time.deltaTime;
-
-                            float use = Mathf.Clamp01(consumableTimer / useTime);
-                            Mod.consumeUI.text.text = string.Format("{0:0.#}/{1:0.#}", amountRate <= 0 ? (use * amount) : (use * amountRate), amountRate <= 0 ? amount : amountRate);
-                            if (amountRate == 0)
+                    switch (itemType)
+                    {
+                        case ItemType.Consumable:
+                            if (!EFMHand.otherHand.consuming)
                             {
-                                // This consumable is discrete units and can only use one at a time, so set text to red until we have reached useTime, then set it to green
-                                if (consumableTimer >= useTime)
+                                EFMHand.consuming = true;
+
+                                // Increment timer
+                                consumableTimer += Time.deltaTime;
+
+                                float use = Mathf.Clamp01(consumableTimer / useTime);
+                                Mod.consumeUI.text.text = string.Format("{0:0.#}/{1:0.#}", amountRate <= 0 ? (use * amount) : (use * amountRate), amountRate <= 0 ? amount : amountRate);
+                                if (amountRate == 0)
                                 {
-                                    Mod.consumeUIText.color = Color.green;
+                                    // This consumable is discrete units and can only use one at a time, so set text to red until we have reached useTime, then set it to green
+                                    if (consumableTimer >= useTime)
+                                    {
+                                        Mod.consumeUIText.color = Color.green;
+                                    }
+                                    else
+                                    {
+                                        Mod.consumeUIText.color = Color.red;
+                                    }
                                 }
                                 else
                                 {
-                                    Mod.consumeUIText.color = Color.red;
+                                    Mod.consumeUIText.color = Color.white;
                                 }
+                                Mod.consumeUI.transform.parent = hand.transform;
+                                Mod.consumeUI.transform.localPosition = new Vector3(hand.IsThisTheRightHand ? -0.15f : 0.15f, 0, 0);
+                                Mod.consumeUI.transform.localRotation = Quaternion.Euler(25, 0, 0);
+                                Mod.consumeUI.gameObject.SetActive(true);
+                                validConsumePress = true;
                             }
-                            else
-                            {
-                                Mod.consumeUIText.color = Color.white;
-                            }
-                            Mod.consumeUI.transform.parent = hand.transform;
-                            Mod.consumeUI.transform.localPosition = new Vector3(hand.IsThisTheRightHand ? -0.15f : 0.15f, 0, 0);
-                            Mod.consumeUI.transform.localRotation = Quaternion.Euler(25, 0, 0);
-                            Mod.consumeUI.gameObject.SetActive(true);
-                            validConsumePress = true;
-                        }
-                        break;
-                    default:
-                        break;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                else // We have current plant zone, and we want to use usage button for that instead
+                {
+                    if (!EFMHand.otherHand.planting)
+                    {
+                        EFMHand.planting = true;
+                        plantingHand = EFMHand;
+
+                        // Increment timer
+                        plantingTimer += Time.deltaTime;
+
+                        float plant = Mathf.Clamp01(plantingTimer / currentPlantZone.plantTime);
+                        Mod.consumeUI.text.text = string.Format("{0:0.#}/{1:0.#}", plantingTimer, currentPlantZone.plantTime);
+                        Mod.consumeUIText.color = Color.white;
+                        Mod.consumeUI.transform.parent = hand.transform;
+                        Mod.consumeUI.transform.localPosition = new Vector3(hand.IsThisTheRightHand ? -0.15f : 0.15f, 0, 0);
+                        Mod.consumeUI.transform.localRotation = Quaternion.Euler(25, 0, 0);
+                        Mod.consumeUI.gameObject.SetActive(true);
+                        validPlantingPress = true;
+                    }
                 }
             }
 
@@ -1283,7 +1330,7 @@ namespace EFM
 				{
 					validConsumePress = false;
 					EFMHand.consuming = false;
-					Mod.consumeUI.gameObject.SetActive(false);
+                    Mod.consumeUI.gameObject.SetActive(false);
 					Mod.LogInfo("Valid consume released");
 
 					if (amountRate == -1) // This consumable is an amount that can be consumed partially
@@ -1400,8 +1447,32 @@ namespace EFM
 						Destroy();
 					}
 				}
-			}
-		}
+                else if (validPlantingPress)
+                {
+                    validPlantingPress = false;
+                    EFMHand.planting = false;
+                    plantingHand = null;
+                    Mod.consumeUI.gameObject.SetActive(false);
+                    plantingTimer = 0;
+                }
+            }
+
+            if (validPlantingPress)
+            {
+                if(plantingTimer >= currentPlantZone.plantTime)
+                {
+                    validPlantingPress = false;
+                    EFMHand.planting = false;
+                    plantingHand = null;
+                    Mod.consumeUI.gameObject.SetActive(false);
+                    plantingTimer = 0;
+
+                    itemData.OnItemLeftInvoke(currentPlantZone.locationID);
+
+                    Destroy();
+                }
+            }
+        }
 
 		public void CancelSplit()
         {

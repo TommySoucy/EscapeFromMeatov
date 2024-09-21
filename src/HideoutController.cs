@@ -1646,6 +1646,9 @@ namespace EFM
                 {
                     Mod.UnsecureItems();
                 }
+
+                // Setup post raid UI (XP, then medical)
+                TODO:
             }
             Mod.LogInfo("\t0");
 
@@ -1727,27 +1730,13 @@ namespace EFM
             // Load triggered exploration triggers if not loading in from raid
             if (!Mod.justFinishedRaid)
             {
-                if (Mod.triggeredExplorationTriggers == null)
-                {
-                    Mod.triggeredExplorationTriggers = new List<List<bool>>();
-                }
-                else
-                {
-                    Mod.triggeredExplorationTriggers.Clear();
-                }
                 if (loadedData["triggeredExplorationTriggers"] != null)
                 {
-                    for (int i = 0; i < 12; ++i)
-                    {
-                        Mod.triggeredExplorationTriggers.Add(loadedData["triggeredExplorationTriggers"][i].ToObject<List<bool>>());
-                    }
+                    Mod.triggeredExperienceTriggers = loadedData["triggeredExplorationTriggers"].ToObject<List<string>>();
                 }
                 else
                 {
-                    for (int i = 0; i < 12; ++i)
-                    {
-                        Mod.triggeredExplorationTriggers.Add(new List<bool>());
-                    }
+                    Mod.triggeredExperienceTriggers = new List<string>();
                 }
             }
             Mod.LogInfo("\t0");
@@ -3639,6 +3628,8 @@ namespace EFM
             }
         }
 
+        TODO: // When populating map list, we now need to check which time we've selected and check if map available during that time
+        TODO: // When selecting time, we need to re populate map lists to match
         public void PopulateMapList()
         {
             while (mapListParent.childCount > 1)
@@ -4556,12 +4547,7 @@ namespace EFM
             //}
 
             // Save triggered exploration triggers
-            JArray savedExperiencetriggers = new JArray();
-            loadedData["triggeredExplorationTriggers"] = savedExperiencetriggers;
-            for (int i = 0; i < 12; ++i)
-            {
-                savedExperiencetriggers.Add(JArray.FromObject(Mod.triggeredExplorationTriggers[i]));
-            }
+            loadedData["triggeredExplorationTriggers"] = JArray.FromObject(Mod.triggeredExperienceTriggers);
 
             loadedData["whishlist"] = JArray.FromObject(Mod.wishList);
 

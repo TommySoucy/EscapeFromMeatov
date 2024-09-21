@@ -13,7 +13,7 @@ namespace EFM
         public Collider volumeCollider;
         public FVRViveHand fvrHand;
         public bool consuming;
-        public bool leaving;
+        public bool planting;
 
         // Held item
         public bool hasScript;
