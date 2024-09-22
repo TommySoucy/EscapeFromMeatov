@@ -8,7 +8,6 @@ namespace EFM
 {
     public class ItemPlantZone : MonoBehaviour
     {
-        TODO: // Add to raid dev
         public string locationID;
         public string itemID;
         public float plantTime;

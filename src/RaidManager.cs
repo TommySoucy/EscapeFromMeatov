@@ -67,6 +67,7 @@ namespace EFM
             raidTimeLeft = raidTime;
             Mod.raidTime = 0;
             scavSpawnTimer = scavSpawnInterval;
+            Mod.raidKills = new List<KillData>();
 
             InitTime();
 
@@ -820,7 +821,7 @@ namespace EFM
                 // Generate outfit from inventory
                 List<FVRObject>[] botOutfit = botInventory.GetOutfit(true);
 
-                AnvilManager.Run(SpawnSosig(spawn, botInventory, sosigTemplate, botOutfit, enemyIFF++, 500, true, false, USEC));
+                AnvilManager.Run(SpawnSosig(spawn, botInventory, sosigTemplate, botOutfit, enemyIFF++, 300, true, false, USEC));
 
                 // Loop IFF once we've reached max
                 if(enemyIFF > 31)
@@ -907,7 +908,7 @@ namespace EFM
                 // Generate outfit from inventory
                 List<FVRObject>[] botOutfit = botInventory.GetOutfit(true);
 
-                AnvilManager.Run(SpawnSosig(spawn, botInventory, sosigTemplate, botOutfit, 1, 200, false, true, false));
+                AnvilManager.Run(SpawnSosig(spawn, botInventory, sosigTemplate, botOutfit, 1, 100, false, true, false));
 
                 ++activeScavCount;
 
@@ -1002,7 +1003,7 @@ namespace EFM
                         // Generate outfit from inventory
                         List<FVRObject>[] botOutfit = botInventory.GetOutfit(true);
 
-                        AnvilManager.Run(SpawnSosig(selectedSpawn, botInventory, sosigTemplate, botOutfit, enemyIFF, 600, false, false, false));
+                        AnvilManager.Run(SpawnSosig(selectedSpawn, botInventory, sosigTemplate, botOutfit, enemyIFF, 300, false, false, false));
 
                         // Spawn squadmembers if necessary
                         if(selectedSpawn.squadMembers != null && selectedSpawn.squadMembers.Count > 0)
@@ -1036,7 +1037,7 @@ namespace EFM
                                         // Generate outfit from inventory
                                         List<FVRObject>[] squadMemberBotOutfit = squadMemberBotInventory.GetOutfit(true);
 
-                                        AnvilManager.Run(SpawnSosig(selectedSpawn, squadMemberBotInventory, squadMemberSosigTemplate, squadMemberBotOutfit, enemyIFF, 500, false, false, false));
+                                        AnvilManager.Run(SpawnSosig(selectedSpawn, squadMemberBotInventory, squadMemberSosigTemplate, squadMemberBotOutfit, enemyIFF, 200, false, false, false));
                                     }
                                     else
                                     {
@@ -1079,7 +1080,7 @@ namespace EFM
                                         // Generate outfit from inventory
                                         List<FVRObject>[] squadMemberBotOutfit = squadMemberBotInventory.GetOutfit(true);
 
-                                        AnvilManager.Run(SpawnSosig(selectedSpawn, squadMemberBotInventory, squadMemberSosigTemplate, squadMemberBotOutfit, enemyIFF, 500, false, false, false));
+                                        AnvilManager.Run(SpawnSosig(selectedSpawn, squadMemberBotInventory, squadMemberSosigTemplate, squadMemberBotOutfit, enemyIFF, 200, false, false, false));
                                     }
                                     else
                                     {

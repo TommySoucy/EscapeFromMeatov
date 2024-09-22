@@ -81,6 +81,7 @@ namespace EFM
         public static int healingExp = 0;
         public static int explorationExp = 0;
         public static int raidExp = 0;
+        public static List<KillData> raidKills;
         public static float raidTime = 0;
         public static bool loadingToMeatovScene;
         public static bool inMeatovScene;
@@ -4695,7 +4696,7 @@ namespace EFM
             return num3 + ((num4 != 0L) ? ("." + num4) : "") + "M";
         }
 
-        public static void AddRaidMap(string mapName, string bundleName, bool day)
+        public static void AddRaidMap(string mapName, string bundleName, string day)
         {
             if (availableRaidMaps.TryGetValue(mapName, out string existingFullPath))
             {
@@ -4721,7 +4722,7 @@ namespace EFM
             {
                 // Add if found
                 availableRaidMaps.Add(mapName, fullPath);
-                availableRaidMapDay.Add(mapName, day);
+                availableRaidMapDay.Add(mapName, day.Equals("1"));
             }
             else
             {

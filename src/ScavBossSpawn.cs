@@ -8,7 +8,6 @@ namespace EFM
 {
     public class ScavBossSpawn : Spawn
     {
-        TODO: // set in scene
         // All spawns that should be considered the same as this one
         // These spawns will not be used to spawn a boss if this one was chosen
         public List<ScavBossSpawn> spawnGroup;

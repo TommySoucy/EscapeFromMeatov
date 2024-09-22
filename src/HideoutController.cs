@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.UI;
 using Valve.Newtonsoft.Json.Linq;
 
@@ -46,12 +47,6 @@ namespace EFM
         public Text loadingChosenMap;
         public Text loadingChosenTime;
         public AudioSource clickAudio;
-        public Transform medicalScreen;
-        public Transform medicalScreenPartImagesParent;
-        public Transform[] medicalScreenPartImages;
-        public Text[] medicalScreenPartHealthTexts;
-        public Text medicalScreenTotalHealthText;
-        public Text totalTreatmentPriceText;
         public Text scavTimerText;
         public Collider scavButtonCollider;
         public Text scavButtonText;
@@ -63,6 +58,34 @@ namespace EFM
         public GameObject mapListPreviousButton;
         public GameObject mapListEntryPrefab;
         public int mapListPage;
+        public Image raidReportRankIcon;
+        public Text raidReportLevel;
+        public Text raidReportExperience;
+        public RectTransform raidReportBarFill;
+        public GameObject raidReportKillsParent;
+        public GameObject raidReportKillEntry;
+        public GameObject raidReportExplorationParent;
+        public GameObject raidReportHealingParent;
+        public GameObject raidReportLootingParent;
+        public HoverScrollProcessor raidReportHoverScrollProcessor;
+        public Text raidReportStatus;
+        public Color[] raidReportTotalBackgrounColors; // Success, Run Through, KIA, MIA
+        public Image raidReportTotalBackground;
+        public Text raidReportTotalExp;
+        public Text[] treatmentPartHealths;
+        public Image[] treatmentPartImages;
+        public Text treatmentTotalHeatlh;
+        public Text treatmentInventoryMoney;
+        public Text treatmentTotalCost;
+        public Transform treatmentListParent;
+        public GameObject treatmentPartEntry;
+        public GameObject treatmentPartSubEntry;
+        public Dictionary<int, GameObject> treatmentParentsByIndex; // <part index, treatment object parent>
+        public Dictionary<int, Dictionary<Effect.EffectType, GameObject>> treatmentObjectsByEffectTypeByParent; // <part index, <effect type, treatment object>>
+        public Dictionary<GameObject, Dictionary<GameObject, int>> treatmentObjectsByParent; // <parent, <object, cost>>
+        public Dictionary<GameObject, GameObject> treatmentParentsByObject; // <object, parent>
+        public Dictionary<GameObject, int> treatmentCosts; // <object, cost>
+        public Dictionary<GameObject, bool> treatmentSelected; // <object, selected>
         // H3MP
         public GameObject instancesPage;
         public Transform instancesParent;
@@ -179,7 +202,7 @@ namespace EFM
         public Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>> ammoBoxesByRoundClassByRoundType;
         private Dictionary<int, int[]> fullPartConditions;
         private Dictionary<int, GameObject> medicalPartElements;
-        private int totalMedicalTreatmentPrice;
+        public int totalTreatmentCost;
         public MarketManager marketManager;
         public static bool inMarket; // whether we are currently in market mode or in area UI mode
         public GCManager GCManager;
@@ -295,37 +318,7 @@ namespace EFM
             ProcessData();
 
             Mod.LogInfo("\t0");
-            InitUI();
-
-            Mod.LogInfo("\t0");
             InitTime();
-
-            Mod.LogInfo("\t0");
-            if (Mod.justFinishedRaid && Mod.charChoicePMC)
-            {
-                FinishRaid(Mod.raidState); // This will save on autosave
-
-                // Set any parts health to 1 if they are at 0
-                for (int i = 0; i < 7; ++i)
-                {
-                    if (Mod.GetHealth(i) == 0)
-                    {
-                        Mod.SetHealth(i, 1);
-                    }
-                }
-
-                // Add movement skill exp
-                Mod.AddSkillExp(Mod.distanceTravelledSprinting * Skill.sprintAction, 0);
-                if (Mod.weight <= Mod.currentWeightLimit)
-                {
-                    Mod.AddSkillExp(Mod.distanceTravelledSprinting * UnityEngine.Random.Range(Skill.sprintActionMin, Skill.sprintActionMax), 1);
-                }
-                Mod.AddSkillExp(Mod.distanceTravelledWalking * Skill.movementAction, 0);
-                if (Mod.weight <= Mod.currentWeightLimit)
-                {
-                    Mod.AddSkillExp(Mod.distanceTravelledWalking * UnityEngine.Random.Range(Skill.movementActionMin, Skill.movementActionMax), 1);
-                }
-            }
             Mod.LogInfo("\t0");
 
             // Give any existing rewards to player now
@@ -337,12 +330,6 @@ namespace EFM
             //    }
             //    Mod.rewardsToGive = null;
             //}
-
-            if (Mod.justFinishedRaid)
-            {
-                // Remove raid rates
-                // TODO: // Will need to have RaidController setup
-            }
 
             // Add hideout rates
             for(int i=0; i<Mod.GetHealthCount(); ++i)
@@ -371,9 +358,20 @@ namespace EFM
                 }
             }
 
+            if (Mod.justFinishedRaid)
+            {
+                FinishRaid(Mod.raidState); // This will save on autosave
+            }
+
             Mod.justFinishedRaid = false;
             init = true;
             Mod.LogInfo("\t0");
+
+            Mod.saveSlotIndex = 5;
+            Save();
+
+            Mod.LogInfo("\t0");
+            InitUI();
         }
 
         public override void Update()
@@ -1631,7 +1629,7 @@ namespace EFM
                 // This happens before call to ProcessData, on awake of hideoutcontroller
                 LoadPlayerItems();
             }
-            else if (Mod.justFinishedRaid)
+            else if (Mod.justFinishedRaid) // Just finished raid as PMC
             {
                 Mod.LogInfo("\t\tFinished raid, not loading player from save");
                 for (int i = 0; i < 64; ++i)
@@ -1647,8 +1645,26 @@ namespace EFM
                     Mod.UnsecureItems();
                 }
 
-                // Setup post raid UI (XP, then medical)
-                TODO:
+                // Set any parts health to 1 if they are at 0
+                for (int i = 0; i < 7; ++i)
+                {
+                    if (Mod.GetHealth(i) == 0)
+                    {
+                        Mod.SetHealth(i, 1);
+                    }
+                }
+
+                // Add movement skill exp
+                Mod.AddSkillExp(Mod.distanceTravelledSprinting * Skill.sprintAction, 0);
+                if (Mod.weight <= Mod.currentWeightLimit)
+                {
+                    Mod.AddSkillExp(Mod.distanceTravelledSprinting * UnityEngine.Random.Range(Skill.sprintActionMin, Skill.sprintActionMax), 1);
+                }
+                Mod.AddSkillExp(Mod.distanceTravelledWalking * Skill.movementAction, 0);
+                if (Mod.weight <= Mod.currentWeightLimit)
+                {
+                    Mod.AddSkillExp(Mod.distanceTravelledWalking * UnityEngine.Random.Range(Skill.movementActionMin, Skill.movementActionMax), 1);
+                }
             }
             Mod.LogInfo("\t0");
 
@@ -2648,458 +2664,292 @@ namespace EFM
         {
             UpdateLoadButtonList();
 
-            if (Mod.justFinishedRaid)
+            if (Mod.justFinishedRaid && Mod.charChoicePMC)
             {
-                if (Mod.charChoicePMC)
+                // Raid Report
+                SetPage(8);
+                Mod.OnPlayerLevelChanged += OnPlayerLevelChanged;
+                Mod.OnPlayerExperienceChanged += OnPlayerExperienceChanged;
+                OnPlayerLevelChanged();
+                OnPlayerExperienceChanged();
+                if (Mod.raidKills != null && Mod.raidKills.Count > 0)
                 {
-                    // Spawn with less health and energy/hydration if killed or MIA
-                    int raidResultExp = 0; // TODO: Add bonus for how long we survived
-                    if (Mod.raidState == FinishRaidState.KIA || Mod.raidState == FinishRaidState.MIA)
+                    raidReportKillsParent.SetActive(true);
+                    for (int i = 0; i < Mod.raidKills.Count; ++i)
                     {
-                        for (int i = 0; i < Mod.GetHealthCount(); ++i)
+                        GameObject killEntryObject = Instantiate(raidReportKillEntry, raidReportKillsParent.transform);
+                        killEntryObject.SetActive(true);
+                        if (Mod.raidKills[i].enemyTarget == ConditionCounter.EnemyTarget.Savage)
                         {
-                            Mod.SetHealth(i, 0.3f * Mod.GetCurrentMaxHealth(i));
+                            killEntryObject.transform.GetChild(0).GetComponent<Text>().text = "Scav";
+                            killEntryObject.transform.GetChild(1).GetComponent<Text>().text = "";
                         }
-
-                        Mod.hydration = 0.3f * Mod.currentMaxHydration;
-                        Mod.energy = 0.3f * Mod.currentMaxEnergy;
-
-                        // Remove all effects
-                        Effect.RemoveAllEffects();
-                    }
-                    else if (Mod.raidState == FinishRaidState.Survived)
-                    {
-                        raidResultExp = 600 + (int)(Mod.raidTime / 60 * 10); // Survive exp + bonus of 10 exp / min
-                        Mod.AddExperience(600);
-                    }
-
-                    Mod.LogInfo("Base init: Just finished raid");
-                    Transform raidReportScreen = transform.GetChild(0).GetChild(0).GetChild(12);
-                    medicalScreen = transform.GetChild(0).GetChild(0).GetChild(13);
-                    float raidReportListHeight = 141; // Default height not including None kill
-                    float medicalListHeight = 26;
-
-                    // Activate raid report, deactivate hideout menu
-                    transform.GetChild(0).GetChild(0).GetChild(0).gameObject.SetActive(false);
-                    transform.GetChild(0).GetChild(0).GetChild(12).gameObject.SetActive(true);
-
-                    // Set raid result in title
-                    string raidResultString = Mod.raidState == FinishRaidState.RunThrough ? "Run Through" : Mod.raidState.ToString();
-                    raidReportScreen.GetChild(0).GetComponent<Text>().text = "Raid Report: " + raidResultString;
-
-                    // Set experience elements
-                    raidReportScreen.GetChild(2).GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.playerLevelIcons[Mod.level / 5];
-                    raidReportScreen.GetChild(2).GetChild(0).GetChild(1).GetComponent<Text>().text = Mod.level.ToString();
-                    int expForNextLevel = 0;
-                    for (int i = 0; i < Mod.level; ++i)
-                    {
-                        expForNextLevel += Mod.XPPerLevel[Mod.level];
-                    }
-                    raidReportScreen.GetChild(2).GetChild(1).GetChild(1).GetComponent<Image>().rectTransform.sizeDelta = new Vector2(450 * (Mod.experience / (float)expForNextLevel), 12.8f);
-                    raidReportScreen.GetChild(2).GetChild(1).GetChild(2).GetComponent<Text>().text = Mod.experience.ToString() + "/" + expForNextLevel;
-
-                    Transform listContent = raidReportScreen.GetChild(3).GetChild(0).GetChild(0);
-                    int expTotal = 0;
-
-                    Mod.LogInfo("\tSet raid report xp");
-                    // Fill kill list
-                    int killCount = 0;
-                    if (Mod.killList != null && Mod.killList.Count > 0)
-                    {
-                        Mod.LogInfo("\tHave kills, adding to list");
-                        // Disable none
-                        listContent.GetChild(0).GetChild(1).gameObject.SetActive(false);
-
-                        // Add each kill
-                        foreach (KeyValuePair<string, int> kill in Mod.killList)
+                        else // PMC
                         {
-                            GameObject killElement = Instantiate(listContent.GetChild(0).GetChild(2).gameObject, listContent.GetChild(0));
-                            killElement.SetActive(true);
-                            killElement.transform.GetChild(0).GetComponent<Text>().text = kill.Key;
-                            killElement.transform.GetChild(1).GetComponent<Text>().text = kill.Value.ToString() + " exp";
-
-                            expTotal += kill.Value;
-
-                            raidReportListHeight += 21;
-                            ++killCount;
+                            killEntryObject.transform.GetChild(0).GetComponent<Text>().text = "lvl. " + Mod.raidKills[i].level;
+                            killEntryObject.transform.GetChild(1).GetComponent<Text>().text = Mod.raidKills[i].name;
                         }
-                    }
-                    else
-                    {
-                        Mod.LogInfo("\tNo kills");
-                        raidReportListHeight += 21; // Add none kill
-                    }
-
-                    // Set other
-                    listContent.GetChild(1).GetChild(1).GetChild(1).GetComponent<Text>().text = Mod.lootingExp.ToString() + " exp";
-                    expTotal += Mod.lootingExp;
-                    listContent.GetChild(1).GetChild(2).GetChild(1).GetComponent<Text>().text = Mod.healingExp.ToString() + " exp";
-                    expTotal += Mod.healingExp;
-                    listContent.GetChild(1).GetChild(3).GetChild(1).GetComponent<Text>().text = Mod.explorationExp.ToString() + " exp";
-                    expTotal += Mod.explorationExp;
-                    listContent.GetChild(1).GetChild(4).GetChild(0).GetComponent<Text>().text = "Raid Result (" + raidResultString + ")";
-                    listContent.GetChild(1).GetChild(4).GetChild(1).GetComponent<Text>().text = raidResultExp.ToString() + " exp";
-                    expTotal += raidResultExp;
-
-                    Mod.LogInfo("\tSet other xp");
-                    // Set total
-                    listContent.GetChild(2).GetChild(0).GetChild(1).GetComponent<Text>().text = expTotal.ToString() + " exp";
-
-                    Mod.LogInfo("\tSetting hoverscrolls, killcount: " + killCount);
-                    // Set hover scrolls
-                    if (killCount >= 8)
-                    {
-                        Mod.LogInfo("\t\tkillcount >= 8, activating kill list hover scrolls");
-                        HoverScroll raidReportListDownHoverScroll = raidReportScreen.GetChild(3).GetChild(2).gameObject.AddComponent<HoverScroll>();
-                        HoverScroll raidReportListUpHoverScroll = raidReportScreen.GetChild(3).GetChild(3).gameObject.AddComponent<HoverScroll>();
-                        raidReportListDownHoverScroll.MaxPointingRange = 30;
-                        //raidReportListDownHoverScroll.hoverSound = hoverAudio;
-                        raidReportListDownHoverScroll.scrollbar = raidReportScreen.GetChild(3).GetChild(1).GetComponent<Scrollbar>();
-                        raidReportListDownHoverScroll.other = raidReportListUpHoverScroll;
-                        raidReportListDownHoverScroll.up = false;
-                        raidReportListUpHoverScroll.MaxPointingRange = 30;
-                        //raidReportListUpHoverScroll.hoverSound = hoverAudio;
-                        raidReportListUpHoverScroll.scrollbar = raidReportScreen.GetChild(3).GetChild(1).GetComponent<Scrollbar>();
-                        raidReportListUpHoverScroll.other = raidReportListDownHoverScroll;
-                        raidReportListUpHoverScroll.up = true;
-
-                        raidReportListUpHoverScroll.rate = 309 / (raidReportListHeight - 309);
-                        raidReportListDownHoverScroll.rate = 309 / (raidReportListHeight - 309);
-                        raidReportListDownHoverScroll.gameObject.SetActive(true);
-                    }
-                    Mod.LogInfo("\tSet hoverscrolls, setting medical");
-
-
-                    //// Set medical body
-                    //Dictionary<int, bool[]> partConditions = new Dictionary<int, bool[]>();
-                    //foreach (Effect effect in Effect.effects)
-                    //{
-                    //    if (effect.partIndex > -1)
-                    //    {
-                    //        if (effect.effectType == Effect.EffectType.LightBleeding)
-                    //        {
-                    //            if (partConditions.ContainsKey(effect.partIndex))
-                    //            {
-                    //                partConditions[effect.partIndex][0] = true;
-                    //            }
-                    //            else
-                    //            {
-                    //                partConditions.Add(effect.partIndex, new bool[] { true, false, false });
-                    //            }
-                    //        }
-                    //        else if (effect.effectType == Effect.EffectType.HeavyBleeding)
-                    //        {
-                    //            if (partConditions.ContainsKey(effect.partIndex))
-                    //            {
-                    //                partConditions[effect.partIndex][1] = true;
-                    //            }
-                    //            else
-                    //            {
-                    //                partConditions.Add(effect.partIndex, new bool[] { false, true, false });
-                    //            }
-                    //        }
-                    //        else if (effect.effectType == Effect.EffectType.Fracture)
-                    //        {
-                    //            if (partConditions.ContainsKey(effect.partIndex))
-                    //            {
-                    //                partConditions[effect.partIndex][2] = true;
-                    //            }
-                    //            else
-                    //            {
-                    //                partConditions.Add(effect.partIndex, new bool[] { false, false, true });
-                    //            }
-                    //        }
-                    //    }
-                    //}
-                    Mod.LogInfo("\tSet body");
-
-                    // Process parts
-                    medicalScreenPartImagesParent = medicalScreen.GetChild(4).GetChild(0);
-                    Transform partInfoParent = medicalScreen.GetChild(4).GetChild(1);
-                    Transform medicalListContent = medicalScreen.GetChild(3).GetChild(0).GetChild(0);
-                    medicalScreenPartImages = new Transform[7];
-                    medicalScreenPartHealthTexts = new Text[7];
-                    totalMedicalTreatmentPrice = 0;
-                    fullPartConditions = new Dictionary<int, int[]>();
-                    medicalPartElements = new Dictionary<int, GameObject>();
-                    int breakPartPrice = (int)Mod.globalDB["config"]["Health"]["Effects"]["BreakPart"]["RemovePrice"];
-                    int fracturePrice = (int)Mod.globalDB["config"]["Health"]["Effects"]["Fracture"]["RemovePrice"];
-                    int heavyBleedingPrice = (int)Mod.globalDB["config"]["Health"]["Effects"]["HeavyBleeding"]["RemovePrice"];
-                    int lightBleedingPrice = (int)Mod.globalDB["config"]["Health"]["Effects"]["LightBleeding"]["RemovePrice"];
-                    int healthPrice = (int)Mod.globalDB["config"]["Health"]["HealPrice"]["HealthPointPrice"];
-                    int trialLevels = (int)Mod.globalDB["config"]["Health"]["HealPrice"]["TrialLevels"];
-                    int trialRaids = (int)Mod.globalDB["config"]["Health"]["HealPrice"]["TrialRaids"];
-                    int[] otherConditionCosts = new int[] { lightBleedingPrice, heavyBleedingPrice, fracturePrice };
-                    Mod.LogInfo("\tInit part process");
-                    for (int partIndex = 0; partIndex < 7; ++partIndex)
-                    {
-                        // Set part color
-                        medicalScreenPartImages[partIndex] = medicalScreenPartImagesParent.GetChild(partIndex);
-                        if (Mod.GetHealth(partIndex) == 0)
+                        killEntryObject.transform.GetChild(2).GetComponent<Text>().text = (Mod.raidKills[i].baseExperienceReward + (Mod.raidKills[i].bodyPart == ConditionCounter.TargetBodyPart.Head ? 200 : 0)).ToString()+"xp";
+                        if(Mod.explorationExp > 0)
                         {
-                            medicalScreenPartImages[partIndex].GetComponent<Image>().color = Color.black;
+                            raidReportExplorationParent.SetActive(true);
+                            raidReportExplorationParent.transform.GetChild(0).GetComponent<Text>().text = "EXPLORATION: " + Mod.explorationExp + "xp";
                         }
-                        else
+                        if(Mod.healingExp > 0)
                         {
-                            medicalScreenPartImages[partIndex].GetComponent<Image>().color = Color.Lerp(Color.red, Color.white, Mod.GetHealth(partIndex) / Mod.GetCurrentMaxHealth(partIndex));
+                            raidReportHealingParent.SetActive(true);
+                            raidReportHealingParent.transform.GetChild(0).GetComponent<Text>().text = "HEALING: " + Mod.healingExp + "xp";
                         }
-
-                        // Set part info
-                        medicalScreenPartHealthTexts[partIndex] = partInfoParent.GetChild(partIndex).GetChild(1).GetComponent<Text>();
-                        medicalScreenPartHealthTexts[partIndex].text = String.Format("{0:0}", Mod.GetHealth(partIndex)) + "/" + String.Format("{0:0}", Mod.GetCurrentMaxHealth(partIndex));
-                        //if (partConditions.ContainsKey(partIndex))
-                        //{
-                        //    for (int i = 0; i < partConditions[partIndex].Length; ++i)
-                        //    {
-                        //        partInfoParent.GetChild(partIndex).GetChild(3).GetChild(i).gameObject.SetActive(partConditions[partIndex][i]);
-                        //    }
-                        //}
-
-                        //if (partConditions.ContainsKey(partIndex) || Mod.GetHealth(partIndex) < Mod.GetCurrentMaxHealth(partIndex))
-                        //{
-                        //    fullPartConditions.Add(partIndex, new int[5]);
-
-                        //    // Add to list
-                        //    GameObject partElement = Instantiate(medicalListContent.GetChild(0).gameObject, medicalListContent);
-                        //    partElement.transform.GetChild(0).GetChild(1).GetChild(0).GetComponent<Text>().text = Mod.GetBodyPartName(partIndex);
-                        //    partElement.SetActive(true);
-
-                        //    // Setup logic
-                        //    PointableButton pointableButton = partElement.transform.GetChild(0).gameObject.AddComponent<PointableButton>();
-                        //    pointableButton.SetButton();
-                        //    int currentPartIndex = partIndex;
-                        //    pointableButton.Button.onClick.AddListener(() => { ToggleMedicalPart(currentPartIndex); });
-                        //    pointableButton.MaxPointingRange = 20;
-                        //    //pointableButton.hoverSound = hoverAudio;
-
-                        //    medicalPartElements.Add(partIndex, partElement);
-
-                        //    medicalListHeight += 27;
-
-                        //    // Process health and destroyed
-                        //    int partTotalCost = 0;
-                        //    if (Mod.GetHealth(partIndex) < Mod.GetCurrentMaxHealth(partIndex))
-                        //    {
-                        //        if (Mod.GetHealth(partIndex) <= 0)
-                        //        {
-                        //            int cost = (int)(breakPartPrice + healthPrice * Mod.GetCurrentMaxHealth(partIndex));
-                        //            fullPartConditions[partIndex][4] = cost;
-                        //            totalMedicalTreatmentPrice += cost;
-                        //            partTotalCost += cost;
-
-                        //            partElement.transform.GetChild(5).gameObject.SetActive(true);
-                        //            //partElement.transform.GetChild(5).GetChild(1).GetChild(1).GetComponent<Text>().text = MarketManager.FormatCompleteMoneyString(cost);
-
-                        //            PointableButton destroyedPartButton = partElement.transform.GetChild(5).gameObject.AddComponent<PointableButton>();
-                        //            destroyedPartButton.SetButton();
-                        //            destroyedPartButton.Button.onClick.AddListener(() => { ToggleMedicalPartCondition(currentPartIndex, 4); });
-                        //            destroyedPartButton.MaxPointingRange = 20;
-                        //            //destroyedPartButton.hoverSound = hoverAudio;
-                        //        }
-                        //        else // Not destroyed but damaged
-                        //        {
-                        //            int hpToHeal = (int)(Mod.GetCurrentMaxHealth(partIndex) - Mod.GetHealth(partIndex));
-                        //            int cost = healthPrice * hpToHeal;
-                        //            fullPartConditions[partIndex][0] = cost;
-                        //            totalMedicalTreatmentPrice += cost;
-                        //            partTotalCost += cost;
-
-                        //            partElement.transform.GetChild(1).gameObject.SetActive(true);
-                        //            //partElement.transform.GetChild(1).GetChild(1).GetChild(1).GetComponent<Text>().text = MarketManager.FormatCompleteMoneyString(cost);
-                        //            partElement.transform.GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = "Health (" + hpToHeal + ")";
-
-                        //            PointableButton destroyedPartButton = partElement.transform.GetChild(1).gameObject.AddComponent<PointableButton>();
-                        //            destroyedPartButton.SetButton();
-                        //            destroyedPartButton.Button.onClick.AddListener(() => { ToggleMedicalPartCondition(currentPartIndex, 0); });
-                        //            destroyedPartButton.MaxPointingRange = 20;
-                        //            //destroyedPartButton.hoverSound = hoverAudio;
-                        //        }
-
-                        //        medicalListHeight += 22;
-                        //    }
-
-                        //    // Process other conditions
-                        //    if (partConditions.ContainsKey(partIndex))
-                        //    {
-                        //        for (int i = 0; i < 3; ++i)
-                        //        {
-                        //            if (partConditions[partIndex][i])
-                        //            {
-                        //                int cost = otherConditionCosts[i];
-                        //                fullPartConditions[partIndex][i + 1] = cost;
-                        //                totalMedicalTreatmentPrice += cost;
-                        //                partTotalCost += cost;
-
-                        //                partElement.transform.GetChild(i + 2).gameObject.SetActive(true);
-                        //                //partElement.transform.GetChild(i + 2).GetChild(1).GetChild(1).GetComponent<Text>().text = MarketManager.FormatCompleteMoneyString(cost);
-
-                        //                PointableButton destroyedPartButton = partElement.transform.GetChild(i + 2).gameObject.AddComponent<PointableButton>();
-                        //                destroyedPartButton.SetButton();
-                        //                destroyedPartButton.Button.onClick.AddListener(() => { ToggleMedicalPartCondition(currentPartIndex, i + 1); });
-                        //                destroyedPartButton.MaxPointingRange = 20;
-                        //                //destroyedPartButton.hoverSound = hoverAudio;
-
-                        //                medicalListHeight += 22;
-                        //            }
-                        //        }
-                        //    }
-
-                        //    // Set part total cost
-                        //    //partElement.transform.GetChild(0).GetChild(1).GetChild(1).GetComponent<Text>().text = MarketManager.FormatCompleteMoneyString(partTotalCost);
-                        //}
+                        if(Mod.lootingExp > 0)
+                        {
+                            raidReportLootingParent.SetActive(true);
+                            raidReportLootingParent.transform.GetChild(0).GetComponent<Text>().text = "LOOTING: " + Mod.healingExp + "xp";
+                        }
+                        switch (Mod.raidStatus)
+                        {
+                            case RaidManager.RaidStatus.Success:
+                                raidReportStatus.text = "Survived";
+                                break;
+                            case RaidManager.RaidStatus.RunThrough:
+                                raidReportStatus.text = "Run Through";
+                                break;
+                            case RaidManager.RaidStatus.KIA:
+                                raidReportStatus.text = "KIA";
+                                break;
+                            case RaidManager.RaidStatus.MIA:
+                                raidReportStatus.text = "MIA";
+                                break;
+                        }
+                        raidReportTotalBackground.color = raidReportTotalBackgrounColors[(int)Mod.raidStatus];
+                        raidReportTotalExp.text = Mod.raidExp.ToString();
                     }
-                    Mod.LogInfo("\tProcessed parts");
-
-                    // Setup total and put as last sibling
-                    totalTreatmentPriceText = medicalListContent.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>();
-                    //totalTreatmentPriceText.text = MarketManager.FormatCompleteMoneyString(totalMedicalTreatmentPrice);
-                    medicalListContent.GetChild(1).SetAsLastSibling();
-
-                    // Set total health
-                    float totalHealth = 0;
-                    for (int i = 0; i < Mod.GetHealthCount(); ++i) 
-                    {
-                        totalHealth += Mod.GetHealth(i);
-                    }
-                    medicalScreenTotalHealthText = medicalScreen.GetChild(4).GetChild(2).GetChild(1).GetComponent<Text>();
-                    medicalScreenTotalHealthText.text = totalHealth.ToString() + "/440";
-
-                    //medicalScreen.GetChild(5).GetChild(0).GetComponent<Text>().text = "Stash: " + MarketManager.FormatCompleteMoneyString((inventory.ContainsKey("203") ? inventory["203"] : 0) + (Mod.playerInventory.ContainsKey("203") ? Mod.playerInventory["203"] : 0));
-
-                    Mod.LogInfo("\tSet total health");
-                    // Set hover scrolls
-                    if (medicalListHeight >= 377)
-                    {
-                        HoverScroll medicalListDownHoverScroll = medicalScreen.GetChild(3).GetChild(2).gameObject.AddComponent<HoverScroll>();
-                        HoverScroll merdicalListUpHoverScroll = medicalScreen.GetChild(3).GetChild(3).gameObject.AddComponent<HoverScroll>();
-                        medicalListDownHoverScroll.MaxPointingRange = 30;
-                        //medicalListDownHoverScroll.hoverSound = hoverAudio;
-                        medicalListDownHoverScroll.scrollbar = medicalScreen.GetChild(3).GetChild(1).GetComponent<Scrollbar>();
-                        medicalListDownHoverScroll.other = merdicalListUpHoverScroll;
-                        medicalListDownHoverScroll.up = false;
-                        merdicalListUpHoverScroll.MaxPointingRange = 30;
-                        //merdicalListUpHoverScroll.hoverSound = hoverAudio;
-                        merdicalListUpHoverScroll.scrollbar = medicalScreen.GetChild(3).GetChild(1).GetComponent<Scrollbar>();
-                        merdicalListUpHoverScroll.other = medicalListDownHoverScroll;
-                        merdicalListUpHoverScroll.up = true;
-
-                        merdicalListUpHoverScroll.rate = 377 / (medicalListHeight - 377);
-                        medicalListDownHoverScroll.rate = 377 / (medicalListHeight - 377);
-                        medicalListDownHoverScroll.gameObject.SetActive(true);
-                    }
-                    Mod.LogInfo("\tSet hoverscrolls");
-
-                    UpdateTreatmentApply();
-
-                    // Enable after raid collider to keep player in security room until they're done with after raid report
-                    transform.GetChild(1).GetChild(23).GetChild(3).gameObject.SetActive(true);
                 }
-                else // Finished scav raid
+
+                // Treatment
+                Mod.OnPartHealthChanged += OnPartHealthChanged;
+                Mod.OnPartCurrentMaxHealthChanged += OnPartHealthChanged;
+                for (int i=0; i < Mod.GetHealthCount(); ++i)
                 {
-                    scavTimer = (defaultScavTime - defaultScavTime / 100 * Bonus.scavCooldownTimer);
+                    OnPartHealthChanged(i);
                 }
+                SetEffecTreatments();
+                Effect.OnEffectRemoved += OnPartEffectRemoved;
             }
-
-            // Init status skills
-            //Transform skillList = StatusUI.instance.transform.GetChild(9).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
-            //GameObject skillPairPrefab = skillList.GetChild(0).gameObject;
-            //GameObject skillPrefab = skillPairPrefab.transform.GetChild(0).gameObject;
-            //Transform currentSkillPair = Instantiate(skillPairPrefab, skillList).transform;
-            //currentSkillPair.gameObject.SetActive(true);
-            //StatusUI.instance.skills = new SkillUI[Mod.skills.Length];
-            //for (int i = 0; i < Mod.skills.Length; ++i)
-            //{
-            //    if (currentSkillPair.childCount == 3)
-            //    {
-            //        currentSkillPair = Instantiate(skillPairPrefab, skillList).transform;
-            //        currentSkillPair.gameObject.SetActive(true);
-            //    }
-
-            //    SkillUI skillUI = new SkillUI();
-            //    GameObject currentSkill = Instantiate(skillPrefab, currentSkillPair);
-            //    currentSkill.SetActive(true);
-            //    currentSkill.transform.GetChild(0).GetComponent<Image>().sprite = Mod.skillIcons[i];
-            //    skillUI.text = currentSkill.transform.GetChild(1).GetChild(0).GetComponent<Text>();
-            //    skillUI.text.text = String.Format("{0} lvl. {1:0} ({2:0}/100)", Mod.SkillIndexToName(i), (int)(Mod.skills[i].currentProgress / 100), Mod.skills[i].currentProgress % 100);
-            //    skillUI.progressBarRectTransform = currentSkill.transform.GetChild(1).GetChild(1).GetChild(1).GetComponent<RectTransform>();
-            //    skillUI.progressBarRectTransform.sizeDelta = new Vector2(Mod.skills[i].currentProgress % 100, 4.73f);
-            //    skillUI.diminishingReturns = currentSkill.transform.GetChild(1).GetChild(2).gameObject;
-            //    skillUI.increasing = currentSkill.transform.GetChild(1).GetChild(3).gameObject;
-            //    StatusUI.instance.skills[i] = skillUI;
-            //}
         }
 
-        private void UpdateTreatmentApply()
+        public void OnRaidReportNextClicked()
         {
-            //int playerRoubleCount = (inventory.ContainsKey("203") ? inventory["203"] : 0) + (Mod.playerInventory.ContainsKey("203") ? Mod.playerInventory["203"] : 0);
-            //if (playerRoubleCount < totalMedicalTreatmentPrice)
-            //{
-            //    transform.GetChild(0).GetChild(0).GetChild(13).GetChild(2).GetComponent<Collider>().enabled = false;
-            //    transform.GetChild(0).GetChild(0).GetChild(13).GetChild(2).GetChild(2).GetComponent<Text>().color = Color.gray;
-            //}
-            //else
-            //{
-            //    transform.GetChild(0).GetChild(0).GetChild(13).GetChild(2).GetComponent<Collider>().enabled = true;
-            //    transform.GetChild(0).GetChild(0).GetChild(13).GetChild(2).GetChild(2).GetComponent<Text>().color = Color.white;
-            //}
+            Mod.OnPlayerLevelChanged -= OnPlayerLevelChanged;
+            Mod.OnPlayerExperienceChanged -= OnPlayerExperienceChanged;
+            SetPage(9);
+            clickAudio.Play();
         }
 
-        public void ToggleMedicalPart(int partIndex)
+        public void OnTreatmentNextClicked()
         {
-            if (medicalPartElements[partIndex].transform.GetChild(0).GetChild(0).GetChild(0).gameObject.activeSelf)
-            {
-                // Deactivate checkmark and remove from price
-                medicalPartElements[partIndex].transform.GetChild(0).GetChild(0).GetChild(0).gameObject.SetActive(false);
-                for (int i = 0; i < 5; ++i)
-                {
-                    if (medicalPartElements[partIndex].transform.GetChild(i + 1).GetChild(0).GetChild(0).gameObject.activeSelf)
-                    {
-                        totalMedicalTreatmentPrice -= fullPartConditions[partIndex][i];
-                    }
-                }
-                //totalTreatmentPriceText.text = MarketManager.FormatCompleteMoneyString(totalMedicalTreatmentPrice);
-            }
-            else
-            {
-                // Activate checkmark and add to price
-                medicalPartElements[partIndex].transform.GetChild(0).GetChild(0).GetChild(0).gameObject.SetActive(true);
-                for (int i = 0; i < 5; ++i)
-                {
-                    if (medicalPartElements[partIndex].transform.GetChild(i + 1).GetChild(0).GetChild(0).gameObject.activeSelf)
-                    {
-                        totalMedicalTreatmentPrice += fullPartConditions[partIndex][i];
-                    }
-                }
-                //totalTreatmentPriceText.text = MarketManager.FormatCompleteMoneyString(totalMedicalTreatmentPrice);
-            }
-
-            UpdateTreatmentApply();
+            Mod.OnPartHealthChanged -= OnPartHealthChanged;
+            Mod.OnPartCurrentMaxHealthChanged -= OnPartHealthChanged;
+            SetPage(0);
+            clickAudio.Play();
         }
 
-        public void ToggleMedicalPartCondition(int partIndex, int conditionIndex)
+        public void SetEffecTreatments()
         {
-            if (medicalPartElements[partIndex].transform.GetChild(conditionIndex + 1).GetChild(0).GetChild(0).gameObject.activeSelf)
+            TODO: // Set all initial effects and entries in treatment screen
+        }
+
+        public void OnPartEffectRemoved(Effect effect)
+        {
+            if(effect.partIndex == -1)
             {
-                // Deactivate checkmark and remove from price if necessary
-                medicalPartElements[partIndex].transform.GetChild(conditionIndex + 1).GetChild(0).GetChild(0).gameObject.SetActive(false);
-                if (medicalPartElements[partIndex].transform.GetChild(0).GetChild(0).GetChild(0).gameObject.activeSelf)
+                return;
+            }
+
+            if (treatmentCosts == null)
+            {
+                treatmentCosts = new Dictionary<GameObject, int>();
+                treatmentObjectsByParent = new Dictionary<GameObject, Dictionary<GameObject, int>>();
+                treatmentParentsByObject = new Dictionary<GameObject, GameObject>();
+                treatmentObjectsByEffectTypeByParent = new Dictionary<int, Dictionary<Effect.EffectType, GameObject>>();
+                treatmentParentsByIndex = new Dictionary<int, GameObject>();
+                treatmentSelected = new Dictionary<GameObject, bool>();
+            }
+
+            TODO: // Remove effect from part if not already removed
+        }
+
+        public void OnPartHealthChanged(int index)
+        {
+            if (Mod.GetCurrentMaxHealthArray() == null || Mod.GetHealthArray() == null)
+            {
+                return;
+            }
+
+            if(treatmentCosts == null)
+            {
+                treatmentCosts = new Dictionary<GameObject, int>();
+                treatmentObjectsByParent = new Dictionary<GameObject, Dictionary<GameObject, int>>();
+                treatmentParentsByObject = new Dictionary<GameObject, GameObject>();
+                treatmentObjectsByEffectTypeByParent = new Dictionary<int, Dictionary<Effect.EffectType, GameObject>>();
+                treatmentParentsByIndex = new Dictionary<int, GameObject>();
+                treatmentSelected = new Dictionary<GameObject, bool>();
+            }
+
+            if (index == -1)
+            {
+                for (int i = 0; i < Mod.GetHealthCount(); ++i)
                 {
-                    totalMedicalTreatmentPrice -= fullPartConditions[partIndex][conditionIndex];
-                    //totalTreatmentPriceText.text = MarketManager.FormatCompleteMoneyString(totalMedicalTreatmentPrice);
+                    OnPartHealthChanged(i);
                 }
             }
             else
             {
-                // Activate checkmark and add to price if necessary
-                medicalPartElements[partIndex].transform.GetChild(conditionIndex + 1).GetChild(0).GetChild(0).gameObject.SetActive(true);
-                if (medicalPartElements[partIndex].transform.GetChild(0).GetChild(0).GetChild(0).gameObject.activeSelf)
+                if(Mod.GetHealth(index) == Mod.GetCurrentMaxHealth(index))
                 {
-                    totalMedicalTreatmentPrice += fullPartConditions[partIndex][conditionIndex];
-                    //totalTreatmentPriceText.text = MarketManager.FormatCompleteMoneyString(totalMedicalTreatmentPrice);
+                    // Make sure part has no health treatment
+                    if(treatmentObjectsByEffectTypeByParent.TryGetValue(index, out Dictionary<Effect.EffectType, GameObject> treatmentObjectsByEffectType)
+                        && treatmentObjectsByEffectType.TryGetValue(Effect.EffectType.HealthRate, out GameObject treatmentObject))
+                    {
+                        // Find parent
+                        if(treatmentParentsByObject.TryGetValue(treatmentObject, out GameObject parentTreatmentObject))
+                        {
+                            // Remove from parent
+                            treatmentParentsByObject.Remove(treatmentObject);
+                            treatmentObjectsByParent[parentTreatmentObject].Remove(treatmentObject);
+
+                            // If parent has more treatments, only remove the health one, and recalculate total part cost
+                            // Otherwise, remove parent
+                            if (treatmentObjectsByParent[parentTreatmentObject].Count > 0)
+                            {
+                                treatmentObjectsByEffectType.Remove(Effect.EffectType.HealthRate);
+
+                                int totalCost = 0;
+                                foreach(KeyValuePair<GameObject, int> objectEntry in treatmentObjectsByParent[parentTreatmentObject])
+                                {
+                                    totalCost += objectEntry.Value;
+                                }
+                                parentTreatmentObject.transform.GetChild(3).GetComponent<Text>().text = totalCost.ToString();
+                            }
+                            else
+                            {
+                                treatmentObjectsByParent.Remove(parentTreatmentObject);
+                                treatmentObjectsByEffectTypeByParent.Remove(index);
+                                treatmentParentsByIndex.Remove(index);
+                                Destroy(parentTreatmentObject);
+                            }
+                        }
+                        Destroy(treatmentObject);
+                    }
+                }
+                else
+                {
+                    // Make sure part has health treatment
+                    if (treatmentObjectsByEffectTypeByParent.TryGetValue(index, out Dictionary<Effect.EffectType, GameObject> treatmentObjectsByEffectType)
+                        && treatmentObjectsByEffectType.TryGetValue(Effect.EffectType.HealthRate, out GameObject treatmentObject))
+                    {
+                        // Treatment already exists under this parent, recalculate cost
+                        int cost = (int)(Mod.GetCurrentMaxHealth(index) - Mod.GetHealth(index)) * (int)Mod.globalDB["config"]["HealPrice"]["HealthPointPrice"];
+                        treatmentObject.transform.GetChild(3).GetComponent<Text>().text = cost.ToString();
+                        treatmentCosts[treatmentObject] = cost;
+
+                        // Then recalculate parent cost
+                        if (treatmentParentsByObject.TryGetValue(treatmentObject, out GameObject parentTreatmentObject))
+                        {
+                            treatmentObjectsByParent[parentTreatmentObject][treatmentObject] = cost;
+
+                            int totalCost = 0;
+                            foreach (KeyValuePair<GameObject, int> objectEntry in treatmentObjectsByParent[parentTreatmentObject])
+                            {
+                                totalCost += objectEntry.Value;
+                            }
+                            parentTreatmentObject.transform.GetChild(3).GetComponent<Text>().text = totalCost.ToString();
+                        }
+                    }
+                    else // Dont yet have health treatment under this parent or parent does not yet exist
+                    {
+                        GameObject newTreatmentObject = Instantiate(treatmentPartSubEntry, treatmentListParent);
+                        int cost = (int)(Mod.GetCurrentMaxHealth(index) - Mod.GetHealth(index)) * (int)Mod.globalDB["config"]["HealPrice"]["HealthPointPrice"];
+                        treatmentCosts.Add(newTreatmentObject, cost);
+                        treatmentSelected.Add(newTreatmentObject, true);
+                        newTreatmentObject.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnTreatmentCheckToggle(newTreatmentObject); });
+                        newTreatmentObject.transform.GetChild(1).GetComponent<Text>().text = "Health";
+                        newTreatmentObject.transform.GetChild(3).GetComponent<Text>().text = cost.ToString();
+
+                        GameObject newTreatmentParentObject = null;
+                        if (treatmentObjectsByEffectType == null) // Parent does not exist
+                        {
+                            newTreatmentParentObject = Instantiate(treatmentPartEntry, treatmentListParent);
+                            newTreatmentObject.transform.SetAsLastSibling();
+                            treatmentSelected.Add(newTreatmentParentObject, true);
+                            treatmentObjectsByParent.Add(newTreatmentParentObject, new Dictionary<GameObject, int>() { { newTreatmentObject, cost } });
+                            treatmentObjectsByEffectTypeByParent.Add(index, new Dictionary<Effect.EffectType, GameObject>() { { Effect.EffectType.HealthRate, newTreatmentObject } });
+                            treatmentParentsByIndex.Add(index, newTreatmentParentObject);
+                            newTreatmentParentObject.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnTreatmentCheckToggle(newTreatmentParentObject); });
+                            newTreatmentParentObject.transform.GetChild(1).GetComponent<Text>().text = Mod.GetBodyPartName(index);
+                            newTreatmentParentObject.transform.GetChild(3).GetComponent<Text>().text = cost.ToString();
+                        }
+                        else // Parent exists
+                        {
+                            newTreatmentParentObject = treatmentParentsByIndex[index];
+                            newTreatmentObject.transform.SetSiblingIndex(newTreatmentParentObject.transform.GetSiblingIndex() + 1);
+                            treatmentObjectsByParent[newTreatmentParentObject].Add(newTreatmentObject, cost);
+                            treatmentObjectsByEffectType.Add(Effect.EffectType.HealthRate, newTreatmentObject);
+
+                            int totalCost = 0;
+                            foreach (KeyValuePair<GameObject, int> objectEntry in treatmentObjectsByParent[newTreatmentParentObject])
+                            {
+                                totalCost += objectEntry.Value;
+                            }
+                            newTreatmentParentObject.transform.GetChild(3).GetComponent<Text>().text = totalCost.ToString();
+                        }
+                        treatmentParentsByObject.Add(newTreatmentObject, newTreatmentParentObject);
+                    }
+                }
+
+                UpdateTotalTreatmentCost();
+            }
+        }
+
+        public void UpdateTotalTreatmentCost()
+        {
+            int totalCost = 0;
+            foreach(KeyValuePair<GameObject, Dictionary<GameObject, int>> entry in treatmentObjectsByParent)
+            {
+                if (treatmentSelected[entry.Key])
+                {
+                    foreach(KeyValuePair<GameObject, int> subEntry in entry.Value)
+                    {
+                        if (treatmentSelected[subEntry.Key])
+                        {
+                            totalCost += subEntry.Value;
+                        }
+                    }
                 }
             }
 
-            UpdateTreatmentApply();
+            treatmentTotalCost.text = "Selected Total: " + totalCost.ToString();
+            totalTreatmentCost = totalCost;
+        }
+
+        public void OnTreatmentCheckToggle(GameObject treatmentObject)
+        {
+            GameObject checkTextObject = treatmentObject.transform.GetChild(0).GetChild(0).gameObject;
+            checkTextObject.gameObject.SetActive(!checkTextObject.activeSelf);
+            treatmentSelected[treatmentObject] = checkTextObject.activeSelf;
+
+            UpdateTotalTreatmentCost();
+        }
+
+        public void OnPlayerLevelChanged()
+        {
+            raidReportRankIcon.sprite = StatusUI.instance.levelSprites[Mod.level / 5];
+            raidReportLevel.text = Mod.level.ToString();
+        }
+
+        public void OnPlayerExperienceChanged()
+        {
+            raidReportExperience.text = Mod.experience.ToString() + "/" + (Mod.level >= Mod.XPPerLevel.Length ? "INFINITY" : Mod.XPPerLevel[Mod.level].ToString());
+            raidReportBarFill.sizeDelta = new Vector2(Mod.level >= Mod.XPPerLevel.Length ? 0 : Mod.level / (float)Mod.XPPerLevel[Mod.level] * 450f, 12.8f);
         }
 
         public void UpdateLoadButtonList()
@@ -4191,25 +4041,6 @@ namespace EFM
             cancelRaidLoad = true;
         }
 
-        public void OnRaidReportNextClicked()
-        {
-            clickAudio.Play();
-
-            transform.GetChild(0).GetChild(0).GetChild(12).gameObject.SetActive(false);
-            transform.GetChild(0).GetChild(0).GetChild(13).gameObject.SetActive(true);
-        }
-
-        public void OnMedicalNextClicked()
-        {
-            clickAudio.Play();
-
-            transform.GetChild(0).GetChild(0).GetChild(13).gameObject.SetActive(false);
-            transform.GetChild(0).GetChild(0).GetChild(0).gameObject.SetActive(true);
-
-            // Disable after raid collider
-            transform.GetChild(1).GetChild(23).GetChild(3).gameObject.SetActive(false);
-        }
-
         public void OnMedicalApplyClicked()
         {
             clickAudio.Play();
@@ -4274,19 +4105,19 @@ namespace EFM
             int amountToRemoveFromPlayer = 0;
             if (inventoryItems.ContainsKey("203"))
             {
-                if (inventoryItems["203"].Count >= totalMedicalTreatmentPrice)
+                if (inventoryItems["203"].Count >= totalTreatmentCost)
                 {
-                    amountToRemoveFromBase = totalMedicalTreatmentPrice;
+                    amountToRemoveFromBase = totalTreatmentCost;
                 }
                 else
                 {
                     amountToRemoveFromBase = inventoryItems["203"].Count;
-                    amountToRemoveFromPlayer = totalMedicalTreatmentPrice - inventoryItems["203"].Count;
+                    amountToRemoveFromPlayer = totalTreatmentCost - inventoryItems["203"].Count;
                 }
             }
             else
             {
-                amountToRemoveFromPlayer = totalMedicalTreatmentPrice;
+                amountToRemoveFromPlayer = totalTreatmentCost;
             }
             if (amountToRemoveFromBase > 0)
             {
@@ -4589,32 +4420,55 @@ namespace EFM
 
         public void FinishRaid(FinishRaidState state)
         {
-            // Increment raid counters
-            ++Mod.totalRaidCount;
-            switch (state)
+            if (Mod.charChoicePMC)
             {
-                case FinishRaidState.RunThrough:
-                    ++Mod.runthroughRaidCount;
-                    ++Mod.survivedRaidCount;
-                    break;
-                case FinishRaidState.Survived:
-                    ++Mod.survivedRaidCount;
-                    break;
-                case FinishRaidState.MIA:
-                    ++Mod.MIARaidCount;
-                    ++Mod.failedRaidCount;
-                    break;
-                case FinishRaidState.KIA:
-                    ++Mod.KIARaidCount;
-                    ++Mod.failedRaidCount;
-                    break;
-                default:
-                    break;
-            }
+                // Increment raid counters
+                ++Mod.totalRaidCount;
+                switch (state)
+                {
+                    case FinishRaidState.RunThrough:
+                        ++Mod.runthroughRaidCount;
+                        ++Mod.survivedRaidCount;
+                        break;
+                    case FinishRaidState.Survived:
+                        ++Mod.survivedRaidCount;
+                        break;
+                    case FinishRaidState.MIA:
+                        ++Mod.MIARaidCount;
+                        ++Mod.failedRaidCount;
+                        break;
+                    case FinishRaidState.KIA:
+                        ++Mod.KIARaidCount;
+                        ++Mod.failedRaidCount;
+                        break;
+                    default:
+                        break;
+                }
 
-            // Save the base
-            Mod.saveSlotIndex = 5;
-            Save();
+                if (Mod.raidState == FinishRaidState.KIA || Mod.raidState == FinishRaidState.MIA)
+                {
+                    // Remove all effects
+                    Effect.RemoveAllEffects();
+
+                    for (int i = 0; i < Mod.GetHealthCount(); ++i)
+                    {
+                        Mod.SetHealth(i, 0.3f * Mod.GetCurrentMaxHealth(i));
+                    }
+
+                    Mod.hydration = 0.3f * Mod.currentMaxHydration;
+                    Mod.energy = 0.3f * Mod.currentMaxEnergy;
+
+                    Mod.AddExperience(100 + (int)(Mod.raidTime / 60 * 10)); // Fail exp + bonus of 10 exp / min
+                }
+                else if (Mod.raidState == FinishRaidState.Survived)
+                {
+                    Mod.AddExperience(600 + (int)(Mod.raidTime / 60 * 10)); // Survive exp + bonus of 10 exp / min
+                }
+            }
+            else
+            {
+                scavTimer = defaultScavTime;
+            }
         }
 
         private void SaveDataToFile()

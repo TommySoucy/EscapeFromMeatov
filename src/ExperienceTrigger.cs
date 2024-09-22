@@ -5,7 +5,6 @@ namespace EFM
 {
     public class ExperienceTrigger : MonoBehaviour
     {
-        TODO: // Add to raid dev
         public string ID;
         public int experienceAward;
         public bool PMCOnly;
