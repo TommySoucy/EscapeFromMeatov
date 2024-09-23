@@ -80,6 +80,7 @@ namespace EFM
         public Transform treatmentListParent;
         public GameObject treatmentPartEntry;
         public GameObject treatmentPartSubEntry;
+        public GameObject treatmentApplyButton;
         public Dictionary<int, GameObject> treatmentParentsByIndex; // <part index, treatment object parent>
         public Dictionary<int, Dictionary<Effect.EffectType, GameObject>> treatmentObjectsByEffectTypeByParent; // <part index, <effect type, treatment object>>
         public Dictionary<GameObject, Dictionary<GameObject, int>> treatmentObjectsByParent; // <parent, <object, cost>>
@@ -2726,6 +2727,15 @@ namespace EFM
                 }
 
                 // Treatment
+                if (treatmentCosts == null)
+                {
+                    treatmentCosts = new Dictionary<GameObject, int>();
+                    treatmentObjectsByParent = new Dictionary<GameObject, Dictionary<GameObject, int>>();
+                    treatmentParentsByObject = new Dictionary<GameObject, GameObject>();
+                    treatmentObjectsByEffectTypeByParent = new Dictionary<int, Dictionary<Effect.EffectType, GameObject>>();
+                    treatmentParentsByIndex = new Dictionary<int, GameObject>();
+                    treatmentSelected = new Dictionary<GameObject, bool>();
+                }
                 Mod.OnPartHealthChanged += OnPartHealthChanged;
                 Mod.OnPartCurrentMaxHealthChanged += OnPartHealthChanged;
                 for (int i=0; i < Mod.GetHealthCount(); ++i)
@@ -2753,29 +2763,292 @@ namespace EFM
             clickAudio.Play();
         }
 
+        public void OnTreatmentApplyClicked()
+        {
+            // Consume cost
+            int countLeft = totalTreatmentCost;
+            if (Mod.playerInventoryItems.TryGetValue("5449016a4bdc2d6f028b456f", out List<MeatovItem> playerRoubles))
+            {
+                while (countLeft > 0 && playerRoubles.Count > 0)
+                {
+                    MeatovItem item = playerRoubles[playerRoubles.Count - 1];
+                    if (item.stack > countLeft)
+                    {
+                        item.stack -= countLeft;
+                        countLeft = 0;
+                        break;
+                    }
+                    else
+                    {
+                        countLeft -= item.stack;
+                        if (item.DetachChildren())
+                        {
+                            item.Destroy();
+                        }
+                    }
+                }
+            }
+            if(countLeft > 0 && inventoryItems.TryGetValue("5449016a4bdc2d6f028b456f", out List<MeatovItem> hideoutRoubles))
+            {
+                while (countLeft > 0 && hideoutRoubles.Count > 0)
+                {
+                    MeatovItem item = hideoutRoubles[hideoutRoubles.Count - 1];
+                    if (item.stack > countLeft)
+                    {
+                        item.stack -= countLeft;
+                        countLeft = 0;
+                        break;
+                    }
+                    else
+                    {
+                        countLeft -= item.stack;
+                        if (item.DetachChildren())
+                        {
+                            item.Destroy();
+                        }
+                    }
+                }
+            }
+
+            // Find parts to heal and effects to remove
+            Dictionary<Effect.EffectType, List<int>> effectsToRemove = new Dictionary<Effect.EffectType, List<int>>();
+            List<int> partsToHeal = new List<int>();
+            foreach (KeyValuePair<int, Dictionary<Effect.EffectType, GameObject>> outer in treatmentObjectsByEffectTypeByParent)
+            {
+                foreach(KeyValuePair<Effect.EffectType, GameObject> inner in outer.Value)
+                {
+                    bool selected = false;
+                    if(treatmentSelected.TryGetValue(inner.Value, out selected) && selected)
+                    {
+                        GameObject parentTreatment = treatmentParentsByObject[inner.Value];
+                        if(treatmentSelected.TryGetValue(parentTreatment, out selected) && selected)
+                        {
+                            if(inner.Key == Effect.EffectType.HealthRate)
+                            {
+                                partsToHeal.Add(outer.Key);
+                            }
+                            else
+                            {
+                                if(effectsToRemove.TryGetValue(inner.Key, out List<int> parts))
+                                {
+                                    parts.Add(outer.Key);
+                                }
+                                else
+                                {
+                                    effectsToRemove.Add(inner.Key, new List<int>() { outer.Key });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Heal parts, Remove effects
+            for(int i=0; i < partsToHeal.Count; ++i)
+            {
+                Mod.SetHealth(partsToHeal[i], Mod.GetCurrentMaxHealth(partsToHeal[i]));
+            }
+            foreach(KeyValuePair<Effect.EffectType, List<int>> entry in effectsToRemove)
+            {
+                if(Effect.effectsByType.TryGetValue(entry.Key, out List<Effect> effects))
+                {
+                    for (int i = effects.Count - 1; i >= 0; --i)
+                    {
+                        if (entry.Value.Contains(effects[i].partIndex))
+                        {
+                            Effect.RemoveEffect(effects[i], null);
+                        }
+                    }
+                }
+            }
+
+            UpdateTotalTreatmentCost();
+        }
+
         public void SetEffecTreatments()
         {
-            TODO: // Set all initial effects and entries in treatment screen
+            // Only care about bleeding and fracture effects
+            if (Effect.effectsByType.TryGetValue(Effect.EffectType.LightBleeding, out List<Effect> lightBleedEffectList))
+            {
+                for (int i = 0; i < lightBleedEffectList.Count; ++i)
+                {
+                    if (lightBleedEffectList[i].partIndex != -1)
+                    {
+                        GameObject newTreatmentObject = Instantiate(treatmentPartSubEntry, treatmentListParent);
+                        int cost = (int)Mod.globalDB["config"]["Health"]["LightBleeding"]["RemovePrice"];
+                        treatmentCosts.Add(newTreatmentObject, cost);
+                        treatmentSelected.Add(newTreatmentObject, true);
+                        newTreatmentObject.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnTreatmentCheckToggle(newTreatmentObject); });
+                        newTreatmentObject.transform.GetChild(1).GetComponent<Text>().text = "Light bleeding";
+                        newTreatmentObject.transform.GetChild(3).GetComponent<Text>().text = cost.ToString();
+
+                        GameObject newTreatmentParentObject = null;
+                        if (treatmentParentsByIndex.TryGetValue(lightBleedEffectList[i].partIndex, out newTreatmentParentObject)) // Parent exists
+                        {
+                            newTreatmentObject.transform.SetSiblingIndex(newTreatmentParentObject.transform.GetSiblingIndex() + 1);
+                            treatmentObjectsByParent[newTreatmentParentObject].Add(newTreatmentObject, cost);
+                            treatmentObjectsByEffectTypeByParent[lightBleedEffectList[i].partIndex].Add(Effect.EffectType.LightBleeding, newTreatmentObject);
+
+                            int totalCost = 0;
+                            foreach (KeyValuePair<GameObject, int> objectEntry in treatmentObjectsByParent[newTreatmentParentObject])
+                            {
+                                totalCost += objectEntry.Value;
+                            }
+                            newTreatmentParentObject.transform.GetChild(3).GetComponent<Text>().text = totalCost.ToString();
+                        }
+                        else // Parent does not exist
+                        {
+                            newTreatmentParentObject = Instantiate(treatmentPartEntry, treatmentListParent);
+                            newTreatmentObject.transform.SetAsLastSibling();
+                            treatmentSelected.Add(newTreatmentParentObject, true);
+                            treatmentObjectsByParent.Add(newTreatmentParentObject, new Dictionary<GameObject, int>() { { newTreatmentObject, cost } });
+                            treatmentObjectsByEffectTypeByParent.Add(lightBleedEffectList[i].partIndex, new Dictionary<Effect.EffectType, GameObject>() { { Effect.EffectType.HealthRate, newTreatmentObject } });
+                            treatmentParentsByIndex.Add(lightBleedEffectList[i].partIndex, newTreatmentParentObject);
+                            newTreatmentParentObject.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnTreatmentCheckToggle(newTreatmentParentObject); });
+                            newTreatmentParentObject.transform.GetChild(1).GetComponent<Text>().text = Mod.GetBodyPartName(lightBleedEffectList[i].partIndex);
+                            newTreatmentParentObject.transform.GetChild(3).GetComponent<Text>().text = cost.ToString();
+                        }
+                        treatmentParentsByObject.Add(newTreatmentObject, newTreatmentParentObject);
+                    }
+                }
+            }
+            if (Effect.effectsByType.TryGetValue(Effect.EffectType.HeavyBleeding, out List<Effect> heavyBleedEffectList))
+            {
+                for (int i = 0; i < heavyBleedEffectList.Count; ++i)
+                {
+                    if (heavyBleedEffectList[i].partIndex != -1)
+                    {
+                        GameObject newTreatmentObject = Instantiate(treatmentPartSubEntry, treatmentListParent);
+                        int cost = (int)Mod.globalDB["config"]["Health"]["HeavyBleeding"]["RemovePrice"];
+                        treatmentCosts.Add(newTreatmentObject, cost);
+                        treatmentSelected.Add(newTreatmentObject, true);
+                        newTreatmentObject.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnTreatmentCheckToggle(newTreatmentObject); });
+                        newTreatmentObject.transform.GetChild(1).GetComponent<Text>().text = "Heavy bleeding";
+                        newTreatmentObject.transform.GetChild(3).GetComponent<Text>().text = cost.ToString();
+
+                        GameObject newTreatmentParentObject = null;
+                        if (treatmentParentsByIndex.TryGetValue(heavyBleedEffectList[i].partIndex, out newTreatmentParentObject)) // Parent exists
+                        {
+                            newTreatmentObject.transform.SetSiblingIndex(newTreatmentParentObject.transform.GetSiblingIndex() + 1);
+                            treatmentObjectsByParent[newTreatmentParentObject].Add(newTreatmentObject, cost);
+                            treatmentObjectsByEffectTypeByParent[heavyBleedEffectList[i].partIndex].Add(Effect.EffectType.HeavyBleeding, newTreatmentObject);
+
+                            int totalCost = 0;
+                            foreach (KeyValuePair<GameObject, int> objectEntry in treatmentObjectsByParent[newTreatmentParentObject])
+                            {
+                                totalCost += objectEntry.Value;
+                            }
+                            newTreatmentParentObject.transform.GetChild(3).GetComponent<Text>().text = totalCost.ToString();
+                        }
+                        else // Parent does not exist
+                        {
+                            newTreatmentParentObject = Instantiate(treatmentPartEntry, treatmentListParent);
+                            newTreatmentObject.transform.SetAsLastSibling();
+                            treatmentSelected.Add(newTreatmentParentObject, true);
+                            treatmentObjectsByParent.Add(newTreatmentParentObject, new Dictionary<GameObject, int>() { { newTreatmentObject, cost } });
+                            treatmentObjectsByEffectTypeByParent.Add(heavyBleedEffectList[i].partIndex, new Dictionary<Effect.EffectType, GameObject>() { { Effect.EffectType.HeavyBleeding, newTreatmentObject } });
+                            treatmentParentsByIndex.Add(heavyBleedEffectList[i].partIndex, newTreatmentParentObject);
+                            newTreatmentParentObject.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnTreatmentCheckToggle(newTreatmentParentObject); });
+                            newTreatmentParentObject.transform.GetChild(1).GetComponent<Text>().text = Mod.GetBodyPartName(heavyBleedEffectList[i].partIndex);
+                            newTreatmentParentObject.transform.GetChild(3).GetComponent<Text>().text = cost.ToString();
+                        }
+                        treatmentParentsByObject.Add(newTreatmentObject, newTreatmentParentObject);
+                    }
+                }
+            }
+            if (Effect.effectsByType.TryGetValue(Effect.EffectType.HeavyBleeding, out List<Effect> fractureEffectList))
+            {
+                for (int i = 0; i < fractureEffectList.Count; ++i) 
+                {
+                    if (fractureEffectList[i].partIndex != -1)
+                    {
+                        GameObject newTreatmentObject = Instantiate(treatmentPartSubEntry, treatmentListParent);
+                        int cost = (int)Mod.globalDB["config"]["Health"]["Fracture"]["RemovePrice"];
+                        treatmentCosts.Add(newTreatmentObject, cost);
+                        treatmentSelected.Add(newTreatmentObject, true);
+                        newTreatmentObject.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnTreatmentCheckToggle(newTreatmentObject); });
+                        newTreatmentObject.transform.GetChild(1).GetComponent<Text>().text = "Fracture";
+                        newTreatmentObject.transform.GetChild(3).GetComponent<Text>().text = cost.ToString();
+
+                        GameObject newTreatmentParentObject = null;
+                        if (treatmentParentsByIndex.TryGetValue(fractureEffectList[i].partIndex, out newTreatmentParentObject)) // Parent exists
+                        {
+                            newTreatmentObject.transform.SetSiblingIndex(newTreatmentParentObject.transform.GetSiblingIndex() + 1);
+                            treatmentObjectsByParent[newTreatmentParentObject].Add(newTreatmentObject, cost);
+                            treatmentObjectsByEffectTypeByParent[fractureEffectList[i].partIndex].Add(Effect.EffectType.Fracture, newTreatmentObject);
+
+                            int totalCost = 0;
+                            foreach (KeyValuePair<GameObject, int> objectEntry in treatmentObjectsByParent[newTreatmentParentObject])
+                            {
+                                totalCost += objectEntry.Value;
+                            }
+                            newTreatmentParentObject.transform.GetChild(3).GetComponent<Text>().text = totalCost.ToString();
+                        }
+                        else // Parent does not exist
+                        {
+                            newTreatmentParentObject = Instantiate(treatmentPartEntry, treatmentListParent);
+                            newTreatmentObject.transform.SetAsLastSibling();
+                            treatmentSelected.Add(newTreatmentParentObject, true);
+                            treatmentObjectsByParent.Add(newTreatmentParentObject, new Dictionary<GameObject, int>() { { newTreatmentObject, cost } });
+                            treatmentObjectsByEffectTypeByParent.Add(fractureEffectList[i].partIndex, new Dictionary<Effect.EffectType, GameObject>() { { Effect.EffectType.Fracture, newTreatmentObject } });
+                            treatmentParentsByIndex.Add(fractureEffectList[i].partIndex, newTreatmentParentObject);
+                            newTreatmentParentObject.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnTreatmentCheckToggle(newTreatmentParentObject); });
+                            newTreatmentParentObject.transform.GetChild(1).GetComponent<Text>().text = Mod.GetBodyPartName(fractureEffectList[i].partIndex);
+                            newTreatmentParentObject.transform.GetChild(3).GetComponent<Text>().text = cost.ToString();
+                        }
+                        treatmentParentsByObject.Add(newTreatmentObject, newTreatmentParentObject);
+                    }
+                }
+            }
+
+            UpdateTotalTreatmentCost();
         }
 
         public void OnPartEffectRemoved(Effect effect)
         {
-            if(effect.partIndex == -1)
+            if(effect.partIndex == -1 || (effect.effectType != Effect.EffectType.LightBleeding 
+                                          && effect.effectType != Effect.EffectType.HeavyBleeding
+                                          && effect.effectType != Effect.EffectType.Fracture))
             {
                 return;
             }
 
-            if (treatmentCosts == null)
+            // Make sure part has no treatment of that effect
+            if (treatmentObjectsByEffectTypeByParent.TryGetValue(effect.partIndex, out Dictionary<Effect.EffectType, GameObject> treatmentObjectsByEffectType)
+                && treatmentObjectsByEffectType.TryGetValue(effect.effectType, out GameObject treatmentObject))
             {
-                treatmentCosts = new Dictionary<GameObject, int>();
-                treatmentObjectsByParent = new Dictionary<GameObject, Dictionary<GameObject, int>>();
-                treatmentParentsByObject = new Dictionary<GameObject, GameObject>();
-                treatmentObjectsByEffectTypeByParent = new Dictionary<int, Dictionary<Effect.EffectType, GameObject>>();
-                treatmentParentsByIndex = new Dictionary<int, GameObject>();
-                treatmentSelected = new Dictionary<GameObject, bool>();
-            }
+                // Find parent
+                if (treatmentParentsByObject.TryGetValue(treatmentObject, out GameObject parentTreatmentObject))
+                {
+                    // Remove from parent
+                    treatmentParentsByObject.Remove(treatmentObject);
+                    treatmentObjectsByParent[parentTreatmentObject].Remove(treatmentObject);
 
-            TODO: // Remove effect from part if not already removed
+                    // If parent has more treatments, only remove the one for this effect, and recalculate total part cost
+                    // Otherwise, remove parent
+                    if (treatmentObjectsByParent[parentTreatmentObject].Count > 0)
+                    {
+                        treatmentObjectsByEffectType.Remove(effect.effectType);
+
+                        int totalCost = 0;
+                        foreach (KeyValuePair<GameObject, int> objectEntry in treatmentObjectsByParent[parentTreatmentObject])
+                        {
+                            totalCost += objectEntry.Value;
+                        }
+                        parentTreatmentObject.transform.GetChild(3).GetComponent<Text>().text = totalCost.ToString();
+                    }
+                    else
+                    {
+                        treatmentObjectsByParent.Remove(parentTreatmentObject);
+                        treatmentObjectsByEffectTypeByParent.Remove(effect.partIndex);
+                        treatmentParentsByIndex.Remove(effect.partIndex);
+                        Destroy(parentTreatmentObject);
+                    }
+                }
+                Destroy(treatmentObject);
+
+                UpdateTotalTreatmentCost();
+            }
         }
 
         public void OnPartHealthChanged(int index)
@@ -2783,16 +3056,6 @@ namespace EFM
             if (Mod.GetCurrentMaxHealthArray() == null || Mod.GetHealthArray() == null)
             {
                 return;
-            }
-
-            if(treatmentCosts == null)
-            {
-                treatmentCosts = new Dictionary<GameObject, int>();
-                treatmentObjectsByParent = new Dictionary<GameObject, Dictionary<GameObject, int>>();
-                treatmentParentsByObject = new Dictionary<GameObject, GameObject>();
-                treatmentObjectsByEffectTypeByParent = new Dictionary<int, Dictionary<Effect.EffectType, GameObject>>();
-                treatmentParentsByIndex = new Dictionary<int, GameObject>();
-                treatmentSelected = new Dictionary<GameObject, bool>();
             }
 
             if (index == -1)
@@ -2848,7 +3111,7 @@ namespace EFM
                         && treatmentObjectsByEffectType.TryGetValue(Effect.EffectType.HealthRate, out GameObject treatmentObject))
                     {
                         // Treatment already exists under this parent, recalculate cost
-                        int cost = (int)(Mod.GetCurrentMaxHealth(index) - Mod.GetHealth(index)) * (int)Mod.globalDB["config"]["HealPrice"]["HealthPointPrice"];
+                        int cost = (int)(Mod.GetCurrentMaxHealth(index) - Mod.GetHealth(index)) * (int)Mod.globalDB["config"]["Health"]["HealPrice"]["HealthPointPrice"];
                         treatmentObject.transform.GetChild(3).GetComponent<Text>().text = cost.ToString();
                         treatmentCosts[treatmentObject] = cost;
 
@@ -2868,7 +3131,7 @@ namespace EFM
                     else // Dont yet have health treatment under this parent or parent does not yet exist
                     {
                         GameObject newTreatmentObject = Instantiate(treatmentPartSubEntry, treatmentListParent);
-                        int cost = (int)(Mod.GetCurrentMaxHealth(index) - Mod.GetHealth(index)) * (int)Mod.globalDB["config"]["HealPrice"]["HealthPointPrice"];
+                        int cost = (int)(Mod.GetCurrentMaxHealth(index) - Mod.GetHealth(index)) * (int)Mod.globalDB["config"]["Health"]["HealPrice"]["HealthPointPrice"];
                         treatmentCosts.Add(newTreatmentObject, cost);
                         treatmentSelected.Add(newTreatmentObject, true);
                         newTreatmentObject.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnTreatmentCheckToggle(newTreatmentObject); });
@@ -2929,6 +3192,8 @@ namespace EFM
 
             treatmentTotalCost.text = "Selected Total: " + totalCost.ToString();
             totalTreatmentCost = totalCost;
+
+            treatmentApplyButton.SetActive(Mod.GetItemCountInInventories("5449016a4bdc2d6f028b456f") >= totalCost);
         }
 
         public void OnTreatmentCheckToggle(GameObject treatmentObject)

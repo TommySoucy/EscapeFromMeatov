@@ -748,7 +748,7 @@ namespace EFM
             }
             for(int i=0; i < toRemove.Count; ++i)
             {
-                effectsByType.Remove(toRemove[i]);
+                RemoveEffects(toRemove[i]);
             }
         }
 
