@@ -6,8 +6,11 @@ namespace EFM
     {
         public int experienceReward;
         public bool PMC;
-        public bool scav;
         public bool USEC;
+        public bool scav;
+        public string dataName;
         public BotInventory botInventory;
+
+        public KillData latestDamageSourceKillData;
     }
 }

@@ -102,6 +102,7 @@
     <Compile Include="src\ItemDescriptionListEntryUI.cs" />
     <Compile Include="src\ItemDescriptionUI.cs" />
     <Compile Include="src\ItemPlantZone.cs" />
+    <Compile Include="src\ItemReference.cs" />
     <Compile Include="src\ItemRewardView.cs" />
     <Compile Include="src\ItemView.cs" />
     <Compile Include="src\KillData.cs" />

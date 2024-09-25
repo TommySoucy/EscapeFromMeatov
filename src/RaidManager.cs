@@ -113,28 +113,38 @@ namespace EFM
             if (control)
             {
                 AI ai = sosig.GetComponent<AI>();
-                if(ai != null && ai.scav)
+                if(ai != null)
                 {
-                    --activeScavCount;
-
-                    if (Networking.currentInstance != null)
+                    if (ai.scav)
                     {
-                        Networking.currentInstance.activeScavCount = activeScavCount;
+                        --activeScavCount;
 
-                        using (Packet packet = new Packet(Networking.setRaidActiveScavCountPacketID))
+                        if (Networking.currentInstance != null)
                         {
-                            packet.Write(Networking.currentInstance.ID);
-                            packet.Write(activeScavCount);
+                            Networking.currentInstance.activeScavCount = activeScavCount;
 
-                            if (ThreadManager.host)
+                            using (Packet packet = new Packet(Networking.setRaidActiveScavCountPacketID))
                             {
-                                ServerSend.SendTCPDataToAll(packet, true);
-                            }
-                            else
-                            {
-                                ClientSend.SendTCPData(packet, true);
+                                packet.Write(Networking.currentInstance.ID);
+                                packet.Write(activeScavCount);
+
+                                if (ThreadManager.host)
+                                {
+                                    ServerSend.SendTCPDataToAll(packet, true);
+                                }
+                                else
+                                {
+                                    ClientSend.SendTCPData(packet, true);
+                                }
                             }
                         }
+                    }
+
+                    if(ai.latestDamageSourceKillData != null)
+                    {
+                        Mod.OnKillInvoke(ai.latestDamageSourceKillData);
+                        Mod.raidKills.Add(ai.latestDamageSourceKillData);
+                        ai.latestDamageSourceKillData = null;
                     }
                 }
             }
@@ -821,7 +831,7 @@ namespace EFM
                 // Generate outfit from inventory
                 List<FVRObject>[] botOutfit = botInventory.GetOutfit(true);
 
-                AnvilManager.Run(SpawnSosig(spawn, botInventory, sosigTemplate, botOutfit, enemyIFF++, 300, true, false, USEC));
+                AnvilManager.Run(SpawnSosig(spawn, botInventory, sosigTemplate, botOutfit, enemyIFF++, 300, true, USEC, false, USEC ? "usec" : "bear"));
 
                 // Loop IFF once we've reached max
                 if(enemyIFF > 31)
@@ -908,7 +918,7 @@ namespace EFM
                 // Generate outfit from inventory
                 List<FVRObject>[] botOutfit = botInventory.GetOutfit(true);
 
-                AnvilManager.Run(SpawnSosig(spawn, botInventory, sosigTemplate, botOutfit, 1, 100, false, true, false));
+                AnvilManager.Run(SpawnSosig(spawn, botInventory, sosigTemplate, botOutfit, 1, 100, false, false, true, botDataName));
 
                 ++activeScavCount;
 
@@ -1003,7 +1013,7 @@ namespace EFM
                         // Generate outfit from inventory
                         List<FVRObject>[] botOutfit = botInventory.GetOutfit(true);
 
-                        AnvilManager.Run(SpawnSosig(selectedSpawn, botInventory, sosigTemplate, botOutfit, enemyIFF, 300, false, false, false));
+                        AnvilManager.Run(SpawnSosig(selectedSpawn, botInventory, sosigTemplate, botOutfit, enemyIFF, 300, false, false, false, selectedSpawn.bossID));
 
                         // Spawn squadmembers if necessary
                         if(selectedSpawn.squadMembers != null && selectedSpawn.squadMembers.Count > 0)
@@ -1037,7 +1047,7 @@ namespace EFM
                                         // Generate outfit from inventory
                                         List<FVRObject>[] squadMemberBotOutfit = squadMemberBotInventory.GetOutfit(true);
 
-                                        AnvilManager.Run(SpawnSosig(selectedSpawn, squadMemberBotInventory, squadMemberSosigTemplate, squadMemberBotOutfit, enemyIFF, 200, false, false, false));
+                                        AnvilManager.Run(SpawnSosig(selectedSpawn, squadMemberBotInventory, squadMemberSosigTemplate, squadMemberBotOutfit, enemyIFF, 200, false, false, false, selectedSpawn.squadMembers[j]));
                                     }
                                     else
                                     {
@@ -1080,7 +1090,7 @@ namespace EFM
                                         // Generate outfit from inventory
                                         List<FVRObject>[] squadMemberBotOutfit = squadMemberBotInventory.GetOutfit(true);
 
-                                        AnvilManager.Run(SpawnSosig(selectedSpawn, squadMemberBotInventory, squadMemberSosigTemplate, squadMemberBotOutfit, enemyIFF, 200, false, false, false));
+                                        AnvilManager.Run(SpawnSosig(selectedSpawn, squadMemberBotInventory, squadMemberSosigTemplate, squadMemberBotOutfit, enemyIFF, 200, false, false, false, randomMember));
                                     }
                                     else
                                     {
@@ -1125,7 +1135,7 @@ namespace EFM
             }
         }
 
-        public IEnumerator SpawnSosig(Spawn spawn, BotInventory botInventory, SosigConfigTemplate template, List<FVRObject>[] outfit, int IFF, int experienceReward, bool PMC, bool scav, bool USEC)
+        public IEnumerator SpawnSosig(Spawn spawn, BotInventory botInventory, SosigConfigTemplate template, List<FVRObject>[] outfit, int IFF, int experienceReward, bool PMC, bool USEC, bool scav, string dataName)
         {
             yield return IM.OD["SosigBody"].GetGameObjectAsync();
             GameObject sosigPrefab = IM.OD["SosigBody"].GetGameObject();
@@ -1145,6 +1155,7 @@ namespace EFM
                 Networking.PMC = PMC;
                 Networking.scav = scav;
                 Networking.USEC = USEC;
+                Networking.dataName = dataName;
             }
             GameObject sosigObject = Instantiate(sosigPrefab, spawnPos, Quaternion.identity);
             Sosig sosig = sosigObject.GetComponentInChildren<Sosig>();
@@ -1158,6 +1169,7 @@ namespace EFM
                 AIScript.PMC = PMC;
                 AIScript.scav = scav;
                 AIScript.USEC = USEC;
+                AIScript.dataName = dataName;
             }
             else
             {

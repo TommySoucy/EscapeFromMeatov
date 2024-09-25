@@ -30,6 +30,7 @@ namespace EFM
         public static bool PMC;
         public static bool scav;
         public static bool USEC;
+        public static string dataName;
         public static BotInventory botInventory;
 
         public static int addInstancePacketID; // AddEFMInstancePacketID
@@ -462,6 +463,7 @@ namespace EFM
             AIScript.PMC = PMC;
             AIScript.scav = scav;
             AIScript.USEC = USEC;
+            AIScript.dataName = dataName;
 
             List<byte> data = new List<byte>();
 
@@ -495,6 +497,8 @@ namespace EFM
             boolData <<= 1;
             boolData |= (USEC ? 1 : 0);
             data.Add((byte)boolData);
+            data.Add((byte)dataName.Length);
+            data.AddRange(Encoding.ASCII.GetBytes(dataName));
 
             sosig.data = data.ToArray();
 
@@ -561,6 +565,8 @@ namespace EFM
             AIScript.USEC = (boolData & 1) == 1;
             AIScript.scav = ((boolData >> 1) & 1) == 1;
             AIScript.PMC = ((boolData >> 2) & 1) == 1;
+            byte dataNameLength = sosig.data[offset++];
+            AIScript.dataName = Encoding.ASCII.GetString(sosig.data, offset, dataNameLength);
 
             processed = true;
         }

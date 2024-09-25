@@ -742,6 +742,19 @@ namespace EFM
             currentRecoilVertical = Mathf.Max(0, currentVertical);
         }
 
+        public void GetAllChildrenData(bool addThis, List<MeatovItemData> data)
+        {
+            if (addThis)
+            {
+                data.Add(itemData);
+            }
+
+            for (int i=0; i < children.Count; ++i)
+            {
+                children[i].GetAllChildrenData(true, data);
+            }
+        }
+
         public void AddAttachmentRecoil(MeatovItem currentItem, ref int currentHorizontal, ref int currentVertical)
         {
             // We don't want to count children weapon attachments

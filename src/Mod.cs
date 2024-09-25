@@ -10,6 +10,8 @@ using Valve.Newtonsoft.Json.Linq;
 using Valve.VR;
 using UnityEngine.UI;
 using ModularWorkshop;
+using H3MP.Scripts;
+using H3MP.Tracking;
 
 namespace EFM
 {
@@ -76,7 +78,6 @@ namespace EFM
         public static bool PMCSpawnTogether;
         public static HideoutController.FinishRaidState raidState;
         public static bool justFinishedRaid;
-        public static Dictionary<string, int> killList;
         public static int lootingExp = 0;
         public static int healingExp = 0;
         public static int explorationExp = 0;
@@ -701,6 +702,9 @@ namespace EFM
             Mod.LogInfo("Meatov path found: " + path, false);
 
             H3MP.Mod.OnInstantiationTrack += H3MP_OnInstantiationTrack;
+            H3MP.Patches.ExplosionDamageablePatch.OnAddControllerReference += OnDamagerAddControllerReference;
+            H3MP.Patches.ExplosionDamageablePatch.OnDamage += OnExplosionDamage;
+            H3MP.Patches.BallisticProjectileDamageablePatch.OnDamage += OnProjectileDamage;
 
             LoadConfig();
 
@@ -4662,6 +4666,193 @@ namespace EFM
                     instantiatedItem = go;
                 }
             }
+        }
+
+        // This will be called when a an explosive explodes, giving us the chance to keep a reference
+        // to the grenade's data on the explosion itself. We can later use this to know exactly which type of grenade
+        // was used to damage a damageable
+        // Note that we assume that as long as the explosive has a meatovitem, it comes from the player
+        public void OnDamagerAddControllerReference(GameObject dest, MonoBehaviour src)
+        {
+            GameObject srcToUse = src == null ? dest : src.gameObject;
+            MeatovItem meatovItem = srcToUse.GetComponent<MeatovItem>();
+            if (meatovItem != null)
+            {
+                ItemReference reference = dest.GetComponent<ItemReference>();
+                if (reference == null)
+                {
+                    reference = dest.AddComponent<ItemReference>();
+                }
+                reference.itemData = meatovItem.itemData;
+            }
+        }
+
+        // This will be called when a Grenade/Explosion causes damage to a damageable, so we can
+        // store data about the damager so we can later get a KillData if necessary
+        public void OnExplosionDamage(MonoBehaviour mb, IFVRDamageable damageable)
+        {
+            if (RaidManager.instance == null)
+            {
+                return;
+            }
+
+            if (damageable is SosigLink)
+            {
+                SosigLink sosigLink = (SosigLink)damageable;
+                AI AIRef = sosigLink.S.GetComponent<AI>();
+                ItemReference itemRef = mb.GetComponent<ItemReference>();
+                if (itemRef != null && itemRef.itemData != null)
+                {
+                    KillData killData = new KillData();
+                    killData.distance = Vector3.Distance(GM.CurrentPlayerBody.Head.position, mb.transform.position);
+                    killData.name = sosigLink.S.name;
+                    killData.baseExperienceReward = AIRef.experienceReward;
+                    killData.enemyTarget = AIRef.PMC ? (AIRef.USEC ? ConditionCounter.EnemyTarget.Usec : ConditionCounter.EnemyTarget.Bear) : ConditionCounter.EnemyTarget.Savage;
+                    killData.savageRole = AIRef.dataName;
+                    killData.weaponData = itemRef.itemData;
+                    TODO: // Enemy health effects
+                    if (sosigLink.BodyPart == SosigLink.SosigBodyPart.Head)
+                    {
+                        killData.bodyPart = ConditionCounter.TargetBodyPart.Head;
+                    }
+                    else if (sosigLink.BodyPart == SosigLink.SosigBodyPart.Torso)
+                    {
+                        bool torso = UnityEngine.Random.value < 0.5;
+                        if (torso)
+                        {
+                            killData.bodyPart = ConditionCounter.TargetBodyPart.Chest;
+                        }
+                        else
+                        {
+                            bool left = UnityEngine.Random.value < 0.5;
+                            if (left)
+                            {
+                                killData.bodyPart = ConditionCounter.TargetBodyPart.LeftArm;
+                            }
+                            else
+                            {
+                                killData.bodyPart = ConditionCounter.TargetBodyPart.RightArm;
+                            }
+                        }
+                    }
+                    else if (sosigLink.BodyPart == SosigLink.SosigBodyPart.UpperLink)
+                    {
+                        killData.bodyPart = ConditionCounter.TargetBodyPart.Stomach;
+                    }
+                    else // Lower link
+                    {
+                        bool left = UnityEngine.Random.value < 0.5;
+                        if (left)
+                        {
+                            killData.bodyPart = ConditionCounter.TargetBodyPart.LeftLeg;
+                        }
+                        else
+                        {
+                            killData.bodyPart = ConditionCounter.TargetBodyPart.RightLeg;
+                        }
+                    }
+                    killData.killTime = RaidManager.instance.time;
+                    killData.level = (int)Mathf.Clamp(RandomGaussian(Mod.level), 1, 100);
+
+                    AIRef.latestDamageSourceKillData = killData;
+                }
+                else // Not from a player damage source, clear kill data
+                {
+                    AIRef.latestDamageSourceKillData = null;
+                }
+            }
+        }
+
+        // This will be called when a ballistic projectile causes damage to a damageable, so we can
+        // store data about the damager so we can later get a KillData if necessary
+        public void OnProjectileDamage(FVRFireArm firearm, IFVRDamageable damageable)
+        {
+            if(RaidManager.instance == null)
+            {
+                return;
+            }
+
+            if (damageable is SosigLink)
+            {
+                SosigLink sosigLink = (SosigLink)damageable;
+                AI AIRef = sosigLink.S.GetComponent<AI>();
+                MeatovItem itemRef = firearm.GetComponent<MeatovItem>();
+                if (itemRef != null)
+                {
+                    KillData killData = new KillData();
+                    killData.distance = Vector3.Distance(GM.CurrentPlayerBody.Head.position, sosigLink.transform.position);
+                    killData.name = sosigLink.S.name;
+                    killData.baseExperienceReward = AIRef.experienceReward;
+                    killData.enemyTarget = AIRef.PMC ? (AIRef.USEC ? ConditionCounter.EnemyTarget.Usec : ConditionCounter.EnemyTarget.Bear) : ConditionCounter.EnemyTarget.Savage;
+                    killData.savageRole = AIRef.dataName;
+                    killData.weaponData = itemRef.itemData;
+                    killData.weaponChildrenData = new List<MeatovItemData>();
+                    itemRef.GetAllChildrenData(false, killData.weaponChildrenData);
+                    TODO: // Enemy health effects
+                    if (sosigLink.BodyPart == SosigLink.SosigBodyPart.Head)
+                    {
+                        killData.bodyPart = ConditionCounter.TargetBodyPart.Head;
+                    }
+                    else if (sosigLink.BodyPart == SosigLink.SosigBodyPart.Torso)
+                    {
+                        bool torso = UnityEngine.Random.value < 0.5;
+                        if (torso)
+                        {
+                            killData.bodyPart = ConditionCounter.TargetBodyPart.Chest;
+                        }
+                        else
+                        {
+                            bool left = UnityEngine.Random.value < 0.5;
+                            if (left)
+                            {
+                                killData.bodyPart = ConditionCounter.TargetBodyPart.LeftArm;
+                            }
+                            else
+                            {
+                                killData.bodyPart = ConditionCounter.TargetBodyPart.RightArm;
+                            }
+                        }
+                    }
+                    else if (sosigLink.BodyPart == SosigLink.SosigBodyPart.UpperLink)
+                    {
+                        killData.bodyPart = ConditionCounter.TargetBodyPart.Stomach;
+                    }
+                    else // Lower link
+                    {
+                        bool left = UnityEngine.Random.value < 0.5;
+                        if (left)
+                        {
+                            killData.bodyPart = ConditionCounter.TargetBodyPart.LeftLeg;
+                        }
+                        else
+                        {
+                            killData.bodyPart = ConditionCounter.TargetBodyPart.RightLeg;
+                        }
+                    }
+                    killData.killTime = RaidManager.instance.time;
+                    killData.level = (int)Mathf.Clamp(RandomGaussian(Mod.level), 1, 100);
+                    AIRef.latestDamageSourceKillData = killData;
+
+                    Mod.OnShotInvoke(new ShotData(killData));
+                }
+                else // Not from a player damage source, clear kill data
+                {
+                    AIRef.latestDamageSourceKillData = null;
+                }
+            }
+        }
+
+        public static float RandomGaussian(float mu = 0, float sigma = 1)
+        {
+            float u1 = 1 - UnityEngine.Random.value;
+            float u2 = 1 - UnityEngine.Random.value;
+
+            float rand_std_normal = Mathf.Sqrt(-2.0f * Mathf.Log(u1)) *
+                                Mathf.Sin(2.0f * Mathf.PI * u2);
+
+            float rand_normal = mu + sigma * rand_std_normal;
+
+            return rand_normal;
         }
 
         public static string FormatCompleteMoneyString(long amount)
