@@ -3863,7 +3863,7 @@ namespace EFM
             if (loading) // Started loading
             {
                 // Set instance to 0 if leaving raid or if going to MeatovMainMenu
-                if(GameObject.FindObjectOfType<RaidManager>() != null || H3MP.Patches.LoadLevelBeginPatch.loadingLevel.Equals("MeatovMainMenu"))
+                if(Networking.currentInstance != null && (GameObject.FindObjectOfType<RaidManager>() != null || H3MP.Patches.LoadLevelBeginPatch.loadingLevel.Equals("MeatovMainMenu")))
                 {
                     H3MP.GameManager.SetInstance(0);
                 }
