@@ -182,7 +182,8 @@
       <HintPath>packages\HarmonyX.2.10.2\lib\net35\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\H3VR.GameLibs.0.113.4\lib\net35\Assembly-CSharp.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>D:\VR\H3VR Modding\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\H3VR.GameLibs.0.113.4\lib\net35\Assembly-CSharp-firstpass.dll</HintPath>
@@ -190,7 +191,7 @@
     <Reference Include="BepInEx, Version=5.4.21.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\BepInEx.BaseLib.5.4.21\lib\net35\BepInEx.dll</HintPath>
     </Reference>
-    <Reference Include="H3MP, Version=1.9.15.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="H3MP, Version=1.10.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>D:\VR\H3VR Modding\H3MP\H3MP\H3MP\bin\Debug\H3MP.dll</HintPath>
     </Reference>

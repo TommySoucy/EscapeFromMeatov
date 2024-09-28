@@ -431,16 +431,12 @@ namespace EFM
             // SosigPatch
             MethodInfo supressionUpdateOriginal = typeof(Sosig).GetMethod("SuppresionUpdate", BindingFlags.NonPublic | BindingFlags.Instance);
             MethodInfo supressionUpdatePrefix = typeof(SosigPatch).GetMethod("SuppresionUpdatePrefix", BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo stateBailCheckShouldISkirmishOriginal = typeof(Sosig).GetMethod("StateBailCheck_ShouldISkirmish", BindingFlags.NonPublic | BindingFlags.Instance);
-            MethodInfo stateBailCheckShouldISkirmishPrefix = typeof(SosigPatch).GetMethod("StateBailCheck_ShouldISkirmishPrefix", BindingFlags.NonPublic | BindingFlags.Static);
             MethodInfo executeDoorManipulationOriginal = typeof(Sosig).GetMethod("ExecuteDoorManipulation", BindingFlags.NonPublic | BindingFlags.Instance);
             MethodInfo executeDoorManipulationPrefix = typeof(SosigPatch).GetMethod("ExecuteDoorManipulationPrefix", BindingFlags.NonPublic | BindingFlags.Static);
 
             PatchController.Verify(supressionUpdateOriginal, harmony, true);
-            PatchController.Verify(stateBailCheckShouldISkirmishOriginal, harmony, true);
             PatchController.Verify(executeDoorManipulationOriginal, harmony, true);
             harmony.Patch(supressionUpdateOriginal, new HarmonyMethod(supressionUpdatePrefix));
-            harmony.Patch(stateBailCheckShouldISkirmishOriginal, new HarmonyMethod(stateBailCheckShouldISkirmishPrefix));
             harmony.Patch(executeDoorManipulationOriginal, new HarmonyMethod(executeDoorManipulationPrefix));
 
             // SosigHandPatch
@@ -4734,7 +4730,7 @@ namespace EFM
             bool closed = doorLink.EFMDoor.closedMinRot ? doorLink.EFMDoor.rotAngle == doorLink.EFMDoor.minRot : doorLink.EFMDoor.rotAngle == doorLink.EFMDoor.maxRot;
             bool cantManipulate = closed && doorLink.EFMDoor.lockScript != null && doorLink.EFMDoor.lockScript.locked;
             bool flag4 = __instance.HasABrain;
-            flag4 = (__instance.m_alertnessLevel <= 0.5f && __instance.m_pathWith != null && __instance.m_pathWith.Count <= 1);
+            flag4 = (__instance.m_aggrolevel <= 0.5f && __instance.m_pathWith != null && __instance.m_pathWith.Count <= 1);
             if (!__instance.HasABrain)
             {
                 flag4 = false;
@@ -4799,65 +4795,6 @@ namespace EFM
             {
                 __instance.m_suppressionLevel -= Time.deltaTime * 5f;
             }
-
-            return false;
-        }
-
-        static bool StateBailCheck_ShouldISkirmishPrefix(Sosig __instance, ref bool __result)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return true;
-            }
-
-            if (__instance.m_isBlinded)
-            {
-                __result = false;
-                return false;
-            }
-            if (__instance.Priority.HasFreshTarget())
-            {
-                if (__instance.Priority.IsTargetEntity() && !__instance.Priority.GetTargetEntity().IsPassiveEntity)
-                {
-                    // Recognition time is now 0.5s if not investigating, and 0.05s if investigating
-                    float num = 2f;
-                    if (__instance.CurrentOrder == Sosig.SosigOrder.Investigate)
-                    {
-                        num = 20f;
-                    }
-                    if (__instance.m_entityRecognition < 1f)
-                    {
-                        __instance.m_entityRecognition += Time.deltaTime * num;
-                    }
-                    if (__instance.m_entityRecognition >= 1f)
-                    {
-                        __instance.SetCurrentOrder(Sosig.SosigOrder.Skirmish);
-                        __result = true;
-                        return false;
-                    }
-                }
-                else if (__instance.m_entityRecognition > 0f)
-                {
-                    __instance.m_entityRecognition -= Time.deltaTime;
-                }
-                if (__instance.CurrentOrder != Sosig.SosigOrder.Investigate && __instance.m_alertnessLevel >= 1f)
-                {
-                    if (__instance.Priority.GetTargetEntity() != null && __instance.Priority.GetTargetEntity().IsPassiveEntity)
-                    {
-                        __instance.Priority.DisregardEntity(__instance.Priority.GetTargetEntity());
-                    }
-                    __instance.SetCurrentOrder(Sosig.SosigOrder.Investigate);
-                    __instance.m_investigateCooldown = UnityEngine.Random.Range(8f, 11f);
-                    __result = true;
-                    return false;
-                }
-            }
-            else if (__instance.m_entityRecognition > 0f)
-            {
-                __instance.m_entityRecognition -= Time.deltaTime;
-            }
-
-            __result = false;
 
             return false;
         }

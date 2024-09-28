@@ -809,10 +809,12 @@ namespace EFM
             if(Mod.botData.TryGetValue(USEC ? "usec" : "bear", out JObject botData))
             {
                 // Generate sosig template
-                // Time until skirmish when recognizing an enemy entity will increase faster due to StateBailCheck_ShouldISkirmish patch
                 // ADS time will be faster due to SosigHand.Hold patch
                 // Supression will decrease faster due to SuppresionUpdate patch
                 SosigConfigTemplate sosigTemplate = ScriptableObject.CreateInstance<SosigConfigTemplate>();
+                sosigTemplate.EntityRecognitionSpeedMultiplier = 20;
+                sosigTemplate.AggroSensitivityMultiplier = 20;
+                sosigTemplate.CombatTargetIdentificationSpeedMultiplier = 20;
                 sosigTemplate.RegistersPassiveThreats = true;
                 sosigTemplate.DoesDropWeaponsOnBallistic = false;
                 sosigTemplate.ShudderThreshold = 1000; // High number, sosig should probably just never shudder
@@ -896,10 +898,12 @@ namespace EFM
             if(Mod.botData.TryGetValue(botDataName, out JObject botData))
             {
                 // Generate sosig template
-                // Time until skirmish when recognizing an enemy entity will increase faster due to StateBailCheck_ShouldISkirmish patch
                 // ADS time will be faster due to SosigHand.Hold patch
                 // Supression will decrease faster due to SuppresionUpdate patch
                 SosigConfigTemplate sosigTemplate = ScriptableObject.CreateInstance<SosigConfigTemplate>();
+                sosigTemplate.EntityRecognitionSpeedMultiplier = 20;
+                sosigTemplate.AggroSensitivityMultiplier = 20;
+                sosigTemplate.CombatTargetIdentificationSpeedMultiplier = 20;
                 sosigTemplate.RegistersPassiveThreats = true;
                 sosigTemplate.DoesDropWeaponsOnBallistic = false;
                 sosigTemplate.ShudderThreshold = 1000; // High number, sosig should probably just never shudder
@@ -991,10 +995,12 @@ namespace EFM
                     if (Mod.botData.TryGetValue(selectedSpawn.bossID, out JObject botData))
                     {
                         // Generate sosig template
-                        // Time until skirmish when recognizing an enemy entity will increase faster due to StateBailCheck_ShouldISkirmish patch
                         // ADS time will be faster due to SosigHand.Hold patch
                         // Supression will decrease faster due to SuppresionUpdate patch
                         SosigConfigTemplate sosigTemplate = ScriptableObject.CreateInstance<SosigConfigTemplate>();
+                        sosigTemplate.EntityRecognitionSpeedMultiplier = 20;
+                        sosigTemplate.AggroSensitivityMultiplier = 20;
+                        sosigTemplate.CombatTargetIdentificationSpeedMultiplier = 20;
                         sosigTemplate.RegistersPassiveThreats = true;
                         sosigTemplate.DoesDropWeaponsOnBallistic = false;
                         sosigTemplate.ShudderThreshold = 1000; // High number, sosig should probably just never shudder
@@ -1025,10 +1031,12 @@ namespace EFM
                                     if (Mod.botData.TryGetValue(selectedSpawn.squadMembers[j], out JObject squadMemberBotData))
                                     {
                                         // Generate sosig template
-                                        // Time until skirmish when recognizing an enemy entity will increase faster due to StateBailCheck_ShouldISkirmish patch
                                         // ADS time will be faster due to SosigHand.Hold patch
                                         // Supression will decrease faster due to SuppresionUpdate patch
                                         SosigConfigTemplate squadMemberSosigTemplate = ScriptableObject.CreateInstance<SosigConfigTemplate>();
+                                        sosigTemplate.EntityRecognitionSpeedMultiplier = 20;
+                                        sosigTemplate.AggroSensitivityMultiplier = 20;
+                                        sosigTemplate.CombatTargetIdentificationSpeedMultiplier = 20;
                                         squadMemberSosigTemplate.RegistersPassiveThreats = true;
                                         squadMemberSosigTemplate.DoesDropWeaponsOnBallistic = false;
                                         squadMemberSosigTemplate.ShudderThreshold = 1000; // High number, sosig should probably just never shudder
@@ -1068,10 +1076,12 @@ namespace EFM
                                     if (Mod.botData.TryGetValue(randomMember, out JObject squadMemberBotData))
                                     {
                                         // Generate sosig template
-                                        // Time until skirmish when recognizing an enemy entity will increase faster due to StateBailCheck_ShouldISkirmish patch
                                         // ADS time will be faster due to SosigHand.Hold patch
                                         // Supression will decrease faster due to SuppresionUpdate patch
                                         SosigConfigTemplate squadMemberSosigTemplate = ScriptableObject.CreateInstance<SosigConfigTemplate>();
+                                        sosigTemplate.EntityRecognitionSpeedMultiplier = 20;
+                                        sosigTemplate.AggroSensitivityMultiplier = 20;
+                                        sosigTemplate.CombatTargetIdentificationSpeedMultiplier = 20;
                                         squadMemberSosigTemplate.RegistersPassiveThreats = true;
                                         squadMemberSosigTemplate.DoesDropWeaponsOnBallistic = false;
                                         squadMemberSosigTemplate.ShudderThreshold = 1000; // High number, sosig should probably just never shudder
