@@ -10,8 +10,7 @@ using Valve.Newtonsoft.Json.Linq;
 using Valve.VR;
 using UnityEngine.UI;
 using ModularWorkshop;
-using H3MP.Scripts;
-using H3MP.Tracking;
+using HarmonyLib;
 
 namespace EFM
 {
@@ -27,6 +26,7 @@ namespace EFM
 
         // Constants
         public static readonly string itemParentID = "54009119af1c881c07000029";
+        public static int meatovTimeMultiplier = 7;
         public static readonly float headshotDamageMultiplier = 1.2f;
         public static readonly float handDamageResist = 0.5f;
         //public static readonly float[] sizeVolumes = { 1, 2, 5, 30, 0, 50}; // 0: Small, 1: Medium, 2: Large, 3: Massive, 4: None, 5: CantCarryBig
@@ -48,20 +48,14 @@ namespace EFM
         public static AssetBundle defaultBundle;
         public static AssetBundle mainMenuBundle;
         public static AssetBundle hideoutBundle;
-        public static AssetBundleCreateRequest hideoutBundleRequest;
         public static AssetBundle hideoutAssetsBundle;
-        public static AssetBundleCreateRequest hideoutAssetsBundleRequest;
         public static AssetBundle[] hideoutAreaBundles;
-        public static AssetBundleCreateRequest[] hideoutAreaBundleRequests;
         public static AssetBundle itemIconsBundle;
-        public static AssetBundleCreateRequest itemIconsBundleRequest;
         public static AssetBundle[] itemsBundles;
-        public static AssetBundleCreateRequest[] itemsBundlesRequests;
         public static AssetBundle playerBundle;
-        public static AssetBundleCreateRequest playerBundleRequest;
-        public static AssetBundleCreateRequest raidMapBundleRequest;
-        public static List<AssetBundleCreateRequest> raidMapAdditiveBundleRequests;
-        public static List<AssetBundleCreateRequest> raidMapPrefabBundleRequests;
+        public static AssetBundle raidMapBundle;
+        public static List<AssetBundle> raidMapAdditiveBundles;
+        public static List<AssetBundle> raidMapPrefabBundles;
         public static List<GameObject> securedMainSceneComponents;
         public static List<GameObject> securedObjects; // Other objects that needed to be secured that do not require special handling
         public static MeatovItem[] securedItems; // Left hand, Right hand, Backpack, BodyArmor, EarPiece, HeadWear, FaceCover, EyeWear, Rig, Pouch, Right shoulder, Pockets
@@ -85,6 +79,7 @@ namespace EFM
         public static List<KillData> raidKills;
         public static float raidTime = 0;
         public static bool loadingToMeatovScene;
+        public static bool keepInstance;
         public static bool inMeatovScene;
         public static int pocketsConfigIndex;
         public static Dictionary<int, int> quickbeltConfigurationIndices;
@@ -118,6 +113,9 @@ namespace EFM
         public static Dictionary<string, Dictionary<string, byte>> noneModulParts; // Dict of "None" modul workshop parts by part ID by group ID
         public static string usedExtraction;
         public static RaidManager.RaidStatus raidStatus;
+        public static List<int> availableSaveFiles;
+        public static bool unloadHideout;
+        public static bool unloadRaid;
 
         // Player
         private static int _level = 1;
@@ -716,6 +714,7 @@ namespace EFM
 
             // Sub to H3MP events
             H3MP.Mod.OnConnection += Networking.OnConnection;
+            H3MP.Networking.ServerClient.OnSendPostWelcomeData += Networking.OnSendPostWelcomeData;
             H3MP.Networking.Client.OnDisconnect += Networking.OnDisconnection;
             H3MP.Networking.Server.OnServerClose += Networking.OnDisconnection;
             H3MP.Tracking.TrackedItem.AddModulPartData += Networking.AddModulPartData;
@@ -863,7 +862,7 @@ namespace EFM
                                 break;
                             case 10: // Load save 0
                                 Mod.LogInfo("\tDebug: Load save 0");
-                                UIController.LoadHideout(0);
+                                LoadHideout(0);
                                 break;
                             case 11: // Kill player
                                 Mod.LogInfo("\tDebug: Kill player");
@@ -894,7 +893,7 @@ namespace EFM
 
                                 //Raid_Manager.currentManager.ResetHealthEffectCounterConditions();
 
-                                UIController.LoadHideout(5); // Load autosave, which is right before the start of raid
+                                LoadHideout(5); // Load autosave, which is right before the start of raid
 
                                 //Raid_Manager.currentManager.extracted = true;
                                 break;
@@ -3336,6 +3335,113 @@ namespace EFM
             }
         }
 
+        public static void LoadHideout(int slotIndex = -1, bool latest = false)
+        {
+            // Load necessary assets
+            if (Mod.hideoutBundle == null) // Need to load asset bundles
+            {
+                Mod.hideoutBundle = AssetBundle.LoadFromFile(Mod.path + "/Assets/efmhideout.ab");
+                Mod.hideoutAssetsBundle = AssetBundle.LoadFromFile(Mod.path + "/Assets/efmhideoutAssets.ab");
+                Mod.hideoutAreaBundles = new AssetBundle[6];
+                for (int i = 0; i < Mod.hideoutAreaBundles.Length; ++i)
+                {
+                    Mod.hideoutAreaBundles[i] = AssetBundle.LoadFromFile(Mod.path + "/Assets/efmhideoutAreas" + i + ".ab");
+                }
+            }
+            if (Mod.playerBundle == null)
+            {
+                Mod.playerBundle = AssetBundle.LoadFromFile(Mod.path + "/Assets/efmplayer.ab");
+                Mod.itemsBundles = new AssetBundle[5];
+                for (int i = 0; i < 5; ++i)
+                {
+                    Mod.itemsBundles[i] = AssetBundle.LoadFromFile(Mod.path + "/Assets/efmitems" + i + ".ab");
+                }
+                Mod.itemIconsBundle = AssetBundle.LoadFromFile(Mod.path + "/Assets/efmitemicons.ab");
+
+                Mod.playerStatusUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("StatusUI");
+                Mod.staminaBarPrefab = Mod.playerBundle.LoadAsset<GameObject>("StaminaBar");
+                Mod.consumeUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("ConsumeUI");
+                Mod.stackSplitUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("StackSplitUI");
+                Mod.extractionUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("ExtractionUI");
+                Mod.extractionLimitUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("ExtractionLimitUI");
+                Mod.itemDescriptionUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("ItemDescriptionUI");
+                Mod.devItemSpawnerPrefab = Mod.playerBundle.LoadAsset<GameObject>("DevItemSpawner");
+                Mod.highlightMaterial = Mod.playerBundle.LoadAsset<Material>("Highlight");
+
+                Mod.quickbeltConfigurationIndices = new Dictionary<int, int>();
+                Mod.pocketsConfigIndex = GM.Instance.QuickbeltConfigurations.Length;
+                GM.Instance.QuickbeltConfigurations = GM.Instance.QuickbeltConfigurations.AddToArray(Mod.playerBundle.LoadAsset<GameObject>("PocketsConfiguration"));
+
+                Mod.questionMarkIcon = Mod.itemIconsBundle.LoadAsset<Sprite>("QuestionMarkIcon");
+                Mod.emptyCellIcon = Mod.itemIconsBundle.LoadAsset<Sprite>("cell_full_border");
+
+                HideoutController.areaCanvasPrefab = Mod.hideoutAssetsBundle.LoadAsset<GameObject>("AreaCanvas");
+            }
+
+            FetchAvailableSaveFiles();
+
+            // Get save data
+            HideoutController.loadedData = null;
+            if (slotIndex == -1)
+            {
+                if (latest)
+                {
+                    long currentLatestTime = 0;
+                    for (int i = 0; i < availableSaveFiles.Count; ++i)
+                    {
+                        int fileIndex = availableSaveFiles[i];
+                        JObject current = JObject.Parse(File.ReadAllText(Mod.path + "/Saves/" + (fileIndex == 5 ? "AutoSave" : "Slot" + fileIndex) + ".sav"));
+                        long saveTime = (long)current["time"];
+                        if (saveTime > currentLatestTime)
+                        {
+                            currentLatestTime = saveTime;
+                            HideoutController.loadedData = current;
+                            Mod.saveSlotIndex = i;
+                        }
+                    }
+                }
+                else // New game, use default save
+                {
+                    HideoutController.loadedData = JObject.Parse(File.ReadAllText(Mod.path + "/Saves/DefaultSave.sav"));
+                }
+            }
+            else
+            {
+                HideoutController.loadedData = JObject.Parse(File.ReadAllText(Mod.path + "/Saves/" + (slotIndex == 5 ? "AutoSave" : "Slot" + slotIndex) + ".sav"));
+                Mod.saveSlotIndex = slotIndex;
+            }
+
+            Mod.loadingToMeatovScene = true;
+            SteamVR_LoadLevel.Begin("MeatovHideout", false, 0.5f, 0f, 0f, 0f, 1f);
+        }
+
+        public static void FetchAvailableSaveFiles()
+        {
+            if (availableSaveFiles == null)
+            {
+                availableSaveFiles = new List<int>();
+            }
+            else
+            {
+                availableSaveFiles.Clear();
+            }
+            string[] allFiles = Directory.GetFiles(Mod.path + "/Saves");
+            foreach (string path in allFiles)
+            {
+                if (path.EndsWith(".sav")) // If .sav is present as the last part of the path
+                {
+                    if (int.TryParse(path[path.Length - 5].ToString(), out int parseResult))
+                    {
+                        availableSaveFiles.Add(parseResult);
+                    }
+                    else // AutoSave.sav
+                    {
+                        availableSaveFiles.Add(5);
+                    }
+                }
+            }
+        }
+
         public static void AddToPlayerInventory(MeatovItem item, bool stackOnly = false, int stackDifference = 0)
         {
             int difference = stackDifference;
@@ -3863,10 +3969,11 @@ namespace EFM
             if (loading) // Started loading
             {
                 // Set instance to 0 if leaving raid or if going to MeatovMainMenu
-                if(Networking.currentInstance != null && (GameObject.FindObjectOfType<RaidManager>() != null || H3MP.Patches.LoadLevelBeginPatch.loadingLevel.Equals("MeatovMainMenu")))
+                if(Networking.currentInstance != null && !keepInstance)
                 {
                     H3MP.GameManager.SetInstance(0);
                 }
+                keepInstance = false;
 
                 // Loading into meatov scene
                 if (loadingToMeatovScene || H3MP.Patches.LoadLevelBeginPatch.loadingLevel.Equals("MeatovMainMenu"))
@@ -3888,6 +3995,63 @@ namespace EFM
                     // Reset pixel light count
                     GM.RefreshQuality();
                 }
+
+                // Unload assets if necessary
+                if (unloadHideout)
+                {
+                    unloadHideout = false;
+                    if (hideoutBundle != null)
+                    {
+                        hideoutBundle.Unload(true);
+                        hideoutBundle = null;
+                    }
+                    if(hideoutAssetsBundle != null)
+                    {
+                        hideoutAssetsBundle.Unload(true);
+                        hideoutAssetsBundle = null;
+                    }
+                    if(hideoutAreaBundles != null)
+                    {
+                        for(int i=0; i < hideoutAreaBundles.Length; ++i)
+                        {
+                            if (hideoutAreaBundles[i] != null)
+                            {
+                                hideoutAreaBundles[i].Unload(true);
+                            }
+                        }
+                        hideoutAreaBundles = null;
+                    }
+                }
+                if (unloadRaid)
+                {
+                    unloadRaid = false;
+                    if(raidMapBundle != null)
+                    {
+                        raidMapBundle.Unload(true);
+                    }
+                    if(raidMapPrefabBundles != null)
+                    {
+                        for (int i = 0; i < raidMapPrefabBundles.Count; ++i)
+                        {
+                            if (raidMapPrefabBundles[i] != null)
+                            {
+                                raidMapPrefabBundles[i].Unload(true);
+                            }
+                        }
+                        raidMapPrefabBundles = null;
+                    }
+                    if(raidMapAdditiveBundles != null)
+                    {
+                        for (int i = 0; i < raidMapAdditiveBundles.Count; ++i)
+                        {
+                            if (raidMapAdditiveBundles[i] != null)
+                            {
+                                raidMapAdditiveBundles[i].Unload(true);
+                            }
+                        }
+                        raidMapAdditiveBundles = null;
+                    }
+                }
             }
             else // Done loading
             {
@@ -3905,22 +4069,22 @@ namespace EFM
                 RaidManager raidManager = GameObject.FindObjectOfType<RaidManager>();
                 if (raidManager != null)
                 {
-                    if(raidMapAdditiveBundleRequests != null)
+                    if(raidMapAdditiveBundles != null)
                     {
-                        for(int i=0; i < raidMapAdditiveBundleRequests.Count; ++i)
+                        for(int i=0; i < raidMapAdditiveBundles.Count; ++i)
                         {
-                            string[] additiveScenes = raidMapAdditiveBundleRequests[i].assetBundle.GetAllScenePaths();
+                            string[] additiveScenes = raidMapAdditiveBundles[i].GetAllScenePaths();
                             for(int j=0; j < additiveScenes.Length; ++j)
                             {
                                 SceneManager.LoadScene(additiveScenes[j], LoadSceneMode.Additive);
                             }
                         }
                     }
-                    if(raidMapPrefabBundleRequests != null)
+                    if(raidMapPrefabBundles != null)
                     {
-                        for(int i=0; i < raidMapPrefabBundleRequests.Count; ++i)
+                        for(int i=0; i < raidMapPrefabBundles.Count; ++i)
                         {
-                            GameObject[] mapPrefabs = raidMapAdditiveBundleRequests[i].assetBundle.LoadAllAssets<GameObject>();
+                            GameObject[] mapPrefabs = raidMapAdditiveBundles[i].LoadAllAssets<GameObject>();
                             for(int j=0; j < mapPrefabs.Length; ++j)
                             {
                                 GameObject.Instantiate(mapPrefabs[j]);
@@ -3932,60 +4096,8 @@ namespace EFM
                 switch (H3MP.Patches.LoadLevelBeginPatch.loadingLevel)
                 {
                     case "MainMenu3":
-                        // Unload hideout bundle
-                        if (hideoutBundle != null)
-                        {
-                            hideoutBundle.Unload(true);
-                            hideoutBundle = null;
-                            hideoutAssetsBundle.Unload(true);
-                            hideoutAssetsBundle = null;
-                            for(int i=0; i < hideoutAreaBundles.Length; ++i)
-                            {
-                                hideoutAreaBundles[i].Unload(true);
-                                hideoutAreaBundles[i] = null;
-                            }
-                            for(int i=0; i < itemsBundles.Length; ++i)
-                            {
-                                itemsBundles[i].Unload(true);
-                                itemsBundles[i] = null;
-                            }
-                            itemIconsBundle.Unload(true);
-                            itemIconsBundle = null;
-                            playerBundle.Unload(true);
-                            playerBundle = null;
-                        }
-
-                        inMeatovScene = false;
                         HideoutController.instance = null;
                         LoadMainMenu();
-                        Mod.currentLocationIndex = -1;
-                        break;
-                    case "MeatovMainMenu":
-                        break;
-                    case "MeatovHideout":
-                        // UnsecureObjects();
-
-                        // Call a GC collect
-                        //baseManager.GCManager.gc_collect();
-                        break;
-                    case "MeatovFactory":
-                        //Mod.currentLocationIndex = 2;
-                        //UnsecureObjects();
-
-                        //GameObject raidRoot = SceneManager.GetActiveScene().GetRootGameObjects()[0];
-
-                        //Raid_Manager raidManager = raidRoot.AddComponent<Raid_Manager>();
-                        //raidManager.Init();
-
-                        //GM.CurrentMovementManager.TeleportToPoint(currentRaidManager.spawnPoint.position, true, currentRaidManager.spawnPoint.rotation.eulerAngles);
-
-                        // Unload the map's asset bundle
-                        //Mod.currentRaidBundleRequest.assetBundle.Unload(false);
-
-                        // Call a GC collect
-                        //raidRoot.GetComponent<Raid_Manager>().GCManager.gc_collect();
-                        break;
-                    default:
                         Mod.currentLocationIndex = -1;
                         break;
                 }
@@ -4278,37 +4390,11 @@ namespace EFM
             }
 
             // Unsecure hand and equipment items
-            for(int i=0; i < securedItems.Length; ++i)
+            if(securedItems != null)
             {
-                SceneManager.MoveGameObjectToScene(securedItems[i].gameObject, SceneManager.GetActiveScene());
-
-                if (scav)
+                for (int i = 0; i < securedItems.Length; ++i)
                 {
-                    securedItems[i].transform.parent = HideoutController.instance.scavReturnNode;
-                }
-                else
-                {
-                    if (i == 0)
-                    {
-                        Mod.leftHand.fvrHand.ForceSetInteractable(securedItems[i].physObj);
-                    }
-                    else if(i == 1)
-                    {
-                        Mod.rightHand.fvrHand.ForceSetInteractable(securedItems[i].physObj);
-                    }
-                    else
-                    {
-                        securedItems[i].physObj.SetQuickBeltSlot(StatusUI.instance.equipmentSlots[i - 2]);
-                    }
-                }
-            }
-
-            // Unsecure slot items
-            for (int i = 0; i < securedSlotItems.Count; ++i)
-            {
-                if(securedSlotItems[i] != null)
-                {
-                    SceneManager.MoveGameObjectToScene(securedSlotItems[i].gameObject, SceneManager.GetActiveScene());
+                    SceneManager.MoveGameObjectToScene(securedItems[i].gameObject, SceneManager.GetActiveScene());
 
                     if (scav)
                     {
@@ -4316,7 +4402,39 @@ namespace EFM
                     }
                     else
                     {
-                        securedItems[i].physObj.SetQuickBeltSlot(i < GM.CurrentPlayerBody.QBSlots_Internal.Count ? GM.CurrentPlayerBody.QBSlots_Internal[i] : GM.CurrentPlayerBody.QBSlots_Added[i + GM.CurrentPlayerBody.QBSlots_Internal.Count]);
+                        if (i == 0)
+                        {
+                            Mod.leftHand.fvrHand.ForceSetInteractable(securedItems[i].physObj);
+                        }
+                        else if (i == 1)
+                        {
+                            Mod.rightHand.fvrHand.ForceSetInteractable(securedItems[i].physObj);
+                        }
+                        else
+                        {
+                            securedItems[i].physObj.SetQuickBeltSlot(StatusUI.instance.equipmentSlots[i - 2]);
+                        }
+                    }
+                }
+            }
+
+            // Unsecure slot items
+            if(securedSlotItems != null)
+            {
+                for (int i = 0; i < securedSlotItems.Count; ++i)
+                {
+                    if (securedSlotItems[i] != null)
+                    {
+                        SceneManager.MoveGameObjectToScene(securedSlotItems[i].gameObject, SceneManager.GetActiveScene());
+
+                        if (scav)
+                        {
+                            securedItems[i].transform.parent = HideoutController.instance.scavReturnNode;
+                        }
+                        else
+                        {
+                            securedItems[i].physObj.SetQuickBeltSlot(i < GM.CurrentPlayerBody.QBSlots_Internal.Count ? GM.CurrentPlayerBody.QBSlots_Internal[i] : GM.CurrentPlayerBody.QBSlots_Added[i + GM.CurrentPlayerBody.QBSlots_Internal.Count]);
+                        }
                     }
                 }
             }

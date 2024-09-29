@@ -60,6 +60,8 @@ namespace EFM
         public void Awake()
         {
             instance = this;
+
+            Mod.currentLocationIndex = 2;
         }
 
         public void Start()
@@ -160,13 +162,13 @@ namespace EFM
         {
             long longTime = GetTimeSeconds();
             long clampedTime = longTime % 86400; // Clamp to 24 hours because thats the relevant range
-            int scaledTime = (int)((clampedTime * UIController.meatovTimeMultiplier) % 86400);
+            int scaledTime = (int)((clampedTime * Mod.meatovTimeMultiplier) % 86400);
             time = scaledTime;
         }
 
         public void UpdateTime()
         {
-            time += UnityEngine.Time.deltaTime * UIController.meatovTimeMultiplier;
+            time += UnityEngine.Time.deltaTime * Mod.meatovTimeMultiplier;
             time %= 86400;
 
             Mod.raidTime += Time.deltaTime;
@@ -1322,7 +1324,8 @@ namespace EFM
             }
 
             // Main scene components will get secured on load start and unsecured upon arrival
-            UIController.LoadHideout(-1, true);
+            Mod.unloadRaid = true;
+            Mod.LoadHideout(-1, true);
         }
 
         public void OnDestroy()

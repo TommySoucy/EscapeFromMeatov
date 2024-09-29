@@ -1,6 +1,4 @@
-﻿using FFmpeg.AutoGen;
-using FistVR;
-using H3MP;
+﻿using H3MP;
 using H3MP.Networking;
 using H3MP.Tracking;
 using ModularWorkshop;
@@ -33,6 +31,7 @@ namespace EFM
         public static string dataName;
         public static BotInventory botInventory;
 
+        public static int initRaidInstancesPacketID; // InitEFMRaidInstancesPacketID
         public static int addInstancePacketID; // AddEFMInstancePacketID
         public static int setPlayerReadynessPacketID; // SetEFMInstancePlayerReadyness
         public static int setInstanceWaitingPacketID; // SetEFMInstanceWaitingPacketID
@@ -52,7 +51,7 @@ namespace EFM
         {
             if(HideoutController.instance != null)
             {
-                if(HideoutController.instance.loadingRaid || HideoutController.instance.countdownDeploy || HideoutController.instance.waitForDeploy)
+                if(HideoutController.instance.countdownDeploy || HideoutController.instance.waitForDeploy)
                 {
                     // Already starting a game, just disconnect
                     if (ThreadManager.host)
@@ -178,6 +177,13 @@ namespace EFM
                     setModulPartDataPacketID = Server.RegisterCustomPacketType("SetEFMModulPartDataPacketID");
                 }
                 H3MP.Mod.customPacketHandlers[setModulPartDataPacketID] = SetModulPartDataServerHandler;
+
+                // Init raid instances
+                if (!H3MP.Mod.registeredCustomPacketIDs.TryGetValue("InitEFMRaidInstancesPacketID", out initRaidInstancesPacketID))
+                {
+                    initRaidInstancesPacketID = Server.RegisterCustomPacketType("InitEFMRaidInstancesPacketID");
+                }
+                H3MP.Mod.customPacketHandlers[initRaidInstancesPacketID] = InitRaidInstancesServerHandler;
             }
             else
             {
@@ -348,6 +354,52 @@ namespace EFM
                     ClientSend.RegisterCustomPacketType("SetEFMModulPartDataPacketID");
                     H3MP.Mod.CustomPacketHandlerReceived += SetModulPartDataPacketIDReceived;
                 }
+
+                // Init raid instances
+                if (H3MP.Mod.registeredCustomPacketIDs.TryGetValue("InitEFMRaidInstancesPacketID", out int customInitRaidInstancesPacketID))
+                {
+                    initRaidInstancesPacketID = customInitRaidInstancesPacketID;
+                    H3MP.Mod.customPacketHandlers[initRaidInstancesPacketID] = InitRaidInstancesClientHandler;
+                }
+                else
+                {
+                    ClientSend.RegisterCustomPacketType("InitEFMRaidInstancesPacketID");
+                    H3MP.Mod.CustomPacketHandlerReceived += InitRaidInstancesPacketIDReceived;
+                }
+            }
+        }
+
+        public static void OnSendPostWelcomeData(int ID)
+        {
+            // Note that this will only ever be called if we are host
+            if (raidInstances == null || raidInstances.Count == 0)
+            {
+                return;
+            }
+
+            using (Packet packet = new Packet(initRaidInstancesPacketID))
+            {
+                packet.Write(raidInstances.Count);
+                foreach (KeyValuePair<int, RaidInstance> instanceEntry in raidInstances)
+                {
+                    packet.Write(instanceEntry.Value.ID);
+                    packet.Write(instanceEntry.Value.map);
+                    packet.Write(instanceEntry.Value.timeIs0);
+                    packet.Write(instanceEntry.Value.spawnTogether);
+                    packet.Write(instanceEntry.Value.waiting);
+                    packet.Write(instanceEntry.Value.players.Count);
+                    for (int j = 0; j < instanceEntry.Value.players.Count; ++j)
+                    {
+                        packet.Write(instanceEntry.Value.players[j]);
+                    }
+                    packet.Write(instanceEntry.Value.readyPlayers.Count);
+                    for (int j = 0; j < instanceEntry.Value.readyPlayers.Count; ++j)
+                    {
+                        packet.Write(instanceEntry.Value.readyPlayers[j]);
+                    }
+                }
+
+                ServerSend.SendTCPData(ID, packet, true);
             }
         }
 
@@ -784,6 +836,16 @@ namespace EFM
             }
         }
 
+        public static void InitRaidInstancesPacketIDReceived(string identifier, int ID)
+        {
+            if (identifier.Equals("InitEFMRaidInstancesPacketID"))
+            {
+                initRaidInstancesPacketID = ID;
+                H3MP.Mod.customPacketHandlers[initRaidInstancesPacketID] = InitRaidInstancesClientHandler;
+                H3MP.Mod.CustomPacketHandlerReceived -= InitRaidInstancesPacketIDReceived;
+            }
+        }
+
         public static RaidInstance AddInstance(string map, bool timeIs0, bool spawnTogether)
         {
             if (ThreadManager.host)
@@ -867,6 +929,11 @@ namespace EFM
 
                 ServerSend.SendTCPDataToAll(newPacket, true);
             }
+        }
+
+        public static void InitRaidInstancesServerHandler(int clientID, Packet packet)
+        {
+            Mod.LogError("Host received InitRaidInstancesServerHandler");
         }
 
         public static void SetPlayerReadynessServerHandler(int clientID, Packet packet)
@@ -1327,6 +1394,35 @@ namespace EFM
             // Only want to set dontAddToInstance if we want to join the TNH instance upon receiving it
             H3MP.GameManager.dontAddToInstance = setLatestInstance;
             OnInstanceReceived(newRaidInstance);
+        }
+
+        public static void InitRaidInstancesClientHandler(int clientID, Packet packet)
+        {
+            int raidCount = packet.ReadInt();
+            for(int i=0; i < raidCount; ++i)
+            {
+                int ID = packet.ReadInt();
+                string map = packet.ReadString();
+                bool timeIs0 = packet.ReadBool();
+                bool spawnTogether = packet.ReadBool();
+                bool waiting = packet.ReadBool();
+                int playerCount = packet.ReadInt();
+                List<int> players = new List<int>();
+                for (int j = 0; j < playerCount; ++j)
+                {
+                    players.Add(packet.ReadInt());
+                }
+                int readyPlayerCount = packet.ReadInt();
+                List<int> readyPlayers = new List<int>();
+                for (int j = 0; j < readyPlayerCount; ++j)
+                {
+                    readyPlayers.Add(packet.ReadInt());
+                }
+
+                RaidInstance newRaidInstance = new RaidInstance(ID, map, timeIs0, spawnTogether, waiting, players, readyPlayers);
+
+                raidInstances.Add(ID, newRaidInstance);
+            }
         }
 
         public static void SetPlayerReadynessClientHandler(int clientID, Packet packet)

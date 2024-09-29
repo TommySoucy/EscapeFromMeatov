@@ -21,7 +21,7 @@ namespace EFM
             Mod.currentLocationIndex = -1;
 
             // TP Player
-            GM.CurrentMovementManager.TeleportToPoint(spawn.position, false, spawn.rotation.eulerAngles);
+            GM.CurrentMovementManager.TeleportToPoint(spawn.position, true, spawn.rotation.eulerAngles);
 
             // Set to no quickbelt slot
             GM.CurrentPlayerBody.ConfigureQuickbelt(-4);
@@ -34,25 +34,15 @@ namespace EFM
             GM.Options.SaveToFile();
         }
 
-        public override void Update()
-        {
-            base.Update();
-
-            if (loadingHideoutAssets)
-            {
-                loadProgressText.text = "Total: "+((int)(loadingHideoutAVGProgress * 100)).ToString()+"%\n\n" +
-                    "Player: "+ ((int)(Mod.playerBundleRequest.progress * 100));
-            }
-        }
-
         public override void InitUI()
         {
             // Set buttons activated depending on presence of save files
-            if(availableSaveFiles.Count > 0)
+            Mod.FetchAvailableSaveFiles();
+            if(Mod.availableSaveFiles.Count > 0)
             {
                 for (int i = 0; i < 6; ++i)
                 {
-                    loadButtons[i].gameObject.SetActive(availableSaveFiles.Contains(i));
+                    loadButtons[i].gameObject.SetActive(Mod.availableSaveFiles.Contains(i));
                 }
             }
             else
@@ -64,7 +54,7 @@ namespace EFM
 
         public void OnNewGameClicked()
         {
-            LoadHideout();
+            Mod.LoadHideout();
             pages[0].SetActive(false);
             pages[2].SetActive(true);
             clickAudio.Play();
@@ -72,7 +62,7 @@ namespace EFM
 
         public void OnContinueClicked()
         {
-            LoadHideout(-1, true);
+            Mod.LoadHideout(-1, true);
             pages[0].SetActive(false);
             pages[2].SetActive(true);
             clickAudio.Play();
@@ -87,7 +77,7 @@ namespace EFM
 
         public void OnLoadSlotClicked(int slotIndex)
         {
-            LoadHideout(slotIndex);
+            Mod.LoadHideout(slotIndex);
             pages[1].SetActive(false);
             pages[2].SetActive(true);
             clickAudio.Play();

@@ -46,6 +46,7 @@ namespace EFM
         public Text loadingChosenCharacter;
         public Text loadingChosenMap;
         public Text loadingChosenTime;
+        public Text loadingCountdownText;
         public AudioSource clickAudio;
         public Text scavTimerText;
         public Collider scavButtonCollider;
@@ -122,13 +123,10 @@ namespace EFM
         public GameObject waitingInstanceStartButton;
         public GameObject waitingInstancePlayerListPreviousButton;
         public GameObject waitingInstancePlayerListNextButton;
-        public GameObject loadingPage;
-        public Text loadingPercentageText;
         public GameObject waitForDeployPage;
         public Text waitForDeployCountText;
         public GameObject countdownPage;
         public Text countdownText;
-        public GameObject cancelPage;
 
         // Assets
         public static GameObject areaCanvasPrefab; // AreaCanvas
@@ -181,6 +179,7 @@ namespace EFM
         public static AudioClip bitcoinFarmAudio;
 
         // Live data
+        public static JObject loadedData;
         public static float[] defaultHealthRates;
         public static float defaultEnergyRate;
         public static float defaultHydrationRate;
@@ -188,11 +187,10 @@ namespace EFM
         public static double secondsSinceSave;
         public float time;
         public bool cancelRaidLoad;
-        public bool loadingRaid;
         public bool countdownDeploy;
         public bool waitForDeploy;
         public float deployTimer;
-        public float deployTime = 0; // TODO: Should be 10 but set to 0 for faster debugging
+        public float deployTime = 5;
         private int insuredSetIndex = 0;
         private float defaultScavTime = 900; // seconds, 15m
         private float scavTimer;
@@ -375,10 +373,8 @@ namespace EFM
             InitUI();
         }
 
-        public override void Update()
+        public void Update()
         {
-            base.Update();
-
             if (init)
             {
                 UpdateTime();
@@ -395,70 +391,48 @@ namespace EFM
             // Handle raid loading process
             if (cancelRaidLoad)
             {
-                loadingRaid = false;
                 countdownDeploy = false;
-                waitForDeploy = false;
+                cancelRaidLoad = false;
+                SetPage(0);
 
-                // Wait until the raid map is done loading before unloading it
-                bool doneLoading = true;
-                doneLoading &= Mod.raidMapBundleRequest.isDone;
-                if (Mod.raidMapAdditiveBundleRequests != null)
+                // Unload raid map assets
+                if(Mod.raidMapBundle != null)
                 {
-                    for (int i = 0; i < Mod.raidMapAdditiveBundleRequests.Count; ++i)
-                    {
-                        doneLoading &= Mod.raidMapAdditiveBundleRequests[i].isDone;
-                    }
+                    Mod.raidMapBundle.Unload(true);
+                    Mod.raidMapBundle = null;
                 }
-                if (Mod.raidMapPrefabBundleRequests != null)
+                if (Mod.raidMapAdditiveBundles != null)
                 {
-                    for (int i = 0; i < Mod.raidMapPrefabBundleRequests.Count; ++i)
+                    for (int i = 0; i < Mod.raidMapAdditiveBundles.Count; ++i)
                     {
-                        doneLoading &= Mod.raidMapPrefabBundleRequests[i].isDone;
-                    }
-                }
-                if (doneLoading)
-                {
-                    if (Mod.raidMapBundleRequest.assetBundle != null)
-                    {
-                        Mod.raidMapBundleRequest.assetBundle.Unload(true);
-                    }
-                    if (Mod.raidMapAdditiveBundleRequests != null)
-                    {
-                        for (int i = 0; i < Mod.raidMapAdditiveBundleRequests.Count; ++i)
+                        if(Mod.raidMapAdditiveBundles[i] != null)
                         {
-                            if(Mod.raidMapAdditiveBundleRequests[i].assetBundle != null)
-                            {
-                                Mod.raidMapAdditiveBundleRequests[i].assetBundle.Unload(true);
-                            }
+                            Mod.raidMapAdditiveBundles[i].Unload(true);
                         }
                     }
-                    if (Mod.raidMapPrefabBundleRequests != null)
+                    Mod.raidMapAdditiveBundles = null;
+                }
+                if (Mod.raidMapPrefabBundles != null)
+                {
+                    for (int i = 0; i < Mod.raidMapPrefabBundles.Count; ++i)
                     {
-                        for (int i = 0; i < Mod.raidMapPrefabBundleRequests.Count; ++i)
+                        if (Mod.raidMapPrefabBundles[i] != null)
                         {
-                            if (Mod.raidMapPrefabBundleRequests[i].assetBundle != null)
-                            {
-                                Mod.raidMapPrefabBundleRequests[i].assetBundle.Unload(true);
-                            }
+                            Mod.raidMapPrefabBundles[i].Unload(true);
                         }
                     }
-                    cancelRaidLoad = false;
-                    cancelPage.SetActive(false);
-                    SetPage(0);
+                    Mod.raidMapPrefabBundles = null;
                 }
             }
             else if (countdownDeploy)
             {
                 deployTimer -= Time.deltaTime;
 
+                loadingCountdownText.text = Mod.FormatTimeString(deployTimer);
                 countdownText.text = Mod.FormatTimeString(deployTimer);
 
                 if (deployTimer <= 0)
                 {
-                    // Autosave before starting the raid
-                    Mod.saveSlotIndex = 5;
-                    Save();
-
                     try
                     {
                         // Check if fulfill map requirements, if don't, cancel load
@@ -506,125 +480,69 @@ namespace EFM
                                 }
                             }
 
+                            // Autosave before starting the raid
+                            Mod.saveSlotIndex = 5;
+                            Save();
+
                             // Secure all items player has
                             if (Mod.charChoicePMC)
                             {
                                 Mod.SecureItems(Mod.mapChoiceName);
                             }
 
+                            // Load raid map assets
+                            Mod.raidMapBundle = AssetBundle.LoadFromFile(Mod.availableRaidMaps[Networking.currentInstance.map]);
+                            if (Mod.availableRaidMapAdditives.TryGetValue(Networking.currentInstance.map, out List<string> additivePaths))
+                            {
+                                Mod.raidMapAdditiveBundles = new List<AssetBundle>();
+                                for (int i = 0; i < additivePaths.Count; ++i)
+                                {
+                                    Mod.raidMapAdditiveBundles.Add(AssetBundle.LoadFromFile(additivePaths[i]));
+                                }
+                            }
+                            else
+                            {
+                                Mod.raidMapAdditiveBundles = null;
+                            }
+                            if (Mod.availableRaidMapPrefabs.TryGetValue(Networking.currentInstance.map, out List<string> prefabPaths))
+                            {
+                                Mod.raidMapPrefabBundles = new List<AssetBundle>();
+                                for (int i = 0; i < prefabPaths.Count; ++i)
+                                {
+                                    Mod.raidMapPrefabBundles.Add(AssetBundle.LoadFromFile(prefabPaths[i]));
+                                }
+                            }
+                            else
+                            {
+                                Mod.raidMapPrefabBundles = null;
+                            }
+
                             // Load raid scene
                             Mod.loadingToMeatovScene = true;
+                            Mod.unloadHideout = true;
+                            Mod.keepInstance = true;
                             SteamVR_LoadLevel.Begin(Mod.mapChoiceName, false, 0.5f, 0f, 0f, 0f, 1f);
                             countdownDeploy = false;
                         }
                         else
                         {
-                            GameManager.SetInstance(0);
+                            if(Networking.currentInstance != null)
+                            {
+                                GameManager.SetInstance(0);
+                            }
                             cancelRaidLoad = true;
                             Mod.LogError("Got to raid scene load but could not fulfill all requirements, cancelling");
                         }
                     }
                     catch(Exception ex)
                     {
+                        if (Networking.currentInstance != null)
+                        {
+                            GameManager.SetInstance(0);
+                        }
+                        cancelRaidLoad = true;
                         Mod.LogError("Could not load level: "+Mod.mapChoiceName+", cancelling: "+ ex.Message+"\n"+ ex.StackTrace);
-                        cancelRaidLoad = true;
                     }
-                }
-            }
-            else if (waitForDeploy)
-            {
-                if (Networking.currentInstance.AllPlayersReady())
-                {
-                    waitForDeployPage.SetActive(false);
-                    waitForDeploy = false;
-                    countdownPage.SetActive(true);
-                    countdownDeploy = true;
-                }
-                else
-                {
-                    waitForDeployCountText.text = Networking.currentInstance.readyPlayers.Count.ToString() + "/" + Networking.currentInstance.players.Count;
-                }
-            }
-            else if (loadingRaid)
-            {
-                bool doneLoading = true;
-                float progress = 0;
-                doneLoading &= Mod.raidMapBundleRequest.isDone;
-                progress += Mod.raidMapBundleRequest.progress;
-                if (Mod.raidMapAdditiveBundleRequests != null)
-                {
-                    for(int i=0; i < Mod.raidMapAdditiveBundleRequests.Count; ++i)
-                    {
-                        doneLoading &= Mod.raidMapAdditiveBundleRequests[i].isDone;
-                        progress += Mod.raidMapAdditiveBundleRequests[i].progress;
-                    }
-                }
-                if (Mod.raidMapPrefabBundleRequests != null)
-                {
-                    for(int i=0; i < Mod.raidMapPrefabBundleRequests.Count; ++i)
-                    {
-                        doneLoading &= Mod.raidMapPrefabBundleRequests[i].isDone;
-                        progress += Mod.raidMapPrefabBundleRequests[i].progress;
-                    }
-                }
-                progress /= (Mod.raidMapAdditiveBundleRequests == null ? 0 : Mod.raidMapAdditiveBundleRequests.Count) + (Mod.raidMapPrefabBundleRequests == null ? 0 : Mod.raidMapPrefabBundleRequests.Count) + 1;
-
-                if (doneLoading)
-                {
-                    if (Mod.raidMapBundleRequest.assetBundle != null)
-                    {
-                        deployTimer = deployTime;
-
-                        loadingRaid = false;
-                        loadingPage.SetActive(false);
-                        if (Networking.currentInstance == null)
-                        {
-                            countdownPage.SetActive(true);
-                            countdownDeploy = true;
-                        }
-                        else
-                        {
-                            if (!Networking.currentInstance.readyPlayers.Contains(H3MP.GameManager.ID))
-                            {
-                                Networking.currentInstance.readyPlayers.Add(H3MP.GameManager.ID);
-
-                                using (Packet packet = new Packet(Networking.setPlayerReadynessPacketID))
-                                {
-                                    packet.Write(H3MP.GameManager.ID);
-                                    packet.Write(true);
-
-                                    if (ThreadManager.host)
-                                    {
-                                        ServerSend.SendTCPDataToAll(packet, true);
-                                    }
-                                    else
-                                    {
-                                        ClientSend.SendTCPData(packet, true);
-                                    }
-                                }
-                            }
-
-                            if (Networking.currentInstance.AllPlayersReady())
-                            {
-                                countdownPage.SetActive(true);
-                                countdownDeploy = true;
-                            }
-                            else
-                            {
-                                waitForDeployPage.SetActive(true);
-                                waitForDeploy = true;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        Mod.LogError("Could not load raid map bundle, cancelling");
-                        cancelRaidLoad = true;
-                    }
-                }
-                else
-                {
-                    loadingPercentageText.text = (progress * 100).ToString() + "%";
                 }
             }
         }
@@ -1490,7 +1408,7 @@ namespace EFM
 
         private void UpdateTime()
         {
-            time += UnityEngine.Time.deltaTime * UIController.meatovTimeMultiplier;
+            time += UnityEngine.Time.deltaTime * Mod.meatovTimeMultiplier;
 
             time %= 86400;
 
@@ -3220,14 +3138,14 @@ namespace EFM
         public void UpdateLoadButtonList()
         {
             // Call a fetch because new saves could have been made
-            FetchAvailableSaveFiles();
+            Mod.FetchAvailableSaveFiles();
 
             // Set buttons activated depending on presence of save files
-            if (availableSaveFiles.Count > 0)
+            if (Mod.availableSaveFiles.Count > 0)
             {
                 for (int i = 0; i < 6; ++i)
                 {
-                    loadButtons[i].gameObject.SetActive(availableSaveFiles.Contains(i));
+                    loadButtons[i].gameObject.SetActive(Mod.availableSaveFiles.Contains(i));
                 }
                 loadButton.gameObject.SetActive(true);
             }
@@ -3247,7 +3165,7 @@ namespace EFM
         {
             long longTime = GetTimeSeconds();
             long clampedTime = longTime % 86400; // Clamp to 24 hours because thats the relevant range
-            int scaledTime = (int)((clampedTime * UIController.meatovTimeMultiplier) % 86400);
+            int scaledTime = (int)((clampedTime * Mod.meatovTimeMultiplier) % 86400);
             time = scaledTime;
         }
 
@@ -3300,7 +3218,7 @@ namespace EFM
         {
             clickAudio.Play();
             ResetPlayerRig();
-            LoadHideout(slotIndex);
+            Mod.LoadHideout(slotIndex);
         }
 
         public void OnRaidClicked()
@@ -3312,8 +3230,6 @@ namespace EFM
                 instancesPage.SetActive(true);
 
                 instancesListPage = 0;
-                instancesNextButton.SetActive(Networking.raidInstances.Count > 6);
-                instancesPreviousButton.SetActive(false);
                 PopulateInstancesList();
             }
             else
@@ -3346,6 +3262,8 @@ namespace EFM
             switch (pageIndex)
             {
                 case 0:
+                    Mod.loadingToMeatovScene = true;
+                    Mod.unloadHideout = true;
                     SteamVR_LoadLevel.Begin("MeatovMainMenu", false, 0.5f, 0f, 0f, 0f, 1f);
                     break;
                 case 4:
@@ -3363,15 +3281,12 @@ namespace EFM
         {
             clickAudio.Play();
 
-            loadingPage.SetActive(false);
             waitForDeployPage.SetActive(false);
             countdownPage.SetActive(false);
 
-            cancelPage.SetActive(true);
+            cancelRaidLoad = true;
 
             GameManager.SetInstance(0);
-
-            cancelRaidLoad = true;
         }
 
         public void OnInstancesBackClicked()
@@ -4121,42 +4036,17 @@ namespace EFM
 
             waitingInstancePage.SetActive(false);
             waitingInstancePlayerListPage.SetActive(false);
-            loadingPage.SetActive(true);
+            countdownPage.SetActive(true);
+            countdownDeploy = true;
+            deployTimer = deployTime;
 
-            loadingRaid = true;
-            Mod.raidMapBundleRequest = AssetBundle.LoadFromFileAsync(Mod.availableRaidMaps[Networking.currentInstance.map]);
-            if(Mod.availableRaidMapAdditives.TryGetValue(Networking.currentInstance.map, out List<string> additivePaths))
-            {
-                Mod.raidMapAdditiveBundleRequests = new List<AssetBundleCreateRequest>();
-                for(int i=0; i< additivePaths.Count; ++i)
-                {
-                    Mod.raidMapAdditiveBundleRequests.Add(AssetBundle.LoadFromFileAsync(additivePaths[i]));
-                }
-            }
-            else
-            {
-                Mod.raidMapAdditiveBundleRequests = null;
-            }
-            if(Mod.availableRaidMapPrefabs.TryGetValue(Networking.currentInstance.map, out List<string> prefabPaths))
-            {
-                Mod.raidMapPrefabBundleRequests = new List<AssetBundleCreateRequest>();
-                for(int i=0; i< prefabPaths.Count; ++i)
-                {
-                    Mod.raidMapPrefabBundleRequests.Add(AssetBundle.LoadFromFileAsync(prefabPaths[i]));
-                }
-            }
-            else
-            {
-                Mod.raidMapPrefabBundleRequests = null;
-            }
-
-            // Send SetWaiting packet to everyone else if we are the instance host
+            // Send waiting packet to everyone else if we are the instance host
             if (Networking.currentInstance.players[0] == GameManager.ID)
             {
                 using (Packet packet = new Packet(Networking.setInstanceWaitingPacketID))
                 {
                     packet.Write(Networking.currentInstance.ID);
-                    packet.Write(true);
+                    packet.Write(false);
 
                     if (ThreadManager.host)
                     {
@@ -4269,34 +4159,10 @@ namespace EFM
         {
             clickAudio.Play();
 
-            SetPage(7);
+            countdownDeploy = true;
+            deployTimer = deployTime;
 
-            loadingRaid = true;
-            Mod.raidMapBundleRequest = AssetBundle.LoadFromFileAsync(Mod.availableRaidMaps[Mod.mapChoiceName]);
-            if (Mod.availableRaidMapAdditives.TryGetValue(Mod.mapChoiceName, out List<string> additivePaths))
-            {
-                Mod.raidMapAdditiveBundleRequests = new List<AssetBundleCreateRequest>();
-                for (int i = 0; i < additivePaths.Count; ++i)
-                {
-                    Mod.raidMapAdditiveBundleRequests.Add(AssetBundle.LoadFromFileAsync(additivePaths[i]));
-                }
-            }
-            else
-            {
-                Mod.raidMapAdditiveBundleRequests = null;
-            }
-            if (Mod.availableRaidMapPrefabs.TryGetValue(Mod.mapChoiceName, out List<string> prefabPaths))
-            {
-                Mod.raidMapPrefabBundleRequests = new List<AssetBundleCreateRequest>();
-                for (int i = 0; i < prefabPaths.Count; ++i)
-                {
-                    Mod.raidMapPrefabBundleRequests.Add(AssetBundle.LoadFromFileAsync(prefabPaths[i]));
-                }
-            }
-            else
-            {
-                Mod.raidMapPrefabBundleRequests = null;
-            }
+            SetPage(7);
         }
 
         public void OnCancelRaidLoadClicked()

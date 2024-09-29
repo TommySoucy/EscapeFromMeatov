@@ -11,7 +11,7 @@ namespace EFM
         public bool spawnTogether;
 
         // Live
-        public bool waiting; // false means game is ongoing
+        public bool waiting = true; // false means game is ongoing
         public List<int> players = new List<int>();
         public List<int> readyPlayers = new List<int>();
 
