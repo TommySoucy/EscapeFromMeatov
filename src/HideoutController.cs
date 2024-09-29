@@ -70,7 +70,7 @@ namespace EFM
         public GameObject raidReportLootingParent;
         public HoverScrollProcessor raidReportHoverScrollProcessor;
         public Text raidReportStatus;
-        public Color[] raidReportTotalBackgrounColors; // Success, Run Through, KIA, MIA
+        public Color[] raidReportTotalBackgroundColors; // Success, Run Through, KIA, MIA
         public Image raidReportTotalBackground;
         public Text raidReportTotalExp;
         public Text[] treatmentPartHealths;
@@ -2645,7 +2645,7 @@ namespace EFM
                         raidReportStatus.text = "MIA";
                         break;
                 }
-                raidReportTotalBackground.color = raidReportTotalBackgrounColors[(int)Mod.raidStatus];
+                raidReportTotalBackground.color = raidReportTotalBackgroundColors[(int)Mod.raidStatus];
                 raidReportTotalExp.text = Mod.raidExp.ToString();
                 raidReportHoverScrollProcessor.mustUpdateMiddleHeight = 1;
 
