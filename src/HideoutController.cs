@@ -75,6 +75,9 @@ namespace EFM
         public Text raidReportTotalExp;
         public Text[] treatmentPartHealths;
         public Image[] treatmentPartImages;
+        public GameObject[] treatmentFractureIcons;
+        public GameObject[] treatmentLightBleedIcons;
+        public GameObject[] treatmentHeavyBleedIcons;
         public Text treatmentTotalHeatlh;
         public Text treatmentInventoryMoney;
         public Text treatmentTotalCost;
@@ -82,6 +85,7 @@ namespace EFM
         public GameObject treatmentPartEntry;
         public GameObject treatmentPartSubEntry;
         public GameObject treatmentApplyButton;
+        public HoverScrollProcessor treatmentHoverScrollProcessor;
         public Dictionary<int, GameObject> treatmentParentsByIndex; // <part index, treatment object parent>
         public Dictionary<int, Dictionary<Effect.EffectType, GameObject>> treatmentObjectsByEffectTypeByParent; // <part index, <effect type, treatment object>>
         public Dictionary<GameObject, Dictionary<GameObject, int>> treatmentObjectsByParent; // <parent, <object, cost>>
@@ -2609,40 +2613,41 @@ namespace EFM
                             killEntryObject.transform.GetChild(1).GetComponent<Text>().text = Mod.raidKills[i].name;
                         }
                         killEntryObject.transform.GetChild(2).GetComponent<Text>().text = (Mod.raidKills[i].baseExperienceReward + (Mod.raidKills[i].bodyPart == ConditionCounter.TargetBodyPart.Head ? 200 : 0)).ToString()+"xp";
-                        if(Mod.explorationExp > 0)
-                        {
-                            raidReportExplorationParent.SetActive(true);
-                            raidReportExplorationParent.transform.GetChild(0).GetComponent<Text>().text = "EXPLORATION: " + Mod.explorationExp + "xp";
-                        }
-                        if(Mod.healingExp > 0)
-                        {
-                            raidReportHealingParent.SetActive(true);
-                            raidReportHealingParent.transform.GetChild(0).GetComponent<Text>().text = "HEALING: " + Mod.healingExp + "xp";
-                        }
-                        if(Mod.lootingExp > 0)
-                        {
-                            raidReportLootingParent.SetActive(true);
-                            raidReportLootingParent.transform.GetChild(0).GetComponent<Text>().text = "LOOTING: " + Mod.healingExp + "xp";
-                        }
-                        switch (Mod.raidStatus)
-                        {
-                            case RaidManager.RaidStatus.Success:
-                                raidReportStatus.text = "Survived";
-                                break;
-                            case RaidManager.RaidStatus.RunThrough:
-                                raidReportStatus.text = "Run Through";
-                                break;
-                            case RaidManager.RaidStatus.KIA:
-                                raidReportStatus.text = "KIA";
-                                break;
-                            case RaidManager.RaidStatus.MIA:
-                                raidReportStatus.text = "MIA";
-                                break;
-                        }
-                        raidReportTotalBackground.color = raidReportTotalBackgrounColors[(int)Mod.raidStatus];
-                        raidReportTotalExp.text = Mod.raidExp.ToString();
                     }
                 }
+                if (Mod.explorationExp > 0)
+                {
+                    raidReportExplorationParent.SetActive(true);
+                    raidReportExplorationParent.transform.GetChild(0).GetComponent<Text>().text = "EXPLORATION: " + Mod.explorationExp + "xp";
+                }
+                if (Mod.healingExp > 0)
+                {
+                    raidReportHealingParent.SetActive(true);
+                    raidReportHealingParent.transform.GetChild(0).GetComponent<Text>().text = "HEALING: " + Mod.healingExp + "xp";
+                }
+                if (Mod.lootingExp > 0)
+                {
+                    raidReportLootingParent.SetActive(true);
+                    raidReportLootingParent.transform.GetChild(0).GetComponent<Text>().text = "LOOTING: " + Mod.healingExp + "xp";
+                }
+                switch (Mod.raidStatus)
+                {
+                    case RaidManager.RaidStatus.Success:
+                        raidReportStatus.text = "Survived";
+                        break;
+                    case RaidManager.RaidStatus.RunThrough:
+                        raidReportStatus.text = "Run Through";
+                        break;
+                    case RaidManager.RaidStatus.KIA:
+                        raidReportStatus.text = "KIA";
+                        break;
+                    case RaidManager.RaidStatus.MIA:
+                        raidReportStatus.text = "MIA";
+                        break;
+                }
+                raidReportTotalBackground.color = raidReportTotalBackgrounColors[(int)Mod.raidStatus];
+                raidReportTotalExp.text = Mod.raidExp.ToString();
+                raidReportHoverScrollProcessor.mustUpdateMiddleHeight = 1;
 
                 // Treatment
                 if (treatmentCosts == null)
@@ -2656,12 +2661,10 @@ namespace EFM
                 }
                 Mod.OnPartHealthChanged += OnPartHealthChanged;
                 Mod.OnPartCurrentMaxHealthChanged += OnPartHealthChanged;
-                for (int i=0; i < Mod.GetHealthCount(); ++i)
-                {
-                    OnPartHealthChanged(i);
-                }
+                OnPartHealthChanged(-1);
                 SetEffecTreatments();
                 Effect.OnEffectRemoved += OnPartEffectRemoved;
+                treatmentHoverScrollProcessor.mustUpdateMiddleHeight = 1;
             }
         }
 
@@ -2792,6 +2795,8 @@ namespace EFM
                 {
                     if (lightBleedEffectList[i].partIndex != -1)
                     {
+                        treatmentLightBleedIcons[lightBleedEffectList[i].partIndex].SetActive(true);
+
                         GameObject newTreatmentObject = Instantiate(treatmentPartSubEntry, treatmentListParent);
                         int cost = (int)Mod.globalDB["config"]["Health"]["LightBleeding"]["RemovePrice"];
                         treatmentCosts.Add(newTreatmentObject, cost);
@@ -2836,6 +2841,8 @@ namespace EFM
                 {
                     if (heavyBleedEffectList[i].partIndex != -1)
                     {
+                        treatmentHeavyBleedIcons[heavyBleedEffectList[i].partIndex].SetActive(true);
+
                         GameObject newTreatmentObject = Instantiate(treatmentPartSubEntry, treatmentListParent);
                         int cost = (int)Mod.globalDB["config"]["Health"]["HeavyBleeding"]["RemovePrice"];
                         treatmentCosts.Add(newTreatmentObject, cost);
@@ -2880,6 +2887,8 @@ namespace EFM
                 {
                     if (fractureEffectList[i].partIndex != -1)
                     {
+                        treatmentFractureIcons[fractureEffectList[i].partIndex].SetActive(true);
+
                         GameObject newTreatmentObject = Instantiate(treatmentPartSubEntry, treatmentListParent);
                         int cost = (int)Mod.globalDB["config"]["Health"]["Fracture"]["RemovePrice"];
                         treatmentCosts.Add(newTreatmentObject, cost);
@@ -2931,6 +2940,19 @@ namespace EFM
                 return;
             }
 
+            if(effect.effectType == Effect.EffectType.LightBleeding)
+            {
+                treatmentLightBleedIcons[effect.partIndex].SetActive(false);
+            }
+            else if(effect.effectType == Effect.EffectType.HeavyBleeding)
+            {
+                treatmentHeavyBleedIcons[effect.partIndex].SetActive(false);
+            }
+            else if(effect.effectType == Effect.EffectType.Fracture)
+            {
+                treatmentFractureIcons[effect.partIndex].SetActive(false);
+            }
+
             // Make sure part has no treatment of that effect
             if (treatmentObjectsByEffectTypeByParent.TryGetValue(effect.partIndex, out Dictionary<Effect.EffectType, GameObject> treatmentObjectsByEffectType)
                 && treatmentObjectsByEffectType.TryGetValue(effect.effectType, out GameObject treatmentObject))
@@ -2967,6 +2989,7 @@ namespace EFM
 
                 UpdateTotalTreatmentCost();
             }
+            treatmentHoverScrollProcessor.mustUpdateMiddleHeight = 1;
         }
 
         public void OnPartHealthChanged(int index)
@@ -2985,7 +3008,19 @@ namespace EFM
             }
             else
             {
-                if(Mod.GetHealth(index) == Mod.GetCurrentMaxHealth(index))
+                treatmentPartImages[index].color = Color.Lerp(Color.red, Color.white, Mod.GetHealth(index) / Mod.GetCurrentMaxHealth(index));
+                treatmentPartHealths[index].text = ((int)Mod.GetHealth(index)).ToString() + "/" + ((int)Mod.GetCurrentMaxHealth(index));
+
+                float total = 0;
+                float totalMax = 0;
+                for (int i = 0; i < Mod.GetHealthCount(); ++i)
+                {
+                    total += Mod.GetHealth(i);
+                    totalMax += Mod.GetCurrentMaxHealth(i);
+                }
+                treatmentTotalHeatlh.text = ((int)total).ToString() + "/" + ((int)totalMax);
+
+                if (Mod.GetHealth(index) == Mod.GetCurrentMaxHealth(index))
                 {
                     // Make sure part has no health treatment
                     if(treatmentObjectsByEffectTypeByParent.TryGetValue(index, out Dictionary<Effect.EffectType, GameObject> treatmentObjectsByEffectType)
@@ -3089,6 +3124,7 @@ namespace EFM
 
                 UpdateTotalTreatmentCost();
             }
+            treatmentHoverScrollProcessor.mustUpdateMiddleHeight = 1;
         }
 
         public void UpdateTotalTreatmentCost()
