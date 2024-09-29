@@ -4378,13 +4378,10 @@ namespace EFM
             loadedData["hideout"]["scavTimer"] = scavTimer;
 
             // Write skills
-            JArray skillData = new JArray();
             for (int i = 0; i < 64; ++i)
             {
-                skillData.Add(new JObject());
-                loadedData["skills"][i]["progress"] = Mod.skills[i].progress;
+                loadedData["skills"] = Mod.skills[i].progress;
             }
-            loadedData["skills"] = new JArray();
 
             // Save player items
             // Hands
@@ -4402,7 +4399,7 @@ namespace EFM
             }
             loadedData["rightHand"] = serializedItem;
             // Equipment
-            for(int i=0; i< StatusUI.instance.equipmentSlots.Length; ++i)
+            for (int i=0; i< StatusUI.instance.equipmentSlots.Length; ++i)
             {
                 FVRPhysicalObject physObj = StatusUI.instance.equipmentSlots[0].CurObject;
                 if(physObj == null)
@@ -4480,52 +4477,55 @@ namespace EFM
             for(int i=0; i < areaController.areas.Length; ++i)
             {
                 JObject area = new JObject();
-                // Levels
-                JArray areaLevels = new JArray();
-                // Volumes
-                for(int j=0; j < areaController.areas[i].levels.Length; ++j)
+                if(areaController.areas[i] != null)
                 {
-                    JObject level = new JObject();
-                    JArray volumes = new JArray();
-                    JArray slots = new JArray();
-                    for (int k=0; k< areaController.areas[i].levels[j].areaVolumes.Length; ++j)
+                    // Levels
+                    JArray areaLevels = new JArray();
+                    // Volumes
+                    for(int j=0; j < areaController.areas[i].levels.Length; ++j)
                     {
-                        JArray areaVolumeItems = new JArray();
-                        foreach (KeyValuePair<string, List<MeatovItem>> entry in areaController.areas[i].levels[j].areaVolumes[k].inventoryItems)
+                        JObject level = new JObject();
+                        JArray volumes = new JArray();
+                        JArray slots = new JArray();
+                        for (int k=0; k< areaController.areas[i].levels[j].areaVolumes.Length; ++k)
                         {
-                            for (int l = 0; l < entry.Value.Count; ++l)
+                            JArray areaVolumeItems = new JArray();
+                            foreach (KeyValuePair<string, List<MeatovItem>> entry in areaController.areas[i].levels[j].areaVolumes[k].inventoryItems)
                             {
-                                // Only want to serialize root item so only consider inventory items without parent
-                                if (entry.Value[l].parent == null)
+                                for (int l = 0; l < entry.Value.Count; ++l)
                                 {
-                                    JObject serialized = entry.Value[l].Serialize();
-                                    serialized["posX"] = entry.Value[l].transform.localPosition.x;
-                                    serialized["posY"] = entry.Value[l].transform.localPosition.y;
-                                    serialized["posZ"] = entry.Value[l].transform.localPosition.z;
-                                    serialized["rotX"] = entry.Value[l].transform.localRotation.eulerAngles.x;
-                                    serialized["rotY"] = entry.Value[l].transform.localRotation.eulerAngles.y;
-                                    serialized["rotZ"] = entry.Value[l].transform.localRotation.eulerAngles.z;
-                                    areaVolumeItems.Add(serialized);
+                                    // Only want to serialize root item so only consider inventory items without parent
+                                    if (entry.Value[l].parent == null)
+                                    {
+                                        JObject serialized = entry.Value[l].Serialize();
+                                        serialized["posX"] = entry.Value[l].transform.localPosition.x;
+                                        serialized["posY"] = entry.Value[l].transform.localPosition.y;
+                                        serialized["posZ"] = entry.Value[l].transform.localPosition.z;
+                                        serialized["rotX"] = entry.Value[l].transform.localRotation.eulerAngles.x;
+                                        serialized["rotY"] = entry.Value[l].transform.localRotation.eulerAngles.y;
+                                        serialized["rotZ"] = entry.Value[l].transform.localRotation.eulerAngles.z;
+                                        areaVolumeItems.Add(serialized);
+                                    }
                                 }
                             }
+                            volumes.Add(areaVolumeItems);
                         }
-                        volumes.Add(areaVolumeItems);
-                    }
-                    level["volumes"] = volumes;
-                    for (int k = 0; k < areaController.areas[i].levels[j].areaSlots.Length; ++j)
-                    {
-                        JObject serialized = null;
-                        if (areaController.areas[i].levels[j].areaSlots[k].CurObject != null)
+                        level["volumes"] = volumes;
+                        for (int k = 0; k < areaController.areas[i].levels[j].areaSlots.Length; ++k)
                         {
-                            MeatovItem meatovItem = areaController.areas[i].levels[j].areaSlots[k].CurObject.GetComponent<MeatovItem>();
-                            serializedItem = meatovItem == null ? null : meatovItem.Serialize();
+                            JObject serialized = null;
+                            if (areaController.areas[i].levels[j].areaSlots[k].CurObject != null)
+                            {
+                                MeatovItem meatovItem = areaController.areas[i].levels[j].areaSlots[k].CurObject.GetComponent<MeatovItem>();
+                                serializedItem = meatovItem == null ? null : meatovItem.Serialize();
+                            }
+                            slots.Add(serialized);
                         }
-                        slots.Add(serialized);
+                        level["slots"] = slots;
+                        areaLevels.Add(level);
                     }
-                    level["slots"] = slots;
-                    areaLevels.Add(level);
+                    area["levels"] = areaLevels;
                 }
-                area["levels"] = areaLevels;
                 areas.Add(area);
             }
             loadedData["hideout"]["areas"] = areas;
@@ -4555,8 +4555,11 @@ namespace EFM
             // Save areas
             for (int i = 0; i < areaController.areas.Length; ++i)
             {
-                // Note area array and object have already been added when saving area items above
-                areaController.areas[i].Save(areas[i]);
+                if (areaController.areas[i] != null)
+                {
+                    // Note area array and object have already been added when saving area items above
+                    areaController.areas[i].Save(areas[i]);
+                }
             }
 
             // Save insuredSets
@@ -4578,7 +4581,12 @@ namespace EFM
             // Save triggered exploration triggers
             loadedData["triggeredExplorationTriggers"] = JArray.FromObject(Mod.triggeredExperienceTriggers);
 
-            loadedData["whishlist"] = JArray.FromObject(Mod.wishList);
+            JArray wishlist = new JArray();
+            for(int i=0; i < Mod.wishList.Count; ++i)
+            {
+                wishlist.Add(Mod.wishList[i].tarkovID);
+            }
+            loadedData["whishlist"] = wishlist;
 
             SaveDataToFile();
             Mod.LogInfo("Saved hideout");
@@ -4640,7 +4648,7 @@ namespace EFM
 
         private void SaveDataToFile()
         {
-            File.WriteAllText(Mod.path + "/EscapeFromMeatov/" + (Mod.saveSlotIndex == 5 ? "AutoSave" : "Slot" + Mod.saveSlotIndex) + ".sav", loadedData.ToString());
+            File.WriteAllText(Mod.path + "/Saves/" + (Mod.saveSlotIndex == 5 ? "AutoSave" : "Slot" + Mod.saveSlotIndex) + ".sav", loadedData.ToString());
         }
 
         public void OnHideoutInventoryChangedInvoke()
