@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.UI;
 using Valve.Newtonsoft.Json.Linq;
 
@@ -134,53 +133,6 @@ namespace EFM
 
         // Assets
         public static GameObject areaCanvasPrefab; // AreaCanvas
-        public static GameObject areaCanvasBottomButtonPrefab; // AreaCanvasBottomButton
-        public static GameObject areaRequirementPrefab; // AreaRequirement
-        public static GameObject itemRequirementPrefab; // ItemRequirement
-        public static GameObject skillRequirementPrefab; // SkillRequirement
-        public static GameObject traderRequirementPrefab; // TraderRequirement
-        public static GameObject areaRequirementsPrefab; // AreaRequirements
-        public static GameObject itemRequirementsPrefab; // ItemRequirements
-        public static GameObject skillRequirementsPrefab; // SkillRequirements
-        public static GameObject traderRequirementsPrefab; // TraderRequirements
-        public static GameObject bonusPrefab; // Bonus
-        public static Sprite areaBackgroundNormalSprite; // area_icon_default_back
-        public static Sprite areaBackgroundLockedSprite; // area_icon_locked_back
-        public static Sprite areaBackgroundAvailableSprite; // area_icon_default_back_green
-        public static Sprite areaBackgroundEliteSprite; // area_icon_elite_back
-        public static Sprite areaStatusIconUpgrading; // icon_status_upgrading
-        public static Sprite areaStatusIconConstructing; // icon_status_constructing
-        public static Sprite areaStatusIconLocked; // icon_lock
-        public static Sprite areaStatusIconUnlocked; // icon_status_unlocked
-        public static Sprite areaStatusIconReadyUpgrade; // icon_status_ready_to_upgrade
-        public static Sprite areaStatusIconProducing; // icon_status_producing
-        public static Sprite areaStatusIconOutOfFuel; // icon_out_of_fuel
-        public static Sprite requirementFulfilled; // icon_requirement_fulfilled
-        public static Sprite requirementLocked; // icon_requirement_locked
-        public static Sprite[] traderAvatars; // avatar_russian_small, avatar_therapist_small, avatar_fence_small, avatar_ah_small, avatar_peacekeeper_small, avatar_tech_small, avatar_ragman_small, avatar_jaeger_small
-        public static Sprite[] areaIcons; // icon_vents, icon_security, icon_watercloset, icon_stash, icon_generators, icon_heating, icon_rain_collector, icon_medstation, icon_kitchen, icon_restplace, icon_workbench, icon_intelligence_center, icon_shooting_range, icon_library, icon_scav_case, icon_illumination, icon_placeoffame, icon_afu, icon_solarpower, icon_boozegen, icon_bitcionfarm, icon_christmas_illumination
-        public static Dictionary<string, Sprite> bonusIcons;
-        public static Sprite emptyItemSlotIcon;
-        public static Sprite dollarCurrencySprite;
-        public static Sprite euroCurrencySprite;
-        public static Sprite roubleCurrencySprite;
-        public static Sprite barterSprite;
-        public static Sprite experienceSprite;
-        public static Sprite standingSprite;
-        public static AudioClip[,] areaProductionSounds;
-        public static AudioClip[] areaSlotSounds;
-        public static AudioClip generatorLevel1And2Audio;
-        public static AudioClip generatorLevel3Audio;
-        public static AudioClip medStationLevel3Audio;
-        public static AudioClip kitchenPotAudio;
-        public static AudioClip kitchenFridgeAudio;
-        public static AudioClip[] restSpaceTracks;
-        public static AudioClip restSpacePSAudio;
-        public static AudioClip intelCenterPCAudio;
-        public static AudioClip intelCenterHDDAudio;
-        public static AudioClip AFUAudio;
-        public static AudioClip boozeGenAudio;
-        public static AudioClip bitcoinFarmAudio;
 
         // Live data
         public static JObject loadedData;
@@ -4380,7 +4332,7 @@ namespace EFM
             // Write skills
             for (int i = 0; i < 64; ++i)
             {
-                loadedData["skills"] = Mod.skills[i].progress;
+                loadedData["skills"][i] = Mod.skills[i].progress;
             }
 
             // Save player items

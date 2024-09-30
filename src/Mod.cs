@@ -2134,6 +2134,16 @@ namespace EFM
                                     }
                                 }
                                 break;
+                            case 25: // UnloadUnusedAssets
+                                Mod.LogInfo("\tDebug: Resources.UnloadUnusedAssets");
+                                Resources.UnloadUnusedAssets();
+                                break;
+                            case 26: // Go back to meatov main menu from hideout
+                                Mod.LogInfo("\tDebug: Go back to meatov main menu from hideout");
+                                Mod.loadingToMeatovScene = true;
+                                Mod.unloadHideout = true;
+                                SteamVR_LoadLevel.Begin("MeatovMainMenu", false, 0.5f, 0f, 0f, 0f, 1f);
+                                break;
                         }
                     }
                 }
@@ -3347,6 +3357,8 @@ namespace EFM
                 {
                     Mod.hideoutAreaBundles[i] = AssetBundle.LoadFromFile(Mod.path + "/Assets/efmhideoutAreas" + i + ".ab");
                 }
+
+                HideoutController.areaCanvasPrefab = Mod.hideoutAssetsBundle.LoadAsset<GameObject>("AreaCanvas");
             }
             if (Mod.playerBundle == null)
             {
@@ -3374,8 +3386,6 @@ namespace EFM
 
                 Mod.questionMarkIcon = Mod.itemIconsBundle.LoadAsset<Sprite>("QuestionMarkIcon");
                 Mod.emptyCellIcon = Mod.itemIconsBundle.LoadAsset<Sprite>("cell_full_border");
-
-                HideoutController.areaCanvasPrefab = Mod.hideoutAssetsBundle.LoadAsset<GameObject>("AreaCanvas");
             }
 
             FetchAvailableSaveFiles();
@@ -4007,6 +4017,7 @@ namespace EFM
                     }
                     if(hideoutAssetsBundle != null)
                     {
+                        HideoutController.areaCanvasPrefab = null;
                         hideoutAssetsBundle.Unload(true);
                         hideoutAssetsBundle = null;
                     }
@@ -4017,6 +4028,7 @@ namespace EFM
                             if (hideoutAreaBundles[i] != null)
                             {
                                 hideoutAreaBundles[i].Unload(true);
+                                hideoutAreaBundles[i] = null;
                             }
                         }
                         hideoutAreaBundles = null;
