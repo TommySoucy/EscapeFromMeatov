@@ -151692,5 +151692,55 @@
       0.0,
       0.0
     ]
+  },
+  "000000000000000000000004": {
+    "tarkovID": "000000000000000000000004",
+    "H3ID": "929",
+    "index": 929,
+    "itemType": "Container",
+    "rarity": "Not_exist",
+    "parents": [
+      "54009119af1c881c07000029"
+    ],
+    "weight": 99999,
+    "volumes": [
+      99999
+    ],
+    "lootExperience": 20,
+    "name": "Loot Container",
+    "description": "A Loot Container",
+    "canSellOnRagfair": false,
+    "compatibilityValue": 0,
+    "usesMags": false,
+    "usesAmmoContainers": false,
+    "magType": "mNone",
+    "clipType": "None",
+    "roundType": "a22_LR",
+    "weaponclass": "Pistol",
+    "blocksEarpiece": false,
+    "blocksEyewear": false,
+    "blocksFaceCover": false,
+    "blocksHeadwear": false,
+    "coverage": 0.0,
+    "damageResist": 0.0,
+    "maxArmor": 0.0,
+    "smallSlotCount": 0,
+    "mediumSlotCount": 0,
+    "maxVolume": 0,
+    "cartridge": "",
+    "roundClass": "Ball",
+    "maxStack": 1,
+    "maxAmount": 0,
+    "useTime": 0.0,
+    "amountRate": -1.0,
+    "consumeEffects": [],
+    "buffEffects": [],
+    "value": 0,
+    "whiteList": [],
+    "blackList": [
+      "54009119af1c881c07000029"
+    ],
+    "modulGroup": null,
+    "modulPart": null
   }
 }
