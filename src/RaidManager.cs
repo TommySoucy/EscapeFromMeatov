@@ -117,6 +117,7 @@ namespace EFM
                 AI ai = sosig.GetComponent<AI>();
                 if(ai != null)
                 {
+                    // Update instance active scav count
                     if (ai.scav)
                     {
                         --activeScavCount;
@@ -142,12 +143,18 @@ namespace EFM
                         }
                     }
 
+                    // Process kill
                     if(ai.latestDamageSourceKillData != null)
                     {
                         Mod.OnKillInvoke(ai.latestDamageSourceKillData);
                         Mod.raidKills.Add(ai.latestDamageSourceKillData);
                         ai.latestDamageSourceKillData = null;
                     }
+
+                    // Spawn loot
+                    List<MeatovItem> spawnedItems = SpawnItem(Mod.defaultItemData["000000000000000000000004"], 1, sosig.Links[0].transform.position + Vector3.up * 0.5f, UnityEngine.Random.rotation);
+                    MeatovItem lootBox = spawnedItems[0];
+                    ai.botInventory.Spawn(lootBox, ai.PMC);
                 }
             }
         }
@@ -363,7 +370,7 @@ namespace EFM
             }
         }
 
-        public bool SpawnItem(MeatovItemData itemData, int amount, Vector3 position, Quaternion rotation, bool foundInRaid = false, SpawnItemReturnDelegate del = null)
+        public List<MeatovItem> SpawnItem(MeatovItemData itemData, int amount, Vector3 position, Quaternion rotation, bool foundInRaid = false, SpawnItemReturnDelegate del = null)
         {
             int amountToSpawn = amount;
             if (itemData.index == -1)
@@ -371,7 +378,7 @@ namespace EFM
                 // Spawn vanilla item will handle the updating of proper elements
                 AnvilManager.Run(SpawnVanillaItem(itemData, amountToSpawn, position, rotation, foundInRaid, del));
 
-                return true;
+                return null;
             }
             else
             {
@@ -416,7 +423,7 @@ namespace EFM
                     del(itemsSpawned);
                 }
 
-                return false;
+                return itemsSpawned;
             }
         }
 

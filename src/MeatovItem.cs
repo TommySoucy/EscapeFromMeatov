@@ -699,6 +699,24 @@ namespace EFM
                 }
             }
 
+            if(physObj != null)
+            {
+                bool sizeSet = false;
+                for(int i=0; i < Mod.sizeVolumes.Length; ++i)
+                {
+                    if (volumes[0] <= Mod.sizeVolumes[i])
+                    {
+                        physObj.Size = (FVRPhysicalObject.FVRPhysicalObjectSize)i;
+                        sizeSet = true;
+                        break;
+                    }
+                }
+                if (!sizeSet)
+                {
+                    physObj.Size = FVRPhysicalObject.FVRPhysicalObjectSize.CantCarryBig;
+                }
+            }
+
             // Calculate weapon stats based on current attachments (recoil, ergonomics, sightingRange)
             UpdateRecoil();
             UpdateErgonomics();

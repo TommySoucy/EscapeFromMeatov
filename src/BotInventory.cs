@@ -842,6 +842,75 @@ namespace EFM
             return linkOutfit;
         }
 
+        public void Spawn(MeatovItem lootBox, bool PMC)
+        {
+            MeatovItem backpack = null;
+            MeatovItem vest = null;
+            foreach(KeyValuePair<string, MeatovItemData> equipmentEntry in equipment)
+            {
+                bool isBackpack = equipmentEntry.Key.Equals("Backpack");
+                bool isVest = equipmentEntry.Key.Equals("TacticalVest") || equipmentEntry.Key.Equals("ArmorVest");
+                ContainmentVolume.SpawnItemReturnDelegate del = objs =>
+                {
+                    for(int i=0; i < objs.Count; ++i)
+                    {
+                        MeatovItem meatovItem = objs[i];
+                        if (isBackpack)
+                        {
+                            backpack = meatovItem;
+                        }
+                        else if (isVest)
+                        {
+                            vest = meatovItem;
+                        }
+                    }
+                };
+                lootBox.containerVolume.SpawnItem(equipmentEntry.Value, 1, !PMC, del);
+            }
+            foreach(KeyValuePair<string, Dictionary<MeatovItemData, int>> lootGroupEntry in loot)
+            {
+                foreach(KeyValuePair<MeatovItemData, int> lootEntry in lootGroupEntry.Value)
+                {
+                    if (lootGroupEntry.Key.Equals("backpackLoot") && backpack != null)
+                    {
+                        backpack.containerVolume.SpawnItem(lootEntry.Key, lootEntry.Value, !PMC);
+                    }
+                    else if (lootGroupEntry.Key.Equals("vestLoot") && vest != null && lootEntry.Value == 1)
+                    {
+                        FVRPhysicalObject.FVRPhysicalObjectSize size = FVRPhysicalObject.FVRPhysicalObjectSize.CantCarryBig;
+                        for (int i = 0; i < Mod.sizeVolumes.Length; ++i)
+                        {
+                            if (lootEntry.Key.volumes[0] <= Mod.sizeVolumes[i])
+                            {
+                                size = (FVRPhysicalObject.FVRPhysicalObjectSize)i;
+                                break;
+                            }
+                        }
+
+                        bool spawned = false;
+                        for (int i=0; i < vest.rigSlots.Count; ++i)
+                        {
+                            if (vest.rigSlots[i] != null && vest.rigSlots[i].CurObject == null && (int)size <= (int)vest.rigSlots[i].SizeLimit)
+                            {
+                                vest.rigSlots[i].SpawnItem(lootEntry.Key, 1, !PMC);
+                                spawned = true;
+                                break;
+                            }
+                        }
+
+                        if (!spawned)
+                        {
+                            lootBox.containerVolume.SpawnItem(lootEntry.Key, lootEntry.Value, !PMC);
+                        }
+                    }
+                    else
+                    {
+                        lootBox.containerVolume.SpawnItem(lootEntry.Key, lootEntry.Value, !PMC);
+                    }
+                }
+            }
+        }
+
         public static string GetEquipmentNameByIndex(int index)
         {
             switch (index)
