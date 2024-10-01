@@ -389,6 +389,7 @@ namespace EFM
 
                 if (deployTimer <= 0)
                 {
+                    bool securedItems = false;
                     try
                     {
                         // Check if fulfill map requirements, if don't, cancel load
@@ -444,11 +445,13 @@ namespace EFM
                             if (Mod.charChoicePMC)
                             {
                                 Mod.SecureItems(Mod.mapChoiceName);
+                                securedItems = true;
                             }
 
                             // Load raid map assets
-                            Mod.raidMapBundle = AssetBundle.LoadFromFile(Mod.availableRaidMaps[Networking.currentInstance.map]);
-                            if (Mod.availableRaidMapAdditives.TryGetValue(Networking.currentInstance.map, out List<string> additivePaths))
+                            Mod.mapChoiceName = Networking.currentInstance == null ? Mod.mapChoiceName : Networking.currentInstance.map;
+                            Mod.raidMapBundle = AssetBundle.LoadFromFile(Mod.availableRaidMaps[Mod.mapChoiceName]);
+                            if (Mod.availableRaidMapAdditives.TryGetValue(Mod.mapChoiceName, out List<string> additivePaths))
                             {
                                 Mod.raidMapAdditiveBundles = new List<AssetBundle>();
                                 for (int i = 0; i < additivePaths.Count; ++i)
@@ -460,7 +463,7 @@ namespace EFM
                             {
                                 Mod.raidMapAdditiveBundles = null;
                             }
-                            if (Mod.availableRaidMapPrefabs.TryGetValue(Networking.currentInstance.map, out List<string> prefabPaths))
+                            if (Mod.availableRaidMapPrefabs.TryGetValue(Mod.mapChoiceName, out List<string> prefabPaths))
                             {
                                 Mod.raidMapPrefabBundles = new List<AssetBundle>();
                                 for (int i = 0; i < prefabPaths.Count; ++i)
@@ -497,6 +500,10 @@ namespace EFM
                             GameManager.SetInstance(0);
                         }
                         cancelRaidLoad = true;
+                        if (securedItems)
+                        {
+                            Mod.UnsecureItems();
+                        }
                         Mod.LogError("Could not load level: "+Mod.mapChoiceName+", cancelling: "+ ex.Message+"\n"+ ex.StackTrace);
                     }
                 }
@@ -3362,10 +3369,22 @@ namespace EFM
 
         public void OnPlayerItemInventoryChanged(int difference)
         {
-            PopulateInstancesList();
-            PopulateMapList();
-            PopulateNewInstanceMapList();
-            UpdateStartButton();
+            if (instancesPage.activeSelf)
+            {
+                PopulateInstancesList();
+            }
+            if (pages[5].activeSelf)
+            {
+                PopulateMapList();
+            }
+            if (newInstance1Page.activeSelf)
+            {
+                PopulateNewInstanceMapList();
+            }
+            if (waitingInstancePage.activeSelf)
+            {
+                UpdateStartButton();
+            }
         }
 
         public void PopulateInstancesList()
@@ -3621,13 +3640,14 @@ namespace EFM
                 {
                     // Day is from 21600 to 64800
                     // Night is from 0 to 21600 and 64800 to 86400
+                    float actualTime = Mod.timeChoiceIs0 ? time : (time + 43200) % 86400;
                     if (day)
                     {
-                        unfulfilled = (time >= 0 && time < 21600) || (time >= 64800 && time <= 86400);
+                        unfulfilled = (actualTime >= 0 && actualTime < 21600) || (actualTime >= 64800 && actualTime <= 86400);
                     }
                     else
                     {
-                        unfulfilled = time >= 21600 && time < 64800;
+                        unfulfilled = actualTime >= 21600 && actualTime < 64800;
                     }
                 }
                 if (Mod.raidMapEntryRequirements.TryGetValue(raidMap.Key, out Dictionary<string, int> itemRequirements))
@@ -3657,7 +3677,7 @@ namespace EFM
                     newInstanceMapListEntry.GetComponentInChildren<Button>().onClick.AddListener(() => { OnNewInstanceMapClicked(mapName); });
                 }
 
-                if (Mod.mapChoiceName.Equals("mapName"))
+                if (Mod.mapChoiceName != null && Mod.mapChoiceName.Equals(mapName))
                 {
                     newInstanceMapListEntry.GetComponentInChildren<Image>().color = Color.white;
                     newInstanceMapListEntry.GetComponentInChildren<Text>().color = Color.black;
@@ -3701,15 +3721,17 @@ namespace EFM
                 bool day = false;
                 if(Mod.availableRaidMapDay.TryGetValue(raidMap.Key, out day))
                 {
+
+                    float actualTime = Mod.timeChoiceIs0 ? time : (time + 43200) % 86400;
                     // Day is from 21600 to 64800
                     // Night is from 0 to 21600 and 64800 to 86400
                     if (day)
                     {
-                        unfulfilled = (time >= 0 && time < 21600) || (time >= 64800 && time <= 86400);
+                        unfulfilled = (actualTime >= 0 && actualTime < 21600) || (actualTime >= 64800 && actualTime <= 86400);
                     }
                     else
                     {
-                        unfulfilled = time >= 21600 && time < 64800;
+                        unfulfilled = actualTime >= 21600 && actualTime < 64800;
                     }
                 }
                 if (!unfulfilled && Mod.raidMapEntryRequirements.TryGetValue(raidMap.Key, out Dictionary<string, int> itemRequirements))
@@ -3739,7 +3761,7 @@ namespace EFM
                     newMapListEntry.GetComponentInChildren<Button>().onClick.AddListener(() => { OnMapClicked(mapName); });
                 }
 
-                if (Mod.mapChoiceName.Equals("mapName"))
+                if (Mod.mapChoiceName != null && Mod.mapChoiceName.Equals(mapName))
                 {
                     newMapListEntry.GetComponentInChildren<Image>().color = Color.white;
                     newMapListEntry.GetComponentInChildren<Text>().color = Color.black;
@@ -4117,8 +4139,6 @@ namespace EFM
             else
             {
                 SetPage(4);
-                mapListPage = 0;
-                PopulateMapList();
             }
         }
 
@@ -4132,7 +4152,7 @@ namespace EFM
             confirmChosenMap.text = mapName;
             loadingChosenMap.text = mapName;
 
-            SetPage(5);
+            SetPage(6);
         }
 
         public void OnTimeClicked(int timeIndex)
@@ -4140,7 +4160,9 @@ namespace EFM
             clickAudio.Play();
 
             Mod.timeChoiceIs0 = timeIndex == 0;
-            SetPage(6);
+            SetPage(5);
+            mapListPage = 0;
+            PopulateMapList();
         }
 
         public void OnConfirmRaidClicked()
