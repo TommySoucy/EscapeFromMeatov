@@ -261,6 +261,11 @@ namespace EFM
             {
                 areaController.areas[areaEntry.Key] = areaEntry.Value;
             }
+            Area.areaDatas = new AreaData[highestIndex + 1];
+            for (int i = 0; i < Area.areaDatas.Length; ++i)
+            {
+                Area.areaDatas[i] = new AreaData(i);
+            }
             for(int i=0; i < areaController.areas.Length; ++i)
             {
                 if(areaController.areas[i] != null)
@@ -1917,15 +1922,21 @@ namespace EFM
 
         public void LoadPlayerItems()
         {
+            Mod.LogInfo("LoadPlayerItems");
             // If have secured items, unsecured them on scav return node
             Mod.UnsecureItems(true);
 
             if (loadedData["leftHand"] != null)
             {
+                Mod.LogInfo("\tLeft hand");
                 // In case item is vanilla, in which case we use the vault system to save it,
                 // we will only be getting the instantiated item later
                 // We must write a delegate in order to put it in the correct hand once we do
-                JToken vanillaCustomData = loadedData["leftHand"]["vanillaCustomData"];
+                JToken vanillaCustomData = null;
+                if (loadedData["leftHand"]["vanillaCustomData"] != null)
+                {
+                    vanillaCustomData = loadedData["leftHand"]["vanillaCustomData"];
+                }
                 VaultSystem.ReturnObjectListDelegate del = objs =>
                 {
                     // Here, assume objs[0] is the root item
@@ -1966,7 +1977,12 @@ namespace EFM
             }
             if(loadedData["rightHand"] != null)
             {
-                JToken vanillaCustomData = loadedData["rightHand"]["vanillaCustomData"];
+                Mod.LogInfo("\tRight hand");
+                JToken vanillaCustomData = null;
+                if (loadedData["rightHand"]["vanillaCustomData"] != null)
+                {
+                    vanillaCustomData = loadedData["rightHand"]["vanillaCustomData"];
+                }
                 VaultSystem.ReturnObjectListDelegate del = objs =>
                 {
                     // Here, assume objs[0] is the root item
@@ -2010,7 +2026,12 @@ namespace EFM
             {
                 if (loadedData["equipment"+i] != null)
                 {
-                    JToken vanillaCustomData = loadedData["equipment" + i]["vanillaCustomData"];
+                    Mod.LogInfo("\tEquipment"+i);
+                    JToken vanillaCustomData = null;
+                    if (loadedData["equipment" + i]["vanillaCustomData"] != null)
+                    {
+                        vanillaCustomData = loadedData["equipment" + i]["vanillaCustomData"];
+                    }
                     VaultSystem.ReturnObjectListDelegate del = objs =>
                     {
                         // Here, assume objs[0] is the root item
@@ -2065,7 +2086,12 @@ namespace EFM
             {
                 if (loadedData["slot"+i] != null)
                 {
-                    JToken vanillaCustomData = loadedData["slot" + i]["vanillaCustomData"];
+                    Mod.LogInfo("\tSlot" + i);
+                    JToken vanillaCustomData = null;
+                    if (loadedData["slot" + i]["vanillaCustomData"] != null)
+                    {
+                        vanillaCustomData = loadedData["slot" + i]["vanillaCustomData"];
+                    }
                     VaultSystem.ReturnObjectListDelegate del = objs =>
                     {
                         // Here, assume objs[0] is the root item
@@ -4351,11 +4377,13 @@ namespace EFM
             loadedData["failedRaidCount"] = Mod.failedRaidCount;
             loadedData["hideout"]["scavTimer"] = scavTimer;
 
+            Mod.LogInfo("\t0");
             // Write skills
             for (int i = 0; i < 64; ++i)
             {
                 loadedData["skills"][i] = Mod.skills[i].progress;
             }
+            Mod.LogInfo("\t0");
 
             // Save player items
             // Hands
@@ -4366,12 +4394,14 @@ namespace EFM
                 serializedItem = Mod.leftHand.heldItem.Serialize();
             }
             loadedData["leftHand"] = serializedItem;
+            Mod.LogInfo("\t0");
             serializedItem = null;
             if (Mod.rightHand.heldItem != null && Mod.rightHand.heldItem.physObj.QuickbeltSlot == null)
             {
                 serializedItem = Mod.rightHand.heldItem.Serialize();
             }
             loadedData["rightHand"] = serializedItem;
+            Mod.LogInfo("\t0");
             // Equipment
             for (int i=0; i< StatusUI.instance.equipmentSlots.Length; ++i)
             {
@@ -4387,6 +4417,7 @@ namespace EFM
                 }
                 loadedData["equipment"+i] = serializedItem;
             }
+            Mod.LogInfo("\t0");
             // QBS
             for (int i = 0; i < GM.CurrentPlayerBody.QBSlots_Internal.Count; ++i)
             {
@@ -4402,6 +4433,7 @@ namespace EFM
                 }
                 loadedData["slot" + i] = serializedItem;
             }
+            Mod.LogInfo("\t0");
 
             // Save hideout items
             // Loose items
@@ -4425,6 +4457,7 @@ namespace EFM
                 }
             }
             loadedData["hideout"]["looseItems"] = looseItems;
+            Mod.LogInfo("\t0");
             // Trade volume
             JArray tradeVolumeItems = new JArray();
             foreach (KeyValuePair<string, List<MeatovItem>> entry in marketManager.tradeVolume.inventoryItems)
@@ -4445,7 +4478,8 @@ namespace EFM
                     }
                 }
             }
-            loadedData["hideout"]["tradeVolumeItems"] = looseItems;
+            loadedData["hideout"]["tradeVolumeItems"] = tradeVolumeItems;
+            Mod.LogInfo("\t0");
             // Area items
             JArray areas = new JArray();
             for(int i=0; i < areaController.areas.Length; ++i)
@@ -4503,6 +4537,7 @@ namespace EFM
                 areas.Add(area);
             }
             loadedData["hideout"]["areas"] = areas;
+            Mod.LogInfo("\t0");
             // Scav return items
             JArray scavReturnItemArr = new JArray();
             MeatovItem[] scavReturnItems = scavReturnNode.GetComponentsInChildren<MeatovItem>();
@@ -4515,6 +4550,7 @@ namespace EFM
                 }
             }
             loadedData["hideout"]["scavReturnItems"] = scavReturnItemArr;
+            Mod.LogInfo("\t0");
 
             // Save traders
             JArray traders = new JArray();
@@ -4525,6 +4561,7 @@ namespace EFM
                 traders.Add(trader);
             }
             loadedData["hideout"]["traders"] = traders;
+            Mod.LogInfo("\t0");
 
             // Save areas
             for (int i = 0; i < areaController.areas.Length; ++i)
@@ -4535,6 +4572,7 @@ namespace EFM
                     areaController.areas[i].Save(areas[i]);
                 }
             }
+            Mod.LogInfo("\t0");
 
             // Save insuredSets
             //Mod.insuredItems = new List<InsuredSet>();
@@ -4555,12 +4593,14 @@ namespace EFM
             // Save triggered exploration triggers
             loadedData["triggeredExplorationTriggers"] = JArray.FromObject(Mod.triggeredExperienceTriggers);
 
+            Mod.LogInfo("\t0");
             JArray wishlist = new JArray();
             for(int i=0; i < Mod.wishList.Count; ++i)
             {
                 wishlist.Add(Mod.wishList[i].tarkovID);
             }
             loadedData["whishlist"] = wishlist;
+            Mod.LogInfo("\t0");
 
             SaveDataToFile();
             Mod.LogInfo("Saved hideout");

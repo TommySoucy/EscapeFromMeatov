@@ -100,8 +100,6 @@ namespace EFM
         public void SetAmmoContainer(ItemDescriptionUI owner, MeatovItemData containerData, int hideoutCount, int playerCount, bool isMag)
         {
             this.owner = owner;
-            fulfilledIcon.SetActive(false);
-            unfulfilledIcon.SetActive(false);
             entryName.text = containerData.name;
             if(owner.descriptionPack.item == null)
             {

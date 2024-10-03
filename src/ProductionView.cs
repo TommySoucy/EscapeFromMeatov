@@ -30,8 +30,8 @@ namespace EFM
 
             getButton.SetActive(production.readyCount > 0);
 
-            production.area.UI.UpdateStatusIcons();
-            production.area.UI.UpdateStatusTexts();
+            production.areaData.area.UI.UpdateStatusIcons();
+            production.areaData.area.UI.UpdateStatusTexts();
         }
     }
 }

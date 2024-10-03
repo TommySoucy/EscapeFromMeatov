@@ -1270,7 +1270,7 @@ namespace EFM
         }
     }
 
-    // Patches FVRPlayerHitbox.Damage(Damage) in order to implement our own armor's damage resistance
+    // Patches FVRPlayerHitbox.Damage(Damage) in order to implement our own health system
     class DamagePatch
     {
         static bool Prefix(Damage d, ref FVRPlayerHitbox __instance, ref AudioSource ___m_aud)
@@ -1801,7 +1801,7 @@ namespace EFM
         }
     }
 
-    // Patches FVRPlayerHitbox.Damage(float) in order to implement our own armor's damage resistance
+    // Patches FVRPlayerHitbox.Damage(float) in order to implement our own health system
     class DamageFloatPatch
     {
         static bool Prefix(float i, ref FVRPlayerHitbox __instance, ref AudioSource ___m_aud)
@@ -1842,7 +1842,7 @@ namespace EFM
         }
     }
 
-    // Patches FVRPlayerHitbox.Damage(DamageDealt) in order to implement our own armor's damage resistance
+    // Patches FVRPlayerHitbox.Damage(DamageDealt) in order to implement our own health system
     class DamageDealtPatch
     {
         static bool Prefix(DamageDealt dam, FVRPlayerHitbox __instance, AudioSource ___m_aud)
@@ -2199,7 +2199,6 @@ namespace EFM
                     if (Physics.Raycast(__instance.Input.OneEuroPointingPos, __instance.Input.OneEuroPointRotation * Vector3.forward, out __instance.m_grabHit, 3f, __instance.GrabLaserMask, QueryTriggerInteraction.Collide))
                     {
                         // Describable will not necessarily have a rigidbody and physicalObject script, so check for IDescribable before
-                        TODO: // Test, is performance of using GetComponentInParents fine or should we make our own script we attach to every collider of every item so we can refer to the describable
                         describable = __instance.m_grabHit.collider.GetComponentInParents<IDescribable>();
                         if (describable != null)
                         {
@@ -5260,7 +5259,7 @@ namespace EFM
                 NavMeshLinkDoor doorLink = __instance as NavMeshLinkDoor;
                 if (doorLink.EFMDoor.closedMinRot ? doorLink.EFMDoor.rotAngle == doorLink.EFMDoor.minRot : doorLink.EFMDoor.rotAngle == doorLink.EFMDoor.maxRot)
                 {
-                    if (!__instance.Door.IsLocked())
+                    if (doorLink.EFMDoor.lockScript == null || !doorLink.EFMDoor.lockScript.locked)
                     {
                         __instance.Link.costOverride = __instance.DoorLinkCosts.y;
                     }

@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.UI;
 using Valve.Newtonsoft.Json.Linq;
 
 namespace EFM
@@ -70,6 +71,8 @@ namespace EFM
             Mod.raidTime = 0;
             scavSpawnTimer = scavSpawnInterval;
             Mod.raidKills = new List<KillData>();
+
+            Mod.UnsecureItems();
 
             InitTime();
 
@@ -179,6 +182,20 @@ namespace EFM
             time %= 86400;
 
             Mod.raidTime += Time.deltaTime;
+
+            raidTimeLeft -= Time.deltaTime;
+            if (raidTimeLeft <= 0)
+            {
+                EndRaid(RaidStatus.MIA);
+            }
+            else
+            {
+                StatusUI.instance.extractionTimer.text = Mod.FormatTimeString(raidTimeLeft);
+                if (raidTimeLeft < 600 && StatusUI.instance.extractionTimer.color == Color.black)
+                {
+                    StatusUI.instance.extractionTimer.color = Color.red;
+                }
+            }
         }
 
         public void Init()
@@ -703,6 +720,15 @@ namespace EFM
                     }
                 }
             }
+
+            // Set extractions in StatusUI
+            StatusUI.instance.extractionsParent.SetActive(true);
+            for (int i = 0; i < activeExtractions.Count; ++i) 
+            {
+                GameObject extractionCard = Instantiate(StatusUI.instance.extractionCardPrefab, StatusUI.instance.extractionsParent.transform);
+                extractionCard.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = "EXFIL" + (i < 10 ? "0" + i : i.ToString()) + " " + activeExtractions[i].extractionName;
+                activeExtractions[i].cardRequirementText = extractionCard.transform.GetChild(0).GetChild(1).GetComponent<Text>();
+            }
         }
 
         public Vector3 GetSpawnPosition(Spawn spawn)
@@ -774,12 +800,6 @@ namespace EFM
             }
 
             UpdateTime();
-
-            raidTimeLeft -= Time.deltaTime;
-            if(raidTimeLeft <= 0)
-            {
-                EndRaid(RaidStatus.MIA);
-            }
         }
 
         public void UpdateControl()
@@ -835,6 +855,17 @@ namespace EFM
                 sosigTemplate.MaxUnconsciousTime = 0;
                 sosigTemplate.CanBeGrabbed = false;
                 sosigTemplate.SuppressionMult = 0.05f; // Minimum 20 supression events to fully suppress
+                sosigTemplate.LinkDamageMultipliers = new List<float>();
+                sosigTemplate.LinkStaggerMultipliers = new List<float>();
+                sosigTemplate.StartingLinkIntegrity = new List<Vector2>();
+                sosigTemplate.StartingChanceBrokenJoint = new List<float>();
+                for (int i= 0;i< 4; ++i)
+                {
+                    sosigTemplate.LinkDamageMultipliers.Add(1);
+                    sosigTemplate.LinkStaggerMultipliers.Add(1);
+                    sosigTemplate.StartingLinkIntegrity.Add(new Vector2(100,100));
+                    sosigTemplate.StartingChanceBrokenJoint.Add(0);
+                }
 
                 // Generate inventory
                 BotInventory botInventory = new BotInventory(botData);
@@ -924,6 +955,17 @@ namespace EFM
                 sosigTemplate.MaxUnconsciousTime = 0;
                 sosigTemplate.CanBeGrabbed = false;
                 sosigTemplate.SuppressionMult = 0.05f; // Minimum 20 supression events to fully suppress
+                sosigTemplate.LinkDamageMultipliers = new List<float>();
+                sosigTemplate.LinkStaggerMultipliers = new List<float>();
+                sosigTemplate.StartingLinkIntegrity = new List<Vector2>();
+                sosigTemplate.StartingChanceBrokenJoint = new List<float>();
+                for (int i = 0; i < 4; ++i)
+                {
+                    sosigTemplate.LinkDamageMultipliers.Add(1);
+                    sosigTemplate.LinkStaggerMultipliers.Add(1);
+                    sosigTemplate.StartingLinkIntegrity.Add(new Vector2(100, 100));
+                    sosigTemplate.StartingChanceBrokenJoint.Add(0);
+                }
 
                 // Generate inventory
                 BotInventory botInventory = new BotInventory(botData);
@@ -1021,6 +1063,17 @@ namespace EFM
                         sosigTemplate.MaxUnconsciousTime = 0;
                         sosigTemplate.CanBeGrabbed = false;
                         sosigTemplate.SuppressionMult = 0.05f; // Minimum 20 supression events to fully suppress
+                        sosigTemplate.LinkDamageMultipliers = new List<float>();
+                        sosigTemplate.LinkStaggerMultipliers = new List<float>();
+                        sosigTemplate.StartingLinkIntegrity = new List<Vector2>();
+                        sosigTemplate.StartingChanceBrokenJoint = new List<float>();
+                        for (int j = 0; j < 4; ++j)
+                        {
+                            sosigTemplate.LinkDamageMultipliers.Add(1);
+                            sosigTemplate.LinkStaggerMultipliers.Add(1);
+                            sosigTemplate.StartingLinkIntegrity.Add(new Vector2(100, 100));
+                            sosigTemplate.StartingChanceBrokenJoint.Add(0);
+                        }
 
                         // Generate inventory
                         BotInventory botInventory = new BotInventory(botData);
@@ -1057,6 +1110,17 @@ namespace EFM
                                         squadMemberSosigTemplate.MaxUnconsciousTime = 0;
                                         squadMemberSosigTemplate.CanBeGrabbed = false;
                                         squadMemberSosigTemplate.SuppressionMult = 0.05f; // Minimum 20 supression events to fully suppress
+                                        squadMemberSosigTemplate.LinkDamageMultipliers = new List<float>();
+                                        squadMemberSosigTemplate.LinkStaggerMultipliers = new List<float>();
+                                        squadMemberSosigTemplate.StartingLinkIntegrity = new List<Vector2>();
+                                        squadMemberSosigTemplate.StartingChanceBrokenJoint = new List<float>();
+                                        for (int k = 0; k < 4; ++k)
+                                        {
+                                            squadMemberSosigTemplate.LinkDamageMultipliers.Add(1);
+                                            squadMemberSosigTemplate.LinkStaggerMultipliers.Add(1);
+                                            squadMemberSosigTemplate.StartingLinkIntegrity.Add(new Vector2(100, 100));
+                                            squadMemberSosigTemplate.StartingChanceBrokenJoint.Add(0);
+                                        }
 
                                         // Generate inventory
                                         BotInventory squadMemberBotInventory = new BotInventory(squadMemberBotData);
@@ -1102,6 +1166,17 @@ namespace EFM
                                         squadMemberSosigTemplate.MaxUnconsciousTime = 0;
                                         squadMemberSosigTemplate.CanBeGrabbed = false;
                                         squadMemberSosigTemplate.SuppressionMult = 0.05f; // Minimum 20 supression events to fully suppress
+                                        squadMemberSosigTemplate.LinkDamageMultipliers = new List<float>();
+                                        squadMemberSosigTemplate.LinkStaggerMultipliers = new List<float>();
+                                        squadMemberSosigTemplate.StartingLinkIntegrity = new List<Vector2>();
+                                        squadMemberSosigTemplate.StartingChanceBrokenJoint = new List<float>();
+                                        for (int k = 0; k < 4; ++k)
+                                        {
+                                            squadMemberSosigTemplate.LinkDamageMultipliers.Add(1);
+                                            squadMemberSosigTemplate.LinkStaggerMultipliers.Add(1);
+                                            squadMemberSosigTemplate.StartingLinkIntegrity.Add(new Vector2(100, 100));
+                                            squadMemberSosigTemplate.StartingChanceBrokenJoint.Add(0);
+                                        }
 
                                         // Generate inventory
                                         BotInventory squadMemberBotInventory = new BotInventory(squadMemberBotData);
@@ -1156,8 +1231,8 @@ namespace EFM
 
         public IEnumerator SpawnSosig(Spawn spawn, BotInventory botInventory, SosigConfigTemplate template, List<FVRObject>[] outfit, int IFF, int experienceReward, bool PMC, bool USEC, bool scav, string dataName)
         {
-            yield return IM.OD["SosigBody"].GetGameObjectAsync();
-            GameObject sosigPrefab = IM.OD["SosigBody"].GetGameObject();
+            yield return IM.OD["SosigBody_Default"].GetGameObjectAsync();
+            GameObject sosigPrefab = IM.OD["SosigBody_Default"].GetGameObject();
             if (sosigPrefab == null)
             {
                 Mod.LogError("Failed to get sosig prefab");
@@ -1182,7 +1257,7 @@ namespace EFM
             sosig.SetIFF(IFF);
             if (Networking.currentInstance == null)
             {
-                AI AIScript = sosigObject.AddComponent<AI>();
+                AI AIScript = sosig.gameObject.AddComponent<AI>();
                 AIScript.botInventory = botInventory;
                 AIScript.experienceReward = experienceReward;
                 AIScript.PMC = PMC;
@@ -1285,7 +1360,7 @@ namespace EFM
             }
 
             // Spawn outfit
-            for(int i=0; i < outfit.Length; ++i)
+            for (int i=0; i < outfit.Length; ++i)
             {
                 if(outfit[i] != null)
                 {
@@ -1328,6 +1403,15 @@ namespace EFM
             {
                 // Secure only the pouch
                 Mod.SecureItems("MeatovHideout", true);
+            }
+
+            // Clear extraction UI
+            StatusUI.instance.extractionsParent.SetActive(false);
+            while(StatusUI.instance.extractionsParent.transform.childCount > 1)
+            {
+                Transform child = StatusUI.instance.extractionsParent.transform.GetChild(1);
+                child.parent = null;
+                Destroy(child.gameObject);
             }
 
             // Main scene components will get secured on load start and unsecured upon arrival

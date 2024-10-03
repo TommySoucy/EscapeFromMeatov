@@ -2759,7 +2759,7 @@ namespace EFM
             {
                 Mod.LogInfo("Vanilla serialization of " + name);
                 VaultFile vaultFile = new VaultFile();
-                VaultSystem.ScanObjectToVaultFile(vaultFile, physObj);
+                ScanObjectToVaultFile(vaultFile, physObj);
                 Mod.LogInfo("\tFinished vault file, serializing");
                 string jsonFile = JsonUtility.ToJson(vaultFile, false);
                 serialized["vanillaData"] = jsonFile;
@@ -2771,6 +2771,18 @@ namespace EFM
             serialized["children"] = serializedChildren;
 
             return serialized;
+        }
+
+        public static void ScanObjectToVaultFile(VaultFile file, FVRPhysicalObject o)
+        {
+            file.Objects.Clear();
+            if (o == null || o.ObjectWrapper == null || o.RootRigidbody == null || o.RootRigidbody.gameObject.transform.parent != null || !o.GetIsSaveLoadable() || !IM.HasSpawnedID(o.ObjectWrapper.SpawnedFromId))
+            {
+                return;
+            }
+            List<FVRPhysicalObject> list = new List<FVRPhysicalObject>();
+            list.Add(o);
+            VaultSystem.WriteToVaultFileObject(list, file, true, false, false, list[0].transform);
         }
 
         public JObject GetAllSerializedVanillaCustomData()

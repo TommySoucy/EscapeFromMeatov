@@ -3,11 +3,14 @@ using H3MP.Scripts;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace EFM
 {
     public class Extraction : MonoBehaviour
     {
+        [NonSerialized]
+        public Text cardRequirementText;
         [NonSerialized]
         public float distToSpawn;
         private bool _active
@@ -49,11 +52,11 @@ namespace EFM
         [NonSerialized]
         public float extractionTimer = -1;
 
-        public string name;
+        public string extractionName;
         public float extractionTime = 10;
         public List<Vector2> activeTimes; // Time ranges in seconds from 0 to 86400 (24h) during which this extraction can actually be used
         public List<string> itemRequirements; // Items consumed upon using the extraction
-        public List<string> itemRequirementCounts; // The amount of each item consumed upon using the extraction
+        public List<int> itemRequirementCounts; // The amount of each item consumed upon using the extraction
         public List<string> itemWhitelist; // Items that must be in player inventory upon extraction, not consumed
         public List<string> itemBlacklist; // Items that must NOT be in player inventory upon extraction
         public GameObject activeObject;
@@ -132,16 +135,114 @@ namespace EFM
             }
         }
 
+        public bool UpdateRequirementFulfillment()
+        {
+            if (itemRequirements != null && itemRequirementCounts != null && itemRequirementCounts.Count == itemRequirements.Count)
+            {
+                for (int i = 0; i < itemRequirements.Count; ++i)
+                {
+                    int inventoryCount = 0;
+                    if (!Mod.playerInventory.TryGetValue(itemRequirements[i], out inventoryCount) || inventoryCount < itemRequirementCounts[i])
+                    {
+                        cardRequirementText.gameObject.SetActive(true);
+                        cardRequirementText.text = "Requires x" + itemRequirementCounts[i] + " " + (Mod.defaultItemData.TryGetValue(itemRequirements[i], out MeatovItemData itemData) ? itemData.name : "null");
+                        return false;
+                    }
+                }
+            }
+            if (itemWhitelist != null)
+            {
+                for (int i = 0; i < itemWhitelist.Count; ++i)
+                {
+                    if (Mod.itemsByParents.TryGetValue(itemWhitelist[i], out List<MeatovItemData> itemDatas))
+                    {
+                        for (int j = 0; j < itemDatas.Count; ++j)
+                        {
+                            int inventoryCount = 0;
+                            if (!Mod.playerInventory.TryGetValue(itemDatas[j].tarkovID, out inventoryCount) || inventoryCount <= 0)
+                            {
+                                cardRequirementText.gameObject.SetActive(true);
+                                string categoryName = null;
+                                if (Mod.localeDB[itemWhitelist[i] + " Name"] != null)
+                                {
+                                    categoryName = Mod.localeDB[itemWhitelist[i] + " Name"].ToString();
+                                }
+                                else
+                                {
+                                    categoryName = Mod.GetCorrectCategoryName(Mod.itemDB[itemWhitelist[i]]["_name"].ToString());
+                                }
+                                cardRequirementText.text = "Requires " + categoryName;
+                                return false;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        int inventoryCount = 0;
+                        if (!Mod.playerInventory.TryGetValue(itemWhitelist[i], out inventoryCount) || inventoryCount <= 0)
+                        {
+                            cardRequirementText.gameObject.SetActive(true);
+                            cardRequirementText.text = "Requires " + (Mod.defaultItemData.TryGetValue(itemWhitelist[i], out MeatovItemData itemData) ? itemData.name : "null");
+                            return false;
+                        }
+                    }
+                }
+            }
+            if (itemBlacklist != null)
+            {
+                for (int i = 0; i < itemBlacklist.Count; ++i)
+                {
+                    if (Mod.itemsByParents.TryGetValue(itemBlacklist[i], out List<MeatovItemData> itemDatas))
+                    {
+                        for (int j = 0; j < itemDatas.Count; ++j)
+                        {
+                            int inventoryCount = 0;
+                            if (Mod.playerInventory.TryGetValue(itemDatas[j].tarkovID, out inventoryCount) && inventoryCount > 0)
+                            {
+                                cardRequirementText.gameObject.SetActive(true);
+                                string categoryName = null;
+                                if (Mod.localeDB[itemBlacklist[i] + " Name"] != null)
+                                {
+                                    categoryName = Mod.localeDB[itemBlacklist[i] + " Name"].ToString();
+                                }
+                                else
+                                {
+                                    categoryName = Mod.GetCorrectCategoryName(Mod.itemDB[itemBlacklist[i]]["_name"].ToString());
+                                }
+                                cardRequirementText.text = "Cannot have " + categoryName;
+                                return false;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        int inventoryCount = 0;
+                        if (Mod.playerInventory.TryGetValue(itemBlacklist[i], out inventoryCount) && inventoryCount > 0)
+                        {
+                            cardRequirementText.gameObject.SetActive(true);
+                            cardRequirementText.text = "Cannot have " + (Mod.defaultItemData.TryGetValue(itemBlacklist[i], out MeatovItemData itemData) ? itemData.name : "null");
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+
         public void OnTriggerEnter(Collider other)
         {
-            if(playerHead == null)
+            if (timeActive && active && playerHead == null)
             {
                 FVRPlayerHitbox playerHitbox = other.GetComponent<FVRPlayerHitbox>();
                 if (playerHitbox != null && playerHitbox.Type == FVRPlayerHitbox.PlayerHitBoxType.Head)
                 {
-                    playerHead = playerHitbox;
+                    if (UpdateRequirementFulfillment())
+                    {
+                        playerHead = playerHitbox;
 
-                    extractionTimer = extractionTime;
+                        extractionTimer = extractionTime;
+                    }
                 }
             }
         }
@@ -162,14 +263,44 @@ namespace EFM
 
         public void Extract()
         {
-            // Runthrough if made less than 250xp or stayed in raid less than 5 minutes
-            if(Mod.charChoicePMC && (Mod.raidExp < 250 || Mod.raidTime < 300))
+            if (UpdateRequirementFulfillment())
             {
-                RaidManager.instance.EndRaid(RaidManager.RaidStatus.RunThrough, name);
-            }
-            else
-            {
-                RaidManager.instance.EndRaid(RaidManager.RaidStatus.Success, name);
+                // Consume requirements
+                for(int i=0; i<itemRequirements.Count;++i)
+                {
+                    if (Mod.playerInventoryItems.TryGetValue(itemRequirements[i], out List<MeatovItem> potentialItems))
+                    {
+                        int countLeft = itemRequirementCounts[i];
+                        while (countLeft > 0)
+                        {
+                            MeatovItem item = potentialItems[potentialItems.Count - 1];
+                            if (item.stack > countLeft)
+                            {
+                                item.stack -= countLeft;
+                                countLeft = 0;
+                                break;
+                            }
+                            else
+                            {
+                                countLeft -= item.stack;
+                                if (item.DetachChildren())
+                                {
+                                    item.Destroy();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Runthrough if made less than 250xp or stayed in raid less than 5 minutes
+                if (Mod.charChoicePMC && (Mod.raidExp < 250 || Mod.raidTime < 300))
+                {
+                    RaidManager.instance.EndRaid(RaidManager.RaidStatus.RunThrough, extractionName);
+                }
+                else
+                {
+                    RaidManager.instance.EndRaid(RaidManager.RaidStatus.Success, extractionName);
+                }
             }
         }
     }

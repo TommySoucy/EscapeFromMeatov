@@ -412,7 +412,7 @@ namespace EFM
 
         public void UpdateProductions()
         {
-            productionPanel.SetActive(area.productionsPerLevel[area.currentLevel] != null && area.productionsPerLevel[area.currentLevel].Count > 0);
+            productionPanel.SetActive(area.areaData.productionsPerLevel[area.currentLevel] != null && area.areaData.productionsPerLevel[area.currentLevel].Count > 0);
 
             // Destroy any existing productions
             while (productionPanelContainer.transform.childCount > 3) // 3: 3 production types
@@ -426,7 +426,7 @@ namespace EFM
             {
                 for(int i=0; i <= area.currentLevel; ++i)
                 {
-                    List<Production> currentProductions = area.productionsPerLevel[i];
+                    List<Production> currentProductions = area.areaData.productionsPerLevel[i];
                     for(int j=0; j < currentProductions.Count; ++j)
                     {
                         Production currentProduction = currentProductions[j];
@@ -666,7 +666,7 @@ namespace EFM
         {
             if(area.currentLevel == area.startLevel)
             {
-                if (area.bonusesPerLevel[area.currentLevel + 1] != null && area.bonusesPerLevel[area.currentLevel + 1].Length > 0)
+                if (area.areaData.bonusesPerLevel[area.currentLevel + 1] != null && area.areaData.bonusesPerLevel[area.currentLevel + 1].Length > 0)
                 {
                     bonusPanel.SetActive(true);
                     bonusTitle.text = "FUTURE BONUSES";
@@ -681,7 +681,7 @@ namespace EFM
             }
             else
             {
-                if (area.bonusesPerLevel[area.currentLevel] != null && area.bonusesPerLevel[area.currentLevel].Length > 0)
+                if (area.areaData.bonusesPerLevel[area.currentLevel] != null && area.areaData.bonusesPerLevel[area.currentLevel].Length > 0)
                 {
                     bonusPanel.SetActive(true);
                     bonusTitle.text = "CURRENT BONUSES";
@@ -692,7 +692,7 @@ namespace EFM
                     bonusPanel.SetActive(false);
                 }
 
-                if(area.currentLevel < area.levels.Length - 1 && area.bonusesPerLevel[area.currentLevel + 1] != null && area.bonusesPerLevel[area.currentLevel + 1].Length > 0)
+                if(area.currentLevel < area.levels.Length - 1 && area.areaData.bonusesPerLevel[area.currentLevel + 1] != null && area.areaData.bonusesPerLevel[area.currentLevel + 1].Length > 0)
                 {
                     futureBonusPanel.SetActive(true);
                     UpdateFutureBonuses();
@@ -716,7 +716,7 @@ namespace EFM
 
             if (bonusPanel.activeSelf)
             {
-                Bonus[] bonuses = area.bonusesPerLevel[level];
+                Bonus[] bonuses = area.areaData.bonusesPerLevel[level];
 
                 for(int i=0; i < bonuses.Length; ++i)
                 {
@@ -840,7 +840,7 @@ namespace EFM
 
             if (futureBonusPanel.activeSelf)
             {
-                Bonus[] bonuses = area.bonusesPerLevel[area.currentLevel + 1];
+                Bonus[] bonuses = area.areaData.bonusesPerLevel[area.currentLevel + 1];
 
                 for(int i=0; i < bonuses.Length; ++i)
                 {
@@ -951,7 +951,7 @@ namespace EFM
 
             if (requirementPanel.activeSelf)
             {
-                Dictionary<Requirement.RequirementType, List<Requirement>> requirements = area.requirementsByTypePerLevel[area.currentLevel + 1];
+                Dictionary<Requirement.RequirementType, List<Requirement>> requirements = area.areaData.requirementsByTypePerLevel[area.currentLevel + 1];
 
                 // Area requirements
                 if (requirements.TryGetValue(Requirement.RequirementType.Area, out List<Requirement> areaRequirements))
@@ -1109,7 +1109,7 @@ namespace EFM
 
             if (futureRequirementPanel.activeSelf)
             {
-                Dictionary<Requirement.RequirementType, List<Requirement>> requirements = area.requirementsByTypePerLevel[area.currentLevel + 1];
+                Dictionary<Requirement.RequirementType, List<Requirement>> requirements = area.areaData.requirementsByTypePerLevel[area.currentLevel + 1];
 
                 // Area requirements
                 if (requirements.TryGetValue(Requirement.RequirementType.Area, out List<Requirement> areaRequirements))

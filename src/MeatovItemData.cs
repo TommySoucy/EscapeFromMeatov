@@ -585,12 +585,12 @@ namespace EFM
                     bool subscribed = false;
 
                     // Area upgrades
-                    for (int j = 0; j < area.requirementsByTypePerLevel.Length; ++j)
+                    for (int j = 0; j < area.areaData.requirementsByTypePerLevel.Length; ++j)
                     {
-                        Dictionary<Requirement.RequirementType, List<Requirement>> requirementsByType = area.requirementsByTypePerLevel[j];
+                        Dictionary<Requirement.RequirementType, List<Requirement>> requirementsByType = area.areaData.requirementsByTypePerLevel[j];
                         if (requirementsByType.ContainsKey(Requirement.RequirementType.Item) && requirementsByType[Requirement.RequirementType.Item] != null)
                         {
-                            List<Requirement> itemRequirements = area.requirementsByTypePerLevel[j][Requirement.RequirementType.Item];
+                            List<Requirement> itemRequirements = area.areaData.requirementsByTypePerLevel[j][Requirement.RequirementType.Item];
                             for (int k = 0; k < itemRequirements.Count; ++k)
                             {
                                 Requirement requirement = itemRequirements[k];
@@ -623,7 +623,7 @@ namespace EFM
                                         // but when the area level increases, we might then be needed. It is through this event that we will check that
                                         if (!subscribed)
                                         {
-                                            area.OnAreaLevelChanged += OnAreaLevelChanged;
+                                            area.areaData.OnAreaLevelChanged += OnAreaLevelChanged;
                                             subscribed = true;
                                         }
 
@@ -663,7 +663,7 @@ namespace EFM
                         }
                         if (requirementsByType.ContainsKey(Requirement.RequirementType.Tool) && requirementsByType[Requirement.RequirementType.Tool] != null)
                         {
-                            List<Requirement> itemRequirements = area.requirementsByTypePerLevel[j][Requirement.RequirementType.Tool];
+                            List<Requirement> itemRequirements = area.areaData.requirementsByTypePerLevel[j][Requirement.RequirementType.Tool];
                             for (int k = 0; k < itemRequirements.Count; ++k)
                             {
                                 Requirement requirement = itemRequirements[k];
@@ -695,7 +695,7 @@ namespace EFM
                                         // but when the area level increases, we might then be needed. It is through this event that we will check that
                                         if (!subscribed)
                                         {
-                                            area.OnAreaLevelChanged += OnAreaLevelChanged;
+                                            area.areaData.OnAreaLevelChanged += OnAreaLevelChanged;
                                             subscribed = true;
                                         }
 
@@ -736,9 +736,9 @@ namespace EFM
                     }
 
                     // Productions
-                    for (int j = 0; j < area.productionsPerLevel.Count; ++j)
+                    for (int j = 0; j < area.areaData.productionsPerLevel.Count; ++j)
                     {
-                        List<Production> productions = area.productionsPerLevel[j];
+                        List<Production> productions = area.areaData.productionsPerLevel[j];
                         for (int k = 0; k < productions.Count; ++k)
                         {
                             Production production = productions[k];
@@ -785,7 +785,7 @@ namespace EFM
                                         // but when the area level increases, we might then be needed. It is through this event that we will check that
                                         if (!subscribed)
                                         {
-                                            area.OnAreaLevelChanged += OnAreaLevelChanged;
+                                            area.areaData.OnAreaLevelChanged += OnAreaLevelChanged;
                                             subscribed = true;
                                         }
 
@@ -1215,7 +1215,7 @@ namespace EFM
                 // any areas
                 if (stillSubbed)
                 {
-                    area.OnAreaLevelChanged -= OnAreaLevelChanged;
+                    area.areaData.OnAreaLevelChanged -= OnAreaLevelChanged;
                 }
             }
             else
@@ -1281,7 +1281,7 @@ namespace EFM
                 // can become empty but refill later
                 if (Mod.checkmarkFutureAreas && Mod.checkmarkFutureProductions && !neededForLevelByAreaCurrent.ContainsKey(area.index))
                 {
-                    area.OnAreaLevelChanged -= OnAreaLevelChanged;
+                    area.areaData.OnAreaLevelChanged -= OnAreaLevelChanged;
                 }
             }
 

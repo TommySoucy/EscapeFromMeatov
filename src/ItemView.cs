@@ -289,6 +289,7 @@ namespace EFM
 
         public void OnItemInventoryChanged(int difference)
         {
+            Mod.LogInfo("ItemView OnItemInventoryChanged, itemData null?: "+ (itemData== null)+", checkmark null?: "+(infoNeededForCheckmark == null));
             if (itemData.GetCheckmark(out Color color))
             {
                 infoNeededForCheckmark.gameObject.SetActive(true);

@@ -58,7 +58,7 @@ namespace EFM
             if (fits || bypass)
             {
                 item.physObj.SetAllCollidersToLayer(false, "NoCol");
-                item.physObj.StoreAndDestroyRigidbody();
+                item.physObj.RootRigidbody.isKinematic = true;
                 item.physObj.SetParentage(itemRoot.transform);
                 if (item.physObj.IsAltHeld)
                 {
@@ -146,7 +146,7 @@ namespace EFM
 
                 volume -= item.volumes[item.mode];
                 item.parentVolume = null;
-                item.physObj.RecoverRigidbody();
+                item.physObj.RootRigidbody.isKinematic = false;
                 item.physObj.SetAllCollidersToLayer(false, "Default");
 
                 OnItemRemovedInvoke(item);
@@ -338,9 +338,9 @@ namespace EFM
                     // Add item to volume
                     AddItem(meatovItem);
 
-                    itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-activeVolume.transform.localScale.x / 2, activeVolume.transform.localScale.x / 2),
-                                                                        UnityEngine.Random.Range(-activeVolume.transform.localScale.y / 2, activeVolume.transform.localScale.y / 2),
-                                                                        UnityEngine.Random.Range(-activeVolume.transform.localScale.z / 2, activeVolume.transform.localScale.z / 2));
+                    itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-transform.localScale.x / 2, transform.localScale.x / 2),
+                                                                        UnityEngine.Random.Range(-transform.localScale.y / 2, transform.localScale.y / 2),
+                                                                        UnityEngine.Random.Range(-transform.localScale.z / 2, transform.localScale.z / 2));
                     itemObject.transform.localRotation = UnityEngine.Random.rotation;
 
                     boxCountLeft = countLeft / 120.0f;
@@ -361,9 +361,9 @@ namespace EFM
                     // Add item to volume
                     AddItem(meatovItem);
 
-                    itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-activeVolume.transform.localScale.x / 2, activeVolume.transform.localScale.x / 2),
-                                                                     UnityEngine.Random.Range(-activeVolume.transform.localScale.y / 2, activeVolume.transform.localScale.y / 2),
-                                                                     UnityEngine.Random.Range(-activeVolume.transform.localScale.z / 2, activeVolume.transform.localScale.z / 2));
+                    itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-transform.localScale.x / 2, transform.localScale.x / 2),
+                                                                     UnityEngine.Random.Range(-transform.localScale.y / 2, transform.localScale.y / 2),
+                                                                     UnityEngine.Random.Range(-transform.localScale.z / 2, transform.localScale.z / 2));
                     itemObject.transform.localRotation = UnityEngine.Random.rotation;
 
                     itemsSpawned.Add(meatovItem);

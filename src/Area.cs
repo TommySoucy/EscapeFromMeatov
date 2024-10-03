@@ -2,7 +2,6 @@
 using ModularWorkshop;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using Valve.Newtonsoft.Json.Linq;
 
@@ -10,6 +9,9 @@ namespace EFM
 {
     public class Area : MonoBehaviour
     {
+        public static AreaData[] areaDatas;
+        public AreaData areaData;
+
         // Main
         public AreaController controller;
         public int index;
@@ -20,12 +22,6 @@ namespace EFM
         public static float fuelConsumptionRate;
         public static float filterConsumptionRate;
         [NonSerialized]
-        public int[] constructionTimePerLevel; // In seconds
-        public Dictionary<Requirement.RequirementType, List<Requirement>>[] requirementsByTypePerLevel;
-        public Bonus[][] bonusesPerLevel;
-        public List<List<Production>> productionsPerLevel;
-        public Dictionary<string, Production> productionsByID;
-        public Dictionary<string, List<Production>> productionsByProductID;
         public int readyProdutionCount;
 
         // Live
@@ -39,7 +35,7 @@ namespace EFM
                 _currentLevel = value;
                 if(preLevel != _currentLevel)
                 {
-                    OnAreaLevelChangedInvoke(this);
+                    areaData.OnAreaLevelChangedInvoke(this);
                 }
             }
         }
@@ -77,12 +73,6 @@ namespace EFM
         public AreaUpgradeCheckProcessor[] activeCheckProcessors;
         public bool craftOuputSlot; // False is Volume, output will always be first in slot/vol per level
         public AudioClip[] genericAudioClips; // AreaSelected, UpgradeBegin, UpgradeComplete, ItemInstalled, ItemStarted, ItemComplete
-
-        public delegate void OnSlotContentChangedDelegate();
-        public event OnSlotContentChangedDelegate OnSlotContentChanged;
-
-        public delegate void OnAreaLevelChangedDelegate(Area area);
-        public event OnAreaLevelChangedDelegate OnAreaLevelChanged;
 
         public void Start()
         {
@@ -193,49 +183,56 @@ namespace EFM
 
         public void LoadStaticData()
         {
-            JToken areaData = null;
+            areaData = areaDatas[index];
+            areaData.area = this;
+            if (areaDatas[index].set)
+            {
+                return;
+            }
+
+            JToken areaJSONData = null;
             for (int i = 0; i < Mod.areasDB.Count; ++i)
             {
                 if ((int)Mod.areasDB[i]["type"] == index)
                 {
-                    areaData = Mod.areasDB[i];
+                    areaJSONData = Mod.areasDB[i];
                     break;
                 }
             }
 
-            constructionTimePerLevel = new int[levels.Length];
-            requirementsByTypePerLevel = new Dictionary<Requirement.RequirementType, List<Requirement>>[levels.Length];
-            bonusesPerLevel = new Bonus[levels.Length][];
-            productionsPerLevel = new List<List<Production>>();
-            productionsByID = new Dictionary<string, Production>();
-            productionsByProductID = new Dictionary<string, List<Production>>();
+            areaData.constructionTimePerLevel = new int[levels.Length];
+            areaData.requirementsByTypePerLevel = new Dictionary<Requirement.RequirementType, List<Requirement>>[levels.Length];
+            areaData.bonusesPerLevel = new Bonus[levels.Length][];
+            areaData.productionsPerLevel = new List<List<Production>>();
+            areaData.productionsByID = new Dictionary<string, Production>();
+            areaData.productionsByProductID = new Dictionary<string, List<Production>>();
             for (int i=0; i < levels.Length; ++i)
             {
-                productionsPerLevel.Add(new List<Production>());
+                areaData.productionsPerLevel.Add(new List<Production>());
             }
             for (int i = 0; i < levels.Length; ++i)
             {
-                JToken levelData = areaData["stages"][i.ToString()];
-                constructionTimePerLevel[i] = levelData["constructionTime"] == null ? 0 : (int)levelData["constructionTime"];
+                JToken levelData = areaJSONData["stages"][i.ToString()];
+                areaData.constructionTimePerLevel[i] = levelData["constructionTime"] == null ? 0 : (int)levelData["constructionTime"];
 
                 JArray levelRequirements = levelData["requirements"] as JArray;
                 if (levelRequirements == null)
                 {
-                    requirementsByTypePerLevel[i] = null;
+                    areaData.requirementsByTypePerLevel[i] = null;
                 }
                 else
                 {
-                    requirementsByTypePerLevel[i] = new Dictionary<Requirement.RequirementType, List<Requirement>>();
+                    areaData.requirementsByTypePerLevel[i] = new Dictionary<Requirement.RequirementType, List<Requirement>>();
                     for (int j = 0; j < levelRequirements.Count; ++j)
                     {
-                        Requirement currentRequirement = new Requirement(levelRequirements[j], this);
-                        if (requirementsByTypePerLevel[i].TryGetValue(currentRequirement.requirementType, out List<Requirement> currentRequirements))
+                        Requirement currentRequirement = new Requirement(levelRequirements[j], areaData);
+                        if (areaData.requirementsByTypePerLevel[i].TryGetValue(currentRequirement.requirementType, out List<Requirement> currentRequirements))
                         {
                             currentRequirements.Add(currentRequirement);
                         }
                         else
                         {
-                            requirementsByTypePerLevel[i].Add(currentRequirement.requirementType, new List<Requirement>() { currentRequirement });
+                            areaData.requirementsByTypePerLevel[i].Add(currentRequirement.requirementType, new List<Requirement>() { currentRequirement });
                         }
                     }
                 }
@@ -243,21 +240,21 @@ namespace EFM
                 JArray levelBonuses = levelData["bonuses"] as JArray;
                 if (levelBonuses == null)
                 {
-                    bonusesPerLevel[i] = null;
+                    areaData.bonusesPerLevel[i] = null;
                 }
                 else
                 {
-                    bonusesPerLevel[i] = new Bonus[levelBonuses.Count];
+                    areaData.bonusesPerLevel[i] = new Bonus[levelBonuses.Count];
                     for (int j = 0; j < levelBonuses.Count; ++j)
                     {
-                        Bonus currentBonus = new Bonus(levelBonuses[j], this);
+                        Bonus currentBonus = new Bonus(levelBonuses[j], areaData);
                         if (currentBonus.bonusType == Bonus.BonusType.None)
                         {
-                            bonusesPerLevel[i][j] = null;
+                            areaData.bonusesPerLevel[i][j] = null;
                         }
                         else
                         {
-                            bonusesPerLevel[i][j] = currentBonus;
+                            areaData.bonusesPerLevel[i][j] = currentBonus;
                         }
                     }
                 }
@@ -269,8 +266,8 @@ namespace EFM
                 JToken productionData = Mod.productionsDB[i];
                 if ((int)productionData["areaType"] == index)
                 {
-                    Production newProduction = new Production(this, productionData);
-                    productionsPerLevel[newProduction.areaLevel].Add(newProduction);
+                    Production newProduction = new Production(areaData, productionData);
+                    areaData.productionsPerLevel[newProduction.areaLevel].Add(newProduction);
                 }
             }
 
@@ -280,7 +277,7 @@ namespace EFM
             // In this case, the production will handle this itself
             if(index == 20)
             {
-                OnSlotContentChanged += productionsPerLevel[startLevel + 1][0].OnBitcoinFarmSlotContentChanged;
+                areaData.OnSlotContentChanged += areaData.productionsPerLevel[startLevel + 1][0].OnBitcoinFarmSlotContentChanged;
             }
 
             // Special case for Scav Case (14)
@@ -290,8 +287,8 @@ namespace EFM
                 for (int i = 0; i < Mod.scavCaseProductionsDB.Count; ++i)
                 {
                     JToken productionData = Mod.scavCaseProductionsDB[i];
-                    Production newProduction = new Production(this, productionData, true);
-                    productionsPerLevel[newProduction.areaLevel].Add(newProduction);
+                    Production newProduction = new Production(areaData, productionData, true);
+                    areaData.productionsPerLevel[newProduction.areaLevel].Add(newProduction);
                 }
             }
         }
@@ -304,13 +301,13 @@ namespace EFM
             data["upgradeTimeLeft"] = upgradeTimeLeft;
 
             JObject productions = new JObject();
-            for(int i=0; i < productionsPerLevel.Count; ++i)
+            for(int i=0; i < areaData.productionsPerLevel.Count; ++i)
             {
-                for(int j=0; j < productionsPerLevel[i].Count; ++j)
+                for(int j=0; j < areaData.productionsPerLevel[i].Count; ++j)
                 {
                     JObject production = new JObject();
-                    productionsPerLevel[i][j].Save(production);
-                    productions[productionsPerLevel[i][j].ID] = production;
+                    areaData.productionsPerLevel[i][j].Save(production);
+                    productions[areaData.productionsPerLevel[i][j].ID] = production;
                 }
             }
             data["productions"] = productions;
@@ -332,13 +329,21 @@ namespace EFM
                 upgradeTimeLeft = (float)HideoutController.loadedData["hideout"]["areas"][index]["upgradeTimeLeft"] - (float)HideoutController.secondsSinceSave;
             }
 
-            // Production live data has been loaded upon their instantiation
+            // Load all production live data
+            for (int i = 0; i < areaData.productionsPerLevel.Count; ++i) 
+            {
+                for (int j = 0; j < areaData.productionsPerLevel[i].Count; ++j) 
+                {
+                    areaData.productionsPerLevel[i][j].LoadLiveData();
+                }
+            }
+
             // Here, we need to make sure that all requirements are up to date with live data
             // Note that certain requirements will also update themselves as we initialize other areas
             // as the corresponding events are raised
             if(currentLevel < levels.Length - 1)
             {
-                Dictionary<Requirement.RequirementType, List<Requirement>> requirements = requirementsByTypePerLevel[currentLevel + 1];
+                Dictionary<Requirement.RequirementType, List<Requirement>> requirements = areaData.requirementsByTypePerLevel[currentLevel + 1];
                 foreach(KeyValuePair<Requirement.RequirementType, List<Requirement>> requirementEntry in requirements)
                 {
                     for (int i = 0; i < requirementEntry.Value.Count; ++i)
@@ -347,13 +352,13 @@ namespace EFM
                     }
                 }
             }
-            for(int i = 0; i < productionsPerLevel.Count; ++i)
+            for (int i = 0; i < areaData.productionsPerLevel.Count; ++i) 
             {
-                for(int j = 0; j< productionsPerLevel[i].Count; ++j)
+                for (int j = 0; j < areaData.productionsPerLevel[i].Count; ++j) 
                 {
-                    for(int k=0; k< productionsPerLevel[i][j].requirements.Count; ++k)
+                    for (int k = 0; k < areaData.productionsPerLevel[i][j].requirements.Count; ++k) 
                     {
-                        productionsPerLevel[i][j].requirements[k].UpdateFulfilled();
+                        areaData.productionsPerLevel[i][j].requirements[k].UpdateFulfilled();
                     }
                 }
             }
@@ -367,7 +372,7 @@ namespace EFM
             // Special case for bitcoin farm
             if(index == 20)
             {
-                productionsPerLevel[startLevel + 1][0].OnBitcoinFarmSlotContentChanged();
+                areaData.productionsPerLevel[startLevel + 1][0].OnBitcoinFarmSlotContentChanged();
             }
         }
 
@@ -420,11 +425,11 @@ namespace EFM
                             {
                                 fuelConsumptionTimer = 1 / fuelConsumptionRate;
                                 fuelConsumptionTimer += fuelConsumptionTimer / 100 * Bonus.fuelConsumption;
-                                for (int i = 0; i < bonusesPerLevel[currentLevel].Length; ++i)
+                                for (int i = 0; i < areaData.bonusesPerLevel[currentLevel].Length; ++i)
                                 {
-                                    if (bonusesPerLevel[currentLevel][i].production)
+                                    if (areaData.bonusesPerLevel[currentLevel][i].production)
                                     {
-                                        bonusesPerLevel[currentLevel][i].Apply();
+                                        areaData.bonusesPerLevel[currentLevel][i].Apply();
                                     }
                                 }
                             }
@@ -453,11 +458,11 @@ namespace EFM
                             if (consumed)
                             {
                                 filterConsumptionTimer = 1 / filterConsumptionRate;
-                                for (int i = 0; i < bonusesPerLevel[currentLevel].Length; ++i)
+                                for (int i = 0; i < areaData.bonusesPerLevel[currentLevel].Length; ++i)
                                 {
-                                    if (bonusesPerLevel[currentLevel][i].production)
+                                    if (areaData.bonusesPerLevel[currentLevel][i].production)
                                     {
-                                        bonusesPerLevel[currentLevel][i].Apply();
+                                        areaData.bonusesPerLevel[currentLevel][i].Apply();
                                     }
                                 }
                             }
@@ -465,12 +470,12 @@ namespace EFM
                     }
 
                     // Bonuses
-                    for (int i = 0; i < bonusesPerLevel[currentLevel].Length; ++i)
+                    for (int i = 0; i < areaData.bonusesPerLevel[currentLevel].Length; ++i)
                     {
                         // Note that we only apply bonuses that are non passive (require power) and not production (but require no resources)
-                        if (!bonusesPerLevel[currentLevel][i].passive && !bonusesPerLevel[currentLevel][i].production)
+                        if (!areaData.bonusesPerLevel[currentLevel][i].passive && !areaData.bonusesPerLevel[currentLevel][i].production)
                         {
-                            bonusesPerLevel[currentLevel][i].Apply();
+                            areaData.bonusesPerLevel[currentLevel][i].Apply();
                         }
                     }
                 }
@@ -501,13 +506,13 @@ namespace EFM
                     // Bonuses
                     // Note that we don't manage resource consumption for generator and AFU here
                     // as it will be done on update, where if not powered, resources will not be consumed
-                    for (int i = 0; i < bonusesPerLevel[currentLevel].Length; ++i)
+                    for (int i = 0; i < areaData.bonusesPerLevel[currentLevel].Length; ++i)
                     {
                         // Note that unlike power on, here we unapply all bonuses that are non passive (require power) 
                         // regardless of whether it needs resources or not
-                        if (!bonusesPerLevel[currentLevel][i].passive)
+                        if (!areaData.bonusesPerLevel[currentLevel][i].passive)
                         {
-                            bonusesPerLevel[currentLevel][i].Unapply();
+                            areaData.bonusesPerLevel[currentLevel][i].Unapply();
                         }
                     }
                 }
@@ -537,9 +542,9 @@ namespace EFM
             // Update productions
             for (int i = 0; i <= currentLevel; ++i)
             {
-                for (int j = 0; j < productionsPerLevel[i].Count; ++j)
+                for (int j = 0; j < areaData.productionsPerLevel[i].Count; ++j)
                 {
-                    productionsPerLevel[i][j].Update();
+                    areaData.productionsPerLevel[i][j].Update();
                 }
             }
 
@@ -567,11 +572,11 @@ namespace EFM
 
                     // Apply new bonuses
                     // Note that production bonuses are not applied, those are controlled through specific updates below
-                    for(int i=0; i < bonusesPerLevel[currentLevel].Length; ++i)
+                    for(int i=0; i < areaData.bonusesPerLevel[currentLevel].Length; ++i)
                     {
-                        if ((bonusesPerLevel[currentLevel][i].passive || powered) && !bonusesPerLevel[currentLevel][i].production)
+                        if ((areaData.bonusesPerLevel[currentLevel][i].passive || powered) && !areaData.bonusesPerLevel[currentLevel][i].production)
                         {
-                            bonusesPerLevel[currentLevel][i].Apply();
+                            areaData.bonusesPerLevel[currentLevel][i].Apply();
                         }
                     }
                 }
@@ -607,11 +612,11 @@ namespace EFM
                         else
                         {
                             controller.TogglePower();
-                            for (int i = 0; i < bonusesPerLevel[currentLevel].Length; ++i)
+                            for (int i = 0; i < areaData.bonusesPerLevel[currentLevel].Length; ++i)
                             {
-                                if (bonusesPerLevel[currentLevel][i].production)
+                                if (areaData.bonusesPerLevel[currentLevel][i].production)
                                 {
-                                    bonusesPerLevel[currentLevel][i].Unapply();
+                                    areaData.bonusesPerLevel[currentLevel][i].Unapply();
                                 }
                             }
                         }
@@ -643,11 +648,11 @@ namespace EFM
                         }
                         else
                         {
-                            for (int i = 0; i < bonusesPerLevel[currentLevel].Length; ++i)
+                            for (int i = 0; i < areaData.bonusesPerLevel[currentLevel].Length; ++i)
                             {
-                                if (bonusesPerLevel[currentLevel][i].production)
+                                if (areaData.bonusesPerLevel[currentLevel][i].production)
                                 {
-                                    bonusesPerLevel[currentLevel][i].Unapply();
+                                    areaData.bonusesPerLevel[currentLevel][i].Unapply();
                                 }
                             }
                         }
@@ -658,7 +663,7 @@ namespace EFM
 
         public void ReturnTools()
         {
-            if(requirementsByTypePerLevel[currentLevel].TryGetValue(Requirement.RequirementType.Tool, out List<Requirement> toolRequirements))
+            if(areaData.requirementsByTypePerLevel[currentLevel].TryGetValue(Requirement.RequirementType.Tool, out List<Requirement> toolRequirements))
             {
                 for (int i = 0; i < toolRequirements.Count; ++i)
                 {
@@ -756,7 +761,7 @@ namespace EFM
                 return false;
             }
 
-            Dictionary<Requirement.RequirementType, List<Requirement>> requirements = requirementsByTypePerLevel[currentLevel + 1];
+            Dictionary<Requirement.RequirementType, List<Requirement>> requirements = areaData.requirementsByTypePerLevel[currentLevel + 1];
             foreach (KeyValuePair<Requirement.RequirementType, List<Requirement>> requirementEntry in requirements)
             {
                 for (int i = 0; i < requirementEntry.Value.Count; ++i)
@@ -771,80 +776,18 @@ namespace EFM
             return true;
         }
 
-        public void OnSlotContentChangedInvoke()
-        {
-            // Area specific
-            if(index == 17) // AFU
-            {
-                if (powered && filterConsumptionTimer <= 0)
-                {
-                    // Consume filter
-                    bool consumed = false;
-                    for (int i = 0; i < levels[currentLevel].areaSlots.Length; ++i)
-                    {
-                        if (levels[currentLevel].areaSlots[i].item != null && levels[currentLevel].areaSlots[i].item.amount > 0)
-                        {
-                            --levels[currentLevel].areaSlots[i].item.amount;
-                            break;
-                        }
-                    }
-
-                    // Reset timer and apply bonuses if consumed
-                    if (consumed)
-                    {
-                        filterConsumptionTimer = 1 / filterConsumptionRate;
-                        for (int i = 0; i < bonusesPerLevel[currentLevel].Length; ++i)
-                        {
-                            if (bonusesPerLevel[currentLevel][i].production)
-                            {
-                                bonusesPerLevel[currentLevel][i].Apply();
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Raise event
-            if (OnSlotContentChanged != null)
-            {
-                OnSlotContentChanged();
-            }
-        }
-
-        public void OnAreaLevelChangedInvoke(Area area)
-        {
-            // Raise event
-            if (OnAreaLevelChanged != null)
-            {
-                OnAreaLevelChanged(area);
-            }
-        }
-
-        public void OnBeginProduction(Production production)
-        {
-            activeProductions.Add(production);
-        }
-
-        public void OnStopProduction(Production production)
-        {
-            activeProductions.Remove(production);
-
-            UI.UpdateStatusIcons();
-            UI.UpdateStatusTexts();
-        }
-
         public List<Production> GetActiveProductions()
         {
             List<Production> productions = new List<Production>();
             for(int i=startLevel; i <= currentLevel; ++i)
             {
-                if(productionsPerLevel[currentLevel] != null)
+                if(areaData.productionsPerLevel[currentLevel] != null)
                 {
-                    for (int j = 0; j < productionsPerLevel[currentLevel].Count; ++j)
+                    for (int j = 0; j < areaData.productionsPerLevel[currentLevel].Count; ++j)
                     {
-                        if (productionsPerLevel[currentLevel][j].inProduction)
+                        if (areaData.productionsPerLevel[currentLevel][j].inProduction)
                         {
-                            productions.Add(productionsPerLevel[currentLevel][j]);
+                            productions.Add(areaData.productionsPerLevel[currentLevel][j]);
                         }
                     }
                 }
@@ -856,10 +799,10 @@ namespace EFM
         {
             // Set into upgrade state
             upgrading = true;
-            upgradeTimeLeft = constructionTimePerLevel[currentLevel + 1];
+            upgradeTimeLeft = areaData.constructionTimePerLevel[currentLevel + 1];
 
             // Consume requirements
-            if(requirementsByTypePerLevel[currentLevel + 1].TryGetValue(Requirement.RequirementType.Item, out List<Requirement> itemRequirements))
+            if(areaData.requirementsByTypePerLevel[currentLevel + 1].TryGetValue(Requirement.RequirementType.Item, out List<Requirement> itemRequirements))
             {
                 for (int i = 0; i < itemRequirements.Count; ++i)
                 {
@@ -885,7 +828,7 @@ namespace EFM
                     }
                 }
             }
-            if(requirementsByTypePerLevel[currentLevel + 1].TryGetValue(Requirement.RequirementType.Tool, out List<Requirement> toolRequirements))
+            if(areaData.requirementsByTypePerLevel[currentLevel + 1].TryGetValue(Requirement.RequirementType.Tool, out List<Requirement> toolRequirements))
             {
                 for (int i = 0; i < toolRequirements.Count; ++i)
                 {
@@ -913,7 +856,7 @@ namespace EFM
                     }
                 }
             }
-            if(requirementsByTypePerLevel[currentLevel + 1].TryGetValue(Requirement.RequirementType.Resource, out List<Requirement> resourceRequirements))
+            if(areaData.requirementsByTypePerLevel[currentLevel + 1].TryGetValue(Requirement.RequirementType.Resource, out List<Requirement> resourceRequirements))
             {
                 for (int i = 0; i < resourceRequirements.Count; ++i)
                 {
@@ -961,11 +904,11 @@ namespace EFM
 
             // Apply new bonuses
             // Note that production bonuses are not applied, those are controlled through specific updates below
-            for (int i = 0; i < bonusesPerLevel[currentLevel].Length; ++i)
+            for (int i = 0; i < areaData.bonusesPerLevel[currentLevel].Length; ++i)
             {
-                if ((bonusesPerLevel[currentLevel][i].passive || powered) && !bonusesPerLevel[currentLevel][i].production)
+                if ((areaData.bonusesPerLevel[currentLevel][i].passive || powered) && !areaData.bonusesPerLevel[currentLevel][i].production)
                 {
-                    bonusesPerLevel[currentLevel][i].Apply();
+                    areaData.bonusesPerLevel[currentLevel][i].Apply();
                 }
             }
 
@@ -1178,11 +1121,116 @@ namespace EFM
                 UIScreen.Value.GetComponent<ModularWorkshopUI>().UpdateDisplay();
             }
         }
+
+        public void OnDestroy()
+        {
+            // Workbench specific
+            if (index == 10)
+            {
+                for (int i = 0; i < levels.Length; ++i)
+                {
+                    // Unsub from volume content changed events
+                    if (levels[i].areaVolumes != null && levels[i].areaVolumes.Length > 0 && levels[i].areaVolumes[0] != null)
+                    {
+                        levels[i].areaVolumes[0].OnItemAdded -= OnWorkbenchItemAdded;
+                        levels[i].areaVolumes[0].OnItemRemoved -= OnWorkbenchItemRemoved;
+                    }
+                }
+            }
+        }
+    }
+
+    public class AreaData
+    {
+        public Area area;
+        public int index;
+        public bool set;
+
+        public int[] constructionTimePerLevel; // In seconds
+        public Dictionary<Requirement.RequirementType, List<Requirement>>[] requirementsByTypePerLevel;
+        public Bonus[][] bonusesPerLevel;
+        public List<List<Production>> productionsPerLevel;
+        public Dictionary<string, Production> productionsByID;
+        public Dictionary<string, List<Production>> productionsByProductID;
+
+        public delegate void OnSlotContentChangedDelegate();
+        public event OnSlotContentChangedDelegate OnSlotContentChanged;
+
+        public delegate void OnAreaLevelChangedDelegate(Area area);
+        public event OnAreaLevelChangedDelegate OnAreaLevelChanged;
+
+        public AreaData(int index)
+        {
+            this.index = index;
+        }
+
+        public void OnSlotContentChangedInvoke()
+        {
+            // Note that this can only ever be called if area != null
+            // Area specific
+            if (index == 17) // AFU
+            {
+                if (area.powered && area.filterConsumptionTimer <= 0)
+                {
+                    // Consume filter
+                    bool consumed = false;
+                    for (int i = 0; i < area.levels[area.currentLevel].areaSlots.Length; ++i)
+                    {
+                        if (area.levels[area.currentLevel].areaSlots[i].item != null && area.levels[area.currentLevel].areaSlots[i].item.amount > 0)
+                        {
+                            --area.levels[area.currentLevel].areaSlots[i].item.amount;
+                            break;
+                        }
+                    }
+
+                    // Reset timer and apply bonuses if consumed
+                    if (consumed)
+                    {
+                        area.filterConsumptionTimer = 1 / Area.filterConsumptionRate;
+                        for (int i = 0; i < bonusesPerLevel[area.currentLevel].Length; ++i)
+                        {
+                            if (bonusesPerLevel[area.currentLevel][i].production)
+                            {
+                                bonusesPerLevel[area.currentLevel][i].Apply();
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Raise event
+            if (OnSlotContentChanged != null)
+            {
+                OnSlotContentChanged();
+            }
+        }
+
+        public void OnAreaLevelChangedInvoke(Area area)
+        {
+            // Raise event
+            if (OnAreaLevelChanged != null)
+            {
+                OnAreaLevelChanged(area);
+            }
+        }
+
+        public void OnBeginProduction(Production production)
+        {
+            area.activeProductions.Add(production);
+        }
+
+        public void OnStopProduction(Production production)
+        {
+            area.activeProductions.Remove(production);
+
+            area.UI.UpdateStatusIcons();
+            area.UI.UpdateStatusTexts();
+        }
     }
 
     public class Requirement
     {
-        public Area area;
+        public AreaData areaData;
         public Production production;
         public AreaRequirement areaRequirementUI;
         public RequirementItemView itemRequirementUI;
@@ -1234,11 +1282,11 @@ namespace EFM
         // QuestComplete
         public Task task;
 
-        public Requirement(JToken requirementData, Area area = null, Production production = null)
+        public Requirement(JToken requirementData, AreaData areaData = null, Production production = null)
         {
-            if(requirementData != null)
+            if (requirementData != null)
             {
-                this.area = area;
+                this.areaData = areaData;
                 this.production = production;
                 requirementType = RequirementTypeFromName(requirementData["type"].ToString());
 
@@ -1249,7 +1297,7 @@ namespace EFM
                         {
                             if (!Mod.oldItemMap.ContainsKey(requirementData["templateId"].ToString()))
                             {
-                                Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " item requirement targets item " + requirementData["templateId"].ToString() + " for which we do not have data");
+                                Mod.LogError("DEV: " + (production == null ? "Area " + areaData.index : "Prodution " + production.ID) + " item requirement targets item " + requirementData["templateId"].ToString() + " for which we do not have data");
                             }
                             fulfilled = true;
                             return;
@@ -1262,7 +1310,7 @@ namespace EFM
                         // Really just want to handle a change in slot content if we are continuous production req
                         if (production != null && production.continuous)
                         {
-                            area.OnSlotContentChanged += OnAreaSlotContentChanged;
+                            areaData.OnSlotContentChanged += OnAreaSlotContentChanged;
                         }
                         else // Either we are area upgrade req or we are production but not continuous so not slot dependent
                         {
@@ -1273,7 +1321,7 @@ namespace EFM
                     case RequirementType.Area:
                         areaIndex = (int)requirementData["areaType"];
                         areaLevel = (int)requirementData["requiredLevel"];
-                        area.controller.areas[areaIndex].OnAreaLevelChanged += OnAreaLevelChanged;
+                        Area.areaDatas[areaIndex].OnAreaLevelChanged += OnAreaLevelChanged;
                         break;
                     case RequirementType.Skill:
                         skillIndex = Skill.SkillNameToIndex(requirementData["skillName"].ToString());
@@ -1297,7 +1345,7 @@ namespace EFM
                         {
                             if (!Mod.oldItemMap.ContainsKey(requirementData["templateId"].ToString()))
                             {
-                                Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " tool requirement targets item " + requirementData["templateId"].ToString() + " for which we do not have data");
+                                Mod.LogError("DEV: " + (production == null ? "Area " + areaData.index : "Prodution " + production.ID) + " tool requirement targets item " + requirementData["templateId"].ToString() + " for which we do not have data");
                             }
                             fulfilled = true;
                             return;
@@ -1311,7 +1359,7 @@ namespace EFM
                         {
                             if (!Mod.oldItemMap.ContainsKey(requirementData["templateId"].ToString()))
                             {
-                                Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " item requirement targets item " + requirementData["templateId"].ToString() + " for which we do not have data");
+                                Mod.LogError("DEV: " + (production == null ? "Area " + areaData.index : "Prodution " + production.ID) + " item requirement targets item " + requirementData["templateId"].ToString() + " for which we do not have data");
                             }
                             fulfilled = true;
                             return;
@@ -1321,7 +1369,7 @@ namespace EFM
                         // Really just want to handle a change in slot content if we are continuous production req
                         if (production != null && production.continuous)
                         {
-                            area.OnSlotContentChanged += OnAreaSlotContentChanged;
+                            areaData.OnSlotContentChanged += OnAreaSlotContentChanged;
                         }
                         else // Either we are area upgrade req or we are production but not continuous so not slot dependent
                         {
@@ -1372,7 +1420,7 @@ namespace EFM
         {
             OnInventoryChanged(-1);
             OnAreaSlotContentChanged();
-            OnAreaLevelChanged(area);
+            OnAreaLevelChanged(areaData.area);
             OnTraderLevelChanged(null);
             OnSkillLevelChanged();
             OnTaskStateChanged(null);
@@ -1448,11 +1496,11 @@ namespace EFM
             {
                 case RequirementType.Resource:
                     int totalAmount = 0;
-                    for(int i=0; i < area.levels[area.currentLevel].areaSlots.Length; ++i)
+                    for(int i=0; i < areaData.area.levels[areaData.area.currentLevel].areaSlots.Length; ++i)
                     {
-                        if(area.levels[area.currentLevel].areaSlots[i].item != null)
+                        if(areaData.area.levels[areaData.area.currentLevel].areaSlots[i].item != null)
                         {
-                            totalAmount += area.levels[area.currentLevel].areaSlots[i].item.amount;
+                            totalAmount += areaData.area.levels[areaData.area.currentLevel].areaSlots[i].item.amount;
                         }
                     }
                     // Note that here we only check greater than 0
@@ -1473,9 +1521,9 @@ namespace EFM
                     break;
                 case RequirementType.Item:
                     int itemCount = 0;
-                    for(int i=0; i < area.levels[area.currentLevel].areaSlots.Length; ++i)
+                    for(int i=0; i < areaData.area.levels[areaData.area.currentLevel].areaSlots.Length; ++i)
                     {
-                        if(area.levels[area.currentLevel].areaSlots[i].item != null)
+                        if(areaData.area.levels[areaData.area.currentLevel].areaSlots[i].item != null)
                         {
                             ++itemCount;
                         }
@@ -1565,6 +1613,11 @@ namespace EFM
 
         public void UpdateAreaUI()
         {
+            if(HideoutController.instance == null)
+            {
+                return;
+            }
+
             if (production == null) // Not a production requirement, must be area upgrade requirement
             {
                 UpdateAreaUpgradeUI();
@@ -1592,9 +1645,9 @@ namespace EFM
 
         public void UpdateAreaUpgradeUI()
         {
-            area.UI.UpdateBottomButtons();
-            area.UI.UpdateStatusIcons();
-            area.UI.UpdateStatusTexts();
+            areaData.area.UI.UpdateBottomButtons();
+            areaData.area.UI.UpdateStatusIcons();
+            areaData.area.UI.UpdateStatusTexts();
         }
     }
 
@@ -1613,7 +1666,7 @@ namespace EFM
     /// </summary>
     public class Bonus
     {
-        public Area area;
+        public AreaData areaData;
         public BonusUI bonusUI;
 
         public static int energyRegeneration;
@@ -1671,9 +1724,9 @@ namespace EFM
         // SkillGroupLevelingBoost
         public Skill.SkillType skillType;
 
-        public Bonus(JToken bonusData, Area area)
+        public Bonus(JToken bonusData, AreaData areaData)
         {
-            this.area = area;
+            this.areaData = areaData;
             bonusType = BonusTypeFromName(bonusData["type"].ToString());
 
             if(bonusData["value"] != null)
@@ -1886,7 +1939,7 @@ namespace EFM
     public class Production
     {
         // Static data
-        public Area area;
+        public AreaData areaData;
         public string ID;
         public ProductionView productionUI;
         public FarmingView farmingUI;
@@ -1934,15 +1987,15 @@ namespace EFM
         public delegate void OnStopProductionDelegate(Production production);
         public event OnStopProductionDelegate OnStopProduction;
 
-        public Production(Area area, JToken data, bool scavCase = false)
+        public Production(AreaData areaData, JToken data, bool scavCase = false)
         {
-            this.area = area;
-            OnBeginProduction += area.OnBeginProduction;
-            OnStopProduction += area.OnStopProduction;
+            this.areaData = areaData;
+            OnBeginProduction += areaData.OnBeginProduction;
+            OnStopProduction += areaData.OnStopProduction;
 
             ID = data["_id"].ToString();
 
-            area.productionsByID.Add(ID, this);
+            areaData.productionsByID.Add(ID, this);
             this.scavCase = scavCase;
             JArray requirementsArray = null;
             if (scavCase)
@@ -1991,13 +2044,13 @@ namespace EFM
 
                 if(endProduct != null)
                 {
-                    if (area.productionsByProductID.TryGetValue(endProduct.tarkovID, out List<Production> productionList))
+                    if (areaData.productionsByProductID.TryGetValue(endProduct.tarkovID, out List<Production> productionList))
                     {
                         productionList.Add(this);
                     }
                     else
                     {
-                        area.productionsByProductID.Add(endProduct.tarkovID, new List<Production>() { this });
+                        areaData.productionsByProductID.Add(endProduct.tarkovID, new List<Production>() { this });
                     }
                 }
             }
@@ -2007,9 +2060,9 @@ namespace EFM
             bool foundProductionAreaRequirement = false;
             for (int i = 0; i < requirementsArray.Count; ++i)
             {
-                Requirement newRequirement = new Requirement(requirementsArray[i], area, this);
+                Requirement newRequirement = new Requirement(requirementsArray[i], areaData, this);
 
-                if (newRequirement.requirementType == Requirement.RequirementType.Area && newRequirement.areaIndex == area.index)
+                if (newRequirement.requirementType == Requirement.RequirementType.Area && newRequirement.areaIndex == areaData.index)
                 {
                     areaLevel = newRequirement.areaLevel;
                     foundProductionAreaRequirement = true;
@@ -2020,13 +2073,13 @@ namespace EFM
 
             // Bitcoin farm special case
             // We want to make sure its production has a GPU resource requirement
-            if (area.index == 20)
+            if (areaData.index == 20)
             {
-                Requirement newRequirement = new Requirement(null, area, this);
+                Requirement newRequirement = new Requirement(null, areaData, this);
                 newRequirement.requirementType = Requirement.RequirementType.Item;
                 newRequirement.item = Mod.customItemData[159];
                 newRequirement.resourceCount = 0;
-                area.OnSlotContentChanged += newRequirement.OnAreaSlotContentChanged;
+                areaData.OnSlotContentChanged += newRequirement.OnAreaSlotContentChanged;
             }
 
             if (!foundProductionAreaRequirement)
@@ -2034,15 +2087,17 @@ namespace EFM
                 // This is to handle cases like bitcoin farm and scav case productions
                 // If production does not specify the level this production 
                 // should be listed in, we assume it should be listed since startLevel + 1
-                areaLevel = area.startLevel + 1;
-                Requirement newRequirement = new Requirement(area.index, areaLevel);
+                areaLevel = areaData.area.startLevel + 1;
+                Requirement newRequirement = new Requirement(areaData.index, areaLevel);
                 newRequirement.production = this;
-                newRequirement.area = area;
-                area.OnAreaLevelChanged += newRequirement.OnAreaLevelChanged;
+                newRequirement.areaData = areaData;
+                areaData.OnAreaLevelChanged += newRequirement.OnAreaLevelChanged;
             }
+        }
 
-            // Load live data
-            if (HideoutController.loadedData["hideout"]["areas"][area.index]["productions"][ID] == null)
+        public void LoadLiveData()
+        {
+            if (HideoutController.loadedData["hideout"]["areas"][areaData.index]["productions"][ID] == null)
             {
                 inProduction = false;
                 progress = 0;
@@ -2050,11 +2105,11 @@ namespace EFM
             }
             else
             {
-                JToken productionData = HideoutController.loadedData["hideout"]["areas"][area.index]["productions"][ID];
+                JToken productionData = HideoutController.loadedData["hideout"]["areas"][areaData.index]["productions"][ID];
                 inProduction = (bool)productionData["inProduction"];
                 progress = (float)productionData["progress"];
                 readyCount = (int)productionData["readyCount"];
-                area.readyProdutionCount += readyCount;
+                areaData.area.readyProdutionCount += readyCount;
             }
         }
 
@@ -2084,7 +2139,7 @@ namespace EFM
                 timeLeft -= Time.deltaTime;
                 if(timeLeft <= 0)
                 {
-                    ++area.readyProdutionCount;
+                    ++areaData.area.readyProdutionCount;
                     ++readyCount;
                     if (scavCase)
                     {
@@ -2205,13 +2260,13 @@ namespace EFM
                     requirements[i].resourceConsumptionTimer -= Time.deltaTime;
                     if(requirements[i].resourceConsumptionTimer <= 0)
                     {
-                        for(int j=0; j < area.levels[area.currentLevel].areaSlots.Length; ++j)
+                        for(int j=0; j < areaData.area.levels[areaData.area.currentLevel].areaSlots.Length; ++j)
                         {
-                            if (area.levels[area.currentLevel].areaSlots[j].item != null
-                                && area.levels[area.currentLevel].areaSlots[j].item.itemData == requirements[i].item
-                                && area.levels[area.currentLevel].areaSlots[j].item.amount > 0)
+                            if (areaData.area.levels[areaData.area.currentLevel].areaSlots[j].item != null
+                                && areaData.area.levels[areaData.area.currentLevel].areaSlots[j].item.itemData == requirements[i].item
+                                && areaData.area.levels[areaData.area.currentLevel].areaSlots[j].item.amount > 0)
                             {
-                                --area.levels[area.currentLevel].areaSlots[j].item.amount;
+                                --areaData.area.levels[areaData.area.currentLevel].areaSlots[j].item.amount;
 
                                 requirements[i].resourceConsumptionTimer = requirements[i].resourceConsumptionTime;
                                 break;
@@ -2257,9 +2312,9 @@ namespace EFM
                             }
 
                             // Note that despite this being a production, output could be a slot so we might not have a volume
-                            if (area.levels[area.currentLevel].areaVolumes != null && area.levels[area.currentLevel].areaVolumes.Length > 0)
+                            if (areaData.area.levels[areaData.area.currentLevel].areaVolumes != null && areaData.area.levels[areaData.area.currentLevel].areaVolumes.Length > 0)
                             {
-                                area.levels[area.currentLevel].areaVolumes[0].AddItem(meatovItem);
+                                areaData.area.levels[areaData.area.currentLevel].areaVolumes[0].AddItem(meatovItem);
                             }
                             else // No output volume, spawn item in trade volume
                             {
@@ -2273,9 +2328,9 @@ namespace EFM
 
                     if (loadedItem != null)
                     {
-                        if (area.levels[area.currentLevel].areaVolumes != null && area.levels[area.currentLevel].areaVolumes.Length > 0)
+                        if (areaData.area.levels[areaData.area.currentLevel].areaVolumes != null && areaData.area.levels[areaData.area.currentLevel].areaVolumes.Length > 0)
                         {
-                            area.levels[area.currentLevel].areaVolumes[0].AddItem(loadedItem);
+                            areaData.area.levels[areaData.area.currentLevel].areaVolumes[0].AddItem(loadedItem);
                         }
                         else // No output volume, spawn item in trade volume
                         {
@@ -2290,47 +2345,47 @@ namespace EFM
         {
             if (scavCase)
             {
-                if(Mod.itemsByRarity.TryGetValue(MeatovItem.ItemRarity.Common, out List<MeatovItemData> commonList))
+                if(Mod.itemsByRarity.TryGetValue(MeatovItem.ItemRarity.Common, out List<MeatovItemData> commonList) && commonList.Count > 0)
                 {
                     int commonCount = UnityEngine.Random.Range(endProductRarities[0].x, endProductRarities[0].y + 1);
                     for (int i = 0; i < commonCount; ++i)
                     {
                         MeatovItemData randomCommon = commonList[UnityEngine.Random.Range(0, commonList.Count)];
-                        area.levels[area.currentLevel].areaVolumes[0].SpawnItem(randomCommon, 1, true);
+                        areaData.area.levels[areaData.area.currentLevel].areaVolumes[0].SpawnItem(randomCommon, 1, true);
                     }
                 }
-                if(Mod.itemsByRarity.TryGetValue(MeatovItem.ItemRarity.Rare, out List<MeatovItemData> rareList))
+                if(Mod.itemsByRarity.TryGetValue(MeatovItem.ItemRarity.Rare, out List<MeatovItemData> rareList) && rareList.Count > 0)
                 {
                     int rareCount = UnityEngine.Random.Range(endProductRarities[1].x, endProductRarities[1].y + 1);
                     for (int i = 0; i < rareCount; ++i)
                     {
                         MeatovItemData randomRare = rareList[UnityEngine.Random.Range(0, rareList.Count)];
-                        area.levels[area.currentLevel].areaVolumes[0].SpawnItem(randomRare, 1, true);
+                        areaData.area.levels[areaData.area.currentLevel].areaVolumes[0].SpawnItem(randomRare, 1, true);
                     }
                 }
-                if(Mod.itemsByRarity.TryGetValue(MeatovItem.ItemRarity.Rare, out List<MeatovItemData> superRareList))
+                if(Mod.itemsByRarity.TryGetValue(MeatovItem.ItemRarity.Rare, out List<MeatovItemData> superRareList) && superRareList.Count > 0)
                 {
                     int superRareCount = UnityEngine.Random.Range(endProductRarities[2].x, endProductRarities[2].y + 1);
                     for (int i = 0; i < superRareCount; ++i)
                     {
                         MeatovItemData randomSuperRare = superRareList[UnityEngine.Random.Range(0, superRareList.Count)];
-                        area.levels[area.currentLevel].areaVolumes[0].SpawnItem(randomSuperRare, 1, true);
+                        areaData.area.levels[areaData.area.currentLevel].areaVolumes[0].SpawnItem(randomSuperRare, 1, true);
                     }
                 }
             }
             else
             {
-                if (area.craftOuputSlot)
+                if (areaData.area.craftOuputSlot)
                 {
-                    area.levels[area.currentLevel].areaSlots[0].SpawnItem(endProduct, count, true);
+                    areaData.area.levels[areaData.area.currentLevel].areaSlots[0].SpawnItem(endProduct, count, true);
                 }
                 else
                 {
-                    area.levels[area.currentLevel].areaVolumes[0].SpawnItem(endProduct, count, true);
+                    areaData.area.levels[areaData.area.currentLevel].areaVolumes[0].SpawnItem(endProduct, count, true);
                 }
             }
 
-            --area.readyProdutionCount;
+            --areaData.area.readyProdutionCount;
             --readyCount;
         }
 
@@ -2349,7 +2404,7 @@ namespace EFM
                     int countLeft = itemRequirement.resourceCount;
                     while (countLeft > 0)
                     {
-                        MeatovItem item = area.GetClosestItem(itemRequirement.item.tarkovID);
+                        MeatovItem item = areaData.area.GetClosestItem(itemRequirement.item.tarkovID);
                         if (item.amount > countLeft)
                         {
                             item.amount -= countLeft;
@@ -2370,7 +2425,7 @@ namespace EFM
                     int countLeft = itemRequirement.itemCount;
                     while (countLeft > 0)
                     {
-                        MeatovItem item = area.GetClosestItem(itemRequirement.item.tarkovID);
+                        MeatovItem item = areaData.area.GetClosestItem(itemRequirement.item.tarkovID);
                         if (item.stack > countLeft)
                         {
                             item.stack -= countLeft;
@@ -2425,9 +2480,9 @@ namespace EFM
             // Time per bitcoin (s): productionsPerLevel[currentLevel][0].time/(1+(GC-1)*GPUBoostRate)
             // Time left if already in progress: (Time per bitcoin) - (Time per bitcoin) * (productionsPerLevel[currentLevel][0].progress / 100)
             int GPUCount = 0;
-            for (int i = 0; i < area.levels[area.currentLevel].areaSlots.Length; ++i)
+            for (int i = 0; i < areaData.area.levels[areaData.area.currentLevel].areaSlots.Length; ++i)
             {
-                if (area.levels[area.currentLevel].areaSlots[i].item != null)
+                if (areaData.area.levels[areaData.area.currentLevel].areaSlots[i].item != null)
                 {
                     ++GPUCount;
                 }

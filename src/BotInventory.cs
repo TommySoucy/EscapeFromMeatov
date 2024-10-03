@@ -1,8 +1,5 @@
 ﻿using FistVR;
-using HarmonyLib;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using Valve.Newtonsoft.Json.Linq;
 
 namespace EFM
@@ -79,7 +76,7 @@ namespace EFM
             TODO: // Take into account blocksEarpiece, blocksEyewear, etc
             equipment = new Dictionary<string, MeatovItemData>();
             Dictionary<string, int> equipmentChances = botData["chances"]["equipment"].ToObject<Dictionary<string, int>>();
-            foreach(KeyValuePair<string, int> equipmentChance in equipmentChances)
+            foreach (KeyValuePair<string, int> equipmentChance in equipmentChances)
             {
                 if(UnityEngine.Random.value < equipmentChance.Value / 100.0f)
                 {
@@ -150,35 +147,38 @@ namespace EFM
                         {
                             JArray itemList = botData["inventory"]["items"]["Backpack"] as JArray;
 
-                            for(int i=0; i < maxCount; ++i)
+                            if(itemList.Count > 0)
                             {
-                                string itemID = itemList[UnityEngine.Random.Range(0, itemList.Count)].ToString();
-                                if (Mod.defaultItemData.TryGetValue(itemID, out MeatovItemData itemData))
+                                for (int i = 0; i < maxCount; ++i)
                                 {
-                                    int stack = UnityEngine.Random.Range(1, itemData.maxStack + 1);
-                                    if (itemDict.ContainsKey(itemData))
+                                    string itemID = itemList[UnityEngine.Random.Range(0, itemList.Count)].ToString();
+                                    if (Mod.defaultItemData.TryGetValue(itemID, out MeatovItemData itemData))
                                     {
-                                        itemDict[itemData] += stack;
-                                    }
-                                    else
-                                    {
-                                        itemDict.Add(itemData, stack);
-                                    }
+                                        int stack = UnityEngine.Random.Range(1, itemData.maxStack + 1);
+                                        if (itemDict.ContainsKey(itemData))
+                                        {
+                                            itemDict[itemData] += stack;
+                                        }
+                                        else
+                                        {
+                                            itemDict.Add(itemData, stack);
+                                        }
 
-                                    if (inventory.ContainsKey(itemData.tarkovID))
-                                    {
-                                        inventory[itemData.tarkovID] += stack;
+                                        if (inventory.ContainsKey(itemData.tarkovID))
+                                        {
+                                            inventory[itemData.tarkovID] += stack;
+                                        }
+                                        else
+                                        {
+                                            inventory.Add(itemData.tarkovID, stack);
+                                        }
                                     }
                                     else
                                     {
-                                        inventory.Add(itemData.tarkovID, stack);
-                                    }
-                                }
-                                else
-                                {
-                                    if (!Mod.oldItemMap.ContainsKey(itemID))
-                                    {
-                                        Mod.LogError("Could not get item data for " + itemID + " in bot inventory backpack items");
+                                        if (!Mod.oldItemMap.ContainsKey(itemID))
+                                        {
+                                            Mod.LogError("Could not get item data for " + itemID + " in bot inventory backpack items");
+                                        }
                                     }
                                 }
                             }
@@ -187,35 +187,38 @@ namespace EFM
                         {
                             JArray itemList = botData["inventory"]["items"]["Pockets"] as JArray;
 
-                            for (int i = 0; i < maxCount; ++i)
+                            if (itemList.Count > 0)
                             {
-                                string itemID = itemList[UnityEngine.Random.Range(0, itemList.Count)].ToString();
-                                if (Mod.defaultItemData.TryGetValue(itemID, out MeatovItemData itemData))
+                                for (int i = 0; i < maxCount; ++i)
                                 {
-                                    int stack = UnityEngine.Random.Range(1, itemData.maxStack + 1);
-                                    if (itemDict.ContainsKey(itemData))
+                                    string itemID = itemList[UnityEngine.Random.Range(0, itemList.Count)].ToString();
+                                    if (Mod.defaultItemData.TryGetValue(itemID, out MeatovItemData itemData))
                                     {
-                                        itemDict[itemData] += stack;
-                                    }
-                                    else
-                                    {
-                                        itemDict.Add(itemData, stack);
-                                    }
+                                        int stack = UnityEngine.Random.Range(1, itemData.maxStack + 1);
+                                        if (itemDict.ContainsKey(itemData))
+                                        {
+                                            itemDict[itemData] += stack;
+                                        }
+                                        else
+                                        {
+                                            itemDict.Add(itemData, stack);
+                                        }
 
-                                    if (inventory.ContainsKey(itemData.tarkovID))
-                                    {
-                                        inventory[itemData.tarkovID] += stack;
+                                        if (inventory.ContainsKey(itemData.tarkovID))
+                                        {
+                                            inventory[itemData.tarkovID] += stack;
+                                        }
+                                        else
+                                        {
+                                            inventory.Add(itemData.tarkovID, stack);
+                                        }
                                     }
                                     else
                                     {
-                                        inventory.Add(itemData.tarkovID, stack);
-                                    }
-                                }
-                                else
-                                {
-                                    if (!Mod.oldItemMap.ContainsKey(itemID))
-                                    {
-                                        Mod.LogError("Could not get item data for " + itemID + " in bot inventory pocket items");
+                                        if (!Mod.oldItemMap.ContainsKey(itemID))
+                                        {
+                                            Mod.LogError("Could not get item data for " + itemID + " in bot inventory pocket items");
+                                        }
                                     }
                                 }
                             }
@@ -224,35 +227,38 @@ namespace EFM
                         {
                             JArray itemList = botData["inventory"]["items"]["TacticalVest"] as JArray;
 
-                            for (int i = 0; i < maxCount; ++i)
+                            if (itemList.Count > 0)
                             {
-                                string itemID = itemList[UnityEngine.Random.Range(0, itemList.Count)].ToString();
-                                if (Mod.defaultItemData.TryGetValue(itemID, out MeatovItemData itemData))
+                                for (int i = 0; i < maxCount; ++i)
                                 {
-                                    int stack = UnityEngine.Random.Range(1, itemData.maxStack + 1);
-                                    if (itemDict.ContainsKey(itemData))
+                                    string itemID = itemList[UnityEngine.Random.Range(0, itemList.Count)].ToString();
+                                    if (Mod.defaultItemData.TryGetValue(itemID, out MeatovItemData itemData))
                                     {
-                                        itemDict[itemData] += stack;
-                                    }
-                                    else
-                                    {
-                                        itemDict.Add(itemData, stack);
-                                    }
+                                        int stack = UnityEngine.Random.Range(1, itemData.maxStack + 1);
+                                        if (itemDict.ContainsKey(itemData))
+                                        {
+                                            itemDict[itemData] += stack;
+                                        }
+                                        else
+                                        {
+                                            itemDict.Add(itemData, stack);
+                                        }
 
-                                    if (inventory.ContainsKey(itemData.tarkovID))
-                                    {
-                                        inventory[itemData.tarkovID] += stack;
+                                        if (inventory.ContainsKey(itemData.tarkovID))
+                                        {
+                                            inventory[itemData.tarkovID] += stack;
+                                        }
+                                        else
+                                        {
+                                            inventory.Add(itemData.tarkovID, stack);
+                                        }
                                     }
                                     else
                                     {
-                                        inventory.Add(itemData.tarkovID, stack);
-                                    }
-                                }
-                                else
-                                {
-                                    if (!Mod.oldItemMap.ContainsKey(itemID))
-                                    {
-                                        Mod.LogError("Could not get item data for " + itemID + " in bot inventory vest items");
+                                        if (!Mod.oldItemMap.ContainsKey(itemID))
+                                        {
+                                            Mod.LogError("Could not get item data for " + itemID + " in bot inventory vest items");
+                                        }
                                     }
                                 }
                             }
@@ -261,42 +267,45 @@ namespace EFM
                         {
                             JArray itemList = botData["inventory"]["items"]["SpecialLoot"] as JArray;
 
-                            for (int i = 0; i < maxCount; ++i)
+                            if (itemList.Count > 0)
                             {
-                                string itemID = itemList[UnityEngine.Random.Range(0, itemList.Count)].ToString();
-                                if (Mod.defaultItemData.TryGetValue(itemID, out MeatovItemData itemData))
+                                for (int i = 0; i < maxCount; ++i)
                                 {
-                                    int stack = UnityEngine.Random.Range(1, itemData.maxStack + 1);
-                                    if (itemDict.ContainsKey(itemData))
+                                    string itemID = itemList[UnityEngine.Random.Range(0, itemList.Count)].ToString();
+                                    if (Mod.defaultItemData.TryGetValue(itemID, out MeatovItemData itemData))
                                     {
-                                        itemDict[itemData] += stack;
-                                    }
-                                    else
-                                    {
-                                        itemDict.Add(itemData, stack);
-                                    }
+                                        int stack = UnityEngine.Random.Range(1, itemData.maxStack + 1);
+                                        if (itemDict.ContainsKey(itemData))
+                                        {
+                                            itemDict[itemData] += stack;
+                                        }
+                                        else
+                                        {
+                                            itemDict.Add(itemData, stack);
+                                        }
 
-                                    if (inventory.ContainsKey(itemData.tarkovID))
-                                    {
-                                        inventory[itemData.tarkovID] += stack;
+                                        if (inventory.ContainsKey(itemData.tarkovID))
+                                        {
+                                            inventory[itemData.tarkovID] += stack;
+                                        }
+                                        else
+                                        {
+                                            inventory.Add(itemData.tarkovID, stack);
+                                        }
                                     }
                                     else
                                     {
-                                        inventory.Add(itemData.tarkovID, stack);
-                                    }
-                                }
-                                else
-                                {
-                                    if (!Mod.oldItemMap.ContainsKey(itemID))
-                                    {
-                                        Mod.LogError("Could not get item data for " + itemID + " in bot inventory special items");
+                                        if (!Mod.oldItemMap.ContainsKey(itemID))
+                                        {
+                                            Mod.LogError("Could not get item data for " + itemID + " in bot inventory special items");
+                                        }
                                     }
                                 }
                             }
                         }
                         else if(itemCountWeight.Key.Equals("drugs")) // 5448f3a14bdc2d27728b4569
                         {
-                            if(Mod.itemsByParents.TryGetValue("5448f3a14bdc2d27728b4569", out List<MeatovItemData> itemDatas))
+                            if (Mod.itemsByParents.TryGetValue("5448f3a14bdc2d27728b4569", out List<MeatovItemData> itemDatas) && itemDatas.Count > 0)
                             {
                                 for (int i = 0; i < maxCount; ++i)
                                 {
@@ -327,7 +336,7 @@ namespace EFM
                         }
                         else if(itemCountWeight.Key.Equals("grenades")) // 543be6564bdc2df4348b4568
                         {
-                            if (Mod.itemsByParents.TryGetValue("543be6564bdc2df4348b4568", out List<MeatovItemData> itemDatas))
+                            if (Mod.itemsByParents.TryGetValue("543be6564bdc2df4348b4568", out List<MeatovItemData> itemDatas) && itemDatas.Count > 0)
                             {
                                 for (int i = 0; i < maxCount; ++i)
                                 {
@@ -358,7 +367,7 @@ namespace EFM
                         }
                         else if(itemCountWeight.Key.Equals("healing")) // 5448f39d4bdc2d0a728b4568
                         {
-                            if (Mod.itemsByParents.TryGetValue("5448f39d4bdc2d0a728b4568", out List<MeatovItemData> itemDatas))
+                            if (Mod.itemsByParents.TryGetValue("5448f39d4bdc2d0a728b4568", out List<MeatovItemData> itemDatas) && itemDatas.Count > 0)
                             {
                                 for (int i = 0; i < maxCount; ++i)
                                 {
@@ -389,9 +398,9 @@ namespace EFM
                         }
                         else if(itemCountWeight.Key.Equals("magazines")) // 5448bc234bdc2d3c308b4569
                         {
-                            if(equipment.TryGetValue("FirstPrimaryWeapon", out MeatovItemData firstPrimaryWeaponData) && firstPrimaryWeaponData.magType != FistVR.FireArmMagazineType.mNone)
+                            if (equipment.TryGetValue("FirstPrimaryWeapon", out MeatovItemData firstPrimaryWeaponData) && firstPrimaryWeaponData.magType != FistVR.FireArmMagazineType.mNone)
                             {
-                                if(Mod.magDefaultItemDataByMagType.TryGetValue(firstPrimaryWeaponData.magType, out List<MeatovItemData> itemDatas))
+                                if (Mod.magDefaultItemDataByMagType.TryGetValue(firstPrimaryWeaponData.magType, out List<MeatovItemData> itemDatas) && itemDatas.Count > 0)
                                 {
                                     MeatovItemData itemData = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
                                     itemDict.Add(itemData, maxCount);
@@ -407,12 +416,12 @@ namespace EFM
                                 }
                                 else
                                 {
-                                    Mod.LogError("No mag item data for mag type " + firstPrimaryWeaponData.magType + " needed for bot inventory first primary weapon " + firstPrimaryWeaponData.tarkovID);
+                                    Mod.LogWarning("No mag item data for mag type " + firstPrimaryWeaponData.magType + " needed for bot inventory first primary weapon " + firstPrimaryWeaponData.tarkovID);
                                 }
                             }
                             if(equipment.TryGetValue("SecondPrimaryWeapon", out MeatovItemData secondPrimaryWeaponData) && secondPrimaryWeaponData.magType != FistVR.FireArmMagazineType.mNone)
                             {
-                                if(Mod.magDefaultItemDataByMagType.TryGetValue(secondPrimaryWeaponData.magType, out List<MeatovItemData> itemDatas))
+                                if (Mod.magDefaultItemDataByMagType.TryGetValue(secondPrimaryWeaponData.magType, out List<MeatovItemData> itemDatas) && itemDatas.Count > 0)
                                 {
                                     MeatovItemData itemData = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
                                     itemDict.Add(itemData, maxCount);
@@ -428,12 +437,12 @@ namespace EFM
                                 }
                                 else
                                 {
-                                    Mod.LogError("No mag item data for mag type " + secondPrimaryWeaponData.magType + " needed for bot inventory second primary weapon " + secondPrimaryWeaponData.tarkovID);
+                                    Mod.LogWarning("No mag item data for mag type " + secondPrimaryWeaponData.magType + " needed for bot inventory second primary weapon " + secondPrimaryWeaponData.tarkovID);
                                 }
                             }
                             if(equipment.TryGetValue("Holster", out MeatovItemData holsterWeaponData) && holsterWeaponData.magType != FistVR.FireArmMagazineType.mNone)
                             {
-                                if(Mod.magDefaultItemDataByMagType.TryGetValue(holsterWeaponData.magType, out List<MeatovItemData> itemDatas))
+                                if (Mod.magDefaultItemDataByMagType.TryGetValue(holsterWeaponData.magType, out List<MeatovItemData> itemDatas) && itemDatas.Count > 0)
                                 {
                                     MeatovItemData itemData = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
                                     itemDict.Add(itemData, maxCount);
@@ -449,13 +458,13 @@ namespace EFM
                                 }
                                 else
                                 {
-                                    Mod.LogError("No mag item data for mag type " + holsterWeaponData.magType + " needed for bot inventory holster weapon " + holsterWeaponData.tarkovID);
+                                    Mod.LogWarning("No mag item data for mag type " + holsterWeaponData.magType + " needed for bot inventory holster weapon " + holsterWeaponData.tarkovID);
                                 }
                             }
                         }
                         else if(itemCountWeight.Key.Equals("stims")) // 5448f3a64bdc2d60728b456a
                         {
-                            if (Mod.itemsByParents.TryGetValue("5448f3a64bdc2d60728b456a", out List<MeatovItemData> itemDatas))
+                            if (Mod.itemsByParents.TryGetValue("5448f3a64bdc2d60728b456a", out List<MeatovItemData> itemDatas) && itemDatas.Count > 0)
                             {
                                 for (int i = 0; i < maxCount; ++i)
                                 {
@@ -500,7 +509,7 @@ namespace EFM
                                     }
                                 }
 
-                                if (Mod.itemsByRarity.TryGetValue(rarity, out List<MeatovItemData> itemDatas))
+                                if (Mod.itemsByRarity.TryGetValue(rarity, out List<MeatovItemData> itemDatas) && itemDatas.Count > 0)
                                 {
                                     MeatovItemData itemData = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
                                     if (Mod.IDDescribedInList(itemData.tarkovID, new List<string>(itemData.parents), itemCountWeight.Value["whitelist"].ToObject<List<string>>(), null))
@@ -545,7 +554,7 @@ namespace EFM
             // Equipment
             foreach(KeyValuePair<string, MeatovItemData> equipmentEntry in equipment)
             {
-                if(equipmentEntry.Value.sosigHeadwear != null && equipmentEntry.Value.sosigHeadwear.Count > 0)
+                if (equipmentEntry.Value.sosigHeadwear != null && equipmentEntry.Value.sosigHeadwear.Count > 0)
                 {
                     possibleHeadwear.Add(equipmentEntry.Value);
                 }
@@ -607,7 +616,8 @@ namespace EFM
             MeatovItemData chosenAbdoItem = null;
             int abdoIndex = 0;
             bool addLeg = false;
-            if(chosenTorsoItem != null && chosenTorsoItem.sosigAbdoMatchTorso)
+            linkOutfit[2] = new List<FVRObject>();
+            if (chosenTorsoItem != null && chosenTorsoItem.sosigAbdoMatchTorso)
             {
                 int currentAbdoIndex = 0;
                 foreach(KeyValuePair<FVRObject, bool> abdoEntry in chosenTorsoItem.sosigAbdo)
@@ -623,7 +633,7 @@ namespace EFM
                     ++currentAbdoIndex;
                 }
             }
-            if(chosenAbdoItem == null && possibleAbdo.Count > 0)
+            if (chosenAbdoItem == null && possibleAbdo.Count > 0)
             {
                 chosenAbdoItem = possibleAbdo[UnityEngine.Random.Range(0, possibleAbdo.Count)];
                 abdoIndex = UnityEngine.Random.Range(0, chosenAbdoItem.sosigAbdo.Count);
@@ -640,6 +650,7 @@ namespace EFM
                 }
             }
             MeatovItemData chosenLegItem = null;
+            linkOutfit[3] = new List<FVRObject>();
             if (chosenAbdoItem != null && chosenAbdoItem.sosigLegMatchAbdo)
             {
                 chosenLegItem = chosenAbdoItem;

@@ -48,6 +48,10 @@ namespace EFM
 
         [NonSerialized]
         public bool contentsSpawned;
+        [NonSerialized]
+        public bool spawnContents;
+        [NonSerialized]
+        public Queue<KeyValuePair<MeatovItemData, int>> itemsToSpawn;
 
         public TrackedLootContainerData trackedLootContainerData;
 
@@ -97,6 +101,18 @@ namespace EFM
             }
         }
 
+        public void Update()
+        {
+            if (spawnContents)
+            {
+                KeyValuePair<MeatovItemData, int> entry = itemsToSpawn.Dequeue();
+
+                volume.SpawnItem(entry.Key, entry.Value, true);
+
+                spawnContents = itemsToSpawn.Count > 0;
+            }
+        }
+
         public void ToggleMode()
         {
             volumeRoot.SetActive(volumeRoot.activeSelf);
@@ -122,7 +138,9 @@ namespace EFM
                 return;
             }
 
-            switch(mode)
+            int totalVolume = 0;
+            itemsToSpawn = new Queue<KeyValuePair<MeatovItemData, int>>();
+            switch (mode)
             {
                 case Mode.StaticLootData:
                     JObject staticLoot = JObject.Parse(File.ReadAllText(Mod.path + "/database/loot/staticLoot.json"));
@@ -168,10 +186,11 @@ namespace EFM
 
                         if(Mod.defaultItemData.TryGetValue(item, out MeatovItemData itemData))
                         {
-                            volume.SpawnItem(itemData, 1, true);
+                            totalVolume += itemData.volumes[0];
+                            itemsToSpawn.Enqueue(new KeyValuePair<MeatovItemData, int>(itemData, 1));
                         }
 
-                        if(volume.volume >= maxVolume)
+                        if(totalVolume >= maxVolume)
                         {
                             break;
                         }
@@ -195,10 +214,11 @@ namespace EFM
 
                         if (Mod.defaultItemData.TryGetValue(item, out MeatovItemData itemData))
                         {
-                            volume.SpawnItem(itemData, 1, true);
+                            totalVolume += itemData.volumes[0];
+                            itemsToSpawn.Enqueue(new KeyValuePair<MeatovItemData, int>(itemData, 1));
                         }
 
-                        if (volume.volume >= maxVolume)
+                        if (totalVolume >= maxVolume)
                         {
                             break;
                         }
@@ -207,12 +227,14 @@ namespace EFM
                 case Mode.Rarity:
                     for (int i = 0; i < spawnAttemptCount; ++i)
                     {
-                        if (Mod.itemsByRarity.TryGetValue(rarity, out List<MeatovItemData> itemDatas))
+                        if (Mod.itemsByRarity.TryGetValue(rarity, out List<MeatovItemData> itemDatas) && itemDatas.Count > 0)
                         {
-                            volume.SpawnItem(itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)], 1, true);
+                            MeatovItemData itemData = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
+                            totalVolume += itemData.volumes[0];
+                            itemsToSpawn.Enqueue(new KeyValuePair<MeatovItemData, int>(itemData, 1));
                         }
 
-                        if (volume.volume >= maxVolume)
+                        if (totalVolume >= maxVolume)
                         {
                             break;
                         }
@@ -221,18 +243,22 @@ namespace EFM
                 case Mode.Category:
                     for (int i = 0; i < spawnAttemptCount; ++i)
                     {
-                        if (Mod.itemsByParents.TryGetValue(category, out List<MeatovItemData> itemDatas))
+                        if (Mod.itemsByParents.TryGetValue(category, out List<MeatovItemData> itemDatas) && itemDatas.Count > 0)
                         {
-                            volume.SpawnItem(itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)], 1, true);
+                            MeatovItemData itemData = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
+                            totalVolume += itemData.volumes[0];
+                            itemsToSpawn.Enqueue(new KeyValuePair<MeatovItemData, int>(itemData, 1));
                         }
 
-                        if (volume.volume >= maxVolume)
+                        if (totalVolume >= maxVolume)
                         {
                             break;
                         }
                     }
                     break;
             }
+
+            spawnContents = itemsToSpawn.Count > 0;
 
             if(trackedLootContainerData != null)
             {

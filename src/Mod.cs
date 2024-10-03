@@ -4096,7 +4096,7 @@ namespace EFM
                     {
                         for(int i=0; i < raidMapPrefabBundles.Count; ++i)
                         {
-                            GameObject[] mapPrefabs = raidMapAdditiveBundles[i].LoadAllAssets<GameObject>();
+                            GameObject[] mapPrefabs = raidMapPrefabBundles[i].LoadAllAssets<GameObject>();
                             for(int j=0; j < mapPrefabs.Length; ++j)
                             {
                                 GameObject.Instantiate(mapPrefabs[j]);
@@ -4210,6 +4210,7 @@ namespace EFM
 
         public static void SecureItems(string destination, bool pouchOnly = false)
         {
+            Mod.LogInfo("SecureItems called");
             TODO: // Verify that if we are securing the player body by securing main scene components, do we need to secure stuff if hands and slots?
                   // We shouldn't need to if the slot items are attached to the player body, because i think status ui also is attached to player(?)
             if(securedObjects == null)
@@ -4231,8 +4232,10 @@ namespace EFM
 
             if (pouchOnly)
             {
-                if(StatusUI.instance.equipmentSlots[7].CurObject != null)
+                Mod.LogInfo("\tPouch only");
+                if (StatusUI.instance.equipmentSlots[7].CurObject != null)
                 {
+                    Mod.LogInfo("\t\t"+ StatusUI.instance.equipmentSlots[7].CurObject.name);
                     securedItems[9] = StatusUI.instance.equipmentSlots[7].CurObject.GetComponent<MeatovItem>();
                     securedItems[9].physObj.SetQuickBeltSlot(null);
                     DontDestroyOnLoad(securedItems[9].gameObject);
@@ -4247,8 +4250,10 @@ namespace EFM
             }
             else
             {
+                Mod.LogInfo("\tAll items");
                 if (Mod.leftHand.heldItem != null)
                 {
+                    Mod.LogInfo("\t\tLeft hand: " + Mod.leftHand.heldItem.name);
                     MeatovItem item = Mod.leftHand.heldItem;
 
                     item.physObj.ForceBreakInteraction();
@@ -4264,6 +4269,7 @@ namespace EFM
                 }
                 if (Mod.rightHand.heldItem != null)
                 {
+                    Mod.LogInfo("\t\tRight hand: " + Mod.leftHand.heldItem.name);
                     MeatovItem item = Mod.rightHand.heldItem;
 
                     item.physObj.ForceBreakInteraction();
@@ -4285,6 +4291,7 @@ namespace EFM
                     }
                     else
                     {
+                        Mod.LogInfo("\t\tSlot "+i+": " + GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject.name);
                         MeatovItem item = GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject.GetComponent<MeatovItem>();
                         if (item == null)
                         {
@@ -4314,6 +4321,7 @@ namespace EFM
                     }
                     else
                     {
+                        Mod.LogInfo("\t\tAdded Slot " + i + ": " + GM.CurrentPlayerBody.QBSlots_Added[i].CurObject.name);
                         MeatovItem item = GM.CurrentPlayerBody.QBSlots_Added[i].CurObject.GetComponent<MeatovItem>();
                         if (item == null)
                         {
@@ -4339,6 +4347,7 @@ namespace EFM
                 {
                     if (StatusUI.instance.equipmentSlots[i].CurObject != null)
                     {
+                        Mod.LogInfo("\t\tEquipment Slot " + i + ": " + StatusUI.instance.equipmentSlots[i].CurObject.name);
                         MeatovItem item = StatusUI.instance.equipmentSlots[i].CurObject.GetComponent<MeatovItem>();
                         item.physObj.SetQuickBeltSlot(null);
                         DontDestroyOnLoad(item.gameObject);
@@ -4391,12 +4400,18 @@ namespace EFM
 
         public static void UnsecureItems(bool scav = false)
         {
+            Mod.LogInfo("UnsecureItems called");
             // Unsecure generic secured objects
             if(securedObjects != null)
             {
+                Mod.LogInfo("\tGot "+ securedObjects.Count+" secured objects");
                 for (int i = 0; i < securedObjects.Count; ++i)
                 {
-                    SceneManager.MoveGameObjectToScene(securedObjects[i], SceneManager.GetActiveScene());
+                    if(securedObjects[i] != null)
+                    {
+                        Mod.LogInfo("\t\tUnsecuring: "+ securedObjects[i].name);
+                        SceneManager.MoveGameObjectToScene(securedObjects[i], SceneManager.GetActiveScene());
+                    }
                 }
                 securedObjects.Clear();
             }
@@ -4404,27 +4419,37 @@ namespace EFM
             // Unsecure hand and equipment items
             if(securedItems != null)
             {
+                Mod.LogInfo("\tGot secured items");
                 for (int i = 0; i < securedItems.Length; ++i)
                 {
-                    SceneManager.MoveGameObjectToScene(securedItems[i].gameObject, SceneManager.GetActiveScene());
+                    if(securedItems[i] != null)
+                    {
+                        Mod.LogInfo("\t\t"+i+": "+ securedItems[i].name);
+                        SceneManager.MoveGameObjectToScene(securedItems[i].gameObject, SceneManager.GetActiveScene());
 
-                    if (scav)
-                    {
-                        securedItems[i].transform.parent = HideoutController.instance.scavReturnNode;
-                    }
-                    else
-                    {
-                        if (i == 0)
+                        if (scav)
                         {
-                            Mod.leftHand.fvrHand.ForceSetInteractable(securedItems[i].physObj);
-                        }
-                        else if (i == 1)
-                        {
-                            Mod.rightHand.fvrHand.ForceSetInteractable(securedItems[i].physObj);
+                            Mod.LogInfo("\t\t\tScav, putting on return node");
+                            securedItems[i].transform.parent = HideoutController.instance.scavReturnNode;
+                            securedItems[i].transform.position = HideoutController.instance.scavReturnNode.position;
                         }
                         else
                         {
-                            securedItems[i].physObj.SetQuickBeltSlot(StatusUI.instance.equipmentSlots[i - 2]);
+                            if (i == 0)
+                            {
+                                Mod.LogInfo("\t\t\tLeft hand, setting as interactable");
+                                Mod.leftHand.fvrHand.ForceSetInteractable(securedItems[i].physObj);
+                            }
+                            else if (i == 1)
+                            {
+                                Mod.LogInfo("\t\t\tRight hand, setting as interactable");
+                                Mod.rightHand.fvrHand.ForceSetInteractable(securedItems[i].physObj);
+                            }
+                            else
+                            {
+                                Mod.LogInfo("\t\t\tEquipment "+ (i - 2));
+                                securedItems[i].physObj.SetQuickBeltSlot(StatusUI.instance.equipmentSlots[i - 2]);
+                            }
                         }
                     }
                 }
@@ -4433,19 +4458,24 @@ namespace EFM
             // Unsecure slot items
             if(securedSlotItems != null)
             {
+                Mod.LogInfo("\tGot secured QBS items");
                 for (int i = 0; i < securedSlotItems.Count; ++i)
                 {
                     if (securedSlotItems[i] != null)
                     {
+                        Mod.LogInfo("\t\t" + i + ": " + securedSlotItems[i].name);
                         SceneManager.MoveGameObjectToScene(securedSlotItems[i].gameObject, SceneManager.GetActiveScene());
 
                         if (scav)
                         {
-                            securedItems[i].transform.parent = HideoutController.instance.scavReturnNode;
+                            Mod.LogInfo("\t\t\tScav, putting on return node");
+                            securedSlotItems[i].transform.parent = HideoutController.instance.scavReturnNode;
+                            securedSlotItems[i].transform.position = HideoutController.instance.scavReturnNode.position;
                         }
                         else
                         {
-                            securedItems[i].physObj.SetQuickBeltSlot(i < GM.CurrentPlayerBody.QBSlots_Internal.Count ? GM.CurrentPlayerBody.QBSlots_Internal[i] : GM.CurrentPlayerBody.QBSlots_Added[i + GM.CurrentPlayerBody.QBSlots_Internal.Count]);
+                            Mod.LogInfo("\t\t\tQBS " + i);
+                            securedSlotItems[i].physObj.SetQuickBeltSlot(i < GM.CurrentPlayerBody.QBSlots_Internal.Count ? GM.CurrentPlayerBody.QBSlots_Internal[i] : GM.CurrentPlayerBody.QBSlots_Added[i + GM.CurrentPlayerBody.QBSlots_Internal.Count]);
                         }
                     }
                 }
@@ -4703,8 +4733,16 @@ namespace EFM
                 }
                 else // Could not get icon from item data (spawner ID)
                 {
-                    Mod.LogError("Could not get icon for " + itemData.tarkovID+":"+ itemData.H3ID);
-                    icon.sprite = Mod.questionMarkIcon;
+                    Sprite sprite = Mod.itemIconsBundle.LoadAsset<Sprite>("Item" + itemData.H3ID + "_Icon");
+                    if(sprite == null)
+                    {
+                        Mod.LogError("Could not get icon for " + itemData.tarkovID + ":" + itemData.H3ID);
+                        icon.sprite = Mod.questionMarkIcon;
+                    }
+                    else
+                    {
+                        icon.sprite = sprite;
+                    }
                 }
             }
         }
@@ -4821,7 +4859,7 @@ namespace EFM
         // store data about the damager so we can later get a KillData if necessary
         public void OnExplosionDamage(MonoBehaviour mb, IFVRDamageable damageable)
         {
-            if (RaidManager.instance == null)
+            if (RaidManager.instance == null || damageable == null || mb == null)
             {
                 return;
             }
@@ -4829,7 +4867,16 @@ namespace EFM
             if (damageable is SosigLink)
             {
                 SosigLink sosigLink = (SosigLink)damageable;
+                if(sosigLink.S == null)
+                {
+                    return;
+                }
                 AI AIRef = sosigLink.S.GetComponent<AI>();
+                if (AIRef == null)
+                {
+                    Mod.LogError("Sosig did not have AI script at OnExplosionDamage");
+                    return;
+                }
                 ItemReference itemRef = mb.GetComponent<ItemReference>();
                 if (itemRef != null && itemRef.itemData != null)
                 {

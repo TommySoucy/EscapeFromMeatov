@@ -26,7 +26,7 @@ namespace EFM
                 _item = value;
                 if(preValue != _item)
                 {
-                    area.OnSlotContentChangedInvoke();
+                    area.areaData.OnSlotContentChangedInvoke();
                 }
                 if(preValue != null)
                 {
@@ -41,7 +41,7 @@ namespace EFM
 
         public void OnItemAmountChanged()
         {
-            area.OnSlotContentChangedInvoke();
+            area.areaData.OnSlotContentChangedInvoke();
         }
 
         [Serializable]
