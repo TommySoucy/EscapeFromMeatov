@@ -862,7 +862,7 @@ namespace EFM
                                 break;
                             case 10: // Load save 0
                                 Mod.LogInfo("\tDebug: Load save 0");
-                                LoadHideout(0);
+                                GameObject.FindObjectOfType<MenuController>().OnLoadSlotClicked(0);
                                 break;
                             case 11: // Kill player
                                 Mod.LogInfo("\tDebug: Kill player");

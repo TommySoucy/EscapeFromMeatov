@@ -1700,8 +1700,16 @@ namespace EFM
                                 }
                             }
 
+                            if (meatovItem.physObj != null && meatovItem.physObj.RootRigidbody != null)
+                            {
+                                meatovItem.physObj.RootRigidbody.isKinematic = true;
+                            }
                             meatovItem.transform.position = new Vector3((float)looseItemData["posX"], (float)looseItemData["posY"], (float)looseItemData["posZ"]);
                             meatovItem.transform.rotation = Quaternion.Euler((float)looseItemData["rotX"], (float)looseItemData["rotY"], (float)looseItemData["rotZ"]);
+                            if (meatovItem.physObj != null && meatovItem.physObj.RootRigidbody != null)
+                            {
+                                meatovItem.physObj.RootRigidbody.isKinematic = false;
+                            }
                         }
                     };
 
@@ -1709,8 +1717,16 @@ namespace EFM
 
                     if (loadedItem != null)
                     {
+                        if (loadedItem.physObj != null && loadedItem.physObj.RootRigidbody != null)
+                        {
+                            loadedItem.physObj.RootRigidbody.isKinematic = true;
+                        }
                         loadedItem.transform.position = new Vector3((float)looseItemData["posX"], (float)looseItemData["posY"], (float)looseItemData["posZ"]);
                         loadedItem.transform.rotation = Quaternion.Euler((float)looseItemData["rotX"], (float)looseItemData["rotY"], (float)looseItemData["rotZ"]);
+                        if (loadedItem.physObj != null && loadedItem.physObj.RootRigidbody != null)
+                        {
+                            loadedItem.physObj.RootRigidbody.isKinematic = false;
+                        }
                     }
                 }
             }
@@ -1772,7 +1788,7 @@ namespace EFM
                         JArray areaLevels = area["levels"] as JArray;
                         for (int j = 0; j < areaLevels.Count; ++j)
                         {
-                            JToken level = area["levels"][j];
+                            JToken level = areaLevels[j];
                             if (level["volumes"] != null)
                             {
                                 JArray volumes = level["volumes"] as JArray;
@@ -1829,10 +1845,9 @@ namespace EFM
                                 JArray slots = level["slots"] as JArray;
                                 for (int k = 0; k < slots.Count; ++k)
                                 {
-                                    JArray slotItems = slots[k] as JArray;
-                                    for (int l = 0; l < slotItems.Count; ++l)
+                                    if (slots[k] != null && slots[k].Type != JTokenType.Null)
                                     {
-                                        JToken slotItemData = slotItems[i];
+                                        JToken slotItemData = slots[k];
                                         JToken vanillaCustomData = slotItemData["vanillaCustomData"];
                                         VaultSystem.ReturnObjectListDelegate del = objs =>
                                         {
@@ -1926,7 +1941,7 @@ namespace EFM
             // If have secured items, unsecured them on scav return node
             Mod.UnsecureItems(true);
 
-            if (loadedData["leftHand"] != null)
+            if (loadedData["leftHand"] != null && loadedData["leftHand"].Type != JTokenType.Null)
             {
                 Mod.LogInfo("\tLeft hand");
                 // In case item is vanilla, in which case we use the vault system to save it,
@@ -1975,7 +1990,7 @@ namespace EFM
                     loadedItem.UpdateInventories();
                 }
             }
-            if(loadedData["rightHand"] != null)
+            if(loadedData["rightHand"] != null && loadedData["rightHand"].Type != JTokenType.Null)
             {
                 Mod.LogInfo("\tRight hand");
                 JToken vanillaCustomData = null;
@@ -2024,7 +2039,7 @@ namespace EFM
             // This is so that if we have a rig it will have been loaded
             for (int i = 0; i < StatusUI.instance.equipmentSlots.Length; ++i)
             {
-                if (loadedData["equipment"+i] != null)
+                if (loadedData["equipment"+i] != null && loadedData["equipment" + i].Type != JTokenType.Null)
                 {
                     Mod.LogInfo("\tEquipment"+i);
                     JToken vanillaCustomData = null;
@@ -2084,7 +2099,7 @@ namespace EFM
             }
             for (int i = 0; i < GM.CurrentPlayerBody.QBSlots_Internal.Count; ++i)
             {
-                if (loadedData["slot"+i] != null)
+                if (loadedData["slot"+i] != null && loadedData["slot" + i].Type != JTokenType.Null)
                 {
                     Mod.LogInfo("\tSlot" + i);
                     JToken vanillaCustomData = null;
@@ -2092,6 +2107,7 @@ namespace EFM
                     {
                         vanillaCustomData = loadedData["slot" + i]["vanillaCustomData"];
                     }
+                    int slotIndex = i;
                     VaultSystem.ReturnObjectListDelegate del = objs =>
                     {
                         // Here, assume objs[0] is the root item
@@ -2116,7 +2132,7 @@ namespace EFM
                                 }
                             }
 
-                            objs[0].SetQuickBeltSlot(GM.CurrentPlayerBody.QBSlots_Internal[i]);
+                            objs[0].SetQuickBeltSlot(GM.CurrentPlayerBody.QBSlots_Internal[slotIndex]);
                             meatovItem.UpdateInventories();
                         }
                     };
@@ -4352,6 +4368,8 @@ namespace EFM
                     Destroy(StatusUI.instance.equipmentSlots[i].CurObject.gameObject);
                 }
             }
+            ConfigureQuickbeltPatch.overrideIndex = true;
+            ConfigureQuickbeltPatch.actualConfigIndex = -2;
             GM.CurrentPlayerBody.ConfigureQuickbelt(-2); // -2 in order to destroy the objects on belt as well
         }
 
@@ -4405,7 +4423,7 @@ namespace EFM
             // Equipment
             for (int i=0; i< StatusUI.instance.equipmentSlots.Length; ++i)
             {
-                FVRPhysicalObject physObj = StatusUI.instance.equipmentSlots[0].CurObject;
+                FVRPhysicalObject physObj = StatusUI.instance.equipmentSlots[i].CurObject;
                 if(physObj == null)
                 {
                     serializedItem = null;
@@ -4413,7 +4431,11 @@ namespace EFM
                 else
                 {
                     MeatovItem meatovItem = physObj.GetComponent<MeatovItem>();
+                    ++SetQuickBeltSlotPatch.fullSkip;
+                    physObj.SetQuickBeltSlot(null);
                     serializedItem = meatovItem == null ? null : meatovItem.Serialize();
+                    physObj.SetQuickBeltSlot(StatusUI.instance.equipmentSlots[i]);
+                    --SetQuickBeltSlotPatch.fullSkip;
                 }
                 loadedData["equipment"+i] = serializedItem;
             }
@@ -4429,7 +4451,11 @@ namespace EFM
                 else
                 {
                     MeatovItem meatovItem = physObj.GetComponent<MeatovItem>();
+                    ++SetQuickBeltSlotPatch.fullSkip;
+                    physObj.SetQuickBeltSlot(null);
                     serializedItem = meatovItem == null ? null : meatovItem.Serialize();
+                    physObj.SetQuickBeltSlot(GM.CurrentPlayerBody.QBSlots_Internal[i]);
+                    --SetQuickBeltSlotPatch.fullSkip;
                 }
                 loadedData["slot" + i] = serializedItem;
             }
@@ -4489,12 +4515,12 @@ namespace EFM
                 {
                     // Levels
                     JArray areaLevels = new JArray();
-                    // Volumes
                     for(int j=0; j < areaController.areas[i].levels.Length; ++j)
                     {
                         JObject level = new JObject();
                         JArray volumes = new JArray();
                         JArray slots = new JArray();
+                        // Volumes
                         for (int k=0; k< areaController.areas[i].levels[j].areaVolumes.Length; ++k)
                         {
                             JArray areaVolumeItems = new JArray();
@@ -4519,13 +4545,20 @@ namespace EFM
                             volumes.Add(areaVolumeItems);
                         }
                         level["volumes"] = volumes;
+                        // Slots
                         for (int k = 0; k < areaController.areas[i].levels[j].areaSlots.Length; ++k)
                         {
                             JObject serialized = null;
-                            if (areaController.areas[i].levels[j].areaSlots[k].CurObject != null)
+                            FVRPhysicalObject physObj = areaController.areas[i].levels[j].areaSlots[k].CurObject;
+                            if (physObj != null)
                             {
-                                MeatovItem meatovItem = areaController.areas[i].levels[j].areaSlots[k].CurObject.GetComponent<MeatovItem>();
+                                MeatovItem meatovItem = physObj.GetComponent<MeatovItem>();
+
+                                ++SetQuickBeltSlotPatch.fullSkip;
+                                physObj.SetQuickBeltSlot(null);
                                 serializedItem = meatovItem == null ? null : meatovItem.Serialize();
+                                physObj.SetQuickBeltSlot(areaController.areas[i].levels[j].areaSlots[k]);
+                                --SetQuickBeltSlotPatch.fullSkip;
                             }
                             slots.Add(serialized);
                         }

@@ -24,6 +24,8 @@ namespace EFM
             GM.CurrentMovementManager.TeleportToPoint(spawn.position, true, spawn.rotation.eulerAngles);
 
             // Set to no quickbelt slot
+            ConfigureQuickbeltPatch.overrideIndex = true;
+            ConfigureQuickbeltPatch.actualConfigIndex = -4;
             GM.CurrentPlayerBody.ConfigureQuickbelt(-4);
 
             // Enforce specific options

@@ -81,6 +81,7 @@ namespace EFM
         [NonSerialized]
         public MeatovItemData itemData;
         public bool itemDataSet = false;
+        public bool started = false;
         public string H3ID;
         public string tarkovID;
         public string H3SpawnerID;
@@ -522,28 +523,33 @@ namespace EFM
             {
                 Mod.LogWarning("MeatovItem " + name + ":" + tarkovID + ":" + H3ID + " did not have its data set by the time it got to Start");
 
-                if(tarkovID != null && !tarkovID.Equals("") && Mod.defaultItemData.TryGetValue(tarkovID, out MeatovItemData itemData))
-                {
-                    Mod.LogWarning("Data set on start for "+name);
-                    SetData(itemData);
-                }
-                else if(physObj != null && physObj.ObjectWrapper != null && Mod.defaultItemDataByH3ID.TryGetValue(physObj.ObjectWrapper.ItemID, out List<MeatovItemData> itemDatas))
-                {
-                    for(int i =0; i < itemDatas.Count; ++i)
-                    {
-                        if (itemDatas[i] != null)
-                        {
-                            Mod.LogWarning("Data set on start for " + name);
-                            SetData(itemDatas[i]);
-                            break;
-                        }
-                    }
-                }
+                //if(tarkovID != null && !tarkovID.Equals("") && Mod.defaultItemData.TryGetValue(tarkovID, out MeatovItemData itemData))
+                //{
+                //    Mod.LogWarning("Data set on start for "+name);
+                //    SetData(itemData);
+                //}
+                //else if(physObj != null && physObj.ObjectWrapper != null && Mod.defaultItemDataByH3ID.TryGetValue(physObj.ObjectWrapper.ItemID, out List<MeatovItemData> itemDatas))
+                //{
+                //    for(int i =0; i < itemDatas.Count; ++i)
+                //    {
+                //        if (itemDatas[i] != null)
+                //        {
+                //            Mod.LogWarning("Data set on start for " + name);
+                //            SetData(itemDatas[i]);
+                //            break;
+                //        }
+                //    }
+                //}
             }
 
             Mod.LogInfo("MeatovItem start " + H3ID+":"+tarkovID+":"+name);
             // Make a parent changed call to make sure we are parented properly 
-            OnTransformParentChanged();
+            if (itemDataSet)
+            {
+                OnTransformParentChanged();
+            }
+
+            started = true;
         }
 
         public static void Setup(FVRPhysicalObject physicalObject)
@@ -583,6 +589,8 @@ namespace EFM
         /// <param name="data">Data to set</param>
         public void SetData(MeatovItemData data)
         {
+            Mod.LogInfo("SetData called on "+name+" with data "+data.tarkovID+":"+data.name+":\n"+Environment.StackTrace);
+
             if (itemDataSet)
             {
                 return;
@@ -728,6 +736,12 @@ namespace EFM
             if(OnItemDataSet != null)
             {
                 OnItemDataSet(data);
+            }
+
+            // If Start already happened, make the call to parent transformed changed here 
+            if (started)
+            {
+                OnTransformParentChanged();
             }
         }
 

@@ -199,6 +199,8 @@ namespace EFM
             {
                 Mod.LogInfo("UnequipRig called on " + currentRig.itemName);
                 // Load the config
+                ConfigureQuickbeltPatch.overrideIndex = true;
+                ConfigureQuickbeltPatch.actualConfigIndex = -1;
                 GM.CurrentPlayerBody.ConfigureQuickbelt(-1);
 
                 // Load items into their slots

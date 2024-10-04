@@ -521,8 +521,19 @@ namespace EFM
     // -4: Destroy all slots, this essentially sets the QBS config to None
     class ConfigureQuickbeltPatch
     {
-        static bool Prefix(int index, ref FVRPlayerBody __instance)
+        public static bool overrideIndex;
+        public static int actualConfigIndex;
+
+        static bool Prefix(FVRPlayerBody __instance, ref int index)
         {
+            Mod.LogInfo("ConfigureQuickbeltPatch called with index " + index + ":\n" + Environment.StackTrace);
+            if (overrideIndex && index != actualConfigIndex)
+            {
+                Mod.LogWarning("ConfigureQuickbeltPatch called with index " + index + " which did not match actual " + actualConfigIndex + ":\n" + Environment.StackTrace);
+                index = actualConfigIndex;
+                overrideIndex = false;
+            }
+
             if (!Mod.inMeatovScene)
             {
                 return true;
@@ -554,7 +565,7 @@ namespace EFM
                 }
 
                 // If -3 also destroy objects in pockets, but dont get rid of the slots themselves
-                // This is unused but was meant to be in case of death. Instead we jsut detach everything from player upon death and then laod base 
+                // This is unused but was meant to be in case of death. Instead we jsut detach everything from player upon death and then load base 
                 // and set the config to pockets only
                 if (index == -3)
                 {
@@ -956,12 +967,13 @@ namespace EFM
     // Patches FVRPhysicalObject.SetQuickBeltSlot so we can keep track of what goes in and out of rigs
     class SetQuickBeltSlotPatch
     {
+        public static int fullSkip;
         public static bool skipPatch;
         public static bool dontProcessRigWeight;
 
         static void Prefix(ref FVRQuickBeltSlot slot, ref FVRPhysicalObject __instance)
         {
-            if (!Mod.inMeatovScene)
+            if (!Mod.inMeatovScene || fullSkip > 0)
             {
                 return;
             }
@@ -1113,7 +1125,7 @@ namespace EFM
 
         static void Postfix(FVRQuickBeltSlot slot, ref FVRPhysicalObject __instance)
         {
-            if (!Mod.inMeatovScene)
+            if (!Mod.inMeatovScene || fullSkip > 0)
             {
                 return;
             }
