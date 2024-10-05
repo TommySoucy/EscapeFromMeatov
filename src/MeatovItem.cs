@@ -490,7 +490,6 @@ namespace EFM
 
         private void Awake()
 		{
-            Mod.LogInfo("Meatov item "+tarkovID+":" + H3ID + " awake");
             if(physObj == null)
             {
                 physObj = gameObject.GetComponent<FVRPhysicalObject>();
@@ -506,14 +505,6 @@ namespace EFM
                     FVRFireArmMagazine asMagazine = physObj as FVRFireArmMagazine;
                     asMagazine.ReloadMagWithType(roundClass);
                 }
-
-                // Rounds can get their data directly from their H3ID since only one tarkov round will ever point to an H3 round
-                // Note that this is how everything should work, not just rounds, and, unfortunately, causes
-                // some rounds to be missing from the game entirely, since not every tarkov round has an equivalent in H3
-                if(physObj is FVRFireArmRound && physObj.ObjectWrapper != null && Mod.defaultItemDataByH3ID.TryGetValue(physObj.ObjectWrapper.ItemID, out List<MeatovItemData> itemDatas))
-                {
-                    SetData(itemDatas[0]);
-                }
             }
         }
 
@@ -521,28 +512,23 @@ namespace EFM
         {
             if (!itemDataSet)
             {
-                Mod.LogWarning("MeatovItem " + name + ":" + tarkovID + ":" + H3ID + " did not have its data set by the time it got to Start");
-
-                //if(tarkovID != null && !tarkovID.Equals("") && Mod.defaultItemData.TryGetValue(tarkovID, out MeatovItemData itemData))
-                //{
-                //    Mod.LogWarning("Data set on start for "+name);
-                //    SetData(itemData);
-                //}
-                //else if(physObj != null && physObj.ObjectWrapper != null && Mod.defaultItemDataByH3ID.TryGetValue(physObj.ObjectWrapper.ItemID, out List<MeatovItemData> itemDatas))
-                //{
-                //    for(int i =0; i < itemDatas.Count; ++i)
-                //    {
-                //        if (itemDatas[i] != null)
-                //        {
-                //            Mod.LogWarning("Data set on start for " + name);
-                //            SetData(itemDatas[i]);
-                //            break;
-                //        }
-                //    }
-                //}
+                if (tarkovID != null && !tarkovID.Equals("") && Mod.defaultItemData.TryGetValue(tarkovID, out MeatovItemData itemData))
+                {
+                    SetData(itemData);
+                }
+                else if (physObj != null && physObj.ObjectWrapper != null && Mod.defaultItemDataByH3ID.TryGetValue(physObj.ObjectWrapper.ItemID, out List<MeatovItemData> itemDatas))
+                {
+                    for (int i = 0; i < itemDatas.Count; ++i)
+                    {
+                        if (itemDatas[i] != null)
+                        {
+                            SetData(itemDatas[i]);
+                            break;
+                        }
+                    }
+                }
             }
 
-            Mod.LogInfo("MeatovItem start " + H3ID+":"+tarkovID+":"+name);
             // Make a parent changed call to make sure we are parented properly 
             if (itemDataSet)
             {
@@ -554,7 +540,6 @@ namespace EFM
 
         public static void Setup(FVRPhysicalObject physicalObject)
         {
-            Mod.LogInfo("Meatovitem setup: " + physicalObject.name);
             physicalObject.gameObject.AddComponent<MeatovItem>();
 
             TODO: // Also adding to children is necessary for old modul weapon or weapon that spawn with attachments already on the prefab
@@ -566,7 +551,6 @@ namespace EFM
             {
                 if (childrenPhysObjs[i].ObjectWrapper != null && childrenPhysObjs[i].GetComponent<MeatovItem>() == null)
                 {
-                    Mod.LogInfo("\tAdded MeatovItem to "+ childrenPhysObjs[i].name);
                     childrenPhysObjs[i].gameObject.AddComponent<MeatovItem>();
                 }
             }
@@ -587,11 +571,30 @@ namespace EFM
         /// Considering the complexity of the alternative and the fact that a one-to-one map is the goal anyway, I figured this was acceptable
         /// </summary>
         /// <param name="data">Data to set</param>
-        public void SetData(MeatovItemData data)
+        public void SetData(MeatovItemData data, bool overrideSet = false)
         {
-            Mod.LogInfo("SetData called on "+name+" with data "+data.tarkovID+":"+data.name+":\n"+Environment.StackTrace);
+            if (overrideSet)
+            {
+                if (itemDataSet)
+                {
+                    if (containerVolume != null)
+                    {
+                        containerVolume.OnVolumeChanged -= OnVolumeChanged;
+                    }
 
-            if (itemDataSet)
+                    // Remove the old item from inventories
+                    if (locationIndex == 0)
+                    {
+                        Mod.RemoveFromPlayerInventory(this);
+                    }
+                    else if (locationIndex == 1)
+                    {
+                        HideoutController.instance.RemoveFromInventory(this);
+                    }
+                    locationIndex = -1;
+                }
+            }
+            else if (itemDataSet)
             {
                 return;
             }
@@ -696,6 +699,7 @@ namespace EFM
                 {
                     configurationIndex = GM.Instance.QuickbeltConfigurations.Length;
                     GM.Instance.QuickbeltConfigurations = GM.Instance.QuickbeltConfigurations.AddToArray(Mod.playerBundle.LoadAsset<GameObject>("Item" + index + "Configuration"));
+                    Mod.quickbeltConfigurationIndices.Add(index, configurationIndex);
                 }
             }
             else if (itemType == ItemType.AmmoBox)
@@ -2908,7 +2912,11 @@ namespace EFM
                                         if (meatovItem != null)
                                         {
                                             // Set live data
-                                            meatovItem.SetData(Mod.defaultItemData[vanillaCustomData["tarkovID"].ToString()]);
+                                            string currentTarkovID = vanillaCustomData["tarkovID"].ToString();
+                                            if (!meatovItem.itemDataSet || !meatovItem.tarkovID.Equals(currentTarkovID))
+                                            {
+                                                meatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                                            }
                                             meatovItem.insured = (bool)vanillaCustomData["insured"];
                                             meatovItem.looted = (bool)vanillaCustomData["looted"];
                                             meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
@@ -2918,7 +2926,11 @@ namespace EFM
                                                 MeatovItem childMeatovItem = objs[j].GetComponent<MeatovItem>();
                                                 if(childMeatovItem != null)
                                                 {
-                                                    childMeatovItem.SetData(Mod.defaultItemData[vanillaCustomData["children"][j - 1]["tarkovID"].ToString()]);
+                                                    currentTarkovID = vanillaCustomData["children"][j - 1]["tarkovID"].ToString();
+                                                    if (!childMeatovItem.itemDataSet || !childMeatovItem.tarkovID.Equals(currentTarkovID))
+                                                    {
+                                                        childMeatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                                                    }
                                                     childMeatovItem.insured = (bool)vanillaCustomData["children"][j - 1]["insured"];
                                                     childMeatovItem.looted = (bool)vanillaCustomData["children"][j - 1]["looted"];
                                                     childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][j - 1]["foundInRaid"];
@@ -2963,7 +2975,11 @@ namespace EFM
                                         if (meatovItem != null)
                                         {
                                             // Set live data
-                                            meatovItem.SetData(Mod.defaultItemData[vanillaCustomData["tarkovID"].ToString()]);
+                                            string currentTarkovID = vanillaCustomData["tarkovID"].ToString();
+                                            if (!meatovItem.itemDataSet || !meatovItem.tarkovID.Equals(currentTarkovID))
+                                            {
+                                                meatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                                            }
                                             meatovItem.insured = (bool)vanillaCustomData["insured"];
                                             meatovItem.looted = (bool)vanillaCustomData["looted"];
                                             meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
@@ -2973,7 +2989,11 @@ namespace EFM
                                                 MeatovItem childMeatovItem = objs[j].GetComponent<MeatovItem>();
                                                 if (childMeatovItem != null)
                                                 {
-                                                    meatovItem.SetData(Mod.defaultItemData[vanillaCustomData["tarkovID"].ToString()]);
+                                                    currentTarkovID = vanillaCustomData["children"][j - 1]["tarkovID"].ToString();
+                                                    if (!childMeatovItem.itemDataSet || !childMeatovItem.tarkovID.Equals(currentTarkovID))
+                                                    {
+                                                        childMeatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                                                    }
                                                     childMeatovItem.insured = (bool)vanillaCustomData["children"][j - 1]["insured"];
                                                     childMeatovItem.looted = (bool)vanillaCustomData["children"][j - 1]["looted"];
                                                     childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][j - 1]["foundInRaid"];

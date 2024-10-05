@@ -141,8 +141,8 @@ namespace EFM
                     itemObject = GameObject.Instantiate(itemPrefab);
 
                     MeatovItem meatovItem = itemObject.GetComponent<MeatovItem>();
-                    meatovItem.foundInRaid = foundInRaid;
                     meatovItem.SetData(itemData);
+                    meatovItem.foundInRaid = foundInRaid;
 
                     // Remove current slot item if there already is one
                     // This probably shouldn't happen, we should assume that if a slot is output of an area,

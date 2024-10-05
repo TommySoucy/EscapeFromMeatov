@@ -1683,7 +1683,11 @@ namespace EFM
                         if (meatovItem != null)
                         {
                             // Set live data
-                            meatovItem.SetData(Mod.defaultItemData[vanillaCustomData["tarkovID"].ToString()]);
+                            string currentTarkovID = vanillaCustomData["tarkovID"].ToString();
+                            if (!meatovItem.itemDataSet || !meatovItem.tarkovID.Equals(currentTarkovID))
+                            {
+                                meatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                            }
                             meatovItem.insured = (bool)vanillaCustomData["insured"];
                             meatovItem.looted = (bool)vanillaCustomData["looted"];
                             meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
@@ -1693,7 +1697,11 @@ namespace EFM
                                 MeatovItem childMeatovItem = objs[j].GetComponent<MeatovItem>();
                                 if (childMeatovItem != null)
                                 {
-                                    childMeatovItem.SetData(Mod.defaultItemData[vanillaCustomData["children"][j - 1]["tarkovID"].ToString()]);
+                                    currentTarkovID = vanillaCustomData["children"][j - 1]["tarkovID"].ToString();
+                                    if (!childMeatovItem.itemDataSet || !childMeatovItem.tarkovID.Equals(currentTarkovID))
+                                    {
+                                        childMeatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                                    }
                                     childMeatovItem.insured = (bool)vanillaCustomData["children"][j - 1]["insured"];
                                     childMeatovItem.looted = (bool)vanillaCustomData["children"][j - 1]["looted"];
                                     childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][j - 1]["foundInRaid"];
@@ -1744,7 +1752,11 @@ namespace EFM
                         if (meatovItem != null)
                         {
                             // Set live data
-                            meatovItem.SetData(Mod.defaultItemData[vanillaCustomData["tarkovID"].ToString()]);
+                            string currentTarkovID = vanillaCustomData["tarkovID"].ToString();
+                            if (!meatovItem.itemDataSet || !meatovItem.tarkovID.Equals(currentTarkovID))
+                            {
+                                meatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                            }
                             meatovItem.insured = (bool)vanillaCustomData["insured"];
                             meatovItem.looted = (bool)vanillaCustomData["looted"];
                             meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
@@ -1754,7 +1766,11 @@ namespace EFM
                                 MeatovItem childMeatovItem = objs[j].GetComponent<MeatovItem>();
                                 if (childMeatovItem != null)
                                 {
-                                    childMeatovItem.SetData(Mod.defaultItemData[vanillaCustomData["children"][j - 1]["tarkovID"].ToString()]);
+                                    currentTarkovID = vanillaCustomData["children"][j - 1]["tarkovID"].ToString();
+                                    if (!childMeatovItem.itemDataSet || !childMeatovItem.tarkovID.Equals(currentTarkovID))
+                                    {
+                                        childMeatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                                    }
                                     childMeatovItem.insured = (bool)vanillaCustomData["children"][j - 1]["insured"];
                                     childMeatovItem.looted = (bool)vanillaCustomData["children"][j - 1]["looted"];
                                     childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][j - 1]["foundInRaid"];
@@ -1806,7 +1822,11 @@ namespace EFM
                                             if (meatovItem != null)
                                             {
                                                 // Set live data
-                                                meatovItem.SetData(Mod.defaultItemData[vanillaCustomData["tarkovID"].ToString()]);
+                                                string currentTarkovID = vanillaCustomData["tarkovID"].ToString();
+                                                if (!meatovItem.itemDataSet || !meatovItem.tarkovID.Equals(currentTarkovID))
+                                                {
+                                                    meatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                                                }
                                                 meatovItem.insured = (bool)vanillaCustomData["insured"];
                                                 meatovItem.looted = (bool)vanillaCustomData["looted"];
                                                 meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
@@ -1816,7 +1836,11 @@ namespace EFM
                                                     MeatovItem childMeatovItem = objs[m].GetComponent<MeatovItem>();
                                                     if (childMeatovItem != null)
                                                     {
-                                                        childMeatovItem.SetData(Mod.defaultItemData[vanillaCustomData["children"][m - 1]["tarkovID"].ToString()]);
+                                                        currentTarkovID = vanillaCustomData["children"][m - 1]["tarkovID"].ToString();
+                                                        if (!childMeatovItem.itemDataSet || !childMeatovItem.tarkovID.Equals(currentTarkovID))
+                                                        {
+                                                            childMeatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                                                        }
                                                         childMeatovItem.insured = (bool)vanillaCustomData["children"][m - 1]["insured"];
                                                         childMeatovItem.looted = (bool)vanillaCustomData["children"][m - 1]["looted"];
                                                         childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][m - 1]["foundInRaid"];
@@ -1856,7 +1880,11 @@ namespace EFM
                                             if (meatovItem != null)
                                             {
                                                 // Set live data
-                                                meatovItem.SetData(Mod.defaultItemData[vanillaCustomData["tarkovID"].ToString()]);
+                                                string currentTarkovID = vanillaCustomData["tarkovID"].ToString();
+                                                if (!meatovItem.itemDataSet || !meatovItem.tarkovID.Equals(currentTarkovID))
+                                                {
+                                                    meatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                                                }
                                                 meatovItem.insured = (bool)vanillaCustomData["insured"];
                                                 meatovItem.looted = (bool)vanillaCustomData["looted"];
                                                 meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
@@ -1866,7 +1894,11 @@ namespace EFM
                                                     MeatovItem childMeatovItem = objs[m].GetComponent<MeatovItem>();
                                                     if (childMeatovItem != null)
                                                     {
-                                                        childMeatovItem.SetData(Mod.defaultItemData[vanillaCustomData["children"][m - 1]["tarkovID"].ToString()]);
+                                                        currentTarkovID = vanillaCustomData["children"][m - 1]["tarkovID"].ToString();
+                                                        if (!childMeatovItem.itemDataSet || !childMeatovItem.tarkovID.Equals(currentTarkovID))
+                                                        {
+                                                            childMeatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                                                        }
                                                         childMeatovItem.insured = (bool)vanillaCustomData["children"][m - 1]["insured"];
                                                         childMeatovItem.looted = (bool)vanillaCustomData["children"][m - 1]["looted"];
                                                         childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][m - 1]["foundInRaid"];
@@ -1904,7 +1936,11 @@ namespace EFM
                         if (meatovItem != null)
                         {
                             // Set live data
-                            meatovItem.SetData(Mod.defaultItemData[vanillaCustomData["tarkovID"].ToString()]);
+                            string currentTarkovID = vanillaCustomData["tarkovID"].ToString();
+                            if (!meatovItem.itemDataSet || !meatovItem.tarkovID.Equals(currentTarkovID))
+                            {
+                                meatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                            }
                             meatovItem.insured = (bool)vanillaCustomData["insured"];
                             meatovItem.looted = (bool)vanillaCustomData["looted"];
                             meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
@@ -1914,7 +1950,11 @@ namespace EFM
                                 MeatovItem childMeatovItem = objs[m].GetComponent<MeatovItem>();
                                 if (childMeatovItem != null)
                                 {
-                                    childMeatovItem.SetData(Mod.defaultItemData[vanillaCustomData["children"][m - 1]["tarkovID"].ToString()]);
+                                    currentTarkovID = vanillaCustomData["children"][m - 1]["tarkovID"].ToString();
+                                    if (!childMeatovItem.itemDataSet || !childMeatovItem.tarkovID.Equals(currentTarkovID))
+                                    {
+                                        childMeatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                                    }
                                     childMeatovItem.insured = (bool)vanillaCustomData["children"][m - 1]["insured"];
                                     childMeatovItem.looted = (bool)vanillaCustomData["children"][m - 1]["looted"];
                                     childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][m - 1]["foundInRaid"];
@@ -1959,7 +1999,11 @@ namespace EFM
                     if (meatovItem != null)
                     {
                         // Set live data
-                        meatovItem.SetData(Mod.defaultItemData[vanillaCustomData["tarkovID"].ToString()]);
+                        string currentTarkovID = vanillaCustomData["tarkovID"].ToString();
+                        if (!meatovItem.itemDataSet || !meatovItem.tarkovID.Equals(currentTarkovID))
+                        {
+                            meatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                        }
                         meatovItem.insured = (bool)vanillaCustomData["insured"];
                         meatovItem.looted = (bool)vanillaCustomData["looted"];
                         meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
@@ -1969,7 +2013,11 @@ namespace EFM
                             MeatovItem childMeatovItem = objs[m].GetComponent<MeatovItem>();
                             if (childMeatovItem != null)
                             {
-                                childMeatovItem.SetData(Mod.defaultItemData[vanillaCustomData["children"][m - 1]["tarkovID"].ToString()]);
+                                currentTarkovID = vanillaCustomData["children"][m - 1]["tarkovID"].ToString();
+                                if (!childMeatovItem.itemDataSet || !childMeatovItem.tarkovID.Equals(currentTarkovID))
+                                {
+                                    childMeatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                                }
                                 childMeatovItem.insured = (bool)vanillaCustomData["children"][m - 1]["insured"];
                                 childMeatovItem.looted = (bool)vanillaCustomData["children"][m - 1]["looted"];
                                 childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][m - 1]["foundInRaid"];
@@ -2005,7 +2053,11 @@ namespace EFM
                     if (meatovItem != null)
                     {
                         // Set live data
-                        meatovItem.SetData(Mod.defaultItemData[vanillaCustomData["tarkovID"].ToString()]);
+                        string currentTarkovID = vanillaCustomData["tarkovID"].ToString();
+                        if (!meatovItem.itemDataSet || !meatovItem.tarkovID.Equals(currentTarkovID))
+                        {
+                            meatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                        }
                         meatovItem.insured = (bool)vanillaCustomData["insured"];
                         meatovItem.looted = (bool)vanillaCustomData["looted"];
                         meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
@@ -2015,7 +2067,11 @@ namespace EFM
                             MeatovItem childMeatovItem = objs[m].GetComponent<MeatovItem>();
                             if (childMeatovItem != null)
                             {
-                                childMeatovItem.SetData(Mod.defaultItemData[vanillaCustomData["children"][m - 1]["tarkovID"].ToString()]);
+                                currentTarkovID = vanillaCustomData["children"][m - 1]["tarkovID"].ToString();
+                                if (!childMeatovItem.itemDataSet || !childMeatovItem.tarkovID.Equals(currentTarkovID))
+                                {
+                                    childMeatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                                }
                                 childMeatovItem.insured = (bool)vanillaCustomData["children"][m - 1]["insured"];
                                 childMeatovItem.looted = (bool)vanillaCustomData["children"][m - 1]["looted"];
                                 childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][m - 1]["foundInRaid"];
@@ -2054,7 +2110,11 @@ namespace EFM
                         if (meatovItem != null)
                         {
                             // Set live data
-                            meatovItem.SetData(Mod.defaultItemData[vanillaCustomData["tarkovID"].ToString()]);
+                            string currentTarkovID = vanillaCustomData["tarkovID"].ToString();
+                            if (!meatovItem.itemDataSet || !meatovItem.tarkovID.Equals(currentTarkovID))
+                            {
+                                meatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                            }
                             meatovItem.insured = (bool)vanillaCustomData["insured"];
                             meatovItem.looted = (bool)vanillaCustomData["looted"];
                             meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
@@ -2064,7 +2124,11 @@ namespace EFM
                                 MeatovItem childMeatovItem = objs[m].GetComponent<MeatovItem>();
                                 if (childMeatovItem != null)
                                 {
-                                    childMeatovItem.SetData(Mod.defaultItemData[vanillaCustomData["children"][m - 1]["tarkovID"].ToString()]);
+                                    currentTarkovID = vanillaCustomData["children"][m - 1]["tarkovID"].ToString();
+                                    if (!childMeatovItem.itemDataSet || !childMeatovItem.tarkovID.Equals(currentTarkovID))
+                                    {
+                                        childMeatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                                    }
                                     childMeatovItem.insured = (bool)vanillaCustomData["children"][m - 1]["insured"];
                                     childMeatovItem.looted = (bool)vanillaCustomData["children"][m - 1]["looted"];
                                     childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][m - 1]["foundInRaid"];
@@ -2115,7 +2179,11 @@ namespace EFM
                         if (meatovItem != null)
                         {
                             // Set live data
-                            meatovItem.SetData(Mod.defaultItemData[vanillaCustomData["tarkovID"].ToString()]);
+                            string currentTarkovID = vanillaCustomData["tarkovID"].ToString();
+                            if (!meatovItem.itemDataSet || !meatovItem.tarkovID.Equals(currentTarkovID))
+                            {
+                                meatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                            }
                             meatovItem.insured = (bool)vanillaCustomData["insured"];
                             meatovItem.looted = (bool)vanillaCustomData["looted"];
                             meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
@@ -2125,7 +2193,11 @@ namespace EFM
                                 MeatovItem childMeatovItem = objs[m].GetComponent<MeatovItem>();
                                 if (childMeatovItem != null)
                                 {
-                                    childMeatovItem.SetData(Mod.defaultItemData[vanillaCustomData["children"][m - 1]["tarkovID"].ToString()]);
+                                    currentTarkovID = vanillaCustomData["children"][m - 1]["tarkovID"].ToString();
+                                    if (!childMeatovItem.itemDataSet || !childMeatovItem.tarkovID.Equals(currentTarkovID))
+                                    {
+                                        childMeatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                                    }
                                     childMeatovItem.insured = (bool)vanillaCustomData["children"][m - 1]["insured"];
                                     childMeatovItem.looted = (bool)vanillaCustomData["children"][m - 1]["looted"];
                                     childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][m - 1]["foundInRaid"];
