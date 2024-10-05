@@ -1480,7 +1480,7 @@ namespace EFM
                 {
                     traderDetailsNextLevelElite.SetActive(false);
                     traderDetailsNextLevelText.gameObject.SetActive(true);
-                    traderDetailsCurrentLevelText.text = Trader.LevelToRoman(trader.level + 1);
+                    traderDetailsNextLevelText.text = Trader.LevelToRoman(trader.level + 1);
                 }
                 traderDetailsNextPlayerRankIcon.sprite = playerRankIcons[nextLevel.minLevel / 5];
                 traderDetailsNextPlayerRankText.text = nextLevel.minLevel.ToString();
@@ -1522,7 +1522,6 @@ namespace EFM
             traderDetailsPlayerDollar.text = Mod.FormatCompleteMoneyString(Mod.GetItemCountInInventories("201"));
             traderDetailsPlayerEuro.text = Mod.FormatCompleteMoneyString(Mod.GetItemCountInInventories("202"));
             
-            Mod.LogInfo("0");
             // Main
             // Buy
             Mod.LogInfo("0");
@@ -1556,6 +1555,20 @@ namespace EFM
                             Mod.LogWarning("Trader " + trader.name + " with ID " + trader.ID + " has barter "+j+" at level "+i+" with missing itemdata");
                             continue;
                         }
+                        int nullCount = 0;
+                        for (int k=0; k< currentBarter.itemData.Count; ++k)
+                        {
+                            if (currentBarter.itemData[k] == null)
+                            {
+                                ++nullCount;
+                            }
+                        }
+                        if (nullCount == currentBarter.itemData.Count)
+                        {
+                            Mod.LogWarning("Trader " + trader.name + " with ID " + trader.ID + " has barter " + j + " at level " + i + " with missing itemdata items");
+                            continue;
+                        }
+
                         int priceCount = 0;
                         int firstValidPrice = -1;
                         for (int k = 0; k < currentBarter.prices.Length; ++k)
@@ -1569,6 +1582,7 @@ namespace EFM
                                 }
                             }
                         }
+
                         if (priceCount == 0)
                         {
                             Mod.LogWarning("Trader " + trader.name + " with ID " + trader.ID + " has barter " + j + " at level " + i + " with no price itemdata");
@@ -1822,7 +1836,7 @@ namespace EFM
                 buyItemPriceViewsByID.Clear();
             }
 
-            if (items[0] == null)
+            if (items == null || items[0] == null)
             {
                 cartItemCount = -1;
                 buyPrices = null;

@@ -2041,6 +2041,7 @@ namespace EFM
 
     // Patches FVRViveHand.Update to add description input
     // Completely replaces the original
+    // Note that this will override H3MP's transpiler, but the transpiler only prevent TNH spectators from using grab laser
     class HandUpdatePatch
     {
         static bool Prefix(FVRViveHand __instance)
@@ -2144,6 +2145,7 @@ namespace EFM
                         __instance.PointingLaser.position = __instance.Input.OneEuroPointingPos;
                         __instance.PointingLaser.rotation = __instance.Input.OneEuroPointRotation;
                         __instance.PointingLaser.localScale = new Vector3(0.002f, 0.002f, __instance.m_pointingHit.distance) * d;
+                        __instance.CurrentPointable.SetLastPointHitWorldPos(__instance.m_pointingHit.point);
                     }
                     else
                     {

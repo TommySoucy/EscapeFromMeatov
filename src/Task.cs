@@ -1,5 +1,4 @@
 ﻿using FistVR;
-using Steamworks;
 using System;
 using System.Collections.Generic;
 using Valve.Newtonsoft.Json.Linq;
@@ -48,7 +47,7 @@ namespace EFM
                 _taskState = value;
                 if (_taskState != preValue)
                 {
-                    OnTaskStateChangedInvoke(this);
+                    OnTaskStateChangedInvoke(this, preValue);
                 }
             }
         }
@@ -93,7 +92,7 @@ namespace EFM
             startRewards = new List<Reward>();
             SetupRewards(startRewards, TaskState.Active, questData.Value["rewards"]["Started"] as JArray);
             finishRewards = new List<Reward>();
-            SetupRewards(finishRewards, TaskState.Complete, questData.Value["rewards"]["Success"] as JArray);
+            SetupRewards(finishRewards, TaskState.Success, questData.Value["rewards"]["Success"] as JArray);
             failRewards = new List<Reward>();
             SetupRewards(failRewards, TaskState.Fail, questData.Value["rewards"]["Fail"] as JArray);
         }
@@ -120,10 +119,15 @@ namespace EFM
                 conditions[failConditions[i].ID] = condition;
             }
             data["conditions"] = conditions;
+            data["state"] = (int)taskState;
         }
 
         public void LoadData(JToken data)
         {
+            // Set task state to locked, unsubbing from conditions from previous state and subbing to start and fail conditions
+            taskState = TaskState.Locked;
+
+            // Note that as we load data, task state may change due to condition fulfillment from saved data
             if (data == null)
             {
                 for(int i=0; i < startConditions.Count; ++i)
@@ -137,6 +141,13 @@ namespace EFM
                 for(int i=0; i < failConditions.Count; ++i)
                 {
                     failConditions[i].LoadData(null);
+                }
+
+                // Comment above is particularly relevant if we don't have save data, which indicates
+                // a new game, at which point the task may be made Available by default
+                if (ID.Equals("5936d90786f7742b1420ba5b"))
+                {
+                    Mod.LogInfo("Loaded data for task Debut, start conditions fulfilled: " + AllConditionsFulfilled(startConditions) + ", current state: " + taskState);
                 }
             }
             else
@@ -153,10 +164,14 @@ namespace EFM
                 {
                     failConditions[i].LoadData(data["conditions"][failConditions[i].ID]);
                 }
+
+                // Set saved state, overriding one that may have been set by condition data loading
+                // Note that condition save data should correspond to saved task state
+                taskState = (TaskState)((int)data["state"]);
             }
         }
 
-        public void UpdateEventSubscription(TaskState from, TaskState to, bool onlyTo = false)
+        public void UpdateEventSubscription(TaskState from, TaskState to, bool onlyFrom = false, bool onlyTo = false)
         {
             // We want to unsubscribe from events we needed to be subscribed to in the previous state
             // Then subscribe to the events we need to be subscribed to in the new state
@@ -178,7 +193,6 @@ namespace EFM
                         }
                         break;
                     case TaskState.Active:
-                    case TaskState.Success:
                         for (int i = 0; i < finishConditions.Count; ++i)
                         {
                             finishConditions[i].UnsubscribeFromEvents();
@@ -190,37 +204,53 @@ namespace EFM
                             failConditions[i].OnConditionFulfillmentChanged -= OnConditionFulfillmentChanged;
                         }
                         break;
+                    case TaskState.Success:
+                        for (int i = 0; i < failConditions.Count; ++i)
+                        {
+                            failConditions[i].UnsubscribeFromEvents();
+                            failConditions[i].OnConditionFulfillmentChanged -= OnConditionFulfillmentChanged;
+                        }
+                        break;
                 }
             }
 
-            switch (to)
+            if (!onlyFrom)
             {
-                case TaskState.Locked:
-                case TaskState.Available:
-                    for (int i = 0; i < startConditions.Count; ++i)
-                    {
-                        startConditions[i].SubscribeToEvents();
-                        startConditions[i].OnConditionFulfillmentChanged += OnConditionFulfillmentChanged;
-                    }
-                    for (int i = 0; i < failConditions.Count; ++i)
-                    {
-                        failConditions[i].SubscribeToEvents();
-                        failConditions[i].OnConditionFulfillmentChanged += OnConditionFulfillmentChanged;
-                    }
-                    break;
-                case TaskState.Active:
-                case TaskState.Success:
-                    for (int i = 0; i < finishConditions.Count; ++i)
-                    {
-                        finishConditions[i].SubscribeToEvents();
-                        finishConditions[i].OnConditionFulfillmentChanged += OnConditionFulfillmentChanged;
-                    }
-                    for (int i = 0; i < failConditions.Count; ++i)
-                    {
-                        failConditions[i].SubscribeToEvents();
-                        failConditions[i].OnConditionFulfillmentChanged += OnConditionFulfillmentChanged;
-                    }
-                    break;
+                switch (to)
+                {
+                    case TaskState.Locked:
+                    case TaskState.Available:
+                        for (int i = 0; i < startConditions.Count; ++i)
+                        {
+                            startConditions[i].SubscribeToEvents();
+                            startConditions[i].OnConditionFulfillmentChanged += OnConditionFulfillmentChanged;
+                        }
+                        for (int i = 0; i < failConditions.Count; ++i)
+                        {
+                            failConditions[i].SubscribeToEvents();
+                            failConditions[i].OnConditionFulfillmentChanged += OnConditionFulfillmentChanged;
+                        }
+                        break;
+                    case TaskState.Active:
+                        for (int i = 0; i < finishConditions.Count; ++i)
+                        {
+                            finishConditions[i].SubscribeToEvents();
+                            finishConditions[i].OnConditionFulfillmentChanged += OnConditionFulfillmentChanged;
+                        }
+                        for (int i = 0; i < failConditions.Count; ++i)
+                        {
+                            failConditions[i].SubscribeToEvents();
+                            failConditions[i].OnConditionFulfillmentChanged += OnConditionFulfillmentChanged;
+                        }
+                        break;
+                    case TaskState.Success:
+                        for (int i = 0; i < failConditions.Count; ++i)
+                        {
+                            failConditions[i].SubscribeToEvents();
+                            failConditions[i].OnConditionFulfillmentChanged += OnConditionFulfillmentChanged;
+                        }
+                        break;
+                }
             }
         }
 
@@ -266,8 +296,6 @@ namespace EFM
                             if(taskState == TaskState.Locked)
                             {
                                 taskState = TaskState.Available;
-                                // No need to update event subscription because we still want to listen to the same events
-                                // UpdateEventSubscription(TaskState.Locked, TaskState.Available);
                             }
                         }
                         break;
@@ -277,8 +305,6 @@ namespace EFM
                             if (taskState == TaskState.Active)
                             {
                                 taskState = TaskState.Success;
-                                // No need to update event subscription because we still want to listen to the same events
-                                // UpdateEventSubscription(TaskState.Active, TaskState.Success);
                             }
                         }
                         break;
@@ -289,7 +315,6 @@ namespace EFM
                             if (taskState != TaskState.Fail)
                             {
                                 taskState = TaskState.Fail;
-                                UpdateEventSubscription(taskState, TaskState.Fail);
                             }
                         }
                         break;
@@ -297,11 +322,11 @@ namespace EFM
             }
             else // Condition changed from fulfilled to unfulfilled
             {
-                if(condition.targetState == TaskState.Available && taskState == TaskState.Available)
+                if (condition.targetState == TaskState.Available && taskState == TaskState.Available)
                 {
                     taskState = TaskState.Locked;
                 }
-                else if( condition.targetState == TaskState.Success && taskState == TaskState.Success)
+                else if (condition.targetState == TaskState.Success && taskState == TaskState.Success) 
                 {
                     taskState = TaskState.Active;
                 }
@@ -320,25 +345,28 @@ namespace EFM
             return true;
         }
 
-        public void OnTaskStateChangedInvoke(Task task)
+        public void OnTaskStateChangedInvoke(Task task, TaskState previous)
         {
             // Destruction of the UI elements (Market and StatusUI) happens in the elements themselves
-            // when receiving the corersponding TaskStateChanged events
-            if (taskState == TaskState.Available
-                || taskState == TaskState.Active
-                || taskState == TaskState.Complete)
+            // when receiving the corresponding TaskStateChanged events
+            if(taskState == TaskState.Active || taskState == TaskState.Complete)
             {
-                if(playerUI == null)
+                if (playerUI == null)
                 {
                     StatusUI.instance.AddTask(this);
                 }
+            }
+            if (taskState == TaskState.Available || taskState == TaskState.Active || taskState == TaskState.Complete)
+            {
                 if(marketUI == null && HideoutController.instance != null && HideoutController.instance.marketManager.currentTraderIndex == trader.index)
                 {
                     HideoutController.instance.marketManager.AddTask(this);
                 }
             }
 
-            if(OnTaskStateChanged != null)
+            UpdateEventSubscription(previous, task.taskState);
+
+            if (OnTaskStateChanged != null)
             {
                 OnTaskStateChanged(task);
             }

@@ -2144,6 +2144,10 @@ namespace EFM
                                 Mod.unloadHideout = true;
                                 SteamVR_LoadLevel.Begin("MeatovMainMenu", false, 0.5f, 0f, 0f, 0f, 1f);
                                 break;
+                            case 27: // Toggle trade
+                                Mod.LogInfo("\tDebug: Toggle trade");
+                                HideoutController.instance.switches[1].SimpleInteraction(null);
+                                break;
                         }
                     }
                 }
@@ -2820,6 +2824,12 @@ namespace EFM
                 Task newTask = new Task(questData);
                 newTask.trader.tasks.Add(newTask);
             }
+            foreach(KeyValuePair<string, Task> taskEntry in Task.allTasks)
+            {
+               // Init task event subscription
+               // We do this after they are all instantiated because some conditions require references to other tasks
+                taskEntry.Value.UpdateEventSubscription(Task.TaskState.Locked, Task.TaskState.Locked, false, true);
+            }
 
             //MovementManagerUpdatePatch.damagePerMeter = (float)Mod.globalDB["config"]["Health"]["Falling"]["DamagePerMeter"];
             //MovementManagerUpdatePatch.safeHeight = (float)Mod.globalDB["config"]["Health"]["Falling"]["SafeHeight"];
@@ -3385,6 +3395,7 @@ namespace EFM
                 GM.Instance.QuickbeltConfigurations = GM.Instance.QuickbeltConfigurations.AddToArray(Mod.playerBundle.LoadAsset<GameObject>("PocketsConfiguration"));
 
                 Mod.questionMarkIcon = Mod.itemIconsBundle.LoadAsset<Sprite>("QuestionMarkIcon");
+                Mod.cartridgeIcon = Mod.itemIconsBundle.LoadAsset<Sprite>("BundledCartridgeIcon");
                 Mod.emptyCellIcon = Mod.itemIconsBundle.LoadAsset<Sprite>("cell_full_border");
             }
 
@@ -4716,7 +4727,7 @@ namespace EFM
                     Sprite sprite = Mod.itemIconsBundle.LoadAsset<Sprite>("Item" + parsedID + "_Icon");
                     if (sprite == null)
                     {
-                        Mod.LogError("Mod.SetIcon could not load custom item " + itemData.tarkovID + ":" + parsedID + " icon");
+                        Mod.LogError("Mod.SetIcon could not load custom item " + itemData.tarkovID + ":" + parsedID + " icon using name \"Item" + parsedID + "_Icon\"");
                         icon.sprite = Mod.questionMarkIcon;
                     }
                     else
@@ -4736,8 +4747,15 @@ namespace EFM
                     Sprite sprite = Mod.itemIconsBundle.LoadAsset<Sprite>("Item" + itemData.H3ID + "_Icon");
                     if(sprite == null)
                     {
-                        Mod.LogError("Could not get icon for " + itemData.tarkovID + ":" + itemData.H3ID);
-                        icon.sprite = Mod.questionMarkIcon;
+                        if(itemData.itemType == MeatovItem.ItemType.Round)
+                        {
+                            icon.sprite = Mod.cartridgeIcon;
+                        }
+                        else
+                        {
+                            Mod.LogError("Could not get icon for " + itemData.tarkovID + ":" + itemData.H3ID);
+                            icon.sprite = Mod.questionMarkIcon;
+                        }
                     }
                     else
                     {
