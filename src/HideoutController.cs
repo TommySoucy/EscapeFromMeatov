@@ -1588,21 +1588,6 @@ namespace EFM
             {
                 Mod.traders[i].LoadData(traderDataArray[i]);
             }
-            // Load task data only after loading all trader data because some task conditions are dependent on trader live data
-            for (int i = 0; i < Mod.traders.Length; ++i)
-            {
-                for (int j = 0; j < Mod.traders[i].tasks.Count; ++j)
-                {
-                    if(traderDataArray[i]["tasks"][Mod.traders[i].tasks[j].ID] == null)
-                    {
-                        Mod.traders[i].tasks[j].LoadData(null);
-                    }
-                    else
-                    {
-                        Mod.traders[i].tasks[j].LoadData(traderDataArray[i]["tasks"][Mod.traders[i].tasks[j].ID]);
-                    }
-                }
-            }
             Mod.LogInfo("\t0");
 
             //TraderStatus.fenceRestockTimer = (float)loadedData["fenceRestockTimer"] - secondsSinceSave;
@@ -1662,6 +1647,23 @@ namespace EFM
                 itemData.Value.InitCheckmarkData();
             }
             Mod.LogInfo("\t0");
+
+            // Load task data only after loading all trader data and checkmark data because some task conditions are dependent on trader live data
+            // and checkmark data will have to update on events based on task data we load
+            for (int i = 0; i < Mod.traders.Length; ++i)
+            {
+                for (int j = 0; j < Mod.traders[i].tasks.Count; ++j)
+                {
+                    if (traderDataArray[i]["tasks"][Mod.traders[i].tasks[j].ID] == null)
+                    {
+                        Mod.traders[i].tasks[j].LoadData(null);
+                    }
+                    else
+                    {
+                        Mod.traders[i].tasks[j].LoadData(traderDataArray[i]["tasks"][Mod.traders[i].tasks[j].ID]);
+                    }
+                }
+            }
 
             // Load areas
             // Areas get loaded on Area.Start() which will always happen after process data, which happens in Awake()

@@ -130,7 +130,7 @@ namespace EFM
             // Note that as we load data, task state may change due to condition fulfillment from saved data
             if (data == null)
             {
-                for(int i=0; i < startConditions.Count; ++i)
+                for (int i=0; i < startConditions.Count; ++i)
                 {
                     startConditions[i].LoadData(null);
                 }
@@ -145,10 +145,6 @@ namespace EFM
 
                 // Comment above is particularly relevant if we don't have save data, which indicates
                 // a new game, at which point the task may be made Available by default
-                if (ID.Equals("5936d90786f7742b1420ba5b"))
-                {
-                    Mod.LogInfo("Loaded data for task Debut, start conditions fulfilled: " + AllConditionsFulfilled(startConditions) + ", current state: " + taskState);
-                }
             }
             else
             {
@@ -906,7 +902,7 @@ namespace EFM
                         subscribedToEvents = true;
                         break;
                     case ConditionType.Level:
-                        fulfilled = CompareInt(compareMethod, Mod.level, value);
+                        //fulfilled = CompareInt(compareMethod, Mod.level, value);
                         if (!fulfilled)
                         {
                             Mod.OnPlayerLevelChanged += OnPlayerLevelChanged;
@@ -931,7 +927,7 @@ namespace EFM
                         subscribedToEvents = true;
                         break;
                     case ConditionType.Quest:
-                        fulfilled = questTargetTask.taskState == Task.TaskState.Complete;
+                        //fulfilled = questTargetTask.taskState == Task.TaskState.Complete;
                         if (!fulfilled)
                         {
                             questTargetTask.OnTaskStateChanged += OnTaskStateChanged;
@@ -957,7 +953,7 @@ namespace EFM
                         subscribedToEvents = true;
                         break;
                     case ConditionType.TraderLoyalty:
-                        fulfilled = CompareInt(compareMethod, targetTrader.level, value);
+                        //fulfilled = CompareInt(compareMethod, targetTrader.level, value);
                         if (!fulfilled)
                         {
                             targetTrader.OnTraderLevelChanged += OnTraderLevelChanged;
@@ -970,7 +966,7 @@ namespace EFM
                         }
                         break;
                     case ConditionType.TraderStanding:
-                        fulfilled = CompareFloat(compareMethod, targetTrader.standing, value);
+                        //fulfilled = CompareFloat(compareMethod, targetTrader.standing, value);
                         if (!fulfilled)
                         {
                             targetTrader.OnTraderStandingChanged += OnTraderStandingChanged;
@@ -983,7 +979,7 @@ namespace EFM
                         }
                         break;
                     case ConditionType.Skill:
-                        fulfilled = CompareInt(compareMethod, targetSkill.GetLevel(), value);
+                        //fulfilled = CompareInt(compareMethod, targetSkill.GetLevel(), value);
                         if (!fulfilled)
                         {
                             targetSkill.OnSkillLevelChanged += OnSkillLevelChanged;
