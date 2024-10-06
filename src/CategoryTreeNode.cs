@@ -46,8 +46,8 @@ namespace EFM
                             }
                         }
                     }
-                    // Only add a barter if there aren't any trader barters and if the item canSellOnRagFair
-                    if (!added && items[i].canSellOnRagfair)
+                    // Only add a barter if there aren't any trader barters, if the item canSellOnRagFair, and if value != 0
+                    if (!added && items[i].canSellOnRagfair && items[i].value != 0)
                     {
                         Barter barter = new Barter();
                         barter.itemData = new List<MeatovItemData>() { items[i] };

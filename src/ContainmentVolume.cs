@@ -121,7 +121,7 @@ namespace EFM
         {
             if (inventoryItems.TryGetValue(item.tarkovID, out List<MeatovItem> items) && items.Remove(item))
             {
-                if(inventoryItems.Count == 0)
+                if(items.Count == 0)
                 {
                     inventoryItems.Remove(item.tarkovID);
                 }
@@ -133,7 +133,7 @@ namespace EFM
 
                 if (item.foundInRaid && FIRInventoryItems.TryGetValue(item.tarkovID, out List<MeatovItem> FIRItems) && FIRItems.Remove(item))
                 {
-                    if (FIRInventoryItems.Count == 0)
+                    if (FIRItems.Count == 0)
                     {
                         FIRInventoryItems.Remove(item.tarkovID);
                     }

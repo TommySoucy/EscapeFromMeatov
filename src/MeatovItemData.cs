@@ -1293,6 +1293,7 @@ namespace EFM
             if (neededFor[1])
             {
                 int minimum = int.MaxValue;
+                bool found = false;
                 foreach (KeyValuePair<int, Dictionary<int, int>> neededAreaEntry in neededForLevelByAreaCurrent)
                 {
                     foreach (KeyValuePair<int, int> neededLevelEntry in neededAreaEntry.Value)
@@ -1300,10 +1301,18 @@ namespace EFM
                         if (neededLevelEntry.Value < minimum)
                         {
                             minimum = neededLevelEntry.Value;
+                            found = true;
                         }
                     }
                 }
-                minimumUpgradeAmount = minimum;
+                if (found)
+                {
+                    minimumUpgradeAmount = minimum;
+                }
+                else
+                {
+                    minimumUpgradeAmount = 0;
+                }
             }
             
             if (preNeededForArea != neededFor[1])

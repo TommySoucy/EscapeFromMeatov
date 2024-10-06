@@ -538,12 +538,12 @@ namespace EFM
 
         public bool ItemSellable(MeatovItemData itemData)
         {
-            return !Mod.IDDescribedInList(itemData.tarkovID, new List<string>(itemData.parents), new List<string>(buyCategories), new List<string>(buyBlacklist));
+            return Mod.IDDescribedInList(itemData.tarkovID, new List<string>(itemData.parents), new List<string>(buyCategories), new List<string>(buyBlacklist));
         }
 
         public bool ItemInsureable(MeatovItemData itemData)
         {
-            return insuranceAvailable && !Mod.IDDescribedInList(itemData.tarkovID, new List<string>(itemData.parents), new List<string>() { Mod.itemParentID }, new List<string>(insuranceExcluded));
+            return insuranceAvailable && Mod.IDDescribedInList(itemData.tarkovID, new List<string>(itemData.parents), new List<string>() { Mod.itemParentID }, new List<string>(insuranceExcluded));
         }
     }
 

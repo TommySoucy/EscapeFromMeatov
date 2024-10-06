@@ -276,6 +276,13 @@ namespace EFM
 
         public void OnMinimumUpgradeAmountChanged()
         {
+            TODO: // Maybe we manage event subscription wrong because this gets called on itemViews for which
+            //       the itemView itself seems to be non existant, throwing a null ref if we even just try to get the object name
+            if (infoNeededForCheckmark == null)
+            {
+                return;
+            }
+
             if (itemData.GetCheckmark(out Color color))
             {
                 infoNeededForCheckmark.gameObject.SetActive(true);
@@ -289,7 +296,13 @@ namespace EFM
 
         public void OnItemInventoryChanged(int difference)
         {
-            Mod.LogInfo("ItemView OnItemInventoryChanged, itemData null?: "+ (itemData== null)+", checkmark null?: "+(infoNeededForCheckmark == null));
+            TODO: // Maybe we manage event subscription wrong because this gets called on itemViews for which
+            //       the itemView itself seems to be non existant, throwing a null ref if we even just try to get the object name
+            if(infoNeededForCheckmark == null)
+            {
+                return;
+            }
+
             if (itemData.GetCheckmark(out Color color))
             {
                 infoNeededForCheckmark.gameObject.SetActive(true);

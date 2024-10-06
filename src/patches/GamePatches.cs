@@ -2134,7 +2134,9 @@ namespace EFM
                 __instance.TouchSphere.material = __instance.TouchSphereMat_NoInteractable;
             }
             float d = 1f / GM.CurrentPlayerBody.transform.localScale.x;
-            if (__instance.m_state == FVRViveHand.HandState.Empty && !__instance.Input.BYButtonPressed && !__instance.Input.TouchpadPressed && __instance.ClosestPossibleInteractable == null && __instance.CurrentHoveredQuickbeltSlot == null && __instance.CurrentInteractable == null && !__instance.m_isWristMenuActive)
+            ////////////////////////////////////////////////////////////////////////////
+            // Start patch
+            if ((Mod.stackSplitUI == null || !Mod.stackSplitUI.gameObject.activeSelf) && __instance.m_state == FVRViveHand.HandState.Empty && !__instance.Input.BYButtonPressed && !__instance.Input.TouchpadPressed && __instance.ClosestPossibleInteractable == null && __instance.CurrentHoveredQuickbeltSlot == null && __instance.CurrentInteractable == null && !__instance.m_isWristMenuActive)
             {
                 if (Physics.Raycast(__instance.Input.OneEuroPointingPos, __instance.Input.OneEuroPointRotation * Vector3.forward, out __instance.m_pointingHit, GM.CurrentSceneSettings.MaxPointingDistance, __instance.PointingLayerMask, QueryTriggerInteraction.Collide) && __instance.m_pointingHit.collider.gameObject.GetComponent<FVRPointable>())
                 {
@@ -2167,8 +2169,6 @@ namespace EFM
                 __instance.FlushTouchpadData();
             }
 
-            ////////////////////////////////////////////////////////////////////////////
-            // Start patch
             bool flag;
             bool flag2;
             bool descriptionInput = false;

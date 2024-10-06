@@ -2148,6 +2148,34 @@ namespace EFM
                                 Mod.LogInfo("\tDebug: Toggle trade");
                                 HideoutController.instance.switches[1].SimpleInteraction(null);
                                 break;
+                            case 28: // Set handbook prices as default item data values
+                                Mod.LogInfo("\tDebug: Set handbook prices as default item data values");
+                                JObject itemDataToFix28 = JObject.Parse(File.ReadAllText(path + "/database/DefaultItemData.json"));
+                                Dictionary<string, JToken> itemDataDict28 = itemDataToFix28.ToObject<Dictionary<string, JToken>>();
+                                JObject handbookDB = JObject.Parse(File.ReadAllText(path + "/database/templates/handbook.json"));
+                                JArray handbookItems = handbookDB["Items"] as JArray;
+                                foreach (KeyValuePair<string, JToken> item in itemDataDict28)
+                                {
+                                    bool found = false;
+                                    for(int i=0; i < handbookItems.Count; ++i)
+                                    {
+                                        if (handbookItems[i]["Id"].ToString().Equals(item.Key))
+                                        {
+                                            item.Value["value"] = handbookItems[i]["Price"];
+                                            found = true;
+                                        }
+                                    }
+                                    if (!found)
+                                    {
+                                        Mod.LogError("Value for " + item.Key + " not found in handbook");
+                                        continue;
+                                    }
+
+                                    itemDataToFix28[item.Key] = item.Value;
+                                }
+
+                                File.WriteAllText(path + "/database/DefaultItemData.json", itemDataToFix28.ToString());
+                                break;
                         }
                     }
                 }
