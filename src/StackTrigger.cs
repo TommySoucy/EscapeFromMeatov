@@ -1,9 +1,4 @@
-﻿using FistVR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace EFM
 {
@@ -68,6 +63,10 @@ namespace EFM
             if (newStack <= stackableWrapper.maxStack)
             {
                 stackableWrapper.stack = newStack;
+
+                // Must set other's stack to 0 before destruction
+                // so total weight is properly managed
+                otherStackTrigger.stackableWrapper.stack = 0;
                 otherStackTrigger.stacked = true;
 
                 otherItemWrapper.Destroy();
@@ -87,7 +86,11 @@ namespace EFM
             if (newStack <= otherItemWrapper.maxStack)
             {
                 otherItemWrapper.stack = newStack;
-                otherStackTrigger.stacked = true;
+
+                // Must set stack to 0 before destruction
+                // so total weight is properly managed
+                stackableWrapper.stack = 0;
+                stacked = true;
 
                 stackableWrapper.Destroy();
             }

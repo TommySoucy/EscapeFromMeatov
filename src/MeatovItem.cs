@@ -937,8 +937,9 @@ namespace EFM
             }
         }
 
-        public void UpdateInventories(bool removeWeight = false, bool addWeight = false)
+        public void UpdateInventories(bool removeWeight = false, bool addWeight = false, bool manageWeight = true)
         {
+            Mod.LogInfo("UpdateInventories called on "+tarkovID+":"+H3ID+":"+itemName);
             // Find new location
             int newLocation = -1;
             if (parent != null)
@@ -962,7 +963,7 @@ namespace EFM
             {
                 if (locationIndex == 0)
                 {
-                    Mod.RemoveFromPlayerInventory(this);
+                    Mod.RemoveFromPlayerInventory(this, manageWeight);
                 }
                 else if(locationIndex == 1)
                 {
@@ -971,7 +972,7 @@ namespace EFM
 
                 if (newLocation == 0)
                 {
-                    Mod.AddToPlayerInventory(this);
+                    Mod.AddToPlayerInventory(this, false, 0, manageWeight);
                 }
                 else if (newLocation == 1)
                 {
@@ -993,8 +994,10 @@ namespace EFM
             locationIndex = newLocation;
 
             // Update children
+            Mod.LogInfo("\tGot "+ children.Count+" children to also update inventories for");
             for (int i=0; i < children.Count; ++i)
             {
+                Mod.LogInfo("\t\tUpdate child inventories on "+ children[i].tarkovID+":"+ children[i].H3ID+":"+ children[i].itemName);
                 children[i].UpdateInventories();
             }
         }

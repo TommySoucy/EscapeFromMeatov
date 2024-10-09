@@ -30,12 +30,12 @@ namespace EFM
             harmony.Patch(movementManagerTwoAxisOriginal, null, null, new HarmonyMethod(movementManagerTwoAxisTranspiler));
             harmony.Patch(movementManagerUpdateOriginal, null, null, new HarmonyMethod(movementManagerUpdateTranspiler));
 
-            //// EndInteractionPatch
-            //MethodInfo endInteractionPatchOriginal = typeof(FVRInteractiveObject).GetMethod("EndInteraction", BindingFlags.Public | BindingFlags.Instance);
-            //MethodInfo endInteractionPatchPostfix = typeof(EndInteractionPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            // AttachmentEndInteractionPatch
+            MethodInfo attachmentEndInteractionOriginal = typeof(FVRFireArmAttachment).GetMethod("EndInteraction", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo attachmentEndInteractionPostfix = typeof(AttachmentEndInteractionPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            //PatchController.Verify(endInteractionPatchOriginal, harmony, true);
-            //harmony.Patch(endInteractionPatchOriginal, null, new HarmonyMethod(endInteractionPatchPostfix));
+            PatchController.Verify(attachmentEndInteractionOriginal, harmony, true);
+            harmony.Patch(attachmentEndInteractionOriginal, null, new HarmonyMethod(attachmentEndInteractionPostfix));
 
             // ConfigureQuickbeltPatch
             MethodInfo configureQuickbeltPatchOriginal = typeof(FVRPlayerBody).GetMethod("ConfigureQuickbelt", BindingFlags.Public | BindingFlags.Instance);
@@ -4035,6 +4035,33 @@ namespace EFM
             if (Mod.meatovItemByInteractive.TryGetValue(__instance, out MeatovItem meatovItem))
             {
                 meatovItem.EndInteraction(hand.IsThisTheRightHand ? Mod.rightHand : Mod.leftHand);
+            }
+        }
+    }
+
+    // Patches FVRFirearmAttachment.EndInteraction to UpdateInventories upon attachment
+    class AttachmentEndInteractionPatch
+    {
+        static void Postfix(FVRFireArmAttachment __instance)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+            Mod.LogInfo("AttachmentEndInteractionPatch postfix on " + __instance.name);
+
+            if (__instance.Sensor.CurHoveredMount != null && Mod.meatovItemByInteractive.TryGetValue(__instance, out MeatovItem meatovItem))
+            {
+                Mod.LogInfo("\tUpdating inventories");
+                // Note that we pass false to manage weight, because of the order of parenting when attaching an attachment
+                // The attachment will be parented after end interaction meaning that by the time when endinteraction
+                // makes its call to UpdateInventories, the item is not on the attachment parent
+                // But when we attach the attachment to the parent, UpdateInventories is never called
+                // As it gets parented though, the parent weight is adjusted properly
+                // But the attachment remains out of the player inventory
+                // So here we update inventories, and ensure we don't add the weight again considering it will already have
+                // been added by currentWeight change of the parent
+                meatovItem.UpdateInventories(false, false, false);
             }
         }
     }

@@ -534,6 +534,7 @@ namespace EFM
         {
             set
             {
+                TODO: // Will have to handle weight management for FVRPlayerBody.m_currentHeadAttachment
                 Mod.LogInfo("Total weight set from " + _weight + " to " + value + ":\n" + Environment.StackTrace);
                 int preValue = _weight;
                 _weight = value;
@@ -3504,7 +3505,7 @@ namespace EFM
             }
         }
 
-        public static void AddToPlayerInventory(MeatovItem item, bool stackOnly = false, int stackDifference = 0)
+        public static void AddToPlayerInventory(MeatovItem item, bool stackOnly = false, int stackDifference = 0, bool manageWeight = true)
         {
             int difference = stackDifference;
 
@@ -3560,7 +3561,11 @@ namespace EFM
                     playerInventoryItems.Add(item.tarkovID, new List<MeatovItem> { item });
                 }
 
-                weight += item.GetSpecificWeight();
+
+                if (manageWeight)
+                {
+                    weight += item.GetSpecificWeight();
+                }
                 item.OnCurrentWeightChanged += OnItemCurrentWeightChanged;
 
                 if (item.foundInRaid)
@@ -3642,9 +3647,9 @@ namespace EFM
             }
         }
 
-        public static void RemoveFromPlayerInventory(MeatovItem item)
+        public static void RemoveFromPlayerInventory(MeatovItem item, bool manageWeight = true)
         {
-            Mod.LogInfo("\tRemoving item " + item.tarkovID + " with IID: " + item.GetInstanceID()+" from player inventory");
+            Mod.LogInfo("\tRemoving item " + item.tarkovID + ":"+item.H3ID+":"+item.itemName+" with IID: " + item.GetInstanceID()+" from player inventory");
             int difference = -item.stack;
 
             if (playerInventory.ContainsKey(item.tarkovID))
@@ -3663,7 +3668,10 @@ namespace EFM
                 playerInventoryItems.Remove(item.tarkovID);
             }
 
-            weight -= item.GetSpecificWeight();
+            if (manageWeight)
+            {
+                weight -= item.GetSpecificWeight();
+            }
             item.OnCurrentWeightChanged -= OnItemCurrentWeightChanged;
 
             if (item.foundInRaid)
