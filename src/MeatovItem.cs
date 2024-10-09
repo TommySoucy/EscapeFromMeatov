@@ -2440,7 +2440,7 @@ namespace EFM
                 transform.localScale = Vector3.one;
             }
 
-            UpdateInventories(false, true);
+            UpdateInventories(false, physObj == null || physObj.AltGrip == null);
         }
 
 		public void EndInteraction(Hand hand)
@@ -2500,7 +2500,7 @@ namespace EFM
                 hand.fvrHand.HandMadeGrabReleaseSound();
             }
 
-            // Note that we always pass true to UpdateInventories
+            // Note that we will pass true to UpdateInventories if we are not already holding the item by altGrip
             // This is to make sure this item's currentWeight is removed from
             // player iff the item move from location 0 to 0
             // Note that if we are ending interaction, we can safely assume that the item
@@ -2508,7 +2508,7 @@ namespace EFM
             // In this case, if we are moving the item from hand to somewhere else in player inventory
             // we want to remove the weight because it will be added when it goes back into inventory
             // at its destination (new parent item currentWeight, other hand, etc.)
-            UpdateInventories(true, false);
+            UpdateInventories(physObj == null || physObj.AltGrip == null, false);
         }
 
         public bool ContainsItem(MeatovItemData itemData)

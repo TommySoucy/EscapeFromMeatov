@@ -1302,33 +1302,6 @@ namespace EFM
             }
 
             MeatovItem item = __instance.GetComponent<MeatovItem>();
-            // If we are taking this item from a loose rig/backpack that is in player inventory, we don't want to remove/add item weight to total weight
-            //if (__instance.QuickbeltSlot != null)
-            //{
-            //    if(__instance.QuickbeltSlot is RigSlot)
-            //    {
-            //        SetQuickBeltSlotPatch.dontProcessTotalWeight = ((RigSlot)__instance.QuickbeltSlot).ownerItem.locationIndex == 0;
-            //        MeatovItem.parentChangeDontManageWeight = SetQuickBeltSlotPatch.dontProcessTotalWeight;
-            //    }
-            //    else if(EquipmentSlot.wearingRig || EquipmentSlot.wearingArmoredRig)
-            //    {
-            //        // Find slot in config
-            //        for (int slotIndex = 6; slotIndex < GM.CurrentPlayerBody.QBSlots_Internal.Count; ++slotIndex)
-            //        {
-            //            if (GM.CurrentPlayerBody.QBSlots_Internal[slotIndex] == __instance.QuickbeltSlot)
-            //            {
-            //                SetQuickBeltSlotPatch.dontProcessTotalWeight = true;
-            //                MeatovItem.parentChangeDontManageWeight = true;
-            //                break;
-            //            }
-            //        }
-            //    }
-            //}
-            //else if(item != null && item.parentVolume != null && item.parentVolume is ContainerVolume)
-            //{
-            //    MeatovItem.parentChangeDontManageWeight = (item.parentVolume as ContainerVolume).ownerItem.locationIndex == 0;
-            //}
-
             if (item != null)
             {
                 // Set pose override depending on item type and hand side
@@ -1346,17 +1319,6 @@ namespace EFM
                     //}
                 }
             }
-        }
-
-        static void Postfix(FVRViveHand hand, FVRPhysicalObject __instance)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return;
-            }
-
-            //SetQuickBeltSlotPatch.dontProcessTotalWeight = false;
-            //MeatovItem.parentChangeDontManageWeight = false;
         }
     }
 
