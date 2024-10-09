@@ -529,10 +529,13 @@ namespace EFM
                 }
             }
 
-            // Make a parent changed call to make sure we are parented properly 
             if (itemDataSet)
             {
+                // Make a parent changed call to make sure we are parented properly 
                 OnTransformParentChanged();
+
+                // Initialize our weight
+                UpdateCurrentWeight();
             }
 
             started = true;
@@ -545,7 +548,7 @@ namespace EFM
             TODO: // Also adding to children is necessary for old modul weapon or weapon that spawn with attachments already on the prefab
             // Problem is, we don't have the data to set on those, so they have to set their own data on Start()
             // The idea is that we should go through all the old modul weapons in data and change their ID to really just the receiver only prefab
-            // This would also ensure that we don't spawn an entire weapon along side other parts when we buy an item or get rewarded one for a quest or craft one, etc
+            // This would also ensure that we don't spawn an entire weapon along side other parts when we buy an item, or get rewarded one for a quest, or craft one, etc
             FVRPhysicalObject[] childrenPhysObjs = physicalObject.GetComponentsInChildren<FVRPhysicalObject>();
             for (int i = 0; i < childrenPhysObjs.Length; ++i)
             {
@@ -695,6 +698,16 @@ namespace EFM
 
             if (itemType == ItemType.Rig || itemType == ItemType.ArmoredRig)
             {
+                itemsInSlots = new MeatovItem[rigSlots.Count];
+                // Make sure quickbelt roots are null, im not sure what they are used for in H3
+                // but looking at the code, nothing important. They cause trouble because when an item
+                // get its QBS set, it gets attached to the root. This is a problem in rigs specifically
+                // when we put an item directly in a loose rig slot, the item gets parented to the rig.
+                // This causes problem when moving the item to/from the player QBS if/when the rig is un/equipped
+                for(int i = 0; i < rigSlots.Count; ++i)
+                {
+                    rigSlots[i].QuickbeltRoot = null;
+                }
                 if (!Mod.quickbeltConfigurationIndices.TryGetValue(index, out configurationIndex))
                 {
                     configurationIndex = GM.Instance.QuickbeltConfigurations.Length;
@@ -924,7 +937,7 @@ namespace EFM
             }
         }
 
-        public void UpdateInventories()
+        public void UpdateInventories(bool removeWeight = false, bool addWeight = false)
         {
             // Find new location
             int newLocation = -1;
@@ -965,6 +978,17 @@ namespace EFM
                     HideoutController.instance.AddToInventory(this);
                 }
             }
+            else if(locationIndex == 0)
+            {
+                if (removeWeight)
+                {
+                    Mod.weight -= currentWeight;
+                }
+                else if (addWeight)
+                {
+                    Mod.weight += currentWeight;
+                }
+            }
 
             locationIndex = newLocation;
 
@@ -996,116 +1020,52 @@ namespace EFM
             }
         }
 
-        public static int SetCurrentWeight(MeatovItem item)
+        public int GetSpecificWeight()
+        {
+            int specificWeight = weight;
+
+            if (physObj is FVRFireArmMagazine)
+            {
+                FVRFireArmMagazine asFireArmMagazine = (FVRFireArmMagazine)physObj;
+
+                specificWeight += (asFireArmMagazine.m_numRounds * Mod.GetRoundWeight(asFireArmMagazine.RoundType));
+            }
+
+            return specificWeight;
+        }
+
+        public int UpdateCurrentWeight()
 		{
-			if (item == null)
-			{
-				return 0;
-			}
+            int newCurrentWeight = weight;
 
-			item.currentWeight = item.weight;
-
-			if (item.itemType == ItemType.Rig || item.itemType == ItemType.ArmoredRig)
+			if (itemType == ItemType.Rig || itemType == ItemType.ArmoredRig)
 			{
-				foreach (MeatovItem containedItem in item.itemsInSlots) 
+				foreach (MeatovItem containedItem in itemsInSlots) 
 				{
 					if(containedItem != null)
                     {
-						item.currentWeight += SetCurrentWeight(containedItem);
+                        newCurrentWeight += containedItem.UpdateCurrentWeight();
                     }
 				}
 			}
-			else if(item.itemType == ItemType.Backpack || item.itemType == ItemType.Container || item.itemType == ItemType.Pouch)
-			{
-				foreach (Transform containedItem in item.containerItemRoot)
-				{
-					if (containedItem != null)
-					{
-						item.currentWeight += SetCurrentWeight(containedItem.GetComponent<MeatovItem>());
-					}
-				}
-			}
-			else if(item.itemType == ItemType.AmmoBox)
-			{
-				// TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
-				// locationIndex so we know when to add/remove weight from player also
-				FVRFireArmMagazine magazine = item.GetComponent<FVRFireArmMagazine>();
-				if (magazine != null)
-				{
-					//item.currentWeight += 15 * magazine.m_numRounds;
-				}
-            }
-            else if (item.physObj is FVRFireArm)
+            else if (physObj is FVRFireArmMagazine)
             {
-                FVRFireArm asFireArm = (FVRFireArm)item.physObj;
+                FVRFireArmMagazine asFireArmMagazine = (FVRFireArmMagazine)physObj;
 
-                // Considering 0.015g per round
-                // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
-                // locationIndex so we know when to add/remove weight from player also
-                //item.currentWeight += 15 * (asFireArm.GetChamberRoundList() == null ? 0 : asFireArm.GetChamberRoundList().Count);
+                newCurrentWeight += (asFireArmMagazine.m_numRounds * Mod.GetRoundWeight(asFireArmMagazine.RoundType));
+            }
 
-                // Ammo container
-                if (asFireArm.UsesMagazines && asFireArm.Magazine != null)
+            // If rig, children can only be items in slots and they have already been added above
+            if(itemType != ItemType.Rig && itemType != ItemType.ArmoredRig)
+            {
+                for (int i = 0; i < children.Count; ++i)
                 {
-                    MeatovItem magMI = asFireArm.Magazine.GetComponent<MeatovItem>();
-                    if (magMI != null)
-                    {
-                        item.currentWeight += SetCurrentWeight(magMI);
-                    }
-                }
-                else if (asFireArm.UsesClips && asFireArm.Clip != null)
-                {
-                    MeatovItem clipMI = asFireArm.Clip.GetComponent<MeatovItem>();
-                    if (clipMI != null)
-                    {
-                        item.currentWeight += SetCurrentWeight(clipMI);
-                    }
-                }
-
-                // Attachments
-                if (asFireArm.Attachments != null && asFireArm.Attachments.Count > 0)
-                {
-                    foreach (FVRFireArmAttachment attachment in asFireArm.Attachments)
-                    {
-                        item.currentWeight += SetCurrentWeight(attachment.GetComponent<MeatovItem>());
-                    }
+                    newCurrentWeight += children[i].UpdateCurrentWeight();
                 }
             }
-            else if (item.physObj is FVRFireArmAttachment)
-            {
-                FVRFireArmAttachment asFireArmAttachment = (FVRFireArmAttachment)item.physObj;
 
-                if (asFireArmAttachment.Attachments != null && asFireArmAttachment.Attachments.Count > 0)
-                {
-                    foreach (FVRFireArmAttachment attachment in asFireArmAttachment.Attachments)
-                    {
-                        item.currentWeight += SetCurrentWeight(attachment.GetComponent<MeatovItem>());
-                    }
-                }
-            }
-            else if (item.physObj is FVRFireArmMagazine)
-            {
-                FVRFireArmMagazine asFireArmMagazine = (FVRFireArmMagazine)item.physObj;
-
-                // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
-                // locationIndex so we know when to add/remove weight from player also
-                //item.currentWeight += 15 * asFireArmMagazine.m_numRounds;
-            }
-            else if (item.physObj is FVRFireArmClip)
-            {
-                FVRFireArmClip asFireArmClip = (FVRFireArmClip)item.physObj;
-
-                // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
-                // locationIndex so we know when to add/remove weight from player also
-                //item.currentWeight += 15 * asFireArmClip.m_numRounds;
-            }
-            else if (item.GetComponentInChildren<M203>() != null)
-            {
-                M203 m203 = item.GetComponentInChildren<M203>();
-                item.currentWeight += m203.Chamber.IsFull ? 100 : 0;
-            }
-
-            return item.currentWeight;
+            currentWeight = newCurrentWeight;
+            return currentWeight;
 		}
 
 		private void Update()
@@ -1138,88 +1098,6 @@ namespace EFM
 
 				Mod.stackSplitUI.arrow.localPosition = new Vector3(distanceFromCenter * 100, -2.14f, 0);
 				Mod.stackSplitUI.amountText.text = splitAmount.ToString() + "/" + stack;
-			}
-		}
-
-		public bool AddItemToContainer(FVRPhysicalObject item)
-		{ 
-			if (itemType != ItemType.Backpack &&
-			   itemType != ItemType.Container &&
-			   itemType != ItemType.Pouch)
-			{
-				return false;
-			}
-
-			// Get item volume
-			int volumeToUse = 0;
-			int weightToUse = 0;
-			string IDToUse = "";
-			List<string> parentsToUse = null;
-			MeatovItem wrapper = item.GetComponent<MeatovItem>();
-			if (wrapper != null)
-			{
-                if (!wrapper.modeInitialized)
-                {
-					wrapper.mode = wrapper.volumes.Length - 1;
-					wrapper.modeInitialized = true;
-
-				}
-				volumeToUse = wrapper.volumes[wrapper.mode];
-				weightToUse = wrapper.currentWeight;
-				IDToUse = wrapper.H3ID;
-				parentsToUse = wrapper.parents;
-			}
-
-			if (containingVolume + volumeToUse <= maxVolume && Mod.IDDescribedInList(IDToUse, parentsToUse, whiteList, blackList))
-			{
-				// Attach item to container
-				// Set all non trigger colliders that are on default layer to trigger so they dont collide with anything
-				Collider[] cols = item.gameObject.GetComponentsInChildren<Collider>(true);
-				if (resetColPairs == null)
-				{
-					resetColPairs = new List<MeatovItem.ResetColPair>();
-				}
-				ResetColPair resetColPair = null;
-				foreach (Collider col in cols)
-				{
-					if (col.gameObject.layer == 0 || col.gameObject.layer == 14)
-					{
-						col.isTrigger = true;
-
-						// Create new resetColPair for each collider so we can reset those specific ones to non-triggers when taken out of the backpack
-						if (resetColPair == null)
-						{
-							resetColPair = new ResetColPair();
-							resetColPair.physObj = item;
-							resetColPair.colliders = new List<Collider>();
-						}
-						resetColPair.colliders.Add(col);
-					}
-				}
-				if (resetColPair != null)
-				{
-					resetColPairs.Add(resetColPair);
-				}
-				item.transform.parent = containerItemRoot;
-				item.StoreAndDestroyRigidbody();
-
-				// If put a melee weapon in a container, we must remove it from All, otherwise it will be FixedUpdated like a loose melee weapon
-				if(item is FVRMeleeWeapon)
-                {
-					Mod.RemoveFromAll(item, wrapper);
-                }
-
-				// Add volume to container
-				containingVolume += volumeToUse;
-
-				// Add item's weight to container
-				currentWeight += weightToUse;
-
-				return true;
-			}
-			else
-			{
-				return false;
 			}
 		}
 
@@ -1327,16 +1205,16 @@ namespace EFM
                                     // This consumable is discrete units and can only use one at a time, so set text to red until we have reached useTime, then set it to green
                                     if (consumableTimer >= useTime)
                                     {
-                                        Mod.consumeUIText.color = Color.green;
+                                        Mod.consumeUI.text.color = Color.green;
                                     }
                                     else
                                     {
-                                        Mod.consumeUIText.color = Color.red;
+                                        Mod.consumeUI.text.color = Color.red;
                                     }
                                 }
                                 else
                                 {
-                                    Mod.consumeUIText.color = Color.white;
+                                    Mod.consumeUI.text.color = Color.white;
                                 }
                                 Mod.consumeUI.transform.parent = hand.transform;
                                 Mod.consumeUI.transform.localPosition = new Vector3(hand.IsThisTheRightHand ? -0.15f : 0.15f, 0, 0);
@@ -1428,7 +1306,7 @@ namespace EFM
 
                         float plant = Mathf.Clamp01(plantingTimer / currentPlantZone.plantTime);
                         Mod.consumeUI.text.text = string.Format("{0:0.#}/{1:0.#}", plantingTimer, currentPlantZone.plantTime);
-                        Mod.consumeUIText.color = Color.white;
+                        Mod.consumeUI.text.color = Color.white;
                         Mod.consumeUI.transform.parent = hand.transform;
                         Mod.consumeUI.transform.localPosition = new Vector3(hand.IsThisTheRightHand ? -0.15f : 0.15f, 0, 0);
                         Mod.consumeUI.transform.localRotation = Quaternion.Euler(25, 0, 0);
@@ -2205,13 +2083,19 @@ namespace EFM
             {
                 case ItemType.Rig:
                 case ItemType.ArmoredRig:
+                    bool found = false;
                     for (int i = 0; i < itemsInSlots.Length; ++i)
                     {
                         if (itemsInSlots[i] != null)
                         {
                             SetMode(1);
+                            found = true;
                             break;
                         }
+                    }
+                    if (found)
+                    {
+                        break;
                     }
 
                     // If we get this far it is because no items in slots, so set to closed empty
@@ -2239,6 +2123,15 @@ namespace EFM
             // Set active slots
             activeSlotsSetIndex = Mod.looseRigSlots.Count;
             Mod.looseRigSlots.Add(rigSlots);
+
+            // Set all items in slots active
+            for (int i = 0; i < itemsInSlots.Length; ++i)
+            {
+                if (itemsInSlots[i] != null)
+                {
+                    itemsInSlots[i].gameObject.SetActive(true);
+                }
+            }
         }
 
         public void CloseRig(bool processslots, bool isRightHand = false)
@@ -2250,7 +2143,16 @@ namespace EFM
             MeatovItem replacementRig = Mod.looseRigSlots[activeSlotsSetIndex][0].ownerItem;
             replacementRig.activeSlotsSetIndex = activeSlotsSetIndex;
             Mod.looseRigSlots.RemoveAt(Mod.looseRigSlots.Count - 1);
-		}
+
+            // Set all items in slots inactive
+            for (int i = 0; i < itemsInSlots.Length; ++i)
+            {
+                if (itemsInSlots[i] != null)
+                {
+                    itemsInSlots[i].gameObject.SetActive(false);
+                }
+            }
+        }
 
 		private void SetContainerOpen(bool open, bool isRightHand = false)
 		{
@@ -2535,7 +2437,7 @@ namespace EFM
                 transform.localScale = Vector3.one;
             }
 
-            UpdateInventories();
+            UpdateInventories(false, true);
         }
 
 		public void EndInteraction(Hand hand)
@@ -2595,7 +2497,15 @@ namespace EFM
                 hand.fvrHand.HandMadeGrabReleaseSound();
             }
 
-            UpdateInventories();
+            // Note that we always pass true to UpdateInventories
+            // This is to make sure this item's currentWeight is removed from
+            // player iff the item move from location 0 to 0
+            // Note that if we are ending interaction, we can safely assume that the item
+            // if moving from hand (player inventory, location 0)
+            // In this case, if we are moving the item from hand to somewhere else in player inventory
+            // we want to remove the weight because it will be added when it goes back into inventory
+            // at its destination (new parent item currentWeight, other hand, etc.)
+            UpdateInventories(true, false);
         }
 
         public bool ContainsItem(MeatovItemData itemData)
@@ -3232,21 +3142,45 @@ namespace EFM
             if(physObj == null)
             {
                 newParent = transform.GetComponentInParents<MeatovItem>(false);
-                Mod.LogInfo("\tphysobj null, parent MeatovItem: "+(newParent == null ? "null" : newParent.itemName));
-                Mod.LogInfo("\tHiderachy:");
                 Transform currentParent = transform;
                 while(currentParent != null)
                 {
-                    Mod.LogInfo("\t\t" + currentParent.name);
                     currentParent = currentParent.parent;
                 }
             }
             else
             {
-                if (physObj.QuickbeltSlot != null)
+                if(physObj.transform.parent == GM.CurrentPlayerRoot)
                 {
-                    // If in QBS, we may not be attached directly to the QBS itself so go through it instead of transform parent
-                    newParent = physObj.QuickbeltSlot.GetComponentInParents<MeatovItem>();
+                    // If in hand, we know our parent is null, and we want to do this check before the slots because we may have
+                    // gotten a call to OnTransformParentChanged before having our QBS changed if we have one
+                    newParent = null;
+                }
+                else if (physObj.QuickbeltSlot != null)
+                {
+                    bool found = false;
+                    if(physObj.QuickbeltSlot is RigSlot)
+                    {
+                        found = true;
+                        newParent = (physObj.QuickbeltSlot as RigSlot).ownerItem;
+                    }
+                    else if(EquipmentSlot.wearingArmoredRig || EquipmentSlot.wearingRig)
+                    {
+                        for (int slotIndex = 6; slotIndex < GM.CurrentPlayerBody.QBSlots_Internal.Count; ++slotIndex)
+                        {
+                            if (GM.CurrentPlayerBody.QBSlots_Internal[slotIndex] == physObj.QuickbeltSlot)
+                            {
+                                found = true;
+                                newParent = EquipmentSlot.currentRig;
+                                break;
+                            }
+                        }
+                    }
+
+                    if(!found)
+                    {
+                        newParent = physObj.QuickbeltSlot.GetComponentInParents<MeatovItem>();
+                    }
                 }
                 else if (physObj is FVRFireArmAttachment && (physObj as FVRFireArmAttachment).curMount != null)
                 {

@@ -86,7 +86,7 @@ namespace EFM
         public static float distanceTravelledSprinting;
         public static float distanceTravelledWalking;
         public static MeatovItem[] itemsInPocketSlots;
-        public static FVRQuickBeltSlot[] pocketSlots;
+        public static FVRQuickBeltSlot[] pocketSlots; // Front Left, Front Right, Back Right, Back Left
         public static ShoulderStorage leftShoulderSlot;
         public static ShoulderStorage rightShoulderSlot;
         public static GameObject leftShoulderObject;
@@ -389,7 +389,6 @@ namespace EFM
         public static Effect fatigueEffect;
         public static Effect overweightFatigueEffect;
         public static ConsumeUI consumeUI;
-        public static Text consumeUIText;
         public static StackSplitUI stackSplitUI;
         public static GameObject extractionUI;
         public static Text extractionUIText;
@@ -516,11 +515,26 @@ namespace EFM
             }
         }
         public static int failedRaidCount;
+        // Total weight management is unfortunately complex
+        // The player's weight should be the sum of weight of all items in player inventory
+        // We add an item's weight when we AddToPlayerInventory and remove it when RemoveFromPlayerInventory
+        // We then listen to currentWeight change of all items in inventory, adjusting this weight as we go
+        // WHEN AN ITEM IS MOVED FROM PLAYER INVENTORY TO PLAYER INVENTORY BY PARENTING IT TO ANOTHER ITEM
+        // ALREADY IN PLAYER INVENTORY (volume, slot, attachment) WE MUST REMOVE ITS WEIGHT FROM PLAYER
+        // BEFORE IT GETS READDED BY THE PARENTING:
+        // When we EndInteraction, we update inventories, where items will be added/removed from inventory
+        // When an item is added to another (slot, volume, attachment, etc) we adjust the currentWeight of the new parent (and the total player
+        // weight if the parent is in player inventory), we should remove the weight of the child item when it is moved
+        // from hand to item (player inventory to player inventory)
+        // WHEN WE REMOVE AN ITEM FROM PLAYER INVENTORY, WE ONLY WANT TO REMOVE PARENT SPECIFIC WEIGHT AND NOT THE CHILDREN'S
+        // BECAUSE THOSE ARE INCLUDED IN PARENT currentWeight AND WILL GET REREMOVED WHEN WE SUBSEQUENTLY REMOVE THE CHILDREN FROM PLAYER INVENTORY
+        // When we Add/RemoveTo/FromPlayerInventory, we only add/remove the item.GetSpecificWeight for this reason
         private static int _weight = 0; // Overencumbered at currentWeightLimit / 2, Critical overencumbered at currentWeightLimit
         public static int weight
         {
             set
             {
+                Mod.LogInfo("Total weight set from " + _weight + " to " + value + ":\n" + Environment.StackTrace);
                 int preValue = _weight;
                 _weight = value;
                 if(_weight != preValue)
@@ -627,7 +641,6 @@ namespace EFM
         public static Dictionary<FireArmMagazineType, List<MeatovItemData>> magDefaultItemDataByMagType; // Mag item data by mag type
         public static Dictionary<FireArmClipType, List<MeatovItemData>> clipDefaultItemDataByClipType; // Clip item data by clip type, And i realized after implementing this, there are no clips in tarkov
         public static Dictionary<string, JObject> lootContainersByName;
-        public static Dictionary<string, AudioClip[]> itemSounds;
         public static Dictionary<string, string> availableRaidMaps = new Dictionary<string, string>();
         public static Dictionary<string, bool> availableRaidMapDay = new Dictionary<string, bool>();
         public static Dictionary<string, List<string>> availableRaidMapAdditives = new Dictionary<string, List<string>>();
@@ -3546,7 +3559,8 @@ namespace EFM
                     playerInventory.Add(item.tarkovID, item.stack);
                     playerInventoryItems.Add(item.tarkovID, new List<MeatovItem> { item });
                 }
-                weight += item.currentWeight;
+
+                weight += item.GetSpecificWeight();
                 item.OnCurrentWeightChanged += OnItemCurrentWeightChanged;
 
                 if (item.foundInRaid)
@@ -3648,7 +3662,8 @@ namespace EFM
                 playerInventory.Remove(item.tarkovID);
                 playerInventoryItems.Remove(item.tarkovID);
             }
-            weight -= item.currentWeight;
+
+            weight -= item.GetSpecificWeight();
             item.OnCurrentWeightChanged -= OnItemCurrentWeightChanged;
 
             if (item.foundInRaid)
@@ -4752,10 +4767,10 @@ namespace EFM
                 }
                 else
                 {
-                    Sprite sprite = Mod.itemIconsBundle.LoadAsset<Sprite>("Item" + parsedID + "_Icon");
+                    Sprite sprite = Mod.itemIconsBundle.LoadAsset<Sprite>("item" + parsedID + "_icon");
                     if (sprite == null)
                     {
-                        Mod.LogError("Mod.SetIcon could not load custom item " + itemData.tarkovID + ":" + parsedID + " icon using name \"Item" + parsedID + "_Icon\"");
+                        Mod.LogError("Mod.SetIcon could not load custom item " + itemData.tarkovID + ":" + parsedID + " icon using name \"item" + parsedID + "_icon\"");
                         icon.sprite = Mod.questionMarkIcon;
                     }
                     else
@@ -4772,7 +4787,7 @@ namespace EFM
                 }
                 else // Could not get icon from item data (spawner ID)
                 {
-                    Sprite sprite = Mod.itemIconsBundle.LoadAsset<Sprite>("Item" + itemData.H3ID + "_Icon");
+                    Sprite sprite = Mod.itemIconsBundle.LoadAsset<Sprite>("item" + itemData.H3ID + "_icon");
                     if(sprite == null)
                     {
                         if(itemData.itemType == MeatovItem.ItemType.Round)

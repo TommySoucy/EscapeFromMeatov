@@ -67,7 +67,6 @@ namespace EFM
             infoFoundInRaidCheckmark.SetActive(item.foundInRaid);
             infoInsuredIcon.SetActive(item.insured);
             insuredBorder.SetActive(item.insured);
-            infoCountText.text = item.maxAmount > 0 ? item.amount.ToString() : item.stack.ToString();
             infoValueIcon.gameObject.SetActive(displayValue);
             infoValueText.gameObject.SetActive(displayValue);
             hasValueOverride = valueOverride != -1;
@@ -80,7 +79,7 @@ namespace EFM
                 infoValueText.text = valueOverride.ToString();
                 this.valueOverride = valueOverride;
             }
-            if(item.itemType == MeatovItem.ItemType.Consumable)
+            if(item.itemType == MeatovItem.ItemType.Consumable || item.maxAmount > 1)
             {
                 infoCountText.gameObject.SetActive(true);
                 infoCountText.text = item.amount.ToString()+"/"+item.maxAmount;

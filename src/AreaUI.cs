@@ -1267,6 +1267,13 @@ namespace EFM
                 backButton.SetActive(false);
                 upgradeButton.SetActive(false);
             }
+            else if (area.currentLevel == area.levels.Length - 1)
+            {
+                constructButton.SetActive(false);
+                levelButton.SetActive(false);
+                backButton.SetActive(false);
+                upgradeButton.SetActive(false);
+            }
             else
             {
                 constructButton.SetActive(false);

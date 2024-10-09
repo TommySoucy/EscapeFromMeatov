@@ -24,17 +24,17 @@ namespace EFM
             {
                 MeatovItem preValue = _item;
                 _item = value;
-                if(preValue != _item)
-                {
-                    area.areaData.OnSlotContentChangedInvoke();
-                }
-                if(preValue != null)
+                if (preValue != null)
                 {
                     preValue.OnAmountChanged -= OnItemAmountChanged;
                 }
-                if(_item != null)
+                if (_item != null)
                 {
-                    preValue.OnAmountChanged += OnItemAmountChanged;
+                    _item.OnAmountChanged += OnItemAmountChanged;
+                }
+                if (preValue != _item)
+                {
+                    area.areaData.OnSlotContentChangedInvoke();
                 }
             }
         }

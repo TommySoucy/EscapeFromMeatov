@@ -187,6 +187,10 @@ namespace EFM
                     physicalObject.SetQuickBeltSlot(GM.CurrentPlayerBody.QBSlots_Internal[i + 6]);
                     SetQuickBeltSlotPatch.dontProcessRigWeight = false;
                     physicalObject.transform.localScale = Vector3.one;
+
+                    // Note that when we equip a rig, it is closed automatically prior to putting it into the slot
+                    // That will set the items inactive, and we are setting them active again here
+                    item.itemsInSlots[i].gameObject.SetActive(true);
                 }
             }
 
@@ -210,9 +214,10 @@ namespace EFM
                     {
                         MeatovItem item = currentRig.itemsInSlots[i];
                         SetQuickBeltSlotPatch.dontProcessRigWeight = true; // Dont want to add the weight of this item to the rig as we set its slot, the item is already in the rig
-                        item.physObj.SetQuickBeltSlot(item.rigSlots[i]);
+                        item.physObj.SetQuickBeltSlot(currentRig.rigSlots[i]);
                         SetQuickBeltSlotPatch.dontProcessRigWeight = false;
                         item.physObj.transform.localScale = Vector3.one;
+                        currentRig.itemsInSlots[i].gameObject.SetActive(currentRig.open);
                     }
                 }
 

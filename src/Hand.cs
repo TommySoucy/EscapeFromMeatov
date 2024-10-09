@@ -106,7 +106,19 @@ namespace EFM
                 {
                     fvrHand.Grabbity_HoverSphere.gameObject.SetActive(true);
                 }
-                fvrHand.Grabbity_HoverSphere.position = fvrHand.PoseOverride.position;
+                Vector3 position = fvrHand.PoseOverride.position;
+                if (heldItem != null && heldItem.physObj != null)
+                {
+                    if (heldItem.physObj.PoseOverride != null)
+                    {
+                        position = heldItem.physObj.PoseOverride.position;
+                    }
+                    else
+                    {
+                        position = heldItem.transform.position;
+                    }
+                }
+                fvrHand.Grabbity_HoverSphere.position = position;
             }
         }
 

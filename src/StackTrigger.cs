@@ -70,9 +70,6 @@ namespace EFM
                 stackableWrapper.stack = newStack;
                 otherStackTrigger.stacked = true;
 
-                Mod.weight -= otherItemWrapper.currentWeight;
-                otherItemWrapper.physObj.ForceBreakInteraction();
-
                 otherItemWrapper.Destroy();
             }
             else
@@ -91,9 +88,6 @@ namespace EFM
             {
                 otherItemWrapper.stack = newStack;
                 otherStackTrigger.stacked = true;
-
-                Mod.weight -= stackableWrapper.currentWeight;
-                stackableWrapper.physObj.ForceBreakInteraction();
 
                 stackableWrapper.Destroy();
             }

@@ -131,26 +131,26 @@ namespace EFM
             PatchController.Verify(movementManagerJumpOriginal, harmony, true);
             harmony.Patch(movementManagerJumpOriginal, new HarmonyMethod(movementManagerJumpPrefix));
 
-            // ChamberSetRoundPatch
-            MethodInfo chamberSetRoundPatchOriginal = typeof(FVRFireArmChamber).GetMethod("SetRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FVRFireArmRound), typeof(bool) }, null);
-            MethodInfo chamberSetRoundPatchPrefix = typeof(ChamberSetRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// ChamberSetRoundPatch
+            //MethodInfo chamberSetRoundPatchOriginal = typeof(FVRFireArmChamber).GetMethod("SetRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FVRFireArmRound), typeof(bool) }, null);
+            //MethodInfo chamberSetRoundPatchPrefix = typeof(ChamberSetRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            PatchController.Verify(chamberSetRoundPatchOriginal, harmony, true);
-            harmony.Patch(chamberSetRoundPatchOriginal, new HarmonyMethod(chamberSetRoundPatchPrefix));
+            //PatchController.Verify(chamberSetRoundPatchOriginal, harmony, true);
+            //harmony.Patch(chamberSetRoundPatchOriginal, new HarmonyMethod(chamberSetRoundPatchPrefix));
 
-            // ChamberSetRoundGivenPatch
-            MethodInfo chamberSetRoundGivenPatchOriginal = typeof(FVRFireArmChamber).GetMethod("SetRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FVRFireArmRound), typeof(Vector3), typeof(Quaternion) }, null);
-            MethodInfo chamberSetRoundGivenPatchPrefix = typeof(ChamberSetRoundGivenPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// ChamberSetRoundGivenPatch
+            //MethodInfo chamberSetRoundGivenPatchOriginal = typeof(FVRFireArmChamber).GetMethod("SetRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FVRFireArmRound), typeof(Vector3), typeof(Quaternion) }, null);
+            //MethodInfo chamberSetRoundGivenPatchPrefix = typeof(ChamberSetRoundGivenPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            PatchController.Verify(chamberSetRoundGivenPatchOriginal, harmony, true);
-            harmony.Patch(chamberSetRoundGivenPatchOriginal, new HarmonyMethod(chamberSetRoundGivenPatchPrefix));
+            //PatchController.Verify(chamberSetRoundGivenPatchOriginal, harmony, true);
+            //harmony.Patch(chamberSetRoundGivenPatchOriginal, new HarmonyMethod(chamberSetRoundGivenPatchPrefix));
 
-            // ChamberSetRoundClassPatch
-            MethodInfo chamberSetRoundClassPatchOriginal = typeof(FVRFireArmChamber).GetMethod("SetRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FireArmRoundClass), typeof(Vector3), typeof(Quaternion) }, null);
-            MethodInfo chamberSetRoundClassPatchPrefix = typeof(ChamberSetRoundClassPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// ChamberSetRoundClassPatch
+            //MethodInfo chamberSetRoundClassPatchOriginal = typeof(FVRFireArmChamber).GetMethod("SetRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FireArmRoundClass), typeof(Vector3), typeof(Quaternion) }, null);
+            //MethodInfo chamberSetRoundClassPatchPrefix = typeof(ChamberSetRoundClassPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            PatchController.Verify(chamberSetRoundClassPatchOriginal, harmony, true);
-            harmony.Patch(chamberSetRoundClassPatchOriginal, new HarmonyMethod(chamberSetRoundClassPatchPrefix));
+            //PatchController.Verify(chamberSetRoundClassPatchOriginal, harmony, true);
+            //harmony.Patch(chamberSetRoundClassPatchOriginal, new HarmonyMethod(chamberSetRoundClassPatchPrefix));
 
             // MagRemoveRoundPatch
             MethodInfo magRemoveRoundPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { }, null);
@@ -356,12 +356,20 @@ namespace EFM
             harmony.Patch(interactiveObjectBeginInteractionOriginal, null, new HarmonyMethod(interactiveObjectBeginInteractionPostfix));
             harmony.Patch(interactiveObjectEndInteractionOriginal, null, new HarmonyMethod(interactiveObjectEndInteractionPostfix));
 
-            //// HandCurrentInteractableSetPatch
-            //MethodInfo handCurrentInteractableSetPatchOriginal = typeof(FVRViveHand).GetMethod("set_CurrentInteractable", BindingFlags.Public | BindingFlags.Instance);
-            //MethodInfo handCurrentInteractableSetPatchPostfix = typeof(HandCurrentInteractableSetPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            // HandEndInteractionIfHeldPatch
+            MethodInfo handEndInteractionIfHeldOriginal = typeof(FVRViveHand).GetMethod("EndInteractionIfHeld", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo handEndInteractionIfHeldPrefix = typeof(HandEndInteractionIfHeldPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            //PatchController.Verify(handCurrentInteractableSetPatchOriginal, harmony, true);
-            //harmony.Patch(handCurrentInteractableSetPatchOriginal, null, new HarmonyMethod(handCurrentInteractableSetPatchPostfix));
+            PatchController.Verify(handEndInteractionIfHeldOriginal, harmony, true);
+            harmony.Patch(handEndInteractionIfHeldOriginal, new HarmonyMethod(handEndInteractionIfHeldPrefix));
+
+            // FVRPhysicalObjectPatch
+            MethodInfo endInteractionIntoInventorySlotOriginal = typeof(FVRPhysicalObject).GetMethod("EndInteractionIntoInventorySlot", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo endInteractionIntoInventorySlotPrefix = typeof(FVRPhysicalObjectPatch).GetMethod("EndInteractionIntoInventorySlotPrefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo endInteractionIntoInventorySlotPostfix = typeof(FVRPhysicalObjectPatch).GetMethod("EndInteractionIntoInventorySlotPostfix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            PatchController.Verify(endInteractionIntoInventorySlotOriginal, harmony, true);
+            harmony.Patch(endInteractionIntoInventorySlotOriginal, new HarmonyMethod(endInteractionIntoInventorySlotPrefix), new HarmonyMethod(endInteractionIntoInventorySlotPostfix));
 
             //// SosigLinkDamagePatch
             //MethodInfo sosigLinkDamagePatchOriginal = typeof(SosigLink).GetMethod("Damage", BindingFlags.Public | BindingFlags.Instance);
@@ -1029,6 +1037,9 @@ namespace EFM
                     {
                         Mod.leftShoulderObject = null;
                     }
+
+                    // Decrement total weight, it will be readded if item is taken out of slot by hand
+                    Mod.weight -= item.currentWeight;
                 }
                 else if (__instance.QuickbeltSlot is ShoulderStorage)
                 {
@@ -1047,6 +1058,9 @@ namespace EFM
                         EquipmentSlot.TakeOffEquipment(item);
 
                     }
+
+                    // Decrement total weight, it will be readded if item is taken out of slot by hand
+                    Mod.weight -= item.currentWeight;
                 }
                 else if (__instance.QuickbeltSlot is AreaSlot)
                 {
@@ -1064,6 +1078,9 @@ namespace EFM
                         if (Mod.itemsInPocketSlots[i] == item)
                         {
                             Mod.itemsInPocketSlots[i] = null;
+
+                            // Decrement total weight, it will be readded if item is taken out of slot by hand
+                            Mod.weight -= item.currentWeight;
                             return;
                         }
                     }
@@ -1080,7 +1097,12 @@ namespace EFM
                                 if (rig.rigSlots[slotIndex] == __instance.QuickbeltSlot)
                                 {
                                     rig.itemsInSlots[slotIndex] = null;
-                                    rig.currentWeight -= item.currentWeight;
+                                    // NOTE that we dont process weight here, it will be handled by parenting system
+                                    //if (!dontProcessRigWeight)
+                                    //{
+                                    //    // Note that this will also decrement from total weight
+                                    //    rig.currentWeight -= item.currentWeight;
+                                    //}
                                     return;
                                 }
                             }
@@ -1092,14 +1114,16 @@ namespace EFM
                         // Find item in rig's itemsInSlots and remove it
                         for (int i = 0; i < EquipmentSlot.currentRig.itemsInSlots.Length; ++i)
                         {
-                            if (EquipmentSlot.currentRig.itemsInSlots[i] == item.gameObject)
+                            if (EquipmentSlot.currentRig.itemsInSlots[i] == item)
                             {
                                 EquipmentSlot.currentRig.itemsInSlots[i] = null;
 
-                                if (!dontProcessRigWeight)
-                                {
-                                    EquipmentSlot.currentRig.currentWeight -= item.currentWeight;
-                                }
+                                // NOTE that we dont process weight here, it will be handled by parenting system
+                                //if (!dontProcessRigWeight)
+                                //{
+                                //    // Note that this will also decrement from total weight
+                                //    EquipmentSlot.currentRig.currentWeight -= item.currentWeight;
+                                //}
 
                                 // The model of the rig in the equipment slot should be updated
                                 EquipmentSlot.currentRig.UpdateClosedMode();
@@ -1165,6 +1189,9 @@ namespace EFM
                 if (Mod.pocketSlots[i] == slot)
                 {
                     Mod.itemsInPocketSlots[i] = item;
+
+                    // Increment total weight, it will have been removed if item is put in there by hand
+                    Mod.weight += item.currentWeight;
                     return;
                 }
             }
@@ -1178,6 +1205,9 @@ namespace EFM
                     Mod.rightShoulderObject = __instance.gameObject;
                 }
                 // else, Note that this can't happen because of how we handle this shoulder in the Prefix
+
+                // Increment total weight, it will have been removed if item is put in there by hand
+                Mod.weight += item.currentWeight;
 
                 return;
             }
@@ -1210,6 +1240,9 @@ namespace EFM
                     Mod.leftShoulderObject = __instance.gameObject;
                 }
 
+                // Increment total weight, it will have been removed if item is put in there by hand
+                Mod.weight += item.currentWeight;
+
                 EquipmentSlot.WearEquipment(item);
             }
             else if (slot is RigSlot)
@@ -1223,7 +1256,12 @@ namespace EFM
                         if (rig.rigSlots[slotIndex] == __instance.QuickbeltSlot)
                         {
                             rig.itemsInSlots[slotIndex] = item;
-                            rig.currentWeight += item.currentWeight;
+                            // NOTE that we dont process weight here, it will be handled by parenting system
+                            //if (!dontProcessRigWeight)
+                            //{
+                            //    // Note that this will also increment total weight
+                            //    rig.currentWeight += item.currentWeight;
+                            //}
                             rig.UpdateClosedMode();
                             return;
                         }
@@ -1239,10 +1277,12 @@ namespace EFM
                     {
                         MeatovItem parentRigItem = EquipmentSlot.currentRig;
                         parentRigItem.itemsInSlots[slotIndex - 6] = item;
-                        if (!dontProcessRigWeight)
-                        {
-                            parentRigItem.currentWeight += item.currentWeight;
-                        }
+                        // NOTE that we dont process weight here, it will be handled by parenting system
+                        //if (!dontProcessRigWeight)
+                        //{
+                        //    // Note that this will also increment total weight
+                        //    parentRigItem.currentWeight += item.currentWeight;
+                        //}
                         parentRigItem.UpdateClosedMode();
                         break;
                     }
@@ -1251,10 +1291,10 @@ namespace EFM
         }
     }
 
-    // Patches FVRPhysicalObject.BeginInteraction() to manage which pose override to use
+    // Patches FVRPhysicalObject.BeginInteraction() to manage which pose override to use on specific types of items, and prevent weight management for loose rigs
     class BeginInteractionPatch
     {
-        static void Prefix(FVRViveHand hand, ref FVRPhysicalObject __instance)
+        static void Prefix(FVRViveHand hand, FVRPhysicalObject __instance)
         {
             if (!Mod.inMeatovScene)
             {
@@ -1262,6 +1302,33 @@ namespace EFM
             }
 
             MeatovItem item = __instance.GetComponent<MeatovItem>();
+            // If we are taking this item from a loose rig/backpack that is in player inventory, we don't want to remove/add item weight to total weight
+            //if (__instance.QuickbeltSlot != null)
+            //{
+            //    if(__instance.QuickbeltSlot is RigSlot)
+            //    {
+            //        SetQuickBeltSlotPatch.dontProcessTotalWeight = ((RigSlot)__instance.QuickbeltSlot).ownerItem.locationIndex == 0;
+            //        MeatovItem.parentChangeDontManageWeight = SetQuickBeltSlotPatch.dontProcessTotalWeight;
+            //    }
+            //    else if(EquipmentSlot.wearingRig || EquipmentSlot.wearingArmoredRig)
+            //    {
+            //        // Find slot in config
+            //        for (int slotIndex = 6; slotIndex < GM.CurrentPlayerBody.QBSlots_Internal.Count; ++slotIndex)
+            //        {
+            //            if (GM.CurrentPlayerBody.QBSlots_Internal[slotIndex] == __instance.QuickbeltSlot)
+            //            {
+            //                SetQuickBeltSlotPatch.dontProcessTotalWeight = true;
+            //                MeatovItem.parentChangeDontManageWeight = true;
+            //                break;
+            //            }
+            //        }
+            //    }
+            //}
+            //else if(item != null && item.parentVolume != null && item.parentVolume is ContainerVolume)
+            //{
+            //    MeatovItem.parentChangeDontManageWeight = (item.parentVolume as ContainerVolume).ownerItem.locationIndex == 0;
+            //}
+
             if (item != null)
             {
                 // Set pose override depending on item type and hand side
@@ -1279,6 +1346,17 @@ namespace EFM
                     //}
                 }
             }
+        }
+
+        static void Postfix(FVRViveHand hand, FVRPhysicalObject __instance)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            //SetQuickBeltSlotPatch.dontProcessTotalWeight = false;
+            //MeatovItem.parentChangeDontManageWeight = false;
         }
     }
 
@@ -3064,270 +3142,6 @@ namespace EFM
         }
     }
 
-    // Patches FVRFireArm.LoadMag to keep track of weight of mag on firearm and its location index
-    class FireArmLoadMagPatch
-    {
-        public static bool ignoreLoadMag;
-
-        static void Prefix(FVRFireArmMagazine mag, ref FVRFireArm __instance)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return;
-            }
-
-            if (ignoreLoadMag)
-            {
-                ignoreLoadMag = false;
-                return;
-            }
-
-            if (mag.m_hand != null)
-            {
-                // TODO: Might have to do this for ammo when putting it into a mag?
-                MeatovItem fireArmMI = __instance.GetComponent<MeatovItem>();
-                switch (fireArmMI.weaponClass)
-                {
-                    case MeatovItem.WeaponClass.Pistol:
-                        Mod.AddSkillExp(Skill.pistolWeaponReloadAction, 12);
-                        break;
-                    case MeatovItem.WeaponClass.Revolver:
-                        Mod.AddSkillExp(Skill.revolverWeaponReloadAction, 13);
-                        break;
-                    case MeatovItem.WeaponClass.SMG:
-                        Mod.AddSkillExp(Skill.SMGWeaponReloadAction, 14);
-                        break;
-                    case MeatovItem.WeaponClass.Assault:
-                        Mod.AddSkillExp(Skill.assaultWeaponReloadAction, 15);
-                        break;
-                    case MeatovItem.WeaponClass.Shotgun:
-                        Mod.AddSkillExp(Skill.shotgunWeaponReloadAction, 16);
-                        break;
-                    case MeatovItem.WeaponClass.Sniper:
-                        Mod.AddSkillExp(Skill.sniperWeaponReloadAction, 17);
-                        break;
-                    case MeatovItem.WeaponClass.LMG:
-                        Mod.AddSkillExp(Skill.LMGWeaponReloadAction, 18);
-                        break;
-                    case MeatovItem.WeaponClass.HMG:
-                        Mod.AddSkillExp(Skill.HMGWeaponReloadAction, 19);
-                        break;
-                    case MeatovItem.WeaponClass.Launcher:
-                        Mod.AddSkillExp(Skill.launcherWeaponReloadAction, 20);
-                        break;
-                    case MeatovItem.WeaponClass.AttachedLauncher:
-                        Mod.AddSkillExp(Skill.attachedLauncherWeaponReloadAction, 21);
-                        break;
-                    case MeatovItem.WeaponClass.DMR:
-                        Mod.AddSkillExp(Skill.DMRWeaponReloadAction, 24);
-                        break;
-                }
-            }
-
-            if (__instance.Magazine == null && mag != null)
-            {
-                MeatovItem magMI = mag.GetComponent<MeatovItem>();
-                MeatovItem fireArmMI = __instance.GetComponent<MeatovItem>();
-                fireArmMI.currentWeight += magMI.currentWeight;
-
-                if (magMI.locationIndex == 0) // Player
-                {
-                    // Went from player to firearm location index
-                    if (fireArmMI.locationIndex == 0) // Player
-                    {
-                        // Even if transfered from player to player, we don't want to consider it in inventory anymore
-                        if (!Mod.preventLoadMagUpdateLists)
-                        {
-                            magMI.UpdateInventories();
-                        }
-
-                        // No difference to weight
-                    }
-                    else // Hideout/Raid
-                    {
-                        // Transfered from player to hideout or raid but we dont want to consider it in baseinventory because it is inside a firearm
-                        if (!Mod.preventLoadMagUpdateLists)
-                        {
-                            magMI.UpdateInventories();
-                        }
-                    }
-                }
-                else if (magMI.locationIndex == 1) // Hideout
-                {
-                    // Went from hideout to firearm locationIndex
-                    if (fireArmMI.locationIndex == 0) // Player
-                    {
-                        // Transfered from hideout to player, dont want to consider it in player inventory because it is in firearm
-                        if (!Mod.preventLoadMagUpdateLists)
-                        {
-                            magMI.UpdateInventories();
-                        }
-                    }
-                    else if (fireArmMI.locationIndex == 1) // Hideout
-                    {
-                        // Transfered from hideout to hideout, dont want to consider it in base inventory because it is in firearm
-                        if (!Mod.preventLoadMagUpdateLists)
-                        {
-                            magMI.UpdateInventories();
-                        }
-                    }
-                    else // Raid
-                    {
-                        Mod.LogError("Fire arm load mag patch impossible case: Mag loaded from hideout to raid, meaning mag had wrong location index while on player");
-                    }
-                }
-                else // Raid
-                {
-                    if (fireArmMI.locationIndex == 0) // Player
-                    {
-                        // Transfered from raid to player, dont want to add to inventory because it is in firearm
-                    }
-                }
-            }
-        }
-    }
-
-    // Patches FVRFireArm.EjectMag to keep track of weight of mag on firearm and its location index
-    class FireArmEjectMagPatch
-    {
-        static int preLocationIndex;
-        static MeatovItem preMagMI;
-
-        static void Prefix(ref FVRFireArm __instance)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return;
-            }
-
-            if (__instance.Magazine != null)
-            {
-                MeatovItem magMI = __instance.Magazine.GetComponent<MeatovItem>();
-
-                preLocationIndex = magMI.locationIndex;
-                preMagMI = magMI;
-            }
-        }
-
-        static void Postfix(ref FVRFireArm __instance)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return;
-            }
-            MeatovItem fireArmMI = __instance.GetComponent<MeatovItem>();
-            fireArmMI.currentWeight -= preMagMI.currentWeight;
-
-            preMagMI.UpdateInventories();
-        }
-    }
-
-    // Patches FVRFireArm.LoadClip to keep track of weight of clip on firearm and its location index
-    class FireArmLoadClipPatch
-    {
-        public static bool ignoreLoadClip;
-
-        static void Prefix(FVRFireArmClip clip, ref FVRFireArm __instance)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return;
-            }
-
-            if (ignoreLoadClip)
-            {
-                ignoreLoadClip = false;
-                return;
-            }
-
-            if (clip.m_hand != null)
-            {
-                MeatovItem fireArmMI = __instance.GetComponent<MeatovItem>();
-                switch (fireArmMI.weaponClass)
-                {
-                    case MeatovItem.WeaponClass.Pistol:
-                        Mod.AddSkillExp(Skill.pistolWeaponReloadAction, 12);
-                        break;
-                    case MeatovItem.WeaponClass.Revolver:
-                        Mod.AddSkillExp(Skill.revolverWeaponReloadAction, 13);
-                        break;
-                    case MeatovItem.WeaponClass.SMG:
-                        Mod.AddSkillExp(Skill.SMGWeaponReloadAction, 14);
-                        break;
-                    case MeatovItem.WeaponClass.Assault:
-                        Mod.AddSkillExp(Skill.assaultWeaponReloadAction, 15);
-                        break;
-                    case MeatovItem.WeaponClass.Shotgun:
-                        Mod.AddSkillExp(Skill.shotgunWeaponReloadAction, 16);
-                        break;
-                    case MeatovItem.WeaponClass.Sniper:
-                        Mod.AddSkillExp(Skill.sniperWeaponReloadAction, 17);
-                        break;
-                    case MeatovItem.WeaponClass.LMG:
-                        Mod.AddSkillExp(Skill.LMGWeaponReloadAction, 18);
-                        break;
-                    case MeatovItem.WeaponClass.HMG:
-                        Mod.AddSkillExp(Skill.HMGWeaponReloadAction, 19);
-                        break;
-                    case MeatovItem.WeaponClass.Launcher:
-                        Mod.AddSkillExp(Skill.launcherWeaponReloadAction, 20);
-                        break;
-                    case MeatovItem.WeaponClass.AttachedLauncher:
-                        Mod.AddSkillExp(Skill.attachedLauncherWeaponReloadAction, 21);
-                        break;
-                    case MeatovItem.WeaponClass.DMR:
-                        Mod.AddSkillExp(Skill.DMRWeaponReloadAction, 24);
-                        break;
-                }
-            }
-
-            if (__instance.Clip == null && clip != null)
-            {
-                MeatovItem clipMI = clip.GetComponent<MeatovItem>();
-                MeatovItem fireArmMI = __instance.GetComponent<MeatovItem>();
-                fireArmMI.currentWeight += clipMI.currentWeight;
-
-                clipMI.UpdateInventories();
-            }
-        }
-    }
-
-    // Patches FVRFireArm.EjectClip to keep track of weight of clip on firearm and its location index
-    class FireArmEjectClipPatch
-    {
-        static int preLocationIndex;
-        static MeatovItem preClipMI;
-
-        static void Prefix(ref FVRFireArm __instance)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return;
-            }
-
-            if (__instance.Clip != null)
-            {
-                MeatovItem clipMI = __instance.Clip.GetComponent<MeatovItem>();
-
-                preLocationIndex = clipMI.locationIndex;
-                preClipMI = clipMI;
-            }
-        }
-
-        static void Postfix(ref FVRFireArm __instance)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return;
-            }
-
-            MeatovItem fireArmMI = __instance.GetComponent<MeatovItem>();
-            fireArmMI.currentWeight -= preClipMI.currentWeight;
-
-            preClipMI.UpdateInventories();
-        }
-    }
-
     // Patches FVRFirearmMagazine.ReloadMagWithType to track ammo in mag
     class MagReloadMagWithTypePatch
     {
@@ -3997,105 +3811,6 @@ namespace EFM
         }
     }
 
-    // Patches AIManager.EntityCheck to use our own entity lists instead of OverlapSphere to check for other entities
-    // This completely replaces the original
-    class EntityCheckPatch
-    {
-        static bool Prefix(AIEntity e)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return true;
-            }
-
-            e.ResetTick();
-            if (e.ReceivesEvent_Visual)
-            {
-                Vector3 pos = e.GetPos();
-                Vector3 forward = e.SensoryFrame.forward;
-                //if (Raid_Manager.entities.Count > 0)
-                //{
-                //    for (int i = 0; i < Raid_Manager.entities.Count; i++)
-                //    {
-                //        AIEntity component = Raid_Manager.entities[i];
-                //        if (!(component == null))
-                //        {
-                //            if (!(component == e))
-                //            {
-                //                if (component.IFFCode >= -1)
-                //                {
-                //                    if (!component.IsPassiveEntity || e.PerceivesPassiveEntities)
-                //                    {
-                //                        Vector3 pos2 = component.GetPos();
-                //                        Vector3 to = pos2 - pos;
-                //                        float num = to.magnitude;
-                //                        float dist = num;
-                //                        float num2 = e.MaximumSightRange;
-                //                        if (num <= component.MaxDistanceVisibleFrom)
-                //                        {
-                //                            if (component.VisibilityMultiplier <= 2f)
-                //                            {
-                //                                if (component.VisibilityMultiplier > 1f)
-                //                                {
-                //                                    num = Mathf.Lerp(num, num2, component.VisibilityMultiplier - 1f);
-                //                                }
-                //                                else
-                //                                {
-                //                                    num = Mathf.Lerp(0f, num, component.VisibilityMultiplier);
-                //                                }
-                //                                if (!e.IsVisualCheckOmni)
-                //                                {
-                //                                    float num3 = Vector3.Angle(forward, to);
-                //                                    num2 = e.MaximumSightRange * e.SightDistanceByFOVMultiplier.Evaluate(num3 / e.MaximumSightFOV);
-                //                                }
-                //                                if (num <= num2)
-                //                                {
-                //                                    if (!Physics.Linecast(pos, pos2, e.LM_VisualOcclusionCheck, QueryTriggerInteraction.Collide))
-                //                                    {
-                //                                        float v = num / e.MaximumSightRange * component.DangerMultiplier;
-                //                                        AIEvent e2 = new AIEvent(component, AIEvent.AIEType.Visual, v, dist);
-                //                                        e.OnAIEventReceive(e2);
-                //                                    }
-                //                                }
-                //                            }
-                //                        }
-                //                    }
-                //                }
-                //            }
-                //        }
-                //    }
-                //}
-            }
-
-            return false;
-        }
-    }
-
-    // Patches FVRInteractiveObject.GlobalFixedUpdate to fix positioning of attachments after hideout load
-    class GlobalFixedUpdatePatch
-    {
-        static void Postfix()
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return;
-            }
-
-            if (Mod.physObjColResetNeeded >= 0)
-            {
-                --Mod.physObjColResetNeeded;
-
-                if (Mod.physObjColResetNeeded == 0)
-                {
-                    foreach (FVRPhysicalObject physObj in Mod.physObjColResetList)
-                    {
-                        physObj.SetAllCollidersToLayer(false, "Default");
-                    }
-                }
-            }
-        }
-    }
-
     // Patches FVRInteractiveObject.PlayGrabSound to use custom item sounds 
     // This completely replaces the original
     class PlayGrabSoundPatch
@@ -4292,7 +4007,7 @@ namespace EFM
         }
     }
 
-    // Patches FVRInteractiveObject
+    // Patches FVRInteractiveObject to keep track of item held
     class InteractiveObjectPatch
     {
         static void BeginInteractionPostfix(FVRInteractiveObject __instance, FVRViveHand hand)
@@ -4324,31 +4039,68 @@ namespace EFM
         }
     }
 
-    // Patches FVRViveHand.CurrentInteractable.set to keep track of item held
-    class HandCurrentInteractableSetPatch
+    // Patches FVRViveHand.EndInteractionIfHeld to keep track of item held
+    class HandEndInteractionIfHeldPatch
     {
-        static void Postfix(FVRViveHand __instance, FVRInteractiveObject value, FVRInteractiveObject ___m_currentInteractable)
+        static void Prefix(FVRViveHand __instance, FVRInteractiveObject inter)
         {
             if (!Mod.inMeatovScene)
             {
                 return;
             }
 
-            if (___m_currentInteractable != null)
+            if(inter == __instance.CurrentInteractable)
             {
-                if (Mod.meatovItemByInteractive.TryGetValue(___m_currentInteractable, out MeatovItem meatovItem))
+                if (Mod.meatovItemByInteractive.TryGetValue(inter, out MeatovItem meatovItem))
                 {
                     meatovItem.EndInteraction(__instance.IsThisTheRightHand ? Mod.rightHand : Mod.leftHand);
                 }
             }
+        }
+    }
 
-            if(value != null)
+    // Patches FVRPhysicalObject
+    class FVRPhysicalObjectPatch
+    {
+        // EndInteractionIntoInventorySlot to manage weight, prevent weight from being added to player if slot parent is already on player
+        static void EndInteractionIntoInventorySlotPrefix(FVRPhysicalObject __instance, FVRViveHand hand, FVRQuickBeltSlot slot)
+        {
+            if (!Mod.inMeatovScene)
             {
-                if (Mod.meatovItemByInteractive.TryGetValue(value, out MeatovItem meatovItem))
-                {
-                    meatovItem.BeginInteraction(__instance.IsThisTheRightHand ? Mod.rightHand : Mod.leftHand);
-                }
+                return;
             }
+
+            //if(slot is RigSlot)
+            //{
+            //     Dont add to total weight if owner rig already in player inventory
+            //    SetQuickBeltSlotPatch.dontProcessTotalWeight = ((RigSlot)slot).ownerItem.locationIndex == 0;
+            //    MeatovItem.parentChangeDontManageWeight = SetQuickBeltSlotPatch.dontProcessTotalWeight;
+            //}
+            //else if (EquipmentSlot.wearingRig || EquipmentSlot.wearingArmoredRig)
+            //{
+            //     Find slot in config
+            //    for (int slotIndex = 6; slotIndex < GM.CurrentPlayerBody.QBSlots_Internal.Count; ++slotIndex)
+            //    {
+            //        if (GM.CurrentPlayerBody.QBSlots_Internal[slotIndex] == slot)
+            //        {
+            //            SetQuickBeltSlotPatch.dontProcessTotalWeight = true;
+            //            MeatovItem.parentChangeDontManageWeight = true;
+            //            break;
+            //        }
+            //    }
+            //}
+        }
+
+        // EndInteractionIntoInventorySlot to manage weight, reset flags
+        static void EndInteractionIntoInventorySlotPostfix(FVRPhysicalObject __instance, FVRViveHand hand, FVRQuickBeltSlot slot)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            //SetQuickBeltSlotPatch.dontProcessTotalWeight = false;
+            //MeatovItem.parentChangeDontManageWeight = false;
         }
     }
 
