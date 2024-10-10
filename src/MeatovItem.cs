@@ -1150,6 +1150,7 @@ namespace EFM
                                     stack -= splitAmount;
 
                                     MeatovItem splitItem = Instantiate(Mod.GetItemPrefab(index), hand.transform.position + hand.transform.forward * 0.2f, Quaternion.identity).GetComponent<MeatovItem>();
+                                    splitItem.SetData(itemData);
                                     splitItem.stack = splitAmount;
                                     splitItem.UpdateInventories();
                                 }
