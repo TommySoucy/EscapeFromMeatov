@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace EFM
@@ -41,11 +42,28 @@ namespace EFM
         public GameObject failUnknownRewardPrefab;
         public GameObject failTraderRewardPrefab;
 
+        [NonSerialized]
+        public bool awakened;
+
+        public void Awake()
+        {
+            awakened = true;
+
+            if(task != null)
+            {
+                task.OnTaskStateChanged += OnTaskStateChanged;
+                for (int i = 0; i < task.finishConditions.Count; ++i)
+                {
+                    task.finishConditions[i].OnConditionFulfillmentChanged += OnConditionFulfillmentChanged;
+                }
+            }
+        }
+
         public void SetTask(Task task, bool market)
         {
             this.market = market;
 
-            if(this.task != null)
+            if(awakened && this.task != null)
             {
                 this.task.OnTaskStateChanged -= OnTaskStateChanged;
                 for(int i=0; i < this.task.finishConditions.Count; ++i)
@@ -56,10 +74,13 @@ namespace EFM
 
             this.task = task;
 
-            this.task.OnTaskStateChanged += OnTaskStateChanged;
-            for (int i = 0; i < this.task.finishConditions.Count; ++i)
+            if (awakened)
             {
-                this.task.finishConditions[i].OnConditionFulfillmentChanged += OnConditionFulfillmentChanged;
+                this.task.OnTaskStateChanged += OnTaskStateChanged;
+                for (int i = 0; i < this.task.finishConditions.Count; ++i)
+                {
+                    this.task.finishConditions[i].OnConditionFulfillmentChanged += OnConditionFulfillmentChanged;
+                }
             }
 
             // Short info
@@ -593,7 +614,7 @@ namespace EFM
 
         public void OnDestroy()
         {
-            if(task != null)
+            if(awakened && task != null)
             {
                 task.OnTaskStateChanged -= OnTaskStateChanged;
                 for (int i = 0; i < task.finishConditions.Count; ++i)

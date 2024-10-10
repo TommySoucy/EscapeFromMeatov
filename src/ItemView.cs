@@ -43,9 +43,34 @@ namespace EFM
         public bool hasFIROverride = false;
         public bool isFIROverride = false;
 
+        [NonSerialized]
+        public bool awakened;
+
+        public void Awake()
+        {
+            awakened = true;
+
+            if(item != null)
+            {
+                item.OnInsuredChanged += OnInsuredChanged;
+                item.OnFIRStatusChanged += OnFIRStatusChanged;
+                item.OnContainingVolumeChanged += OnContainingVolumeChanged;
+                item.OnStackChanged += OnStackChanged;
+                item.OnAmountChanged += OnAmountChanged;
+            }
+
+            if(itemData != null)
+            {
+                itemData.OnNeededForChanged += OnNeededForChanged;
+                itemData.OnMinimumUpgradeAmountChanged += OnMinimumUpgradeAmountChanged;
+                itemData.OnHideoutItemInventoryChanged += OnItemInventoryChanged;
+                itemData.OnPlayerItemInventoryChanged += OnItemInventoryChanged;
+            }
+        }
+
         public void SetItem(MeatovItem item, bool displayValue = false, int currencyIndex = 0, int valueOverride = -1)
         {
-            if(this.item != null)
+            if(awakened && this.item != null)
             {
                 this.item.OnInsuredChanged -= OnInsuredChanged;
                 this.item.OnFIRStatusChanged -= OnFIRStatusChanged;
@@ -56,11 +81,14 @@ namespace EFM
 
             this.item = item;
 
-            this.item.OnInsuredChanged += OnInsuredChanged;
-            this.item.OnFIRStatusChanged += OnFIRStatusChanged;
-            this.item.OnContainingVolumeChanged += OnContainingVolumeChanged;
-            this.item.OnStackChanged += OnStackChanged;
-            this.item.OnAmountChanged += OnAmountChanged;
+            if (awakened)
+            {
+                this.item.OnInsuredChanged += OnInsuredChanged;
+                this.item.OnFIRStatusChanged += OnFIRStatusChanged;
+                this.item.OnContainingVolumeChanged += OnContainingVolumeChanged;
+                this.item.OnStackChanged += OnStackChanged;
+                this.item.OnAmountChanged += OnAmountChanged;
+            }
 
             SetItemData(item.itemData);
 
@@ -139,13 +167,14 @@ namespace EFM
                                 bool hasToolOveride = false, bool isToolOverride = false,
                                 bool hasFIROverride = false, bool isFIROverride = false)
         {
-            if (this.itemData != null)
+            if (awakened && this.itemData != null)
             {
                 this.itemData.OnNeededForChanged -= OnNeededForChanged;
                 this.itemData.OnMinimumUpgradeAmountChanged -= OnMinimumUpgradeAmountChanged;
                 this.itemData.OnHideoutItemInventoryChanged -= OnItemInventoryChanged;
                 this.itemData.OnPlayerItemInventoryChanged -= OnItemInventoryChanged;
             }
+
             this.itemData = itemData;
 
             if (itemData == null)
@@ -179,10 +208,13 @@ namespace EFM
                     infoNeededForCheckmark.gameObject.SetActive(false);
                 }
 
-                itemData.OnNeededForChanged += OnNeededForChanged;
-                itemData.OnMinimumUpgradeAmountChanged += OnMinimumUpgradeAmountChanged;
-                itemData.OnHideoutItemInventoryChanged += OnItemInventoryChanged;
-                itemData.OnPlayerItemInventoryChanged += OnItemInventoryChanged;
+                if (awakened)
+                {
+                    itemData.OnNeededForChanged += OnNeededForChanged;
+                    itemData.OnMinimumUpgradeAmountChanged += OnMinimumUpgradeAmountChanged;
+                    itemData.OnHideoutItemInventoryChanged += OnItemInventoryChanged;
+                    itemData.OnPlayerItemInventoryChanged += OnItemInventoryChanged;
+                }
 
                 // Set overrides
                 this.hasInsuredOverride = hasInsuredOverride;
@@ -275,13 +307,6 @@ namespace EFM
 
         public void OnMinimumUpgradeAmountChanged()
         {
-            TODO: // Maybe we manage event subscription wrong because this gets called on itemViews for which
-            //       the itemView itself seems to be non existant, throwing a null ref if we even just try to get the object name
-            if (infoNeededForCheckmark == null)
-            {
-                return;
-            }
-
             if (itemData.GetCheckmark(out Color color))
             {
                 infoNeededForCheckmark.gameObject.SetActive(true);
@@ -295,13 +320,6 @@ namespace EFM
 
         public void OnItemInventoryChanged(int difference)
         {
-            TODO: // Maybe we manage event subscription wrong because this gets called on itemViews for which
-            //       the itemView itself seems to be non existant, throwing a null ref if we even just try to get the object name
-            if(infoNeededForCheckmark == null)
-            {
-                return;
-            }
-
             if (itemData.GetCheckmark(out Color color))
             {
                 infoNeededForCheckmark.gameObject.SetActive(true);
@@ -344,21 +362,24 @@ namespace EFM
 
         public void OnDestroy()
         {
-            if (item != null)
+            if (awakened)
             {
-                item.OnInsuredChanged -= OnInsuredChanged;
-                item.OnFIRStatusChanged -= OnFIRStatusChanged;
-                item.OnContainingVolumeChanged -= OnContainingVolumeChanged;
-                item.OnStackChanged -= OnStackChanged;
-                item.OnAmountChanged -= OnAmountChanged;
-            }
+                if (item != null)
+                {
+                    item.OnInsuredChanged -= OnInsuredChanged;
+                    item.OnFIRStatusChanged -= OnFIRStatusChanged;
+                    item.OnContainingVolumeChanged -= OnContainingVolumeChanged;
+                    item.OnStackChanged -= OnStackChanged;
+                    item.OnAmountChanged -= OnAmountChanged;
+                }
 
-            if (itemData != null)
-            {
-                itemData.OnNeededForChanged -= OnNeededForChanged;
-                itemData.OnMinimumUpgradeAmountChanged -= OnMinimumUpgradeAmountChanged;
-                itemData.OnHideoutItemInventoryChanged -= OnItemInventoryChanged;
-                itemData.OnPlayerItemInventoryChanged -= OnItemInventoryChanged;
+                if (itemData != null)
+                {
+                    itemData.OnNeededForChanged -= OnNeededForChanged;
+                    itemData.OnMinimumUpgradeAmountChanged -= OnMinimumUpgradeAmountChanged;
+                    itemData.OnHideoutItemInventoryChanged -= OnItemInventoryChanged;
+                    itemData.OnPlayerItemInventoryChanged -= OnItemInventoryChanged;
+                }
             }
         }
     }

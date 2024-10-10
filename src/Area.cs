@@ -185,10 +185,11 @@ namespace EFM
         {
             areaData = areaDatas[index];
             areaData.area = this;
-            if (areaDatas[index].set)
+            if (areaData.set)
             {
                 return;
             }
+            areaData.set = true;
 
             JToken areaJSONData = null;
             for (int i = 0; i < Mod.areasDB.Count; ++i)
