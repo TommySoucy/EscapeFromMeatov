@@ -261,10 +261,13 @@ namespace EFM
             {
                 areaController.areas[areaEntry.Key] = areaEntry.Value;
             }
-            Area.areaDatas = new AreaData[highestIndex + 1];
-            for (int i = 0; i < Area.areaDatas.Length; ++i)
+            if(Area.areaDatas == null)
             {
-                Area.areaDatas[i] = new AreaData(i);
+                Area.areaDatas = new AreaData[highestIndex + 1];
+                for (int i = 0; i < Area.areaDatas.Length; ++i)
+                {
+                    Area.areaDatas[i] = new AreaData(i);
+                }
             }
             for(int i=0; i < areaController.areas.Length; ++i)
             {
@@ -2026,8 +2029,9 @@ namespace EFM
                             }
                         }
 
+                        objs[0].BeginInteraction(Mod.leftHand.fvrHand);
                         Mod.leftHand.fvrHand.ForceSetInteractable(objs[0]);
-                        meatovItem.UpdateInventories();
+                        meatovItem.UpdateInventories(false, false, false);
                     }
                 };
 
@@ -2036,8 +2040,9 @@ namespace EFM
 
                 if(loadedItem != null)
                 {
+                    loadedItem.physObj.BeginInteraction(Mod.leftHand.fvrHand);
                     Mod.leftHand.fvrHand.ForceSetInteractable(loadedItem.physObj);
-                    loadedItem.UpdateInventories();
+                    loadedItem.UpdateInventories(false, false, false);
                 }
             }
             if(loadedData["rightHand"] != null && loadedData["rightHand"].Type != JTokenType.Null)
@@ -2080,8 +2085,9 @@ namespace EFM
                             }
                         }
 
+                        objs[0].BeginInteraction(Mod.rightHand.fvrHand);
                         Mod.rightHand.fvrHand.ForceSetInteractable(objs[0]);
-                        meatovItem.UpdateInventories();
+                        meatovItem.UpdateInventories(false, false, false);
                     }
                 };
 
@@ -2089,8 +2095,9 @@ namespace EFM
 
                 if(loadedItem != null)
                 {
+                    loadedItem.physObj.BeginInteraction(Mod.rightHand.fvrHand);
                     Mod.rightHand.fvrHand.ForceSetInteractable(loadedItem.physObj);
-                    loadedItem.UpdateInventories();
+                    loadedItem.UpdateInventories(false, false, false);
                 }
             }
             // Note that we must load equipment before loading QBS items
@@ -2138,7 +2145,7 @@ namespace EFM
                             }
 
                             objs[0].SetQuickBeltSlot(StatusUI.instance.equipmentSlots[i]);
-                            meatovItem.UpdateInventories();
+                            meatovItem.UpdateInventories(false, false, false);
                         }
                     };
 
@@ -2147,7 +2154,7 @@ namespace EFM
                     if (loadedItem != null)
                     {
                         loadedItem.physObj.SetQuickBeltSlot(StatusUI.instance.equipmentSlots[i]);
-                        loadedItem.UpdateInventories();
+                        loadedItem.UpdateInventories(false, false, false);
                     }
                 }
             }
@@ -2155,7 +2162,7 @@ namespace EFM
             FVRPlayerBody playerBodyToUse = null;
             if (GM.CurrentPlayerBody == null)
             {
-                Mod.LogInfo("DEV: PRELOADING OF PLAYERBODY WHEN LOADING PLAYER ITEMS WAS NEEDED!");
+                Mod.LogWarning("DEV: PRELOADING OF PLAYERBODY WHEN LOADING PLAYER ITEMS WAS NEEDED!");
                 playerBodyToUse = FindObjectOfType<FVRPlayerBody>();
             }
             else
@@ -2207,7 +2214,7 @@ namespace EFM
                             }
 
                             objs[0].SetQuickBeltSlot(GM.CurrentPlayerBody.QBSlots_Internal[slotIndex]);
-                            meatovItem.UpdateInventories();
+                            meatovItem.UpdateInventories(false, false, false);
                         }
                     };
 
@@ -2216,7 +2223,7 @@ namespace EFM
                     if (loadedItem != null)
                     {
                         loadedItem.physObj.SetQuickBeltSlot(GM.CurrentPlayerBody.QBSlots_Internal[i]);
-                        loadedItem.UpdateInventories();
+                        loadedItem.UpdateInventories(false, false, false);
                     }
                 }
             }

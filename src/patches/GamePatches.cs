@@ -363,14 +363,6 @@ namespace EFM
             PatchController.Verify(handEndInteractionIfHeldOriginal, harmony, true);
             harmony.Patch(handEndInteractionIfHeldOriginal, new HarmonyMethod(handEndInteractionIfHeldPrefix));
 
-            // FVRPhysicalObjectPatch
-            MethodInfo endInteractionIntoInventorySlotOriginal = typeof(FVRPhysicalObject).GetMethod("EndInteractionIntoInventorySlot", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo endInteractionIntoInventorySlotPrefix = typeof(FVRPhysicalObjectPatch).GetMethod("EndInteractionIntoInventorySlotPrefix", BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo endInteractionIntoInventorySlotPostfix = typeof(FVRPhysicalObjectPatch).GetMethod("EndInteractionIntoInventorySlotPostfix", BindingFlags.NonPublic | BindingFlags.Static);
-
-            PatchController.Verify(endInteractionIntoInventorySlotOriginal, harmony, true);
-            harmony.Patch(endInteractionIntoInventorySlotOriginal, new HarmonyMethod(endInteractionIntoInventorySlotPrefix), new HarmonyMethod(endInteractionIntoInventorySlotPostfix));
-
             //// SosigLinkDamagePatch
             //MethodInfo sosigLinkDamagePatchOriginal = typeof(SosigLink).GetMethod("Damage", BindingFlags.Public | BindingFlags.Instance);
             //MethodInfo sosigLinkDamagePatchPrefix = typeof(SosigLinkDamagePatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
@@ -4045,51 +4037,6 @@ namespace EFM
                     meatovItem.EndInteraction(__instance.IsThisTheRightHand ? Mod.rightHand : Mod.leftHand);
                 }
             }
-        }
-    }
-
-    // Patches FVRPhysicalObject
-    class FVRPhysicalObjectPatch
-    {
-        // EndInteractionIntoInventorySlot to manage weight, prevent weight from being added to player if slot parent is already on player
-        static void EndInteractionIntoInventorySlotPrefix(FVRPhysicalObject __instance, FVRViveHand hand, FVRQuickBeltSlot slot)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return;
-            }
-
-            //if(slot is RigSlot)
-            //{
-            //     Dont add to total weight if owner rig already in player inventory
-            //    SetQuickBeltSlotPatch.dontProcessTotalWeight = ((RigSlot)slot).ownerItem.locationIndex == 0;
-            //    MeatovItem.parentChangeDontManageWeight = SetQuickBeltSlotPatch.dontProcessTotalWeight;
-            //}
-            //else if (EquipmentSlot.wearingRig || EquipmentSlot.wearingArmoredRig)
-            //{
-            //     Find slot in config
-            //    for (int slotIndex = 6; slotIndex < GM.CurrentPlayerBody.QBSlots_Internal.Count; ++slotIndex)
-            //    {
-            //        if (GM.CurrentPlayerBody.QBSlots_Internal[slotIndex] == slot)
-            //        {
-            //            SetQuickBeltSlotPatch.dontProcessTotalWeight = true;
-            //            MeatovItem.parentChangeDontManageWeight = true;
-            //            break;
-            //        }
-            //    }
-            //}
-        }
-
-        // EndInteractionIntoInventorySlot to manage weight, reset flags
-        static void EndInteractionIntoInventorySlotPostfix(FVRPhysicalObject __instance, FVRViveHand hand, FVRQuickBeltSlot slot)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return;
-            }
-
-            //SetQuickBeltSlotPatch.dontProcessTotalWeight = false;
-            //MeatovItem.parentChangeDontManageWeight = false;
         }
     }
 
