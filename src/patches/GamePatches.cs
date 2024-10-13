@@ -422,11 +422,12 @@ namespace EFM
             MethodInfo updateDisplayPrefix = typeof(ModularWorkshopUIPatch).GetMethod("UpdateDisplayPrefix", BindingFlags.NonPublic | BindingFlags.Static);
             MethodInfo selectOriginal = typeof(ModularWorkshopUI).GetMethod("PButton_Select", BindingFlags.Public | BindingFlags.Instance);
             MethodInfo selectPrefix = typeof(ModularWorkshopUIPatch).GetMethod("PButton_SelectPrefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo selectPostfix = typeof(ModularWorkshopUIPatch).GetMethod("PButton_SelectPostfix", BindingFlags.NonPublic | BindingFlags.Static);
 
             PatchController.Verify(updateDisplayOriginal, harmony, true);
             PatchController.Verify(selectOriginal, harmony, true);
             harmony.Patch(updateDisplayOriginal, new HarmonyMethod(updateDisplayPrefix));
-            harmony.Patch(selectOriginal, new HarmonyMethod(selectPrefix));
+            harmony.Patch(selectOriginal, new HarmonyMethod(selectPrefix), new HarmonyMethod(selectPostfix));
 
             // SosigPatch
             MethodInfo supressionUpdateOriginal = typeof(Sosig).GetMethod("SuppresionUpdate", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -2881,6 +2882,10 @@ namespace EFM
                     // Manage weight
                     meatovItem.currentWeight -= Mod.GetRoundWeight(__instance.RoundType);
 
+                    // Manage amount
+                    // Note that we can't just set amount to numRounds because this is prefix and numRounds has not been updated yet
+                    --meatovItem.amount;
+
                     // Manage ammobox ammo
                     if (meatovItem.itemType == MeatovItem.ItemType.AmmoBox)
                     {
@@ -2937,6 +2942,10 @@ namespace EFM
                     // Manage weight
                     meatovItem.currentWeight -= Mod.GetRoundWeight(__instance.RoundType);
 
+                    // Manage amount
+                    // Note that we can't just set amount to numRounds because this is prefix and numRounds has not been updated yet
+                    --meatovItem.amount;
+
                     // Manage ammobox ammo
                     if (meatovItem.itemType == MeatovItem.ItemType.AmmoBox)
                     {
@@ -2992,8 +3001,9 @@ namespace EFM
                     // Manage weight
                     meatovItem.currentWeight -= Mod.GetRoundWeight(__instance.RoundType);
 
-                    // Manage ammobox ammo
-                    if (meatovItem.itemType == MeatovItem.ItemType.AmmoBox)
+                    // Manage amount
+                    // Note that we can't just set amount to numRounds because this is prefix and numRounds has not been updated yet
+                    --meatovItem.amount;
                     {
                         Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>> dictToUse = null;
                         if (meatovItem.locationIndex == 0) // Player
@@ -3113,6 +3123,9 @@ namespace EFM
             {
                 // Manage weight
                 meatovItem.currentWeight = meatovItem.weight + Mod.GetRoundWeight(__instance.RoundType) * __instance.m_capacity;
+
+                // Manage amount
+                meatovItem.amount = __instance.m_capacity;
 
                 // Manage ammoBox ammo
                 if (meatovItem.itemType == MeatovItem.ItemType.AmmoBox)
@@ -3237,8 +3250,13 @@ namespace EFM
             MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
             if(meatovItem != null)
             {
+                int newAmount = Mathf.Min(list.Count, __instance.m_capacity);
+
                 // Manage weight
-                meatovItem.currentWeight = meatovItem.weight + Mod.GetRoundWeight(__instance.RoundType) * Mathf.Min(list.Count, __instance.m_capacity);
+                meatovItem.currentWeight = meatovItem.weight + Mod.GetRoundWeight(__instance.RoundType) * newAmount;
+
+                // Manage amount
+                meatovItem.amount = newAmount;
 
                 // Manage ammoBox ammo
                 if (meatovItem.itemType == MeatovItem.ItemType.AmmoBox)
@@ -3363,8 +3381,9 @@ namespace EFM
     {
         public static MeatovItem overrideItem;
         public static bool overrideItemNone;
+        public static bool isWorkbench;
 
-        // To track activation to apply stats to weapon
+        // To track part activation
         // Note that by now, we assume the part's attachment point's selectedPart and modularWeaponPartsAttachmentPoint.ModularPartPoint fields have been set
         static void EnablePrefix(ModularWeaponPart __instance)
         {
@@ -3448,16 +3467,16 @@ namespace EFM
             }
         }
 
-        // To track deactivation to unapply stats from weapon
+        // To track part deactivation to spawn it in workbench volume if necessary
         static void DisablePrefix(ModularWeaponPart __instance)
         {
-            if (!Mod.inMeatovScene)
+            if (!isWorkbench || !Mod.inMeatovScene)
             {
                 return;
             }
 
             MeatovItem partItem = __instance.GetComponent<MeatovItem>();
-            if(partItem != null)
+            if (partItem != null) 
             {
                 // We want to keep the data that was on the modular part so make delegate to copy it
                 Area workbench = HideoutController.instance.areaController.areas[10];
@@ -3488,6 +3507,9 @@ namespace EFM
                 // Manage weight
                 int amount = Mathf.Clamp((int)((float)__instance.m_capacity * percentage), 1, __instance.m_capacity);
                 meatovItem.currentWeight = meatovItem.weight + Mod.GetRoundWeight(__instance.RoundType) * amount;
+
+                // Manage amount
+                meatovItem.amount = amount;
 
                 // Manage ammoBox ammo
                 if (meatovItem.itemType == MeatovItem.ItemType.AmmoBox)
@@ -3591,6 +3613,9 @@ namespace EFM
                     // Manage weight
                     meatovItem.currentWeight += Mod.GetRoundWeight(__instance.RoundType);
 
+                    // Manage amount
+                    ++meatovItem.amount;
+
                     // Manage ammoBox ammo
                     if (meatovItem.itemType == MeatovItem.ItemType.AmmoBox)
                     {
@@ -3663,6 +3688,9 @@ namespace EFM
                 {
                     // Manage weight
                     meatovItem.currentWeight += Mod.GetRoundWeight(__instance.RoundType);
+
+                    // Manage amount
+                    ++meatovItem.amount;
 
                     // Manage ammoBox ammo
                     if (meatovItem.itemType == MeatovItem.ItemType.AmmoBox)
@@ -4884,13 +4912,15 @@ namespace EFM
             return false;
         }
 
-        // Patches PButton_Select to ensure _selectedPart is set correctly
+        // Patches PButton_Select to ensure _selectedPart is set correctly, and set a workbench flag
         static bool PButton_SelectPrefix(ModularWorkshopUI __instance, int i)
         {
             if (!Mod.inMeatovScene)
             {
                 return true;
             }
+
+            ModularWeaponPartPatch.isWorkbench = true;
 
             __instance._selectedButton = i;
             if (!__instance._isShowingSkins)
@@ -4913,6 +4943,17 @@ namespace EFM
             __instance.UpdateDisplay();
 
             return false;
+        }
+
+        // Patches PButton_Select to unset workbench flag
+        static void PButton_SelectPostfix()
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            ModularWeaponPartPatch.isWorkbench = false;
         }
     }
 

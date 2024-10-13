@@ -157,6 +157,18 @@ namespace EFM
 
             LoadLiveData();
 
+            // Update all requirement
+            for (int i = 0; i < areaData.requirementsByTypePerLevel.Length; ++i) 
+            {
+                foreach (KeyValuePair<Requirement.RequirementType, List<Requirement>> requirementLevel in areaData.requirementsByTypePerLevel[i]) 
+                {
+                    for(int j=0; j < requirementLevel.Value.Count; ++j)
+                    {
+                        requirementLevel.Value[j].UpdateFulfilled();
+                    }
+                }
+            }
+
             // Init UI based on data
             UI.Init();
 
@@ -1427,8 +1439,14 @@ namespace EFM
 
         public void UpdateFulfilled()
         {
-            OnInventoryChanged(-1);
-            OnAreaSlotContentChanged();
+            if(production != null && production.continuous)
+            {
+                OnAreaSlotContentChanged();
+            }
+            else
+            {
+                OnInventoryChanged(-1);
+            }
             OnAreaLevelChanged(areaData.area);
             OnTraderLevelChanged(null);
             OnSkillLevelChanged();

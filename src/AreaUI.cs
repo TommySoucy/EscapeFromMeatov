@@ -942,7 +942,7 @@ namespace EFM
         public void UpdateCurrentRequirements()
         {
             // Destroy any existing requirements
-            while(requirementPanel.transform.childCount > 5) // 5: title + 4 requirement panels
+            while (requirementPanel.transform.childCount > 5) // 5: title + 4 requirement panels
             {
                 Transform currentChild = requirementPanel.transform.GetChild(5);
                 currentChild.parent = null;

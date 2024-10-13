@@ -726,6 +726,13 @@ namespace EFM
 
             if(physObj != null)
             {
+                if(physObj is FVRFireArmMagazine)
+                {
+                    FVRFireArmMagazine asMag = physObj as FVRFireArmMagazine;
+                    maxAmount = asMag.m_capacity;
+                    amount = asMag.m_numRounds;
+                }
+
                 bool sizeSet = false;
                 for(int i=0; i < Mod.sizeVolumes.Length; ++i)
                 {
@@ -764,26 +771,22 @@ namespace EFM
 
         public void UpdateRecoil()
         {
+            if(parent != null && parent.itemDataSet)
+            {
+                parent.UpdateRecoil();
+            }
+
             int currentHorizontal = baseRecoilHorizontal;
             int currentVertical = baseRecoilVertical;
-
-            // Modul parts stat effects now applied like physical children since they actually have a meatov item and get processed like children
-            //IModularWeapon modularWeaponInterface = GetComponent<IModularWeapon>();
-            //foreach(KeyValuePair<string, ModularWeaponPartsAttachmentPoint> pointEntry in modularWeaponInterface.AllAttachmentPoints)
-            //{
-            //    if (Mod.modItemData.TryGetValue(pointEntry.Key, out Dictionary<string, MeatovItemData> group)
-            //        && group.TryGetValue(pointEntry.Value.SelectedModularWeaponPart, out MeatovItemData itemData)
-            //        && itemData.recoilModifier != 0)
-            //    {
-            //        currentHorizontal = currentHorizontal + (int)(baseRecoilHorizontal / 100.0f * itemData.recoilModifier);
-            //        currentVertical = currentVertical + (int)(baseRecoilVertical / 100.0f * itemData.recoilModifier);
-            //    }
-            //}
 
             if(children != null)
             {
                 for (int i = 0; i < children.Count; ++i)
                 {
+                    if(children[i].itemData == null)
+                    {
+                        break;
+                    }
                     AddAttachmentRecoil(children[i], ref currentHorizontal, ref currentVertical);
                 }
             }
@@ -823,6 +826,10 @@ namespace EFM
             {
                 for (int i = 0; i < currentItem.children.Count; ++i)
                 {
+                    if (currentItem.children[i].itemData == null)
+                    {
+                        break;
+                    }
                     AddAttachmentRecoil(currentItem.children[i], ref currentHorizontal, ref currentVertical);
                 }
             }
@@ -830,24 +837,21 @@ namespace EFM
 
         public void UpdateErgonomics()
         {
-            int current = itemData.ergonomicsModifier;
+            if(parent != null && parent.itemDataSet)
+            {
+                parent.UpdateErgonomics();
+            }
 
-            // Modul parts stat effects now applied like physical children since they actually have a meatov item and get processed like children
-            //IModularWeapon modularWeaponInterface = GetComponent<IModularWeapon>();
-            //foreach (KeyValuePair<string, ModularWeaponPartsAttachmentPoint> pointEntry in modularWeaponInterface.AllAttachmentPoints)
-            //{
-            //    if (Mod.modItemData.TryGetValue(pointEntry.Key, out Dictionary<string, MeatovItemData> group)
-            //        && group.TryGetValue(pointEntry.Value.SelectedModularWeaponPart, out MeatovItemData itemData)
-            //        && itemData.ergonomicsModifier != 0)
-            //    {
-            //        current += itemData.ergonomicsModifier;
-            //    }
-            //}
+            int current = itemData.ergonomicsModifier;
 
             if (children != null)
             {
                 for (int i = 0; i < children.Count; ++i)
                 {
+                    if(children[i].itemData == null)
+                    {
+                        break;
+                    }
                     AddAttachmentErgonomics(children[i], ref current);
                 }
             }
@@ -872,6 +876,10 @@ namespace EFM
             {
                 for (int i = 0; i < currentItem.children.Count; ++i)
                 {
+                    if (currentItem.children[i].itemData == null)
+                    {
+                        break;
+                    }
                     AddAttachmentErgonomics(currentItem.children[i], ref current);
                 }
             }
@@ -879,31 +887,22 @@ namespace EFM
 
         public void UpdateSightingRange(MeatovItemData exclude = null)
         {
+            if(parent != null && parent.itemDataSet)
+            {
+                parent.UpdateSightingRange();
+            }
+
             int current = baseSightingRange;
             bool excluded = false;
-
-            // Modul parts stat effects now applied like physical children since they actually have a meatov item and get processed like children
-            //IModularWeapon modularWeaponInterface = GetComponent<IModularWeapon>();
-            //foreach (KeyValuePair<string, ModularWeaponPartsAttachmentPoint> pointEntry in modularWeaponInterface.AllAttachmentPoints)
-            //{
-            //    if (Mod.modItemData.TryGetValue(pointEntry.Key, out Dictionary<string, MeatovItemData> group)
-            //        && group.TryGetValue(pointEntry.Value.SelectedModularWeaponPart, out MeatovItemData itemData))
-            //    {
-            //        if(!excluded && itemData == exclude)
-            //        {
-            //            excluded = true;
-            //        }
-            //        else
-            //        {
-            //            current = Mathf.Max(current, itemData.sightingRange);
-            //        }
-            //    }
-            //}
 
             if (children != null)
             {
                 for (int i = 0; i < children.Count; ++i)
                 {
+                    if(children[i].itemData == null)
+                    {
+                        break;
+                    }
                     AddAttachmentSightingRange(children[i], ref current, exclude, ref excluded);
                 }
             }
@@ -932,6 +931,10 @@ namespace EFM
             {
                 for (int i = 0; i < currentItem.children.Count; ++i)
                 {
+                    if (currentItem.children[i].itemData == null)
+                    {
+                        break;
+                    }
                     AddAttachmentSightingRange(currentItem.children[i], ref current, exclude, ref excluded);
                 }
             }
@@ -998,7 +1001,10 @@ namespace EFM
             for (int i=0; i < children.Count; ++i)
             {
                 Mod.LogInfo("\t\tUpdate child inventories on "+ children[i].tarkovID+":"+ children[i].H3ID+":"+ children[i].itemName);
-                children[i].UpdateInventories();
+                if (children[i].itemDataSet)
+                {
+                    children[i].UpdateInventories();
+                }
             }
         }
 
