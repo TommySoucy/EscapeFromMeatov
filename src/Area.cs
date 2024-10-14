@@ -2,6 +2,7 @@
 using ModularWorkshop;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using Valve.Newtonsoft.Json.Linq;
 
@@ -59,7 +60,7 @@ namespace EFM
         [NonSerialized]
         public AudioClip[][][] subClips;
         [NonSerialized]
-        public bool poweringOn;
+        public float poweringOnTimer;
         public float fuelConsumptionTimer;
         public bool previouslyConsumingFilter;
         public float filterConsumptionTimer;
@@ -393,18 +394,18 @@ namespace EFM
         {
             if (requiresPower)
             {
+                bool mustTogglePower = false;
                 if (powered && !previousPowered) // Just powered on
                 {
                     // Manage audio
-                    poweringOn = true;
-                    for(int i=0;i < levels.Length; ++i)
+                    poweringOnTimer = 0.01f;
+                    for (int j = 0; j < levels[currentLevel].mainAudioSources.Length; ++j)
                     {
-                        for (int j = 0; j < levels[i].mainAudioSources.Length; ++j)
+                        if(subClips[currentLevel][j][0] != null)
                         {
-                            if(subClips[i][j][0] != null)
-                            {
-                                levels[i].mainAudioSources[j].PlayOneShot(subClips[i][j][0]);
-                            }
+                            levels[currentLevel].mainAudioSources[j].PlayOneShot(subClips[currentLevel][j][0]);
+                            // -0.1 just to make sure we don't switch clip too late and have no sound between frames
+                            poweringOnTimer = levels[currentLevel].workingRanges[j].x - 0.1f;
                         }
                     }
 
@@ -428,6 +429,7 @@ namespace EFM
                             {
                                 if (levels[currentLevel].areaSlots[i].item != null && levels[currentLevel].areaSlots[i].item.amount > 0)
                                 {
+                                    consumed = true;
                                     --levels[currentLevel].areaSlots[i].item.amount;
                                     break;
                                 }
@@ -448,7 +450,7 @@ namespace EFM
                             }
                             else
                             {
-                                controller.TogglePower();
+                                mustTogglePower = true;
                             }
                         }
                     }
@@ -462,6 +464,7 @@ namespace EFM
                             {
                                 if (levels[currentLevel].areaSlots[i].item != null && levels[currentLevel].areaSlots[i].item.amount > 0)
                                 {
+                                    consumed = true;
                                     --levels[currentLevel].areaSlots[i].item.amount;
                                     break;
                                 }
@@ -495,14 +498,22 @@ namespace EFM
                 else if (!powered && previousPowered) // Just powered off
                 {
                     // Manage audio
-                    for (int i = 0; i < levels.Length; ++i)
+                    poweringOnTimer = -1;
+                    for(int i=0; i < levels.Length; ++i)
                     {
                         for (int j = 0; j < levels[i].mainAudioSources.Length; ++j)
                         {
-                            levels[i].mainAudioSources[j].Stop();
-                            if(subClips[i][j][2] != null)
+                            if (levels[i].mainAudioSources[j].isActiveAndEnabled)
                             {
-                                levels[i].mainAudioSources[j].PlayOneShot(subClips[i][j][2]);
+                                levels[i].mainAudioSources[j].Stop();
+                                if (subClips[i][j][2] != null)
+                                {
+                                    levels[i].mainAudioSources[j].PlayOneShot(subClips[i][j][2]);
+                                }
+                            }
+                            else
+                            {
+                                levels[i].mainAudioSources[j].playOnAwake = false;
                             }
                         }
                     }
@@ -531,18 +542,30 @@ namespace EFM
                 }
 
                 // Manage powering on audio
-                if (poweringOn && !levels[currentLevel].mainAudioSources[0].isPlaying)
+                if(poweringOnTimer > 0)
                 {
-                    poweringOn = false;
-                    for (int i = 0; i < levels.Length; ++i)
+                    poweringOnTimer -= Time.deltaTime;
+
+                    if(poweringOnTimer <= 0)
                     {
-                        for (int j = 0; j < levels[i].mainAudioSources.Length; ++j)
+                        for (int i = 0; i < levels.Length; ++i)
                         {
-                            if (subClips[i][j][1] != null)
+                            for (int j = 0; j < levels[i].mainAudioSources.Length; ++j)
                             {
-                                levels[i].mainAudioSources[j].loop = true;
-                                levels[i].mainAudioSources[j].clip = subClips[i][j][1];
-                                levels[i].mainAudioSources[j].Play();
+                                if (subClips[i][j][1] != null)
+                                {
+                                    levels[i].mainAudioSources[j].loop = true;
+                                    levels[i].mainAudioSources[j].clip = subClips[i][j][1];
+
+                                    if (levels[i].mainAudioSources[j].isActiveAndEnabled)
+                                    {
+                                        levels[i].mainAudioSources[j].Play();
+                                    }
+                                    else // Not active, make sure the source plays when it awakes (Mainly for if we upgrade area while power is on)
+                                    {
+                                        levels[i].mainAudioSources[j].playOnAwake = true;
+                                    }
+                                }
                             }
                         }
                     }
@@ -550,6 +573,12 @@ namespace EFM
 
                 // Finally update previousPowered
                 previousPowered = powered;
+
+                // If toggle power due to lacking fuel at power on, need to toggle power AFTER setting previousPowered
+                if (mustTogglePower)
+                {
+                    controller.TogglePower();
+                }
             }
 
             // Update productions
@@ -611,6 +640,7 @@ namespace EFM
                         {
                             if (levels[currentLevel].areaSlots[i].item != null && levels[currentLevel].areaSlots[i].item.amount > 0)
                             {
+                                consumed = true;
                                 --levels[currentLevel].areaSlots[i].item.amount;
                                 break;
                             }
@@ -649,6 +679,7 @@ namespace EFM
                         {
                             if (levels[currentLevel].areaSlots[i].item != null && levels[currentLevel].areaSlots[i].item.amount > 0)
                             {
+                                consumed = true;
                                 --levels[currentLevel].areaSlots[i].item.amount;
                                 break;
                             }

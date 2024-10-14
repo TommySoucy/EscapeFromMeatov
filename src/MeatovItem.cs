@@ -942,7 +942,6 @@ namespace EFM
 
         public void UpdateInventories(bool removeWeight = false, bool addWeight = false, bool manageWeight = true)
         {
-            Mod.LogInfo("UpdateInventories called on "+tarkovID+":"+H3ID+":"+itemName);
             // Find new location
             int newLocation = -1;
             if (parent != null)
@@ -997,10 +996,8 @@ namespace EFM
             locationIndex = newLocation;
 
             // Update children
-            Mod.LogInfo("\tGot "+ children.Count+" children to also update inventories for");
             for (int i=0; i < children.Count; ++i)
             {
-                Mod.LogInfo("\t\tUpdate child inventories on "+ children[i].tarkovID+":"+ children[i].H3ID+":"+ children[i].itemName);
                 if (children[i].itemDataSet)
                 {
                     children[i].UpdateInventories();
@@ -3147,8 +3144,6 @@ namespace EFM
         {
             MeatovItem newParent = null;
 
-            Mod.LogInfo("OnTransformParentChanged called on " + H3ID+", current parent: "+ (parent == null ? "null" : parent.itemName));
-
             if(physObj == null)
             {
                 newParent = transform.GetComponentInParents<MeatovItem>(false);
@@ -3205,11 +3200,9 @@ namespace EFM
 
             if (newParent != parent)
             {
-                Mod.LogInfo("\t\tnew parent is not current parent");
                 // Remove from previous parent if necessary
                 if (parent != null)
                 {
-                    Mod.LogInfo("\t\t\tCurrent parent not null, clearing");
                     parent.currentWeight -= currentWeight;
                     parent.children[childIndex] = parent.children[parent.children.Count - 1];
                     parent.children[childIndex].childIndex = childIndex;
@@ -3245,12 +3238,10 @@ namespace EFM
                 // Add to new parent
                 if (newParent != null)
                 {
-                    Mod.LogInfo("\t\t\tNew parent not null");
                     parent = newParent;
                     // If mod, we want to find first weapon parent to affect stats of
                     if (itemType == ItemType.Mod)
                     {
-                        Mod.LogInfo("\t\t\t\tMod, Finding parent weapon");
                         MeatovItem weaponParent = parent;
                         while (weaponParent != null && weaponParent.itemType != ItemType.Weapon)
                         {
@@ -3258,7 +3249,6 @@ namespace EFM
                         }
                         if (weaponParent != null)
                         {
-                            Mod.LogInfo("\t\t\t\t\tGot parent weapon: "+weaponParent.itemName);
                             if (recoilModifier != 0)
                             {
                                 weaponParent.currentRecoilHorizontal += (int)(weaponParent.baseRecoilHorizontal / 100.0f * recoilModifier);
@@ -3276,7 +3266,6 @@ namespace EFM
                     childIndex = parent.children.Count;
                     parent.children.Add(this);
                     parent.currentWeight += currentWeight;
-                    Mod.LogInfo("\t\t\tAdded to parent children");
                 }
             }
 

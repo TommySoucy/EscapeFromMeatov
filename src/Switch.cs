@@ -27,6 +27,8 @@ namespace EFM
 
             SimpleInteraction(null);
 
+            areaController = HideoutController.instance.areaController;
+
             init = true;
         }
 
@@ -60,7 +62,10 @@ namespace EFM
                     }
                     break;
                 case Mode.Power:
-                    areaController.TogglePower();
+                    if (init)
+                    {
+                        areaController.TogglePower();
+                    }
                     break;
                 default:
                     break;

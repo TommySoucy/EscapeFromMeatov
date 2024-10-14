@@ -60,6 +60,13 @@ namespace EFM
             PatchController.Verify(setQuickBeltSlotPatchOriginal, harmony, true);
             harmony.Patch(setQuickBeltSlotPatchOriginal, new HarmonyMethod(setQuickBeltSlotPatchPrefix), new HarmonyMethod(setQuickBeltSlotPatchPostfix));
 
+            // QBSIsKeepingTrackWithHeadPatch
+            MethodInfo QBSIsKeepingTrackWithHeadOriginal = typeof(FVRQuickBeltSlot).GetMethod("set_IsKeepingTrackWithHead", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo QBSIsKeepingTrackWithHeadPrefix = typeof(QBSIsKeepingTrackWithHeadPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            PatchController.Verify(QBSIsKeepingTrackWithHeadOriginal, harmony, true);
+            harmony.Patch(QBSIsKeepingTrackWithHeadOriginal, new HarmonyMethod(QBSIsKeepingTrackWithHeadPrefix));
+
             // BeginInteractionPatch
             MethodInfo beginInteractionPatchOriginal = typeof(FVRPhysicalObject).GetMethod("BeginInteraction", BindingFlags.Public | BindingFlags.Instance);
             MethodInfo beginInteractionPatchPrefix = typeof(BeginInteractionPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
@@ -978,13 +985,11 @@ namespace EFM
             {
                 return;
             }
-            Mod.LogInfo("SetQuickBeltSlotPatch called");
 
             // In case that new slot is same as current, we want to skip most of the patch
             // Can be possible in case of harnessed slot
             if (slot == __instance.QuickbeltSlot)
             {
-                Mod.LogInfo("Item " + __instance.name + " is already in slot: " + (slot == null ? "null" : slot.name) + ", skipping SetQuickBeltSlotPatch patch");
                 skipPatch = true;
 
                 // Even if skipping patch, need to make sure that in the case of the backpack shoulder slot, we still set it as equip slot
@@ -1281,6 +1286,30 @@ namespace EFM
                     }
                 }
             }
+        }
+    }
+
+    // Patches FVRQuickBeltSlot.set_IsKeepingTrackWithHead to prevent rotatoin of slot in case of AreaSlot
+    // Not sure why, vanilla resets slot rotation if not keeping track with head. Area slots must keep the rotation
+    // as we set them in the assets
+    class QBSIsKeepingTrackWithHeadPatch
+    {
+
+        static bool Prefix(FVRQuickBeltSlot __instance, bool value)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
+            if(__instance is AreaSlot)
+            {
+                __instance.m_isKeepingTrackWithHead = value;
+                return false;
+
+            }
+
+            return true;
         }
     }
 

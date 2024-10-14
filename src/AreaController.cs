@@ -11,7 +11,10 @@ namespace EFM
         {
             for (int i = 0; i < areas.Length; ++i)
             {
-                areas[i].powered = !areas[i].powered;
+                if (areas[i] != null)
+                {
+                    areas[i].powered = !areas[i].powered;
+                }
             }
         }
     }

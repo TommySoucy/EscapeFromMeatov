@@ -57,7 +57,7 @@ namespace EFM
             {
                 for(int i=0; i < poseOverridePerItem.Length; ++i)
                 {
-                    if (poseOverridePerItem[i].item.Equals(item.H3ID))
+                    if (poseOverridePerItem[i].item.Equals(item.tarkovID))
                     {
                         PoseOverride = poseOverridePerItem[i].poseOverride;
                         break;
