@@ -2,7 +2,6 @@
 using ModularWorkshop;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using UnityEngine;
 using Valve.Newtonsoft.Json.Linq;
 
@@ -494,6 +493,8 @@ namespace EFM
                             areaData.bonusesPerLevel[currentLevel][i].Apply();
                         }
                     }
+
+                    areaData.OnAreaPowerChangedInvoke();
                 }
                 else if (!powered && previousPowered) // Just powered off
                 {
@@ -539,6 +540,8 @@ namespace EFM
                             areaData.bonusesPerLevel[currentLevel][i].Unapply();
                         }
                     }
+
+                    areaData.OnAreaPowerChangedInvoke();
                 }
 
                 // Manage powering on audio
@@ -1211,6 +1214,9 @@ namespace EFM
         public delegate void OnAreaLevelChangedDelegate(Area area);
         public event OnAreaLevelChangedDelegate OnAreaLevelChanged;
 
+        public delegate void OnAreaPowerChangedDelegate();
+        public event OnAreaPowerChangedDelegate OnAreaPowerChanged;
+
         public AreaData(int index)
         {
             this.index = index;
@@ -1263,6 +1269,15 @@ namespace EFM
             if (OnAreaLevelChanged != null)
             {
                 OnAreaLevelChanged(area);
+            }
+        }
+
+        public void OnAreaPowerChangedInvoke()
+        {
+            // Raise event
+            if (OnAreaPowerChanged != null)
+            {
+                OnAreaPowerChanged();
             }
         }
 
@@ -1336,10 +1351,11 @@ namespace EFM
 
         public Requirement(JToken requirementData, AreaData areaData = null, Production production = null)
         {
+            this.areaData = areaData;
+            this.production = production;
+
             if (requirementData != null)
             {
-                this.areaData = areaData;
-                this.production = production;
                 requirementType = RequirementTypeFromName(requirementData["type"].ToString());
 
                 switch (requirementType)
@@ -2137,6 +2153,7 @@ namespace EFM
                 newRequirement.requirementType = Requirement.RequirementType.Item;
                 newRequirement.item = Mod.customItemData[159];
                 newRequirement.resourceCount = 0;
+                requirements.Add(newRequirement);
                 areaData.OnSlotContentChanged += newRequirement.OnAreaSlotContentChanged;
             }
 
@@ -2149,6 +2166,7 @@ namespace EFM
                 Requirement newRequirement = new Requirement(areaData.index, areaLevel);
                 newRequirement.production = this;
                 newRequirement.areaData = areaData;
+                requirements.Add(newRequirement);
                 areaData.OnAreaLevelChanged += newRequirement.OnAreaLevelChanged;
             }
         }

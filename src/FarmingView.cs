@@ -11,7 +11,7 @@ namespace EFM
         public GameObject setAllButton;
         public GameObject setOneButton;
         public GameObject removeOneButton;
-        public RequirementItemView installedItemView;
+        public ResultItemView installedItemView;
         public TimePanel timePanel;
         public ResultItemView resultItemView;
         public GameObject getButton;

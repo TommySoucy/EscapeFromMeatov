@@ -130,6 +130,14 @@ namespace EFM
 
             // This must be called while correct content page is active, so after we set current active in this case
             UpdateBottomButtons();
+
+            area.areaData.OnAreaPowerChanged += OnAreaPoweredChanged;
+        }
+
+        public void OnAreaPoweredChanged()
+        {
+            UpdateStatusTexts();
+            UpdateStatusIcons();
         }
 
         public void UpdateStatusTexts()
@@ -412,6 +420,7 @@ namespace EFM
 
         public void UpdateProductions()
         {
+            Mod.LogInfo("UpdateProductions");
             productionPanel.SetActive(area.areaData.productionsPerLevel[area.currentLevel] != null && area.areaData.productionsPerLevel[area.currentLevel].Count > 0);
 
             // Destroy any existing productions
@@ -424,11 +433,14 @@ namespace EFM
 
             if (productionPanel.activeSelf)
             {
-                for(int i=0; i <= area.currentLevel; ++i)
+                Mod.LogInfo("\tHAve productions");
+                for (int i=0; i <= area.currentLevel; ++i)
                 {
+                    Mod.LogInfo("\t\tLevel "+i);
                     List<Production> currentProductions = area.areaData.productionsPerLevel[i];
                     for(int j=0; j < currentProductions.Count; ++j)
                     {
+                        Mod.LogInfo("\t\t\tProduction " + j);
                         Production currentProduction = currentProductions[j];
                         if(area.index == 14) // Scav case
                         {
@@ -491,7 +503,8 @@ namespace EFM
                         }
                         else
                         {
-                            if(currentProduction.endProduct == null)
+                            Mod.LogInfo("\t\t\t\tNot area 14");
+                            if (currentProduction.endProduct == null)
                             {
                                 Mod.LogWarning("Area " + area.index + " production " + currentProduction.ID + " endproduct missing item data");
                                 continue;
@@ -499,6 +512,7 @@ namespace EFM
 
                             if (currentProduction.continuous) // Farming
                             {
+                                Mod.LogInfo("\t\t\t\tContinuous");
                                 GameObject farmingProduction = Instantiate(farmingViewPrefab, productionPanelContainer.transform);
                                 farmingProduction.SetActive(currentProduction.AllUnlockRequirementsFulfilled());
                                 FarmingView farmingView = farmingProduction.GetComponent<FarmingView>();
@@ -511,10 +525,13 @@ namespace EFM
                                 if (currentProduction.requirements[0].requirementType == Requirement.RequirementType.Item
                                     || currentProduction.requirements[0].requirementType == Requirement.RequirementType.Resource)
                                 {
-                                    RequirementItemView itemRequirement = farmingView.installedItemView;
+                                    Mod.LogInfo("\t\t\t\t\tRequirement is item or resource");
+                                    ResultItemView itemRequirement = farmingView.installedItemView;
                                     ResultItemView itemRequirementStash = farmingView.stashItemView;
+                                    currentProduction.requirements[0].itemResultUI = itemRequirement;
                                     currentProduction.requirements[0].stashItemUI = itemRequirementStash;
 
+                                    Mod.LogInfo("\t\t\t\t\t\tSetting requirement item views to "+ currentProduction.requirements[0].item.tarkovID+":"+ currentProduction.requirements[0].item.name);
                                     itemRequirement.itemView.SetItemData(currentProduction.requirements[0].item);
                                     itemRequirementStash.itemView.SetItemData(currentProduction.requirements[0].item);
 
@@ -535,7 +552,7 @@ namespace EFM
                                         {
                                             if (area.levels[area.currentLevel].areaSlots[i].item != null)
                                             {
-                                                ++area.levels[area.currentLevel].areaSlots[i].item.amount;
+                                                itemCount += area.levels[area.currentLevel].areaSlots[i].item.amount;
                                             }
                                         }
                                     }
@@ -1442,6 +1459,11 @@ namespace EFM
         public void PlaySlotInputSound()
         {
             genericAudioSource.PlayOneShot(area.genericAudioClips[3]);
+        }
+
+        public void OnDestroy()
+        {
+            area.areaData.OnAreaPowerChanged -= OnAreaPoweredChanged;
         }
     }
 }
