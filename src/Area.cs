@@ -1512,17 +1512,20 @@ namespace EFM
                 case RequirementType.Item:
                     long count = Mod.GetItemCountInInventories(item.tarkovID);
                     fulfilled = count >= itemCount;
-                    if (itemRequirementUI != null)
+                    if(stashItemUI == null)
                     {
-                        itemRequirementUI.amount.text = Extensions.Min(count, itemCount).ToString() + "/" + itemCount;
-                        itemRequirementUI.fulfilledIcon.SetActive(fulfilled);
-                        itemRequirementUI.unfulfilledIcon.SetActive(!fulfilled);
+                        if (itemRequirementUI != null)
+                        {
+                            itemRequirementUI.amount.text = Extensions.Min(count, itemCount).ToString() + "/" + itemCount;
+                            itemRequirementUI.fulfilledIcon.SetActive(fulfilled);
+                            itemRequirementUI.unfulfilledIcon.SetActive(!fulfilled);
+                        }
+                        else if (itemResultUI != null)
+                        {
+                            itemResultUI.amount.text = Extensions.Min(count, itemCount).ToString() + "/" + itemCount;
+                        }
                     }
-                    else if (itemResultUI != null)
-                    {
-                        itemResultUI.amount.text = Extensions.Min(count, itemCount).ToString() + "/" + itemCount;
-                    }
-                    if(stashItemUI != null)
+                    else
                     {
                         stashItemUI.amount.text = count.ToString() + "\n(INVENTORY)";
                     }

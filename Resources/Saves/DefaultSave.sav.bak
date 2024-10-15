@@ -1,0 +1,481 @@
+{
+	"time" : 0,
+	"level": 1,
+	"experience": 0,
+	"health":[
+		35,
+		85,
+		70,
+		60,
+		60,
+		65,
+		65
+	],
+	"maxHealth":[
+		35,
+		85,
+		70,
+		60,
+		60,
+		65,
+		65
+	],
+	"energy": 100,
+	"hydration": 100,
+	"totalKillCount": 0,
+	"totalDeathCount": 0,
+	"totalRaidCount": 0,
+	"runthroughRaidCount": 0,
+	"survivedRaidCount": 0,
+	"failedRaidCount": 0,
+	"MIARaidCount": 0,
+	"KIARaidCount": 0,
+	"failedRaidCount": 0,
+	"skills":[
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0
+	],
+	"hideout":{
+		"powered": false,
+		"areas":[
+			{
+				"level": 0,
+				"upgrading": false,
+				"upgradeTimeLeft": 0,
+				"productions":{
+					"templateProductionID":{
+						"inProduction": false,
+						"progress": 0,
+						"readyCount": 0
+					}
+				}
+			},
+			{
+				"level": 0,
+				"upgrading": false,
+				"upgradeTimeLeft": 0,
+				"productions":{
+					"templateProductionID":{
+						"inProduction": false,
+						"progress": 0,
+						"readyCount": 0
+					}
+				}
+			},
+			{
+				"level": 0,
+				"upgrading": false,
+				"upgradeTimeLeft": 0,
+				"productions":{
+					"templateProductionID":{
+						"inProduction": false,
+						"progress": 0,
+						"readyCount": 0
+					}
+				}
+			},
+			{
+				"level": 0,
+				"upgrading": false,
+				"upgradeTimeLeft": 0,
+				"productions":{
+					"templateProductionID":{
+						"inProduction": false,
+						"progress": 0,
+						"readyCount": 0
+					}
+				}
+			},
+			{
+				"level": 0,
+				"upgrading": false,
+				"upgradeTimeLeft": 0,
+				"productions":{
+					"templateProductionID":{
+						"inProduction": false,
+						"progress": 0,
+						"readyCount": 0
+					}
+				}
+			},
+			{
+				"level": 0,
+				"upgrading": false,
+				"upgradeTimeLeft": 0,
+				"productions":{
+					"templateProductionID":{
+						"inProduction": false,
+						"progress": 0,
+						"readyCount": 0
+					}
+				}
+			},
+			{
+				"level": 0,
+				"upgrading": false,
+				"upgradeTimeLeft": 0,
+				"productions":{
+					"templateProductionID":{
+						"inProduction": false,
+						"progress": 0,
+						"readyCount": 0
+					}
+				}
+			},
+			{
+				"level": 0,
+				"upgrading": false,
+				"upgradeTimeLeft": 0,
+				"productions":{
+					"templateProductionID":{
+						"inProduction": false,
+						"progress": 0,
+						"readyCount": 0
+					}
+				}
+			},
+			{
+				"level": 0,
+				"upgrading": false,
+				"upgradeTimeLeft": 0,
+				"productions":{
+					"templateProductionID":{
+						"inProduction": false,
+						"progress": 0,
+						"readyCount": 0
+					}
+				}
+			},
+			{
+				"level": 0,
+				"upgrading": false,
+				"upgradeTimeLeft": 0,
+				"productions":{
+					"templateProductionID":{
+						"inProduction": false,
+						"progress": 0,
+						"readyCount": 0
+					}
+				}
+			},
+			{
+				"level": 0,
+				"upgrading": false,
+				"upgradeTimeLeft": 0,
+				"productions":{
+					"templateProductionID":{
+						"inProduction": false,
+						"progress": 0,
+						"readyCount": 0
+					}
+				}
+			},
+			{
+				"level": 0,
+				"upgrading": false,
+				"upgradeTimeLeft": 0,
+				"productions":{
+					"templateProductionID":{
+						"inProduction": false,
+						"progress": 0,
+						"readyCount": 0
+					}
+				}
+			},
+			{
+				"level": 0,
+				"upgrading": false,
+				"upgradeTimeLeft": 0,
+				"productions":{
+					"templateProductionID":{
+						"inProduction": false,
+						"progress": 0,
+						"readyCount": 0
+					}
+				}
+			},
+			{
+				"level": 0,
+				"upgrading": false,
+				"upgradeTimeLeft": 0,
+				"productions":{
+					"templateProductionID":{
+						"inProduction": false,
+						"progress": 0,
+						"readyCount": 0
+					}
+				}
+			},
+			{
+				"level": 0,
+				"upgrading": false,
+				"upgradeTimeLeft": 0,
+				"productions":{
+					"templateProductionID":{
+						"inProduction": false,
+						"progress": 0,
+						"readyCount": 0
+					}
+				}
+			},
+			{
+				"level": 0,
+				"upgrading": false,
+				"upgradeTimeLeft": 0,
+				"productions":{
+					"templateProductionID":{
+						"inProduction": false,
+						"progress": 0,
+						"readyCount": 0
+					}
+				}
+			},
+			{
+				"level": 0,
+				"upgrading": false,
+				"upgradeTimeLeft": 0,
+				"productions":{
+					"templateProductionID":{
+						"inProduction": false,
+						"progress": 0,
+						"readyCount": 0
+					}
+				}
+			},
+			{
+				"level": 0,
+				"upgrading": false,
+				"upgradeTimeLeft": 0,
+				"productions":{
+					"templateProductionID":{
+						"inProduction": false,
+						"progress": 0,
+						"readyCount": 0
+					}
+				}
+			},
+			{
+				"level": 0,
+				"upgrading": false,
+				"upgradeTimeLeft": 0,
+				"productions":{
+					"templateProductionID":{
+						"inProduction": false,
+						"progress": 0,
+						"readyCount": 0
+					}
+				}
+			},
+			{
+				"level": 0,
+				"upgrading": false,
+				"upgradeTimeLeft": 0,
+				"productions":{
+					"templateProductionID":{
+						"inProduction": false,
+						"progress": 0,
+						"readyCount": 0
+					}
+				}
+			},
+			{
+				"level": 0,
+				"upgrading": false,
+				"upgradeTimeLeft": 0,
+				"productions":{
+					"templateProductionID":{
+						"inProduction": false,
+						"progress": 0,
+						"readyCount": 0
+					}
+				}
+			},
+			{
+				"level": 0,
+				"upgrading": false,
+				"upgradeTimeLeft": 0,
+				"productions":{
+					"templateProductionID":{
+						"inProduction": false,
+						"progress": 0,
+						"readyCount": 0
+					}
+				}
+			},
+			{
+				"level": 0,
+				"upgrading": false,
+				"upgradeTimeLeft": 0,
+				"productions":{
+					"templateProductionID":{
+						"inProduction": false,
+						"progress": 0,
+						"readyCount": 0
+					}
+				}
+			},
+			{
+				"level": 0,
+				"upgrading": false,
+				"upgradeTimeLeft": 0,
+				"productions":{
+					"templateProductionID":{
+						"inProduction": false,
+						"progress": 0,
+						"readyCount": 0
+					}
+				}
+			},
+			{
+				"level": 0,
+				"upgrading": false,
+				"upgradeTimeLeft": 0,
+				"productions":{
+					"templateProductionID":{
+						"inProduction": false,
+						"progress": 0,
+						"readyCount": 0
+					}
+				}
+			}
+		],
+		"items":[],
+		"scavTimer":0,
+		"traders":[
+			{
+				"level":0,
+				"standing":0,
+				"standingToRestore":0,
+				"unlocked":true,
+				"tasks":{
+					"templateTaskID": {
+						"conditions": {
+							"templateTaskConditionID":{
+								"count":0
+							}
+						}
+					}
+				}
+			},
+			{
+				"level":0,
+				"standing":0,
+				"standingToRestore":0,
+				"unlocked":true,
+				"tasks":{}
+			},
+			{
+				"level":0,
+				"standing":0,
+				"standingToRestore":0,
+				"unlocked":true,
+				"tasks":{}
+			},
+			{
+				"level":0,
+				"standing":0,
+				"standingToRestore":0,
+				"unlocked":true,
+				"tasks":{}
+			},
+			{
+				"level":0,
+				"standing":0,
+				"standingToRestore":0,
+				"unlocked":true,
+				"tasks":{}
+			},
+			{
+				"level":0,
+				"standing":0,
+				"standingToRestore":0,
+				"unlocked":true,
+				"tasks":{}
+			},
+			{
+				"level":0,
+				"standing":0,
+				"standingToRestore":0,
+				"unlocked":true,
+				"tasks":{}
+			},
+			{
+				"level":0,
+				"standing":0,
+				"standingToRestore":0,
+				"unlocked":false,
+				"tasks":{}
+			},
+			{
+				"level":0,
+				"standing":0,
+				"standingToRestore":0,
+				"unlocked":true,
+				"tasks":{}
+			}
+		]
+	},
+	"wishlist":[]
+}

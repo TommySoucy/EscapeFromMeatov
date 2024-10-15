@@ -55,5 +55,6 @@
   "NavMeshLinkExtension.Update0": -1214935498,
   "FVRViveHand.EndInteractionIfHeld-1464184993": 1138439130,
   "FVRPhysicalObject.EndInteractionIntoInventorySlot-955217881": -426994025,
-  "FVRFireArmAttachment.EndInteraction-1405017133": -202874640
+  "FVRFireArmAttachment.EndInteraction-1405017133": -202874640,
+  "FVRQuickBeltSlot.set_IsKeepingTrackWithHead1729365000": 752650676
 }
