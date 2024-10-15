@@ -1629,7 +1629,7 @@ namespace EFM
 
                         // Setup button
                         PointableButton pointableButton = currentItemView.GetComponent<PointableButton>();
-                        pointableButton.Button.onClick.AddListener(() => { OnBuyItemClick(currentBarter.itemData, currentBarter.prices); });
+                        pointableButton.GetComponent<Button>().onClick.AddListener(() => { OnBuyItemClick(currentBarter.itemData, currentBarter.prices); });
                     }
                 }
             }
