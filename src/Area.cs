@@ -2155,6 +2155,8 @@ namespace EFM
                 newRequirement.resourceCount = 0;
                 requirements.Add(newRequirement);
                 areaData.OnSlotContentChanged += newRequirement.OnAreaSlotContentChanged;
+                newRequirement.item.OnHideoutItemInventoryChanged += newRequirement.OnInventoryChanged;
+                newRequirement.item.OnPlayerItemInventoryChanged += newRequirement.OnInventoryChanged;
             }
 
             if (!foundProductionAreaRequirement)
@@ -2198,7 +2200,10 @@ namespace EFM
         
         public void Update()
         {
-            if (inProduction)
+            // Only update production if powered/dont require power/etc.
+            // Note that bitcoin production should require power, but the production has its needFuelForAllProductionTime set to false
+            // So I've made the assumption that all continuous productions require power
+            if (inProduction && (!areaData.area.requiresPower || (!continuous && !needFuelForAllProductionTime) || areaData.area.powered))
             {
                 // Only need to start if progress == 0, otherwise we are resuming
                 if (!previousInProduction && progress == 0)
@@ -2209,6 +2214,7 @@ namespace EFM
                     if (!timeLeftSet)
                     {
                         timeLeft = time;
+                        timeLeftSet = true;
                     }
                 }
 
@@ -2271,7 +2277,7 @@ namespace EFM
                                 timeLeft = progressBaseTime;
                                 farmingUI.productionStatusText.text = "Producing\n(" + Mod.FormatTimeString(timeLeft) + ")...";
                                 progress = 0;
-                                productionUI.timePanel.percentage.text = ((int)progress).ToString() + "%";
+                                farmingUI.timePanel.percentage.text = ((int)progress).ToString() + "%";
                             }
                             else
                             {

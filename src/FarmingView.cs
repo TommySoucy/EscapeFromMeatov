@@ -35,7 +35,12 @@ namespace EFM
 
         public void OnGetClicked()
         {
-            // TODO
+            production.SpawnProduct();
+
+            getButton.SetActive(production.readyCount > 0);
+
+            area.UpdateStatusIcons();
+            area.UpdateStatusTexts();
         }
     }
 }
