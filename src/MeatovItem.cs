@@ -2355,21 +2355,24 @@ namespace EFM
             MeshRenderer[] mrs = GetComponentsInChildren<MeshRenderer>();
             for(int i=0; i < mrs.Length; ++i)
             {
-                MeshFilter mf = mrs[i].GetComponent<MeshFilter>();
-                if (mf != null)
+                if (mrs[i].isVisible)
                 {
-                    GameObject go = new GameObject();
-                    go.transform.parent = mrs[i].transform.parent;
-                    go.transform.localPosition = mrs[i].transform.localPosition;
-                    go.transform.localRotation = mrs[i].transform.localRotation;
+                    MeshFilter mf = mrs[i].GetComponent<MeshFilter>();
+                    if (mf != null)
+                    {
+                        GameObject go = new GameObject();
+                        go.transform.parent = mrs[i].transform.parent;
+                        go.transform.localPosition = mrs[i].transform.localPosition;
+                        go.transform.localRotation = mrs[i].transform.localRotation;
 
-                    MeshRenderer newMR = go.AddComponent<MeshRenderer>();
-                    MeshFilter newMF = go.AddComponent<MeshFilter>();
+                        MeshRenderer newMR = go.AddComponent<MeshRenderer>();
+                        MeshFilter newMF = go.AddComponent<MeshFilter>();
 
-                    newMF.mesh = mf.mesh;
-                    newMR.material = Mod.highlightMaterial;
+                        newMF.mesh = mf.mesh;
+                        newMR.material = Mod.highlightMaterial;
 
-                    highlightRenderers.Add(newMR);
+                        highlightRenderers.Add(newMR);
+                    }
                 }
             }
         }

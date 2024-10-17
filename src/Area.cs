@@ -857,7 +857,7 @@ namespace EFM
             upgradeTimeLeft = areaData.constructionTimePerLevel[currentLevel + 1];
 
             // Consume requirements
-            if(areaData.requirementsByTypePerLevel[currentLevel + 1].TryGetValue(Requirement.RequirementType.Item, out List<Requirement> itemRequirements))
+            if (areaData.requirementsByTypePerLevel[currentLevel + 1].TryGetValue(Requirement.RequirementType.Item, out List<Requirement> itemRequirements))
             {
                 for (int i = 0; i < itemRequirements.Count; ++i)
                 {
@@ -875,7 +875,7 @@ namespace EFM
                         else
                         {
                             countLeft -= item.stack;
-                            if(item.DetachChildren())
+                            if(!item.DetachChildren())
                             {
                                 item.Destroy();
                             }

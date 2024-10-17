@@ -2913,7 +2913,7 @@ namespace EFM
 
                     // Manage amount
                     // Note that we can't just set amount to numRounds because this is prefix and numRounds has not been updated yet
-                    --meatovItem.amount;
+                    meatovItem.amount = __instance.m_numRounds - 1;
 
                     // Manage ammobox ammo
                     if (meatovItem.itemType == MeatovItem.ItemType.AmmoBox)
@@ -2973,7 +2973,7 @@ namespace EFM
 
                     // Manage amount
                     // Note that we can't just set amount to numRounds because this is prefix and numRounds has not been updated yet
-                    --meatovItem.amount;
+                    meatovItem.amount = __instance.m_numRounds - 1;
 
                     // Manage ammobox ammo
                     if (meatovItem.itemType == MeatovItem.ItemType.AmmoBox)
@@ -3032,7 +3032,10 @@ namespace EFM
 
                     // Manage amount
                     // Note that we can't just set amount to numRounds because this is prefix and numRounds has not been updated yet
-                    --meatovItem.amount;
+                    meatovItem.amount = __instance.m_numRounds - 1;
+
+                    // Manage ammobox ammo
+                    if (meatovItem.itemType == MeatovItem.ItemType.AmmoBox)
                     {
                         Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>> dictToUse = null;
                         if (meatovItem.locationIndex == 0) // Player
@@ -3643,7 +3646,7 @@ namespace EFM
                     meatovItem.currentWeight += Mod.GetRoundWeight(__instance.RoundType);
 
                     // Manage amount
-                    ++meatovItem.amount;
+                    meatovItem.amount = __instance.m_numRounds + 1;
 
                     // Manage ammoBox ammo
                     if (meatovItem.itemType == MeatovItem.ItemType.AmmoBox)
@@ -3719,7 +3722,7 @@ namespace EFM
                     meatovItem.currentWeight += Mod.GetRoundWeight(__instance.RoundType);
 
                     // Manage amount
-                    ++meatovItem.amount;
+                    meatovItem.amount = __instance.m_numRounds + 1;
 
                     // Manage ammoBox ammo
                     if (meatovItem.itemType == MeatovItem.ItemType.AmmoBox)
