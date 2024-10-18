@@ -369,6 +369,7 @@ namespace EFM
         {
             data["level"] = level;
             data["standing"] = standing;
+            data["salesSum"] = salesSum;
             data["standingToRestore"] = standingToRestore;
             data["unlocked"] = unlocked;
 
@@ -386,6 +387,7 @@ namespace EFM
         {
             level = (int)data["level"];
             standing = (float)data["standing"];
+            salesSum = (int)data["salesSum"];
             standingToRestore = (float)data["standingToRestore"];
             unlocked = (bool)data["unlocked"];
             if (!unlocked)

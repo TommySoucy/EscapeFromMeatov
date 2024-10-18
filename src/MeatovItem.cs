@@ -498,13 +498,6 @@ namespace EFM
             if(physObj != null)
             {
                 Mod.meatovItemByInteractive.Add(physObj, this);
-
-                // Ammobox contents gets set to max on awake and will be overriden as necessary
-                if (itemType == ItemType.AmmoBox)
-                {
-                    FVRFireArmMagazine asMagazine = physObj as FVRFireArmMagazine;
-                    asMagazine.ReloadMagWithType(roundClass);
-                }
             }
         }
 

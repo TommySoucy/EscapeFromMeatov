@@ -518,10 +518,7 @@ namespace EFM
 
             // Update price
             currentTotalSellingPrice += actualValue;
-            if (currentTotalSellingPrice > 0)
-            {
-                sellDealButton.SetActive(true);
-            }
+            sellDealButton.SetActive(currentTotalSellingPrice > 0);
             sellItemView.amount.text = currentTotalSellingPrice.ToString();
         }
 
@@ -581,10 +578,7 @@ namespace EFM
             actualValue = Mathf.Max(actualValue, 1);
 
             currentTotalSellingPrice -= actualValue;
-            if (currentTotalSellingPrice > 0)
-            {
-                sellDealButton.SetActive(true);
-            }
+            sellDealButton.SetActive(currentTotalSellingPrice > 0);
             sellItemView.amount.text = currentTotalSellingPrice.ToString();
         }
 
@@ -1008,6 +1002,14 @@ namespace EFM
             // Remove price from trade volume
             foreach (BarterPrice price in ragFairBuyPrices)
             {
+                if(ragFairCartBarter.trader != null)
+                {
+                    if (price.itemData.index == 201 || price.itemData.index == 202 || price.itemData.index == 203)
+                    {
+                        ragFairCartBarter.trader.salesSum += price.count * ragFairCartItemCount;
+                    }
+                }
+
                 RemoveItemFromTrade(price.itemData, price.count * ragFairCartItemCount, price.dogTagLevel);
             }
 
@@ -1936,6 +1938,11 @@ namespace EFM
             // Remove price from trade volume
             foreach (BarterPrice price in buyPrices)
             {
+                if(price.itemData.index == 201 || price.itemData.index == 202 || price.itemData.index == 203)
+                {
+                    Mod.traders[currentTraderIndex].salesSum += price.count * cartItemCount;
+                }
+
                 RemoveItemFromTrade(price.itemData, price.count * cartItemCount, price.dogTagLevel);
             }
 
@@ -1979,6 +1986,9 @@ namespace EFM
 
         public void OnSellDealClick()
         {
+            Mod.traders[currentTraderIndex].salesSum += currentTotalSellingPrice;
+            int totalSellingPrice = currentTotalSellingPrice;
+
             // Remove all sellable items from trade volume
             List<MeatovItem> itemsToSell = new List<MeatovItem>();
             foreach (KeyValuePair<string, List<MeatovItem>> volumeItemEntry in tradeVolume.inventoryItems)
@@ -2004,7 +2014,7 @@ namespace EFM
             int currencyIndex = trader.currency == 0 ? 203 : (trader.currency == 1 ? 201 : 202);
             MeatovItemData currencyItemData = Mod.customItemData[currencyIndex];
 
-            tradeVolume.SpawnItem(currencyItemData, currentTotalSellingPrice);
+            tradeVolume.SpawnItem(currencyItemData, totalSellingPrice);
 
             // Update the whole thing
             SetTrader(currentTraderIndex);
@@ -2012,6 +2022,9 @@ namespace EFM
 
         public void OnInsureDealClick()
         {
+            Mod.traders[currentTraderIndex].salesSum += currentTotalInsurePrice;
+            int totalInsurePrice = currentTotalInsurePrice;
+
             // Insure all insureable items in trade volume
             foreach (KeyValuePair<string, List<MeatovItem>> volumeItemEntry in tradeVolume.inventoryItems)
             {
@@ -2027,7 +2040,7 @@ namespace EFM
             }
 
             // Remove insurance price from trade volume
-            RemoveItemFromTrade(currencyItemData, currentTotalInsurePrice);
+            RemoveItemFromTrade(currencyItemData, totalInsurePrice);
 
             // Update the whole thing
             SetTrader(currentTraderIndex);
