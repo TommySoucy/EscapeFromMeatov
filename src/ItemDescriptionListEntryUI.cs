@@ -646,7 +646,7 @@ namespace EFM
                             if (owner.descriptionPack.item.physObj is FVRFireArm)
                             {
                                 FVRFireArm asFA = owner.descriptionPack.item.physObj as FVRFireArm;
-                                asFA.LoadMag(asMag);
+                                asMag.Load(asFA);
                                 --entryCount;
                                 loaded = true;
                                 break;
@@ -654,7 +654,7 @@ namespace EFM
                             else if (owner.descriptionPack.item.physObj is AttachableFirearmPhysicalObject)
                             {
                                 AttachableFirearmPhysicalObject asAFA = owner.descriptionPack.item.physObj as AttachableFirearmPhysicalObject;
-                                asAFA.FA.LoadMag(asMag);
+                                asMag.Load(asAFA.FA);
                                 --entryCount;
                                 loaded = true;
                                 break;
@@ -676,7 +676,7 @@ namespace EFM
                             if (owner.descriptionPack.item.physObj is FVRFireArm)
                             {
                                 FVRFireArm asFA = owner.descriptionPack.item.physObj as FVRFireArm;
-                                asFA.LoadClip(asClip);
+                                asClip.Load(asFA);
                                 --entryCount;
                                 loaded = true;
                                 break;
