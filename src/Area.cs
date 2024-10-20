@@ -1722,9 +1722,12 @@ namespace EFM
 
         public void UpdateAreaUpgradeUI()
         {
-            areaData.area.UI.UpdateBottomButtons();
-            areaData.area.UI.UpdateStatusIcons();
-            areaData.area.UI.UpdateStatusTexts();
+            if(areaData != null && areaData.area != null && areaData.area.UI != null)
+            {
+                areaData.area.UI.UpdateBottomButtons();
+                areaData.area.UI.UpdateStatusIcons();
+                areaData.area.UI.UpdateStatusTexts();
+            }
         }
     }
 

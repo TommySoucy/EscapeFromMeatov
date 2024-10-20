@@ -1470,6 +1470,33 @@ namespace EFM
                 Mod.looseRigSlots.Clear();
             }
 
+            // Init hideout inventories
+            // Note that this must happen before we load player items because custom items
+            // will be instantiated, have their data set (which adds to to hideout inventory),
+            // and only then get put into their slot (which will again update their location)
+            if (inventoryItems == null)
+            {
+                inventory = new Dictionary<string, int>();
+                inventoryItems = new Dictionary<string, List<MeatovItem>>();
+                FIRInventory = new Dictionary<string, int>();
+                FIRInventoryItems = new Dictionary<string, List<MeatovItem>>();
+                marketManager.inventory = new Dictionary<string, int>();
+                marketManager.inventoryItems = new Dictionary<string, List<MeatovItem>>();
+                marketManager.FIRInventory = new Dictionary<string, int>();
+                marketManager.FIRInventoryItems = new Dictionary<string, List<MeatovItem>>();
+            }
+            else
+            {
+                inventory.Clear();
+                inventoryItems.Clear();
+                FIRInventory.Clear();
+                FIRInventoryItems.Clear();
+                marketManager.inventory.Clear();
+                marketManager.inventoryItems.Clear();
+                marketManager.FIRInventory.Clear();
+                marketManager.FIRInventoryItems.Clear();
+            }
+
             // Load the save time
             saveTime = new DateTime((long)HideoutController.loadedData["time"]);
             secondsSinceSave = (float)DateTime.UtcNow.Subtract(saveTime).TotalSeconds;
@@ -1559,29 +1586,6 @@ namespace EFM
             Mod.LogInfo("\t0");
 
             // Load hideout items
-            if (inventoryItems == null)
-            {
-                inventory = new Dictionary<string, int>();
-                inventoryItems = new Dictionary<string, List<MeatovItem>>();
-                FIRInventory = new Dictionary<string, int>();
-                FIRInventoryItems = new Dictionary<string, List<MeatovItem>>();
-                marketManager.inventory = new Dictionary<string, int>();
-                marketManager.inventoryItems = new Dictionary<string, List<MeatovItem>>();
-                marketManager.FIRInventory = new Dictionary<string, int>();
-                marketManager.FIRInventoryItems = new Dictionary<string, List<MeatovItem>>();
-            }
-            else
-            {
-                inventory.Clear();
-                inventoryItems.Clear();
-                FIRInventory.Clear();
-                FIRInventoryItems.Clear();
-                marketManager.inventory.Clear();
-                marketManager.inventoryItems.Clear();
-                marketManager.FIRInventory.Clear();
-                marketManager.FIRInventoryItems.Clear();
-            }
-
             LoadHideoutItems();
             Mod.LogInfo("\t0");
 
