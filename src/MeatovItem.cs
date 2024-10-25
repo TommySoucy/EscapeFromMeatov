@@ -2607,7 +2607,7 @@ namespace EFM
             return total;
         }
 
-        public JObject Serialize()
+        public JObject Serialize(bool saveSlotItems = true)
         {
             JObject serialized = new JObject();
 
@@ -2651,13 +2651,25 @@ namespace EFM
             {
                 case ItemType.Rig:
                 case ItemType.ArmoredRig:
-                    for(int i=0; i < itemsInSlots.Length; ++i)
-                    {
-                        if(itemsInSlots[i] != null)
+                    if (saveSlotItems)
+                    { 
+                        for (int i = 0; i < itemsInSlots.Length; ++i)
                         {
-                            JObject serializedChild = itemsInSlots[i].Serialize();
-                            serializedChild["slotIndex"] = i;
-                            serializedChildren.Add(serializedChild);
+                            if (itemsInSlots[i] != null)
+                            {
+                                FVRQuickBeltSlot preSlot = itemsInSlots[i].physObj.QuickbeltSlot;
+                                if (preSlot != null)
+                                {
+                                    itemsInSlots[i].physObj.SetQuickBeltSlot(null);
+                                }
+                                JObject serializedChild = itemsInSlots[i].Serialize();
+                                serializedChild["slotIndex"] = i;
+                                serializedChildren.Add(serializedChild);
+                                if (preSlot != null)
+                                {
+                                    itemsInSlots[i].physObj.SetQuickBeltSlot(preSlot);
+                                }
+                            }
                         }
                     }
                     break;

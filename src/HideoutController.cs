@@ -4385,7 +4385,9 @@ namespace EFM
                     MeatovItem meatovItem = physObj.GetComponent<MeatovItem>();
                     ++SetQuickBeltSlotPatch.fullSkip;
                     physObj.SetQuickBeltSlot(null);
-                    serializedItem = meatovItem == null ? null : meatovItem.Serialize();
+                    // Pass false to serialize to prevent saving equipped rig slot items
+                    // since they will instea be saved as QBS items
+                    serializedItem = meatovItem == null ? null : meatovItem.Serialize(false);
                     physObj.SetQuickBeltSlot(StatusUI.instance.equipmentSlots[i]);
                     --SetQuickBeltSlotPatch.fullSkip;
                 }
