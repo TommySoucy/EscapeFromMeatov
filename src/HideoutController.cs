@@ -164,6 +164,7 @@ namespace EFM
         public int instancesListPage;
         public int newInstanceMapListPage;
         public int waitingPlayerListPage;
+        public bool saved;
 
         public delegate void OnHideoutInventoryChangedDelegate();
         public event OnHideoutInventoryChangedDelegate OnHideoutInventoryChanged;
@@ -328,10 +329,6 @@ namespace EFM
 
             Mod.justFinishedRaid = false;
             init = true;
-            Mod.LogInfo("\t0");
-
-            Mod.saveSlotIndex = 5;
-            Save();
 
             Mod.LogInfo("\t0");
             InitUI();
@@ -339,6 +336,13 @@ namespace EFM
 
         public void Update()
         {
+            if (!saved)
+            {
+                Mod.saveSlotIndex = 5;
+                Save();
+                saved = true;
+            }
+
             if (init)
             {
                 UpdateTime();

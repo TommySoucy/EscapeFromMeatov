@@ -332,7 +332,7 @@ namespace EFM
             powered = requiresPower && (bool)HideoutController.loadedData["hideout"]["powered"];
             previousPowered = powered;
             currentLevel = (int)HideoutController.loadedData["hideout"]["areas"][index]["level"];
-            if(currentLevel == 0)
+            if (currentLevel == 0)
             {
                 currentLevel = startLevel;
             }
