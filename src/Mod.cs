@@ -4278,7 +4278,7 @@ namespace EFM
             if(securedObjects == null)
             {
                 securedObjects = new List<GameObject>();
-                securedItems = new MeatovItem[8];
+                securedItems = new MeatovItem[10];
                 securedSlotItems = new List<MeatovItem>();
             }
             else

@@ -808,13 +808,30 @@ namespace EFM
 
         public void Close()
         {
-            TODO: // Must review if this will actually make slotted equipment items hidden, because it won't if they don't get parented to the slot
+            // Equipment items do not necessarily get parented to the slot, so we need to toggle them manually
+            // Equipment items will get parented to the slot when putting them in manually, but not when loaded
+            for(int i=0; i < equipmentSlots.Length; ++i)
+            {
+                if (equipmentSlots[i].CurObject != null)
+                {
+                    equipmentSlots[i].CurObject.gameObject.SetActive(false);
+                }
+            }
             canvas.SetActive(false);
             slotsParent.SetActive(false);
         }
 
         public void Open()
         {
+            // Equipment items do not necessarily get parented to the slot, so we need to toggle them manually
+            // Equipment items will get parented to the slot when putting them in manually, but not when loaded
+            for (int i = 0; i < equipmentSlots.Length; ++i)
+            {
+                if (equipmentSlots[i].CurObject != null)
+                {
+                    equipmentSlots[i].CurObject.gameObject.SetActive(false);
+                }
+            }
             canvas.SetActive(true);
             slotsParent.SetActive(true);
         }
