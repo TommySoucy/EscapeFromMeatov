@@ -829,7 +829,7 @@ namespace EFM
             {
                 if (equipmentSlots[i].CurObject != null)
                 {
-                    equipmentSlots[i].CurObject.gameObject.SetActive(false);
+                    equipmentSlots[i].CurObject.gameObject.SetActive(true);
                 }
             }
             canvas.SetActive(true);

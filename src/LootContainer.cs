@@ -10,6 +10,8 @@ namespace EFM
 {
     public class LootContainer : MonoBehaviour
     {
+        public static readonly bool SPAWN_ALL_LOOT = true;
+
         public enum Mode
         {
             StaticLootData,
@@ -105,11 +107,25 @@ namespace EFM
         {
             if (spawnContents)
             {
-                KeyValuePair<MeatovItemData, int> entry = itemsToSpawn.Dequeue();
+                if (SPAWN_ALL_LOOT)
+                {
+                    while(itemsToSpawn.Count > 0)
+                    {
+                        KeyValuePair<MeatovItemData, int> entry = itemsToSpawn.Dequeue();
 
-                volume.SpawnItem(entry.Key, entry.Value, true);
+                        volume.SpawnItem(entry.Key, entry.Value, true);
 
-                spawnContents = itemsToSpawn.Count > 0;
+                        spawnContents = false;
+                    }
+                }
+                else
+                {
+                    KeyValuePair<MeatovItemData, int> entry = itemsToSpawn.Dequeue();
+
+                    volume.SpawnItem(entry.Key, entry.Value, true);
+
+                    spawnContents = itemsToSpawn.Count > 0;
+                }
             }
         }
 

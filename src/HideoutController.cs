@@ -4674,6 +4674,24 @@ namespace EFM
             }
             itemData.OnHideoutItemInventoryChangedInvoke(difference);
         }
+
+        public void OnDestroy()
+        {
+            // Unsub from UI events
+            foreach (KeyValuePair<string, string> raidMapEntry in Mod.availableRaidMaps)
+            {
+                if (Mod.raidMapEntryRequirements.TryGetValue(raidMapEntry.Key, out Dictionary<string, int> requirements))
+                {
+                    foreach (KeyValuePair<string, int> requirement in requirements)
+                    {
+                        if (Mod.defaultItemData.TryGetValue(requirement.Key, out MeatovItemData itemData))
+                        {
+                            itemData.OnPlayerItemInventoryChanged -= OnPlayerItemInventoryChanged;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public class TimedDisabler : MonoBehaviour

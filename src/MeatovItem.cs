@@ -2388,6 +2388,7 @@ namespace EFM
 		{
             hand.heldItem = this;
             hand.hasScript = true;
+            gameObject.SetActive(true);
 
             // Ensure the Grabbity_HoverSphere is displayed also when holding equipment item, so we know where to put the item in an equip slot
             // This is only necessary for equipment items because the slots are much smaller than the item itself so we need to know what specific point to put inside the slot
@@ -2482,6 +2483,7 @@ namespace EFM
                 // If item is harnessed, this patch doesn't get called because the item's slot doesn't actually change
                 // So we need to handle scaling with harnessed items here
                 transform.localScale = physObj.QBPoseOverride.localScale;
+                gameObject.SetActive(!(physObj.QuickbeltSlot is EquipmentSlot) || StatusUI.instance == null || StatusUI.instance.IsOpen());
 
                 // For the same reason, we must make sure that a togglable item in a slot is closed
                 if (open)

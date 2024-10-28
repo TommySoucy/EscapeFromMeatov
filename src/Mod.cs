@@ -535,7 +535,6 @@ namespace EFM
             set
             {
                 TODO: // Will have to handle weight management for FVRPlayerBody.m_currentHeadAttachment
-                Mod.LogInfo("Total weight set from " + _weight + " to " + value + ":\n" + Environment.StackTrace);
                 int preValue = _weight;
                 _weight = value;
                 if(_weight != preValue)
@@ -4235,6 +4234,14 @@ namespace EFM
             GameObject floorHelper = GM.CurrentMovementManager.m_floorHelper;
             securedMainSceneComponents.Add(floorHelper);
             GameObject.DontDestroyOnLoad(floorHelper);
+
+            // Secure all pooled audio sources
+            FVRPooledAudioSource[] sources = FindObjectsOfType<FVRPooledAudioSource>();
+            for(int i=0; i < sources.Length; ++i)
+            {
+                securedMainSceneComponents.Add(sources[i].gameObject);
+                GameObject.DontDestroyOnLoad(sources[i].gameObject);
+            }
         }
 
         public static void UnsecureMainSceneComponents()
@@ -4300,6 +4307,7 @@ namespace EFM
                     Mod.LogInfo("\t\t"+ StatusUI.instance.equipmentSlots[7].CurObject.name);
                     securedItems[9] = StatusUI.instance.equipmentSlots[7].CurObject.GetComponent<MeatovItem>();
                     securedItems[9].physObj.SetQuickBeltSlot(null);
+                    securedItems[9].physObj.SetParentage(null);
                     DontDestroyOnLoad(securedItems[9].gameObject);
 
                     if (securedItems[9].trackedMeatovItemData != null)
@@ -4364,6 +4372,7 @@ namespace EFM
                             securedSlotItems.Add(item);
 
                             item.physObj.SetQuickBeltSlot(null);
+                            item.physObj.SetParentage(null);
                             DontDestroyOnLoad(item.gameObject);
 
                             if (item.trackedMeatovItemData != null)
@@ -4394,6 +4403,7 @@ namespace EFM
                             securedSlotItems.Add(item);
 
                             item.physObj.SetQuickBeltSlot(null);
+                            item.physObj.SetParentage(null);
                             DontDestroyOnLoad(item.gameObject);
 
                             if (item.trackedMeatovItemData != null)
@@ -4412,6 +4422,7 @@ namespace EFM
                         Mod.LogInfo("\t\tEquipment Slot " + i + ": " + StatusUI.instance.equipmentSlots[i].CurObject.name);
                         MeatovItem item = StatusUI.instance.equipmentSlots[i].CurObject.GetComponent<MeatovItem>();
                         item.physObj.SetQuickBeltSlot(null);
+                        item.physObj.SetParentage(null);
                         DontDestroyOnLoad(item.gameObject);
                         securedItems[i + 2] = item;
 
@@ -4462,7 +4473,7 @@ namespace EFM
 
         public static void UnsecureItems(bool scav = false)
         {
-            Mod.LogInfo("UnsecureItems called");
+            Mod.LogInfo("UnsecureItems called in scene "+ SceneManager.GetActiveScene().name);
             // Unsecure generic secured objects
             if(securedObjects != null)
             {
@@ -4486,7 +4497,7 @@ namespace EFM
                 {
                     if(securedItems[i] != null)
                     {
-                        Mod.LogInfo("\t\t"+i+": "+ securedItems[i].name);
+                        Mod.LogInfo("\t\t"+i+": "+ securedItems[i].name+" with parent: "+(securedItems[i].transform.parent == null ? "null": securedItems[i].transform.parent.name)+" and root: "+ securedItems[i].transform.root.name);
                         SceneManager.MoveGameObjectToScene(securedItems[i].gameObject, SceneManager.GetActiveScene());
 
                         if (scav)
@@ -5022,64 +5033,71 @@ namespace EFM
             {
                 SosigLink sosigLink = (SosigLink)damageable;
                 AI AIRef = sosigLink.S.GetComponent<AI>();
-                MeatovItem itemRef = firearm.GetComponent<MeatovItem>();
-                if (itemRef != null)
+                if(firearm != null)
                 {
-                    KillData killData = new KillData();
-                    killData.distance = Vector3.Distance(GM.CurrentPlayerBody.Head.position, sosigLink.transform.position);
-                    killData.name = sosigLink.S.name;
-                    killData.baseExperienceReward = AIRef.experienceReward;
-                    killData.enemyTarget = AIRef.PMC ? (AIRef.USEC ? ConditionCounter.EnemyTarget.Usec : ConditionCounter.EnemyTarget.Bear) : ConditionCounter.EnemyTarget.Savage;
-                    killData.savageRole = AIRef.dataName;
-                    killData.weaponData = itemRef.itemData;
-                    killData.weaponChildrenData = new List<MeatovItemData>();
-                    itemRef.GetAllChildrenData(false, killData.weaponChildrenData);
-                    TODO: // Enemy health effects
-                    if (sosigLink.BodyPart == SosigLink.SosigBodyPart.Head)
+                    MeatovItem itemRef = firearm.GetComponent<MeatovItem>();
+                    if (itemRef != null)
                     {
-                        killData.bodyPart = ConditionCounter.TargetBodyPart.Head;
-                    }
-                    else if (sosigLink.BodyPart == SosigLink.SosigBodyPart.Torso)
-                    {
-                        bool torso = UnityEngine.Random.value < 0.5;
-                        if (torso)
+                        KillData killData = new KillData();
+                        killData.distance = Vector3.Distance(GM.CurrentPlayerBody.Head.position, sosigLink.transform.position);
+                        killData.name = sosigLink.S.name;
+                        killData.baseExperienceReward = AIRef.experienceReward;
+                        killData.enemyTarget = AIRef.PMC ? (AIRef.USEC ? ConditionCounter.EnemyTarget.Usec : ConditionCounter.EnemyTarget.Bear) : ConditionCounter.EnemyTarget.Savage;
+                        killData.savageRole = AIRef.dataName;
+                        killData.weaponData = itemRef.itemData;
+                        killData.weaponChildrenData = new List<MeatovItemData>();
+                        itemRef.GetAllChildrenData(false, killData.weaponChildrenData);
+                        TODO: // Enemy health effects
+                        if (sosigLink.BodyPart == SosigLink.SosigBodyPart.Head)
                         {
-                            killData.bodyPart = ConditionCounter.TargetBodyPart.Chest;
+                            killData.bodyPart = ConditionCounter.TargetBodyPart.Head;
                         }
-                        else
+                        else if (sosigLink.BodyPart == SosigLink.SosigBodyPart.Torso)
+                        {
+                            bool torso = UnityEngine.Random.value < 0.5;
+                            if (torso)
+                            {
+                                killData.bodyPart = ConditionCounter.TargetBodyPart.Chest;
+                            }
+                            else
+                            {
+                                bool left = UnityEngine.Random.value < 0.5;
+                                if (left)
+                                {
+                                    killData.bodyPart = ConditionCounter.TargetBodyPart.LeftArm;
+                                }
+                                else
+                                {
+                                    killData.bodyPart = ConditionCounter.TargetBodyPart.RightArm;
+                                }
+                            }
+                        }
+                        else if (sosigLink.BodyPart == SosigLink.SosigBodyPart.UpperLink)
+                        {
+                            killData.bodyPart = ConditionCounter.TargetBodyPart.Stomach;
+                        }
+                        else // Lower link
                         {
                             bool left = UnityEngine.Random.value < 0.5;
                             if (left)
                             {
-                                killData.bodyPart = ConditionCounter.TargetBodyPart.LeftArm;
+                                killData.bodyPart = ConditionCounter.TargetBodyPart.LeftLeg;
                             }
                             else
                             {
-                                killData.bodyPart = ConditionCounter.TargetBodyPart.RightArm;
+                                killData.bodyPart = ConditionCounter.TargetBodyPart.RightLeg;
                             }
                         }
-                    }
-                    else if (sosigLink.BodyPart == SosigLink.SosigBodyPart.UpperLink)
-                    {
-                        killData.bodyPart = ConditionCounter.TargetBodyPart.Stomach;
-                    }
-                    else // Lower link
-                    {
-                        bool left = UnityEngine.Random.value < 0.5;
-                        if (left)
-                        {
-                            killData.bodyPart = ConditionCounter.TargetBodyPart.LeftLeg;
-                        }
-                        else
-                        {
-                            killData.bodyPart = ConditionCounter.TargetBodyPart.RightLeg;
-                        }
-                    }
-                    killData.killTime = RaidManager.instance.time;
-                    killData.level = (int)Mathf.Clamp(RandomGaussian(Mod.level), 1, 100);
-                    AIRef.latestDamageSourceKillData = killData;
+                        killData.killTime = RaidManager.instance.time;
+                        killData.level = (int)Mathf.Clamp(RandomGaussian(Mod.level), 1, 100);
+                        AIRef.latestDamageSourceKillData = killData;
 
-                    Mod.OnShotInvoke(new ShotData(killData));
+                        Mod.OnShotInvoke(new ShotData(killData));
+                    }
+                    else // Not from a player damage source, clear kill data
+                    {
+                        AIRef.latestDamageSourceKillData = null;
+                    }
                 }
                 else // Not from a player damage source, clear kill data
                 {

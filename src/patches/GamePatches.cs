@@ -981,6 +981,8 @@ namespace EFM
 
         static void Prefix(ref FVRQuickBeltSlot slot, ref FVRPhysicalObject __instance)
         {
+            Mod.LogInfo("SetQuickBeltSlotPatch called on " + __instance.name + " for QBS: " + (slot == null ? "null":slot.name));
+
             if (!Mod.inMeatovScene || fullSkip > 0)
             {
                 return;
@@ -1242,6 +1244,8 @@ namespace EFM
                 Mod.weight += item.currentWeight;
 
                 EquipmentSlot.WearEquipment(item);
+
+                __instance.gameObject.SetActive(StatusUI.instance.IsOpen());
             }
             else if (slot is RigSlot)
             {
