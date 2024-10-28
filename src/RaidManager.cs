@@ -705,7 +705,7 @@ namespace EFM
                 }
             }
 
-            // Add half (min 1) the restriction extractions, chosen randomly
+            // Add half (min 1) of the restriction extractions, chosen randomly
             if (noRestrictionExtractions.Count > 0)
             {
                 int count = Mathf.Max(1, restrictionExtractions.Count / 2);
@@ -728,6 +728,7 @@ namespace EFM
                 GameObject extractionCard = Instantiate(StatusUI.instance.extractionCardPrefab, StatusUI.instance.extractionsParent.transform);
                 extractionCard.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = "EXFIL" + (i < 10 ? "0" + i : i.ToString()) + " " + activeExtractions[i].extractionName;
                 activeExtractions[i].cardRequirementText = extractionCard.transform.GetChild(0).GetChild(1).GetComponent<Text>();
+                extractionCard.SetActive(true);
             }
         }
 
