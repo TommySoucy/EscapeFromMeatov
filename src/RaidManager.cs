@@ -72,7 +72,7 @@ namespace EFM
             scavSpawnTimer = scavSpawnInterval;
             Mod.raidKills = new List<KillData>();
 
-            Mod.UnsecureItems();
+            Mod.UnsecureInventory();
 
             InitTime();
 
@@ -706,7 +706,7 @@ namespace EFM
             }
 
             // Add half (min 1) of the restriction extractions, chosen randomly
-            if (noRestrictionExtractions.Count > 0)
+            if (restrictionExtractions.Count > 0)
             {
                 int count = Mathf.Max(1, restrictionExtractions.Count / 2);
                 for (int j = 0; j < count; ++j)
@@ -1398,12 +1398,12 @@ namespace EFM
             if(status == RaidStatus.Success || status == RaidStatus.RunThrough)
             {
                 // Secure all items player has on them
-                Mod.SecureItems("MeatovHideout");
+                Mod.SecureInventory();
             }
             else // MIA, KIA
             {
                 // Secure only the pouch
-                Mod.SecureItems("MeatovHideout", true);
+                Mod.SecureInventory(true);
             }
 
             // Clear extraction UI

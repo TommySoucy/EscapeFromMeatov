@@ -456,7 +456,7 @@ namespace EFM
                             // Secure all items player has
                             if (Mod.charChoicePMC)
                             {
-                                Mod.SecureItems(Mod.mapChoiceName);
+                                Mod.SecureInventory();
                                 securedItems = true;
                             }
 
@@ -514,7 +514,7 @@ namespace EFM
                         cancelRaidLoad = true;
                         if (securedItems)
                         {
-                            Mod.UnsecureItems();
+                            Mod.UnsecureInventory();
                         }
                         Mod.LogError("Could not load level: "+Mod.mapChoiceName+", cancelling: "+ ex.Message+"\n"+ ex.StackTrace);
                     }
@@ -1563,7 +1563,7 @@ namespace EFM
                 // If we were PMC in raid, unsecure secured items
                 if (Mod.charChoicePMC)
                 {
-                    Mod.UnsecureItems();
+                    Mod.UnsecureInventory();
                 }
 
                 // Set any parts health to 1 if they are at 0
@@ -1974,7 +1974,8 @@ namespace EFM
                                 }
                             }
 
-                            meatovItem.transform.parent = scavReturnNode;
+                            objs[0].StoreAndDestroyRigidbody();
+                            objs[0].SetParentage(scavReturnNode);
                         }
                     };
 
@@ -1982,7 +1983,8 @@ namespace EFM
 
                     if (loadedItem != null)
                     {
-                        loadedItem.transform.parent = scavReturnNode;
+                        loadedItem.physObj.StoreAndDestroyRigidbody();
+                        loadedItem.physObj.SetParentage(scavReturnNode);
                     }
                 }
             }
@@ -1992,7 +1994,7 @@ namespace EFM
         {
             Mod.LogInfo("LoadPlayerItems");
             // If have secured items, unsecured them on scav return node
-            Mod.UnsecureItems(true);
+            Mod.UnsecureInventory(true);
 
             if (loadedData["leftHand"] != null && loadedData["leftHand"].Type != JTokenType.Null)
             {

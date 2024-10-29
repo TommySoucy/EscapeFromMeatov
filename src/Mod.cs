@@ -57,9 +57,7 @@ namespace EFM
         public static List<AssetBundle> raidMapAdditiveBundles;
         public static List<AssetBundle> raidMapPrefabBundles;
         public static List<GameObject> securedMainSceneComponents;
-        public static List<GameObject> securedObjects; // Other objects that needed to be secured that do not require special handling
-        public static MeatovItem[] securedItems; // Left hand, Right hand, Backpack, BodyArmor, EarPiece, HeadWear, FaceCover, EyeWear, Rig, Pouch, Right shoulder, Pockets
-        public static List<MeatovItem> securedSlotItems;
+        public static JObject securedInventory;
         public static int saveSlotIndex = -1;
         public static int currentQuickBeltConfiguration = -1;
         public static int firstCustomConfigIndex = -1;
@@ -4234,14 +4232,6 @@ namespace EFM
             GameObject floorHelper = GM.CurrentMovementManager.m_floorHelper;
             securedMainSceneComponents.Add(floorHelper);
             GameObject.DontDestroyOnLoad(floorHelper);
-
-            // Secure all pooled audio sources
-            FVRPooledAudioSource[] sources = FindObjectsOfType<FVRPooledAudioSource>();
-            for(int i=0; i < sources.Length; ++i)
-            {
-                securedMainSceneComponents.Add(sources[i].gameObject);
-                GameObject.DontDestroyOnLoad(sources[i].gameObject);
-            }
         }
 
         public static void UnsecureMainSceneComponents()
@@ -4277,282 +4267,388 @@ namespace EFM
             QualitySettings.lodBias = 2;
         }
 
-        public static void SecureItems(string destination, bool pouchOnly = false)
+        public static void SecureInventory(bool pouchOnly = false)
         {
             Mod.LogInfo("SecureItems called");
-            TODO: // Verify that if we are securing the player body by securing main scene components, do we need to secure stuff if hands and slots?
-                  // We shouldn't need to if the slot items are attached to the player body, because i think status ui also is attached to player(?)
-            if(securedObjects == null)
-            {
-                securedObjects = new List<GameObject>();
-                securedItems = new MeatovItem[10];
-                securedSlotItems = new List<MeatovItem>();
-            }
-            else
-            {
-                securedObjects.Clear();
-                for (int i = 0; i < securedItems.Length; ++i)
-                {
-                    securedItems[i] = null;
-                }
-                securedSlotItems.Clear();
-            }
-
+            securedInventory = new JObject();
 
             if (pouchOnly)
             {
                 Mod.LogInfo("\tPouch only");
-                if (StatusUI.instance.equipmentSlots[7].CurObject != null)
+                FVRPhysicalObject physObj = StatusUI.instance.equipmentSlots[7].CurObject;
+                if (physObj != null)
                 {
-                    Mod.LogInfo("\t\t"+ StatusUI.instance.equipmentSlots[7].CurObject.name);
-                    securedItems[9] = StatusUI.instance.equipmentSlots[7].CurObject.GetComponent<MeatovItem>();
-                    securedItems[9].physObj.SetQuickBeltSlot(null);
-                    securedItems[9].physObj.SetParentage(null);
-                    DontDestroyOnLoad(securedItems[9].gameObject);
-
-                    if (securedItems[9].trackedMeatovItemData != null)
-                    {
-                        securedItems[9].trackedMeatovItemData.SetScene(destination, true);
-                    }
-
-                    SecureAdditionalObjects(securedItems[9], destination);
+                    MeatovItem meatovItem = physObj.GetComponent<MeatovItem>();
+                    physObj.SetQuickBeltSlot(null);
+                    physObj.SetParentage(null);
+                    securedInventory["equipment" + 7] = meatovItem == null ? null : meatovItem.Serialize(false);
                 }
             }
             else
             {
                 Mod.LogInfo("\tAll items");
+
+                // Hands
+                // Don't want to save as hand item if item has quickbeltslot, which would mean it is harnessed
                 if (Mod.leftHand.heldItem != null)
                 {
-                    Mod.LogInfo("\t\tLeft hand: " + Mod.leftHand.heldItem.name);
-                    MeatovItem item = Mod.leftHand.heldItem;
+                    Mod.leftHand.heldItem.physObj.ForceBreakInteraction();
 
-                    item.physObj.ForceBreakInteraction();
-                    DontDestroyOnLoad(item.gameObject);
-                    securedItems[0] = item;
-
-                    if (item.trackedMeatovItemData != null)
+                    if (Mod.leftHand.heldItem.physObj.QuickbeltSlot == null)
                     {
-                        item.trackedMeatovItemData.SetScene(destination, true);
+                        securedInventory["leftHand"] = Mod.leftHand.heldItem.Serialize();
                     }
-
-                    SecureAdditionalObjects(item, destination);
                 }
                 if (Mod.rightHand.heldItem != null)
                 {
-                    Mod.LogInfo("\t\tRight hand: " + Mod.leftHand.heldItem.name);
-                    MeatovItem item = Mod.rightHand.heldItem;
+                    Mod.rightHand.heldItem.physObj.ForceBreakInteraction();
 
-                    item.physObj.ForceBreakInteraction();
-                    DontDestroyOnLoad(item.gameObject);
-                    securedItems[1] = item;
-
-                    if (item.trackedMeatovItemData != null)
+                    if (Mod.rightHand.heldItem.physObj.QuickbeltSlot == null)
                     {
-                        item.trackedMeatovItemData.SetScene(destination, true);
+                        securedInventory["rightHand"] = Mod.rightHand.heldItem.Serialize();
                     }
-
-                    SecureAdditionalObjects(item, destination);
                 }
+
+                // QBS
+                securedInventory["slotCount"] = GM.CurrentPlayerBody.QBSlots_Internal.Count;
                 for (int i = 0; i < GM.CurrentPlayerBody.QBSlots_Internal.Count; ++i)
                 {
-                    if (GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject == null)
+                    FVRPhysicalObject physObj = GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject;
+                    if (physObj != null)
                     {
-                        securedSlotItems.Add(null);
-                    }
-                    else
-                    {
-                        Mod.LogInfo("\t\tSlot "+i+": " + GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject.name);
-                        MeatovItem item = GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject.GetComponent<MeatovItem>();
-                        if (item == null)
-                        {
-                            securedSlotItems.Add(null);
-                        }
-                        else
-                        {
-                            securedSlotItems.Add(item);
-
-                            item.physObj.SetQuickBeltSlot(null);
-                            item.physObj.SetParentage(null);
-                            DontDestroyOnLoad(item.gameObject);
-
-                            if (item.trackedMeatovItemData != null)
-                            {
-                                item.trackedMeatovItemData.SetScene(destination, true);
-                            }
-
-                            SecureAdditionalObjects(item, destination);
-                        }
+                        MeatovItem meatovItem = physObj.GetComponent<MeatovItem>();
+                        physObj.SetQuickBeltSlot(null);
+                        physObj.SetParentage(null);
+                        securedInventory["slot" + i] = meatovItem == null ? null : meatovItem.Serialize();
                     }
                 }
-                for (int i = 0; i < GM.CurrentPlayerBody.QBSlots_Added.Count; ++i)
-                {
-                    if (GM.CurrentPlayerBody.QBSlots_Added[i].CurObject == null)
-                    {
-                        securedSlotItems.Add(null);
-                    }
-                    else
-                    {
-                        Mod.LogInfo("\t\tAdded Slot " + i + ": " + GM.CurrentPlayerBody.QBSlots_Added[i].CurObject.name);
-                        MeatovItem item = GM.CurrentPlayerBody.QBSlots_Added[i].CurObject.GetComponent<MeatovItem>();
-                        if (item == null)
-                        {
-                            securedSlotItems.Add(null);
-                        }
-                        else
-                        {
-                            securedSlotItems.Add(item);
 
-                            item.physObj.SetQuickBeltSlot(null);
-                            item.physObj.SetParentage(null);
-                            DontDestroyOnLoad(item.gameObject);
-
-                            if (item.trackedMeatovItemData != null)
-                            {
-                                item.trackedMeatovItemData.SetScene(destination, true);
-                            }
-
-                            SecureAdditionalObjects(item, destination);
-                        }
-                    }
-                }
+                // Equipment
                 for (int i = 0; i < StatusUI.instance.equipmentSlots.Length; ++i)
                 {
-                    if (StatusUI.instance.equipmentSlots[i].CurObject != null)
+                    FVRPhysicalObject physObj = StatusUI.instance.equipmentSlots[i].CurObject;
+                    if (physObj != null)
                     {
-                        Mod.LogInfo("\t\tEquipment Slot " + i + ": " + StatusUI.instance.equipmentSlots[i].CurObject.name);
-                        MeatovItem item = StatusUI.instance.equipmentSlots[i].CurObject.GetComponent<MeatovItem>();
-                        item.physObj.SetQuickBeltSlot(null);
-                        item.physObj.SetParentage(null);
-                        DontDestroyOnLoad(item.gameObject);
-                        securedItems[i + 2] = item;
-
-                        if (item.trackedMeatovItemData != null)
-                        {
-                            item.trackedMeatovItemData.SetScene(destination, true);
-                        }
-
-                        SecureAdditionalObjects(item, destination);
+                        MeatovItem meatovItem = physObj.GetComponent<MeatovItem>();
+                        physObj.SetQuickBeltSlot(null);
+                        physObj.SetParentage(null);
+                        securedInventory["equipment" + i] = meatovItem == null ? null : meatovItem.Serialize(false);
                     }
                 }
             }
         }
 
-        public static void SecureAdditionalObjects(MeatovItem item, string destination)
+        public static void UnsecureInventory(bool scav = false)
         {
-            // Items inside a rig will not be attached to the rig, so much secure them separately
-            TODO: // Verify if this is still necessary
-            if (item.itemType == MeatovItem.ItemType.Rig || item.itemType == MeatovItem.ItemType.ArmoredRig)
-            {
-                foreach (MeatovItem innerItem in item.itemsInSlots)
-                {
-                    // Check if not already secured
-                    if (innerItem != null && !innerItem.gameObject.scene.name.Equals("DontDestroyOnLoad"))
-                    {
-                        DontDestroyOnLoad(innerItem.gameObject);
-                        securedObjects.Add(innerItem.gameObject);
-                        if (innerItem.trackedMeatovItemData != null)
-                        {
-                            innerItem.trackedMeatovItemData.SetScene(destination, true);
-                        }
-                        SecureAdditionalObjects(innerItem, destination);
-                    }
-                }
-            }
+            Mod.LogInfo("UnsecureItems called");
 
-            // Secure any laser pointer hit objects
-            LaserPointer[] laserPointers = item.GetComponentsInChildren<LaserPointer>();
-            foreach (LaserPointer laserPointer in laserPointers)
-            {
-                if (laserPointer.BeamHitPoint != null && laserPointer.BeamHitPoint.transform.parent == null)
-                {
-                    DontDestroyOnLoad(laserPointer.BeamHitPoint);
-                    securedObjects.Add(laserPointer.BeamHitPoint);
-                }
-            }
-        }
-
-        public static void UnsecureItems(bool scav = false)
-        {
-            Mod.LogInfo("UnsecureItems called in scene "+ SceneManager.GetActiveScene().name);
-            // Unsecure generic secured objects
-            if(securedObjects != null)
-            {
-                Mod.LogInfo("\tGot "+ securedObjects.Count+" secured objects");
-                for (int i = 0; i < securedObjects.Count; ++i)
-                {
-                    if(securedObjects[i] != null)
-                    {
-                        Mod.LogInfo("\t\tUnsecuring: "+ securedObjects[i].name);
-                        SceneManager.MoveGameObjectToScene(securedObjects[i], SceneManager.GetActiveScene());
-                    }
-                }
-                securedObjects.Clear();
-            }
-
-            // Unsecure hand and equipment items
-            if(securedItems != null)
+            if(securedInventory != null)
             {
                 Mod.LogInfo("\tGot secured items");
-                for (int i = 0; i < securedItems.Length; ++i)
+                // Hands
+                if (securedInventory["leftHand"] != null && securedInventory["leftHand"].Type != JTokenType.Null)
                 {
-                    if(securedItems[i] != null)
+                    Mod.LogInfo("\tLeft hand");
+                    // In case item is vanilla, in which case we use the vault system to save it,
+                    // we will only be getting the instantiated item later
+                    // We must write a delegate in order to put it in the correct hand once we do
+                    JToken vanillaCustomData = null;
+                    if (securedInventory["leftHand"]["vanillaCustomData"] != null)
                     {
-                        Mod.LogInfo("\t\t"+i+": "+ securedItems[i].name+" with parent: "+(securedItems[i].transform.parent == null ? "null": securedItems[i].transform.parent.name)+" and root: "+ securedItems[i].transform.root.name);
-                        SceneManager.MoveGameObjectToScene(securedItems[i].gameObject, SceneManager.GetActiveScene());
-
-                        if (scav)
+                        vanillaCustomData = securedInventory["leftHand"]["vanillaCustomData"];
+                    }
+                    bool tempScav = scav;
+                    VaultSystem.ReturnObjectListDelegate del = objs =>
+                    {
+                        // Here, assume objs[0] is the root item
+                        MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
+                        if (meatovItem != null)
                         {
-                            Mod.LogInfo("\t\t\tScav, putting on return node");
-                            securedItems[i].transform.parent = HideoutController.instance.scavReturnNode;
-                            securedItems[i].transform.position = HideoutController.instance.scavReturnNode.position;
-                        }
-                        else
-                        {
-                            if (i == 0)
+                            // Set live data
+                            string currentTarkovID = vanillaCustomData["tarkovID"].ToString();
+                            if (!meatovItem.itemDataSet || !meatovItem.tarkovID.Equals(currentTarkovID))
                             {
-                                Mod.LogInfo("\t\t\tLeft hand, setting as interactable");
-                                Mod.leftHand.fvrHand.ForceSetInteractable(securedItems[i].physObj);
+                                meatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
                             }
-                            else if (i == 1)
+                            meatovItem.insured = (bool)vanillaCustomData["insured"];
+                            meatovItem.looted = (bool)vanillaCustomData["looted"];
+                            meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
+
+                            for (int m = 1; m < objs.Count; ++m)
                             {
-                                Mod.LogInfo("\t\t\tRight hand, setting as interactable");
-                                Mod.rightHand.fvrHand.ForceSetInteractable(securedItems[i].physObj);
+                                MeatovItem childMeatovItem = objs[m].GetComponent<MeatovItem>();
+                                if (childMeatovItem != null)
+                                {
+                                    currentTarkovID = vanillaCustomData["children"][m - 1]["tarkovID"].ToString();
+                                    if (!childMeatovItem.itemDataSet || !childMeatovItem.tarkovID.Equals(currentTarkovID))
+                                    {
+                                        childMeatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                                    }
+                                    childMeatovItem.insured = (bool)vanillaCustomData["children"][m - 1]["insured"];
+                                    childMeatovItem.looted = (bool)vanillaCustomData["children"][m - 1]["looted"];
+                                    childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][m - 1]["foundInRaid"];
+                                }
+                            }
+
+                            if (tempScav)
+                            {
+                                objs[0].StoreAndDestroyRigidbody();
+                                objs[0].SetParentage(HideoutController.instance.scavReturnNode);
                             }
                             else
                             {
-                                Mod.LogInfo("\t\t\tEquipment "+ (i - 2));
-                                securedItems[i].physObj.SetQuickBeltSlot(StatusUI.instance.equipmentSlots[i - 2]);
+                                objs[0].BeginInteraction(Mod.leftHand.fvrHand);
+                                Mod.leftHand.fvrHand.ForceSetInteractable(objs[0]);
+                                meatovItem.UpdateInventories(false, false, false);
+                            }
+                        }
+                    };
+
+                    // In case item is custom, it will be returned right away and we can handle it here
+                    MeatovItem loadedItem = MeatovItem.Deserialize(securedInventory["leftHand"], del);
+
+                    if (loadedItem != null)
+                    {
+                        if (scav)
+                        {
+                            loadedItem.physObj.StoreAndDestroyRigidbody();
+                            loadedItem.physObj.SetParentage(HideoutController.instance.scavReturnNode);
+                        }
+                        else
+                        {
+                            loadedItem.physObj.BeginInteraction(Mod.leftHand.fvrHand);
+                            Mod.leftHand.fvrHand.ForceSetInteractable(loadedItem.physObj);
+                            loadedItem.UpdateInventories(false, false, false);
+                        }
+                    }
+                }
+                if (securedInventory["rightHand"] != null && securedInventory["rightHand"].Type != JTokenType.Null)
+                {
+                    Mod.LogInfo("\tRight hand");
+                    JToken vanillaCustomData = null;
+                    if (securedInventory["rightHand"]["vanillaCustomData"] != null)
+                    {
+                        vanillaCustomData = securedInventory["rightHand"]["vanillaCustomData"];
+                    }
+                    bool tempScav = scav;
+                    VaultSystem.ReturnObjectListDelegate del = objs =>
+                    {
+                        // Here, assume objs[0] is the root item
+                        MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
+                        if (meatovItem != null)
+                        {
+                            // Set live data
+                            string currentTarkovID = vanillaCustomData["tarkovID"].ToString();
+                            if (!meatovItem.itemDataSet || !meatovItem.tarkovID.Equals(currentTarkovID))
+                            {
+                                meatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                            }
+                            meatovItem.insured = (bool)vanillaCustomData["insured"];
+                            meatovItem.looted = (bool)vanillaCustomData["looted"];
+                            meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
+
+                            for (int m = 1; m < objs.Count; ++m)
+                            {
+                                MeatovItem childMeatovItem = objs[m].GetComponent<MeatovItem>();
+                                if (childMeatovItem != null)
+                                {
+                                    currentTarkovID = vanillaCustomData["children"][m - 1]["tarkovID"].ToString();
+                                    if (!childMeatovItem.itemDataSet || !childMeatovItem.tarkovID.Equals(currentTarkovID))
+                                    {
+                                        childMeatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                                    }
+                                    childMeatovItem.insured = (bool)vanillaCustomData["children"][m - 1]["insured"];
+                                    childMeatovItem.looted = (bool)vanillaCustomData["children"][m - 1]["looted"];
+                                    childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][m - 1]["foundInRaid"];
+                                }
+                            }
+
+                            if (tempScav)
+                            {
+                                objs[0].StoreAndDestroyRigidbody();
+                                objs[0].SetParentage(HideoutController.instance.scavReturnNode);
+                            }
+                            else
+                            {
+                                objs[0].BeginInteraction(Mod.rightHand.fvrHand);
+                                Mod.rightHand.fvrHand.ForceSetInteractable(objs[0]);
+                                meatovItem.UpdateInventories(false, false, false);
+                            }
+                        }
+                    };
+
+                    MeatovItem loadedItem = MeatovItem.Deserialize(securedInventory["rightHand"], del);
+
+                    if (loadedItem != null)
+                    {
+                        if (scav)
+                        {
+                            loadedItem.physObj.StoreAndDestroyRigidbody();
+                            loadedItem.physObj.SetParentage(HideoutController.instance.scavReturnNode);
+                        }
+                        else
+                        {
+                            loadedItem.physObj.BeginInteraction(Mod.rightHand.fvrHand);
+                            Mod.rightHand.fvrHand.ForceSetInteractable(loadedItem.physObj);
+                            loadedItem.UpdateInventories(false, false, false);
+                        }
+                    }
+                }
+
+                // Note that we must load equipment before loading QBS items
+                // This is so that if we have a rig it will have been loaded
+                for (int i = 0; i < StatusUI.instance.equipmentSlots.Length; ++i)
+                {
+                    if (securedInventory["equipment" + i] != null && securedInventory["equipment" + i].Type != JTokenType.Null)
+                    {
+                        Mod.LogInfo("\tEquipment" + i);
+                        JToken vanillaCustomData = null;
+                        if (securedInventory["equipment" + i]["vanillaCustomData"] != null)
+                        {
+                            vanillaCustomData = securedInventory["equipment" + i]["vanillaCustomData"];
+                        }
+                        bool tempScav = scav;
+                        VaultSystem.ReturnObjectListDelegate del = objs =>
+                        {
+                            // Here, assume objs[0] is the root item
+                            MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
+                            if (meatovItem != null)
+                            {
+                                // Set live data
+                                string currentTarkovID = vanillaCustomData["tarkovID"].ToString();
+                                if (!meatovItem.itemDataSet || !meatovItem.tarkovID.Equals(currentTarkovID))
+                                {
+                                    meatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                                }
+                                meatovItem.insured = (bool)vanillaCustomData["insured"];
+                                meatovItem.looted = (bool)vanillaCustomData["looted"];
+                                meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
+
+                                for (int m = 1; m < objs.Count; ++m)
+                                {
+                                    MeatovItem childMeatovItem = objs[m].GetComponent<MeatovItem>();
+                                    if (childMeatovItem != null)
+                                    {
+                                        currentTarkovID = vanillaCustomData["children"][m - 1]["tarkovID"].ToString();
+                                        if (!childMeatovItem.itemDataSet || !childMeatovItem.tarkovID.Equals(currentTarkovID))
+                                        {
+                                            childMeatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                                        }
+                                        childMeatovItem.insured = (bool)vanillaCustomData["children"][m - 1]["insured"];
+                                        childMeatovItem.looted = (bool)vanillaCustomData["children"][m - 1]["looted"];
+                                        childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][m - 1]["foundInRaid"];
+                                    }
+                                }
+
+                                if (tempScav)
+                                {
+                                    objs[0].StoreAndDestroyRigidbody();
+                                    objs[0].SetParentage(HideoutController.instance.scavReturnNode);
+                                }
+                                else
+                                {
+                                    objs[0].SetQuickBeltSlot(StatusUI.instance.equipmentSlots[i]);
+                                    meatovItem.UpdateInventories(false, false, false);
+                                }
+                            }
+                        };
+
+                        MeatovItem loadedItem = MeatovItem.Deserialize(securedInventory["equipment" + i], del);
+
+                        if (loadedItem != null)
+                        {
+                            if (scav)
+                            {
+                                loadedItem.physObj.StoreAndDestroyRigidbody();
+                                loadedItem.physObj.SetParentage(HideoutController.instance.scavReturnNode);
+                            }
+                            else
+                            {
+                                loadedItem.physObj.SetQuickBeltSlot(StatusUI.instance.equipmentSlots[i]);
+                                loadedItem.UpdateInventories(false, false, false);
+                            }
+                        }
+                    }
+                }
+
+                int slotCount = (int)securedInventory["slotCount"];
+                for (int i = 0; i < slotCount; ++i)
+                {
+                    if (securedInventory["slot" + i] != null && securedInventory["slot" + i].Type != JTokenType.Null)
+                    {
+                        Mod.LogInfo("\tSlot" + i);
+                        JToken vanillaCustomData = null;
+                        if (securedInventory["slot" + i]["vanillaCustomData"] != null)
+                        {
+                            vanillaCustomData = securedInventory["slot" + i]["vanillaCustomData"];
+                        }
+                        int slotIndex = i;
+                        bool tempScav = scav;
+                        VaultSystem.ReturnObjectListDelegate del = objs =>
+                        {
+                            // Here, assume objs[0] is the root item
+                            MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
+                            if (meatovItem != null)
+                            {
+                                // Set live data
+                                string currentTarkovID = vanillaCustomData["tarkovID"].ToString();
+                                if (!meatovItem.itemDataSet || !meatovItem.tarkovID.Equals(currentTarkovID))
+                                {
+                                    meatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                                }
+                                meatovItem.insured = (bool)vanillaCustomData["insured"];
+                                meatovItem.looted = (bool)vanillaCustomData["looted"];
+                                meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
+
+                                for (int m = 1; m < objs.Count; ++m)
+                                {
+                                    MeatovItem childMeatovItem = objs[m].GetComponent<MeatovItem>();
+                                    if (childMeatovItem != null)
+                                    {
+                                        currentTarkovID = vanillaCustomData["children"][m - 1]["tarkovID"].ToString();
+                                        if (!childMeatovItem.itemDataSet || !childMeatovItem.tarkovID.Equals(currentTarkovID))
+                                        {
+                                            childMeatovItem.SetData(Mod.defaultItemData[currentTarkovID], true);
+                                        }
+                                        childMeatovItem.insured = (bool)vanillaCustomData["children"][m - 1]["insured"];
+                                        childMeatovItem.looted = (bool)vanillaCustomData["children"][m - 1]["looted"];
+                                        childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][m - 1]["foundInRaid"];
+                                    }
+                                }
+
+                                if (tempScav)
+                                {
+                                    objs[0].StoreAndDestroyRigidbody();
+                                    objs[0].SetParentage(HideoutController.instance.scavReturnNode);
+                                }
+                                else
+                                {
+                                    objs[0].SetQuickBeltSlot(GM.CurrentPlayerBody.QBSlots_Internal[slotIndex]);
+                                    meatovItem.UpdateInventories(false, false, false);
+                                }
+                            }
+                        };
+
+                        MeatovItem loadedItem = MeatovItem.Deserialize(securedInventory["slot" + i], del);
+
+                        if (loadedItem != null)
+                        {
+                            if (scav)
+                            {
+                                loadedItem.physObj.StoreAndDestroyRigidbody();
+                                loadedItem.physObj.SetParentage(HideoutController.instance.scavReturnNode);
+                            }
+                            else
+                            {
+                                loadedItem.physObj.SetQuickBeltSlot(GM.CurrentPlayerBody.QBSlots_Internal[i]);
+                                loadedItem.UpdateInventories(false, false, false);
                             }
                         }
                     }
                 }
             }
 
-            // Unsecure slot items
-            if(securedSlotItems != null)
-            {
-                Mod.LogInfo("\tGot secured QBS items");
-                for (int i = 0; i < securedSlotItems.Count; ++i)
-                {
-                    if (securedSlotItems[i] != null)
-                    {
-                        Mod.LogInfo("\t\t" + i + ": " + securedSlotItems[i].name);
-                        SceneManager.MoveGameObjectToScene(securedSlotItems[i].gameObject, SceneManager.GetActiveScene());
-
-                        if (scav)
-                        {
-                            Mod.LogInfo("\t\t\tScav, putting on return node");
-                            securedSlotItems[i].transform.parent = HideoutController.instance.scavReturnNode;
-                            securedSlotItems[i].transform.position = HideoutController.instance.scavReturnNode.position;
-                        }
-                        else
-                        {
-                            Mod.LogInfo("\t\t\tQBS " + i);
-                            securedSlotItems[i].physObj.SetQuickBeltSlot(i < GM.CurrentPlayerBody.QBSlots_Internal.Count ? GM.CurrentPlayerBody.QBSlots_Internal[i] : GM.CurrentPlayerBody.QBSlots_Added[i + GM.CurrentPlayerBody.QBSlots_Internal.Count]);
-                        }
-                    }
-                }
-            }
+            securedInventory = null;
         }
 
         public static GameObject GetItemPrefab(int index)
