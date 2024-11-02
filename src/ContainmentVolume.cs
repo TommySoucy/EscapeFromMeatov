@@ -216,7 +216,7 @@ namespace EFM
         /// <param name="foundInRaid">Whether the item is found in raid</param>
         /// <param name="del">A delegate to process the spawned items once they are spawned</param>
         /// <returns>True if spawned item is vanilla</returns>
-        public bool SpawnItem(MeatovItemData itemData, int amount, bool foundInRaid = false, SpawnItemReturnDelegate del = null)
+        public bool SpawnItem(MeatovItemData itemData, int amount, bool foundInRaid = false, bool bypass = false, SpawnItemReturnDelegate del = null)
         {
             int amountToSpawn = amount;
             float xSize = transform.localScale.x;
@@ -225,7 +225,7 @@ namespace EFM
             if (itemData.index == -1)
             {
                 // Spawn vanilla item will handle the updating of proper elements
-                AnvilManager.Run(SpawnVanillaItem(itemData, amountToSpawn, foundInRaid, del));
+                AnvilManager.Run(SpawnVanillaItem(itemData, amountToSpawn, foundInRaid, bypass, del));
 
                 return true;
             }
@@ -262,7 +262,7 @@ namespace EFM
                     }
 
                     // Add item to volume
-                    AddItem(meatovItem);
+                    AddItem(meatovItem, bypass);
 
                     spawnedItem.transform.localPosition = new Vector3(UnityEngine.Random.Range(-xSize / 2, xSize / 2),
                                                                       UnityEngine.Random.Range(-ySize / 2, ySize / 2),
@@ -281,7 +281,7 @@ namespace EFM
             }
         }
 
-        public IEnumerator SpawnVanillaItem(MeatovItemData itemData, int count, bool foundInRaid = false, SpawnItemReturnDelegate del = null)
+        public IEnumerator SpawnVanillaItem(MeatovItemData itemData, int count, bool foundInRaid = false, bool bypass = false, SpawnItemReturnDelegate del = null)
         {
             yield return IM.OD[itemData.H3ID].GetGameObjectAsync();
             GameObject itemPrefab = IM.OD[itemData.H3ID].GetGameObject();
@@ -336,7 +336,7 @@ namespace EFM
                     }
 
                     // Add item to volume
-                    AddItem(meatovItem);
+                    AddItem(meatovItem, bypass);
 
                     itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-transform.localScale.x / 2, transform.localScale.x / 2),
                                                                         UnityEngine.Random.Range(-transform.localScale.y / 2, transform.localScale.y / 2),
@@ -359,7 +359,7 @@ namespace EFM
                     meatovItem.foundInRaid = foundInRaid;
 
                     // Add item to volume
-                    AddItem(meatovItem);
+                    AddItem(meatovItem, bypass);
 
                     itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-transform.localScale.x / 2, transform.localScale.x / 2),
                                                                      UnityEngine.Random.Range(-transform.localScale.y / 2, transform.localScale.y / 2),

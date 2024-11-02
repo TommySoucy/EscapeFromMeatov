@@ -190,6 +190,22 @@ namespace EFM
             }
             else
             {
+                if(raidTimeLeft <= 600)
+                {
+                    if (!Mod.extractionLimitUI.activeSelf)
+                    {
+                        Mod.extractionLimitUI.SetActive(true);
+                    }
+                    Mod.extractionLimitUIText.text = Mod.FormatTimeString(raidTimeLeft);
+                }
+                else
+                {
+                    if (Mod.extractionLimitUI.activeSelf)
+                    {
+                        Mod.extractionLimitUI.SetActive(false);
+                    }
+                }
+
                 StatusUI.instance.extractionTimer.text = Mod.FormatTimeString(raidTimeLeft);
                 if (raidTimeLeft < 600 && StatusUI.instance.extractionTimer.color == Color.black)
                 {
@@ -742,7 +758,7 @@ namespace EFM
             {
                 float angle = UnityEngine.Random.Range(-Mathf.PI, Mathf.PI);
                 float range = UnityEngine.Random.Range(0, spawn.range);
-                return new Vector3(Mathf.Cos(angle) * range, spawn.transform.position.y, Mathf.Sin(angle) * range);
+                return new Vector3(spawn.transform.position.x + Mathf.Cos(angle) * range, spawn.transform.position.y, spawn.transform.position.z + Mathf.Sin(angle) * range);
             }
         }
 
@@ -1378,15 +1394,19 @@ namespace EFM
 
             // Activate behavior
             TODO0: // Make patch to make sosigs go to a random valid extraction once they finish their path or there is only enough time to reach extraction
-            PMCNavPoints.Shuffle();
-            sosig.CommandPathTo(PMCNavPoints, 0.5f, new Vector2(10, 60), 1, Sosig.SosigMoveSpeed.Walking, Sosig.PathLoopType.Loop, null, 1, 1, true, 10);
-            /*
-            sosig.CurrentOrder = Sosig.SosigOrder.Wander;
-            sosig.FallbackOrder = Sosig.SosigOrder.Wander;
-            sosig.CommandGuardPoint(spawnPos, true);
-            sosig.SetDominantGuardDirection(UnityEngine.Random.onUnitSphere);
-            sosig.SetGuardInvestigateDistanceThreshold(25f);
-            */
+            if (PMC)
+            {
+                //PMCNavPoints.Shuffle();
+                //sosig.CommandPathTo(PMCNavPoints, 0.5f, new Vector2(10, 60), 1, Sosig.SosigMoveSpeed.Walking, Sosig.PathLoopType.Loop, null, 1, 1, true, 10);
+                sosig.CurrentOrder = Sosig.SosigOrder.Wander;
+                sosig.FallbackOrder = Sosig.SosigOrder.Wander;
+                sosig.CommandGuardPoint(spawnPos, true);
+                sosig.SetDominantGuardDirection(UnityEngine.Random.onUnitSphere);
+                sosig.SetGuardInvestigateDistanceThreshold(25f);
+            }
+            else
+            {
+            }
         }
 
         public void EndRaid(RaidStatus status, string usedExtraction = null)

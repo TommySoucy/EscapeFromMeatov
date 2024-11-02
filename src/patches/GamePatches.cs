@@ -3520,7 +3520,7 @@ namespace EFM
                 {
                     MeatovItem.Copy(partItem, itemsSpawned[0]);
                 };
-                workbench.levels[workbench.currentLevel].areaVolumes[0].SpawnItem(partItem.itemData, 1, false, del);
+                workbench.levels[workbench.currentLevel].areaVolumes[0].SpawnItem(partItem.itemData, 1, false, false, del);
             }
         }
     }

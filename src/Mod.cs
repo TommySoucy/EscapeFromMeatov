@@ -4016,6 +4016,7 @@ namespace EFM
         {
             // Setup player data
             health = new float[7];
+            currentMaxHealth = new float[7];
             basePositiveHealthRates = new float[7];
             baseNegativeHealthRates = new float[7];
             baseNonLethalHealthRates = new float[7];
@@ -4272,66 +4273,61 @@ namespace EFM
             Mod.LogInfo("SecureItems called");
             securedInventory = new JObject();
 
-            if (pouchOnly)
+            // Hands
+            // Don't want to save as hand item if item has quickbeltslot, which would mean it is harnessed
+            if (Mod.leftHand.heldItem != null)
             {
-                Mod.LogInfo("\tPouch only");
-                FVRPhysicalObject physObj = StatusUI.instance.equipmentSlots[7].CurObject;
-                if (physObj != null)
-                {
-                    MeatovItem meatovItem = physObj.GetComponent<MeatovItem>();
-                    physObj.SetQuickBeltSlot(null);
-                    physObj.SetParentage(null);
-                    securedInventory["equipment" + 7] = meatovItem == null ? null : meatovItem.Serialize(false);
-                }
-            }
-            else
-            {
-                Mod.LogInfo("\tAll items");
+                Mod.leftHand.heldItem.physObj.ForceBreakInteraction();
 
-                // Hands
-                // Don't want to save as hand item if item has quickbeltslot, which would mean it is harnessed
-                if (Mod.leftHand.heldItem != null)
+                if (!pouchOnly)
                 {
-                    Mod.leftHand.heldItem.physObj.ForceBreakInteraction();
-
                     if (Mod.leftHand.heldItem.physObj.QuickbeltSlot == null)
                     {
                         securedInventory["leftHand"] = Mod.leftHand.heldItem.Serialize();
                     }
                 }
-                if (Mod.rightHand.heldItem != null)
-                {
-                    Mod.rightHand.heldItem.physObj.ForceBreakInteraction();
+            }
+            if (Mod.rightHand.heldItem != null)
+            {
+                Mod.rightHand.heldItem.physObj.ForceBreakInteraction();
 
+                if (!pouchOnly)
+                {
                     if (Mod.rightHand.heldItem.physObj.QuickbeltSlot == null)
                     {
                         securedInventory["rightHand"] = Mod.rightHand.heldItem.Serialize();
                     }
                 }
+            }
 
-                // QBS
-                securedInventory["slotCount"] = GM.CurrentPlayerBody.QBSlots_Internal.Count;
-                for (int i = 0; i < GM.CurrentPlayerBody.QBSlots_Internal.Count; ++i)
+            // QBS
+            securedInventory["slotCount"] = GM.CurrentPlayerBody.QBSlots_Internal.Count;
+            for (int i = 0; i < GM.CurrentPlayerBody.QBSlots_Internal.Count; ++i)
+            {
+                FVRPhysicalObject physObj = GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject;
+                if (physObj != null)
                 {
-                    FVRPhysicalObject physObj = GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject;
-                    if (physObj != null)
+                    MeatovItem meatovItem = physObj.GetComponent<MeatovItem>();
+                    physObj.SetQuickBeltSlot(null);
+                    physObj.SetParentage(null);
+                    if (!pouchOnly)
                     {
-                        MeatovItem meatovItem = physObj.GetComponent<MeatovItem>();
-                        physObj.SetQuickBeltSlot(null);
-                        physObj.SetParentage(null);
                         securedInventory["slot" + i] = meatovItem == null ? null : meatovItem.Serialize();
                     }
                 }
+            }
 
-                // Equipment
-                for (int i = 0; i < StatusUI.instance.equipmentSlots.Length; ++i)
+            // Equipment
+            for (int i = 0; i < StatusUI.instance.equipmentSlots.Length; ++i)
+            {
+                FVRPhysicalObject physObj = StatusUI.instance.equipmentSlots[i].CurObject;
+                if (physObj != null)
                 {
-                    FVRPhysicalObject physObj = StatusUI.instance.equipmentSlots[i].CurObject;
-                    if (physObj != null)
+                    MeatovItem meatovItem = physObj.GetComponent<MeatovItem>();
+                    physObj.SetQuickBeltSlot(null);
+                    physObj.SetParentage(null);
+                    if (!pouchOnly || i == 7)
                     {
-                        MeatovItem meatovItem = physObj.GetComponent<MeatovItem>();
-                        physObj.SetQuickBeltSlot(null);
-                        physObj.SetParentage(null);
                         securedInventory["equipment" + i] = meatovItem == null ? null : meatovItem.Serialize(false);
                     }
                 }
@@ -4422,6 +4418,7 @@ namespace EFM
                         }
                     }
                 }
+                Mod.LogInfo("\t0");
                 if (securedInventory["rightHand"] != null && securedInventory["rightHand"].Type != JTokenType.Null)
                 {
                     Mod.LogInfo("\tRight hand");
@@ -4494,6 +4491,7 @@ namespace EFM
                         }
                     }
                 }
+                Mod.LogInfo("\t0");
 
                 // Note that we must load equipment before loading QBS items
                 // This is so that if we have a rig it will have been loaded
@@ -4570,6 +4568,7 @@ namespace EFM
                         }
                     }
                 }
+                Mod.LogInfo("\t0");
 
                 int slotCount = (int)securedInventory["slotCount"];
                 for (int i = 0; i < slotCount; ++i)
@@ -4784,7 +4783,7 @@ namespace EFM
             // If the blacklist contains any of the item's more specific IDs than the ID in the whitelist, then the item does not fit. Otherwise, it fits.
 
             // Check item ID
-            if (whiteList.Contains(IDToUse))
+            if (whiteList != null && whiteList.Contains(IDToUse))
             {
                 // A specific item ID in whitelist should mean that this item fits
                 // A specific item ID should obviously never be specified in both white and black lists

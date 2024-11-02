@@ -286,7 +286,10 @@ namespace EFM
 				_containingVolume = value;
                 if(preValue != _containingVolume)
                 {
-                    volumeIndicatorText.text = (_containingVolume / 1000f).ToString("0.00") + "/" + (maxVolume / 1000f).ToString("0.00");
+                    if (volumeIndicator != null)
+                    {
+                        volumeIndicatorText.text = (_containingVolume / 1000f).ToString("0.00") + "/" + (maxVolume / 1000f).ToString("0.00");
+                    }
                     OnContainingVolumeChangedInvoke();
                 }
 			}
@@ -2000,14 +2003,20 @@ namespace EFM
 				{
 					SetMode(0);
 					SetContainerOpen(true, isRightHand);
-					volumeIndicator.SetActive(true);
-					volumeIndicatorText.text = (containingVolume / 1000f).ToString("0.00") + "/" + (maxVolume / 1000f).ToString("0.00");
+                    if(volumeIndicator != null)
+                    {
+                        volumeIndicator.SetActive(true);
+                        volumeIndicatorText.text = (containingVolume / 1000f).ToString("0.00") + "/" + (maxVolume / 1000f).ToString("0.00");
+                    }
 				}
 				else if (itemType == ItemType.Container || itemType == ItemType.Pouch)
 				{
 					SetContainerOpen(true, isRightHand);
-					volumeIndicator.SetActive(true);
-					volumeIndicatorText.text = (containingVolume / 1000f).ToString("0.00") + "/" + (maxVolume / 1000f).ToString("0.00");
+                    if (volumeIndicator != null)
+                    {
+                        volumeIndicator.SetActive(true);
+                        volumeIndicatorText.text = (containingVolume / 1000f).ToString("0.00") + "/" + (maxVolume / 1000f).ToString("0.00");
+                    }
 				}
 			}
 			else
@@ -2036,7 +2045,10 @@ namespace EFM
 				{
 					SetMode(containingVolume > 0 ? 1 : 2);
 					SetContainerOpen(false, isRightHand);
-					volumeIndicator.SetActive(false);
+                    if (volumeIndicator != null)
+                    {
+                        volumeIndicator.SetActive(false);
+                    }
 				}
 				else if (itemType == ItemType.BodyArmor)
 				{
@@ -2045,7 +2057,10 @@ namespace EFM
 				else if (itemType == ItemType.Container || itemType == ItemType.Pouch)
 				{
 					SetContainerOpen(false, isRightHand);
-					volumeIndicator.SetActive(false);
+                    if (volumeIndicator != null)
+                    {
+                        volumeIndicator.SetActive(false);
+                    }
 				}
 			}
 		}
@@ -3125,7 +3140,7 @@ namespace EFM
                             {
                                 MeatovItem.Copy(child, itemsSpawned[0]);
                             };
-                            mustKeepParent |= volumeToUse.SpawnItem(children[i].itemData, 1, false, del);
+                            mustKeepParent |= volumeToUse.SpawnItem(children[i].itemData, 1, false, false, del);
                         }
                         else
                         {

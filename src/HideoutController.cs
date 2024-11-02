@@ -185,6 +185,17 @@ namespace EFM
 
             Mod.dead = false;
 
+            // Reset current max health
+            Mod.SetCurrentMaxHealthArray(Mod.defaultMaxHealth);
+
+            // Add hideout health rates
+            for (int i = 0; i < Mod.GetHealthCount(); ++i)
+            {
+                Mod.SetBasePositiveHealthRate(i, Mod.GetBasePositiveHealthRate(i) + defaultHealthRates[i]);
+            }
+            Mod.baseEnergyRate += defaultEnergyRate;
+            Mod.baseHydrationRate += defaultHydrationRate;
+
             Mod.LogInfo("\t0");
             if (StatusUI.instance == null)
             {
@@ -294,14 +305,6 @@ namespace EFM
             //    }
             //    Mod.rewardsToGive = null;
             //}
-
-            // Add hideout rates
-            for(int i=0; i<Mod.GetHealthCount(); ++i)
-            {
-                Mod.SetBasePositiveHealthRate(i, Mod.GetBasePositiveHealthRate(i) + defaultHealthRates[i]);
-            }
-            Mod.baseEnergyRate += defaultEnergyRate;
-            Mod.baseHydrationRate += defaultHydrationRate;
 
             // Sub to UI events
             foreach(KeyValuePair<string, string> raidMapEntry in Mod.availableRaidMaps)
@@ -527,7 +530,7 @@ namespace EFM
             for(int i=0; i < Mod.GetHealthCount(); ++i)
             {
                 // Min ensures we cannot lose health in hideout, but we cannot gain any if negative health rate is greater than positive
-                Mod.SetHealth(i, Mathf.Max(0, Mathf.Min(Mod.GetCurrentMaxHealth(i), Mod.GetHealth(i) + Mathf.Min(0, Mod.GetCurrentHealthRate(i) + Mod.GetCurrentNonLethalHealthRate(i)) * Time.deltaTime)));
+                Mod.SetHealth(i, Mathf.Max(0, Mathf.Min(Mod.GetCurrentMaxHealth(i), Mod.GetHealth(i) + Mathf.Max(0, Mod.GetCurrentHealthRate(i) + Mod.GetCurrentNonLethalHealthRate(i)) * Time.deltaTime)));
             }
             Mod.hydration = Mathf.Max(0, Mathf.Min(Mod.currentMaxHydration, Mod.hydration + Mod.currentHydrationRate * Time.deltaTime));
             Mod.energy = Mathf.Max(0, Mathf.Min(Mod.currentMaxEnergy, Mod.energy + Mod.currentEnergyRate * Time.deltaTime));
@@ -1420,16 +1423,18 @@ namespace EFM
             // Stack split UI
             Mod.stackSplitUI = Instantiate(Mod.stackSplitUIPrefab, GM.CurrentPlayerRoot).GetComponent<StackSplitUI>();
             Mod.stackSplitUI.gameObject.SetActive(false);
-            //// Extraction UI
-            //Mod.extractionUI = Instantiate(Mod.extractionUIPrefab, GM.CurrentPlayerRoot);
-            //Mod.extractionUIText = Mod.extractionUI.transform.GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>();
-            //Mod.extractionUI.transform.rotation = Quaternion.Euler(-25, 0, 0);
-            //Mod.extractionUI.SetActive(false);
-            //// Extraction limit UI
-            //Mod.extractionLimitUI = Instantiate(Mod.extractionLimitUIPrefab, GM.CurrentPlayerRoot);
-            //Mod.extractionLimitUIText = Mod.extractionLimitUI.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>();
-            //Mod.extractionLimitUI.transform.rotation = Quaternion.Euler(-25, 0, 0);
-            //Mod.extractionLimitUI.SetActive(false);
+            // Extraction UI
+            Mod.extractionUI = Instantiate(Mod.extractionUIPrefab, GM.CurrentPlayerBody.Head);
+            Mod.extractionUIText = Mod.extractionUI.transform.GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>();
+            Mod.extractionUI.transform.rotation = Quaternion.Euler(-25, 0, 0);
+            Mod.extractionUI.transform.localPosition = new Vector3(0, 0.4f, 0.6f);
+            Mod.extractionUI.SetActive(false);
+            // Extraction limit UI
+            Mod.extractionLimitUI = Instantiate(Mod.extractionLimitUIPrefab, GM.CurrentPlayerBody.Head);
+            Mod.extractionLimitUIText = Mod.extractionLimitUI.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>();
+            Mod.extractionLimitUI.transform.rotation = Quaternion.Euler(-25, 0, 0);
+            Mod.extractionLimitUI.transform.localPosition = new Vector3(0, 0.38f, 0.6f);
+            Mod.extractionLimitUI.SetActive(false);
             //// Stamina bar
             Mod.staminaBarUI = Instantiate(Mod.staminaBarPrefab, GM.CurrentPlayerBody.Head);
             Mod.staminaBarUI.transform.localRotation = Quaternion.Euler(-25, 0, 0);
@@ -1443,13 +1448,9 @@ namespace EFM
             Mod.leftHand.otherHand = Mod.rightHand;
 
             // Set movement control
-            GM.CurrentMovementManager.Mode = FVRMovementManager.MovementMode.TwinStick;
-            GM.Options.MovementOptions.Touchpad_Confirm = FVRMovementManager.TwoAxisMovementConfirm.OnTouch;
-            GM.Options.ControlOptions.CCM = ControlOptions.CoreControlMode.Streamlined;
-
-            // Disable wrist menus
-            //Mod.rightHand.fvrHand.DisableWristMenu();
-            //Mod.leftHand.fvrHand.DisableWristMenu();
+            //GM.CurrentMovementManager.Mode = FVRMovementManager.MovementMode.TwinStick;
+            //GM.Options.MovementOptions.Touchpad_Confirm = FVRMovementManager.TwoAxisMovementConfirm.OnTouch;
+            //GM.Options.ControlOptions.CCM = ControlOptions.CoreControlMode.Streamlined;
 
             // Set QB config to pockets
             Mod.pocketSlots = new FVRQuickBeltSlot[4];

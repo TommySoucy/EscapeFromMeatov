@@ -86,9 +86,16 @@ namespace EFM
 
             if(extractionTimer > 0)
             {
+                if (!Mod.extractionUI.activeSelf)
+                {
+                    Mod.extractionUI.SetActive(true);
+                }
+
                 extractionTimer -= Time.deltaTime;
+                Mod.extractionUIText.text = Mod.FormatTimeString(extractionTimer);
                 if(extractionTimer <= 0)
                 {
+                    Mod.extractionUI.SetActive(false);
                     Extract();
                 }
             }
@@ -257,6 +264,8 @@ namespace EFM
                     playerHead = null;
 
                     extractionTimer = -1;
+
+                    Mod.extractionUI.SetActive(false);
                 }
             }
         }
