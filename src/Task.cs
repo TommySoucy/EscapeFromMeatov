@@ -1646,7 +1646,7 @@ namespace EFM
                     && (killWeaponModWhitelists == null || killWeaponModWhitelists.Count == 0 || IDsDescribedInMultipleLists(killData.weaponChildrenData, killWeaponModWhitelists))
                     && (killWeaponModBlacklists == null || killWeaponModBlacklists.Count == 0 || !IDsDescribedInMultipleLists(killData.weaponChildrenData, killWeaponModBlacklists))
                     && MatchesHealthEffectList(killData.enemyHealthEffects, killEnemyHealthEffects)
-                    && killBodyParts.Contains(killData.bodyPart))
+                    && (killBodyParts == null || killBodyParts.Contains(killData.bodyPart)))
                 {
                     ++condition.count;
                     condition.fulfilled = condition.count >= condition.value;
@@ -1664,7 +1664,7 @@ namespace EFM
                     && (killWeaponModWhitelists == null || killWeaponModWhitelists.Count == 0 || IDsDescribedInMultipleLists(shotData.weaponChildrenData, killWeaponModWhitelists))
                     && (killWeaponModBlacklists == null || killWeaponModBlacklists.Count == 0 || !IDsDescribedInMultipleLists(shotData.weaponChildrenData, killWeaponModBlacklists))
                     && MatchesHealthEffectList(shotData.enemyHealthEffects, killEnemyHealthEffects)
-                    && killBodyParts.Contains(shotData.bodyPart))
+                    && (killBodyParts == null || killBodyParts.Contains(shotData.bodyPart)))
                 {
                     ++condition.count;
                     condition.fulfilled = condition.count >= condition.value;
