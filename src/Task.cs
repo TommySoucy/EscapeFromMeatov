@@ -1733,6 +1733,15 @@ namespace EFM
 
         public static bool MatchesHealthEffectList(List<HealthEffectEntry> gotEntries, List<HealthEffectEntry> list)
         {
+            if(list == null || list.Count == 0)
+            {
+                return true;
+            }
+            else if(gotEntries == null || gotEntries.Count == 0)
+            {
+                return false;
+            }
+
             for(int i = 0; i < list.Count; i++)
             {
                 for(int j = 0; j < gotEntries.Count; ++j)

@@ -872,13 +872,18 @@ namespace EFM
                 sosigTemplate.MaxUnconsciousTime = 0;
                 sosigTemplate.CanBeGrabbed = false;
                 sosigTemplate.SuppressionMult = 0.05f; // Minimum 20 supression events to fully suppress
-                sosigTemplate.LinkDamageMultipliers = new List<float>();
+                sosigTemplate.LinkDamageMultipliers = new List<float>
+                {
+                    3, // Head
+                    2, // Torso
+                    2, // Upper
+                    1  // Lower
+                };
                 sosigTemplate.LinkStaggerMultipliers = new List<float>();
                 sosigTemplate.StartingLinkIntegrity = new List<Vector2>();
                 sosigTemplate.StartingChanceBrokenJoint = new List<float>();
                 for (int i= 0;i< 4; ++i)
                 {
-                    sosigTemplate.LinkDamageMultipliers.Add(1);
                     sosigTemplate.LinkStaggerMultipliers.Add(1);
                     sosigTemplate.StartingLinkIntegrity.Add(new Vector2(100,100));
                     sosigTemplate.StartingChanceBrokenJoint.Add(0);
@@ -972,13 +977,18 @@ namespace EFM
                 sosigTemplate.MaxUnconsciousTime = 0;
                 sosigTemplate.CanBeGrabbed = false;
                 sosigTemplate.SuppressionMult = 0.05f; // Minimum 20 supression events to fully suppress
-                sosigTemplate.LinkDamageMultipliers = new List<float>();
+                sosigTemplate.LinkDamageMultipliers = new List<float>
+                {
+                    3, // Head
+                    2, // Torso
+                    2, // Upper
+                    1  // Lower
+                };
                 sosigTemplate.LinkStaggerMultipliers = new List<float>();
                 sosigTemplate.StartingLinkIntegrity = new List<Vector2>();
                 sosigTemplate.StartingChanceBrokenJoint = new List<float>();
                 for (int i = 0; i < 4; ++i)
                 {
-                    sosigTemplate.LinkDamageMultipliers.Add(1);
                     sosigTemplate.LinkStaggerMultipliers.Add(1);
                     sosigTemplate.StartingLinkIntegrity.Add(new Vector2(100, 100));
                     sosigTemplate.StartingChanceBrokenJoint.Add(0);
@@ -1080,13 +1090,18 @@ namespace EFM
                         sosigTemplate.MaxUnconsciousTime = 0;
                         sosigTemplate.CanBeGrabbed = false;
                         sosigTemplate.SuppressionMult = 0.05f; // Minimum 20 supression events to fully suppress
-                        sosigTemplate.LinkDamageMultipliers = new List<float>();
+                        sosigTemplate.LinkDamageMultipliers = new List<float>
+                        {
+                            3, // Head
+                            2, // Torso
+                            2, // Upper
+                            1  // Lower
+                        };
                         sosigTemplate.LinkStaggerMultipliers = new List<float>();
                         sosigTemplate.StartingLinkIntegrity = new List<Vector2>();
                         sosigTemplate.StartingChanceBrokenJoint = new List<float>();
                         for (int j = 0; j < 4; ++j)
                         {
-                            sosigTemplate.LinkDamageMultipliers.Add(1);
                             sosigTemplate.LinkStaggerMultipliers.Add(1);
                             sosigTemplate.StartingLinkIntegrity.Add(new Vector2(100, 100));
                             sosigTemplate.StartingChanceBrokenJoint.Add(0);
@@ -1127,13 +1142,18 @@ namespace EFM
                                         squadMemberSosigTemplate.MaxUnconsciousTime = 0;
                                         squadMemberSosigTemplate.CanBeGrabbed = false;
                                         squadMemberSosigTemplate.SuppressionMult = 0.05f; // Minimum 20 supression events to fully suppress
-                                        squadMemberSosigTemplate.LinkDamageMultipliers = new List<float>();
+                                        squadMemberSosigTemplate.LinkDamageMultipliers = new List<float>
+                                        {
+                                            3, // Head
+                                            2, // Torso
+                                            2, // Upper
+                                            1  // Lower
+                                        };
                                         squadMemberSosigTemplate.LinkStaggerMultipliers = new List<float>();
                                         squadMemberSosigTemplate.StartingLinkIntegrity = new List<Vector2>();
                                         squadMemberSosigTemplate.StartingChanceBrokenJoint = new List<float>();
                                         for (int k = 0; k < 4; ++k)
                                         {
-                                            squadMemberSosigTemplate.LinkDamageMultipliers.Add(1);
                                             squadMemberSosigTemplate.LinkStaggerMultipliers.Add(1);
                                             squadMemberSosigTemplate.StartingLinkIntegrity.Add(new Vector2(100, 100));
                                             squadMemberSosigTemplate.StartingChanceBrokenJoint.Add(0);
@@ -1183,13 +1203,18 @@ namespace EFM
                                         squadMemberSosigTemplate.MaxUnconsciousTime = 0;
                                         squadMemberSosigTemplate.CanBeGrabbed = false;
                                         squadMemberSosigTemplate.SuppressionMult = 0.05f; // Minimum 20 supression events to fully suppress
-                                        squadMemberSosigTemplate.LinkDamageMultipliers = new List<float>();
+                                        squadMemberSosigTemplate.LinkDamageMultipliers = new List<float>
+                                        {
+                                            3, // Head
+                                            2, // Torso
+                                            2, // Upper
+                                            1  // Lower
+                                        };
                                         squadMemberSosigTemplate.LinkStaggerMultipliers = new List<float>();
                                         squadMemberSosigTemplate.StartingLinkIntegrity = new List<Vector2>();
                                         squadMemberSosigTemplate.StartingChanceBrokenJoint = new List<float>();
                                         for (int k = 0; k < 4; ++k)
                                         {
-                                            squadMemberSosigTemplate.LinkDamageMultipliers.Add(1);
                                             squadMemberSosigTemplate.LinkStaggerMultipliers.Add(1);
                                             squadMemberSosigTemplate.StartingLinkIntegrity.Add(new Vector2(100, 100));
                                             squadMemberSosigTemplate.StartingChanceBrokenJoint.Add(0);
@@ -1396,16 +1421,16 @@ namespace EFM
             TODO0: // Make patch to make sosigs go to a random valid extraction once they finish their path or there is only enough time to reach extraction
             if (PMC)
             {
-                //PMCNavPoints.Shuffle();
-                //sosig.CommandPathTo(PMCNavPoints, 0.5f, new Vector2(10, 60), 1, Sosig.SosigMoveSpeed.Walking, Sosig.PathLoopType.Loop, null, 1, 1, true, 10);
+                PMCNavPoints.Shuffle();
+                sosig.CommandPathTo(PMCNavPoints, 0.5f, new Vector2(10, 60), 1, Sosig.SosigMoveSpeed.Walking, Sosig.PathLoopType.Loop, null, 1, 1, true, 10);
+            }
+            else
+            {
                 sosig.CurrentOrder = Sosig.SosigOrder.Wander;
                 sosig.FallbackOrder = Sosig.SosigOrder.Wander;
                 sosig.CommandGuardPoint(spawnPos, true);
                 sosig.SetDominantGuardDirection(UnityEngine.Random.onUnitSphere);
                 sosig.SetGuardInvestigateDistanceThreshold(25f);
-            }
-            else
-            {
             }
         }
 
