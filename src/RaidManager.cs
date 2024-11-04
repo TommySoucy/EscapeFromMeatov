@@ -151,6 +151,7 @@ namespace EFM
                     {
                         Mod.OnKillInvoke(ai.latestDamageSourceKillData);
                         Mod.raidKills.Add(ai.latestDamageSourceKillData);
+                        Mod.AddExperience(ai.latestDamageSourceKillData.baseExperienceReward + (ai.latestDamageSourceKillData.bodyPart == ConditionCounter.TargetBodyPart.Head ? 200 : 0));
                         ai.latestDamageSourceKillData = null;
                     }
 

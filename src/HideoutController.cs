@@ -14,16 +14,6 @@ namespace EFM
     {
         public static HideoutController instance;
 
-        public enum FinishRaidState
-        {
-            Survived,
-
-            // These are fails
-            RunThrough,
-            MIA,
-            KIA
-        }
-
         // Objects
         public Transform spawn;
         public AreaController areaController;
@@ -327,7 +317,7 @@ namespace EFM
 
             if (Mod.justFinishedRaid)
             {
-                FinishRaid(Mod.raidState); // This will save on autosave
+                FinishRaid(Mod.raidStatus); // This will save on autosave
             }
 
             Mod.justFinishedRaid = false;
@@ -2711,7 +2701,8 @@ namespace EFM
                             killEntryObject.transform.GetChild(0).GetComponent<Text>().text = "lvl. " + Mod.raidKills[i].level;
                             killEntryObject.transform.GetChild(1).GetComponent<Text>().text = Mod.raidKills[i].name;
                         }
-                        killEntryObject.transform.GetChild(2).GetComponent<Text>().text = (Mod.raidKills[i].baseExperienceReward + (Mod.raidKills[i].bodyPart == ConditionCounter.TargetBodyPart.Head ? 200 : 0)).ToString()+"xp";
+                        int killXP = Mod.raidKills[i].baseExperienceReward + (Mod.raidKills[i].bodyPart == ConditionCounter.TargetBodyPart.Head ? 200 : 0);
+                        killEntryObject.transform.GetChild(2).GetComponent<Text>().text = killXP.ToString()+"xp";
                     }
                 }
                 if (Mod.explorationExp > 0)
@@ -4607,7 +4598,7 @@ namespace EFM
             UpdateLoadButtonList();
         }
 
-        public void FinishRaid(FinishRaidState state)
+        public void FinishRaid(RaidManager.RaidStatus state)
         {
             if (Mod.charChoicePMC)
             {
@@ -4615,18 +4606,18 @@ namespace EFM
                 ++Mod.totalRaidCount;
                 switch (state)
                 {
-                    case FinishRaidState.RunThrough:
+                    case RaidManager.RaidStatus.RunThrough:
                         ++Mod.runthroughRaidCount;
                         ++Mod.survivedRaidCount;
                         break;
-                    case FinishRaidState.Survived:
+                    case RaidManager.RaidStatus.Success:
                         ++Mod.survivedRaidCount;
                         break;
-                    case FinishRaidState.MIA:
+                    case RaidManager.RaidStatus.MIA:
                         ++Mod.MIARaidCount;
                         ++Mod.failedRaidCount;
                         break;
-                    case FinishRaidState.KIA:
+                    case RaidManager.RaidStatus.KIA:
                         ++Mod.KIARaidCount;
                         ++Mod.failedRaidCount;
                         break;
@@ -4634,7 +4625,7 @@ namespace EFM
                         break;
                 }
 
-                if (Mod.raidState == FinishRaidState.KIA || Mod.raidState == FinishRaidState.MIA)
+                if (Mod.raidStatus == RaidManager.RaidStatus.KIA || Mod.raidStatus == RaidManager.RaidStatus.MIA)
                 {
                     // Remove all effects
                     Effect.RemoveAllEffects();
@@ -4649,7 +4640,7 @@ namespace EFM
 
                     Mod.AddExperience(100 + (int)(Mod.raidTime / 60 * 10)); // Fail exp + bonus of 10 exp / min
                 }
-                else if (Mod.raidState == FinishRaidState.Survived)
+                else if (Mod.raidStatus == RaidManager.RaidStatus.Success)
                 {
                     Mod.AddExperience(600 + (int)(Mod.raidTime / 60 * 10)); // Survive exp + bonus of 10 exp / min
                 }

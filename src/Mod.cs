@@ -68,7 +68,6 @@ namespace EFM
         public static bool charChoicePMC; // false is Scav
         public static bool timeChoiceIs0; // false is 1
         public static bool PMCSpawnTogether;
-        public static HideoutController.FinishRaidState raidState;
         public static bool justFinishedRaid;
         public static int lootingExp = 0;
         public static int healingExp = 0;
@@ -893,7 +892,7 @@ namespace EFM
                             case 14: // Survive raid
                                 Mod.LogInfo("\tDebug: Survive raid");
                                 Mod.justFinishedRaid = true;
-                                Mod.raidState = HideoutController.FinishRaidState.Survived;
+                                Mod.raidStatus = RaidManager.RaidStatus.Success;
 
                                 // Disable extraction list and timer
                                 StatusUI.instance.transform.GetChild(0).GetChild(9).gameObject.SetActive(false);
