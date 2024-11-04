@@ -2018,7 +2018,7 @@ namespace EFM
                         // TextCollider will always take the new collider's item as ClosestPossibleInteractable
                         // But if we already had one and the new one is the owner of the volume parent to previous one
                         // then we don't want to take the new collider's item as ClosestPossibleInteractable
-                        if (firstItem != null || secondItem != null) 
+                        if (firstItem != null && secondItem != null) 
                         {
                             ContainerVolume firstVolume = firstItem.parentVolume as ContainerVolume;
                             if (firstVolume != null && firstVolume.ownerItem == secondItem)
