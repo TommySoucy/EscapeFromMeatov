@@ -1568,9 +1568,15 @@ namespace EFM
                 }
 
                 // Set any parts health to 1 if they are at 0
-                for (int i = 0; i < 7; ++i)
+                // Set it to a third of max if failed raid
+                for (int i = 0; i < Mod.GetHealthCount(); ++i)
                 {
-                    if (Mod.GetHealth(i) == 0)
+                    if (Mod.raidStatus == RaidManager.RaidStatus.MIA || Mod.raidStatus == RaidManager.RaidStatus.KIA)
+                    {
+                         // Note that max health gets reset in awake
+                        Mod.SetHealth(i, Mod.GetCurrentMaxHealth(i) / 3);
+                    }
+                    else if (Mod.GetHealth(i) == 0)
                     {
                         Mod.SetHealth(i, 1);
                     }

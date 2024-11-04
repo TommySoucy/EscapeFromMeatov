@@ -1963,6 +1963,7 @@ namespace EFM
 
     // Patches FVRViveHand.TestCollider() in order to be able to have interactable colliders on other gameobjects than the root
     // by use of OtherInteractable
+    // Also to prioritize items in volume of container item over the container item itself
     // This completely replaces the original 
     class HandTestColliderPatch
     {
@@ -1987,14 +1988,13 @@ namespace EFM
 
             if (isEnter)
             {
-                FVRInteractiveObject component = interactiveObjectToUse;
-                component.Poke(__instance);
+                interactiveObjectToUse.Poke(__instance);
                 return false;
             }
 
-            if (___m_state == FVRViveHand.HandState.Empty && interactiveObjectToUse != null)
+            if (___m_state == FVRViveHand.HandState.Empty)
             {
-                if (interactiveObjectToUse != null && interactiveObjectToUse.IsInteractable() && !interactiveObjectToUse.IsSelectionRestricted())
+                if (interactiveObjectToUse.IsInteractable() && !interactiveObjectToUse.IsSelectionRestricted())
                 {
                     float num = Vector3.Distance(interactiveObjectToUse.transform.position, __instance.Display_InteractionSphere.transform.position);
                     float num2 = Vector3.Distance(interactiveObjectToUse.transform.position, __instance.Display_InteractionSphere_Palm.transform.position);
@@ -2012,6 +2012,21 @@ namespace EFM
                     }
                     else if (__instance.ClosestPossibleInteractable != interactiveObjectToUse)
                     {
+                        MeatovItem firstItem = __instance.ClosestPossibleInteractable.GetComponent<MeatovItem>();
+                        MeatovItem secondItem = interactiveObjectToUse.GetComponent<MeatovItem>();
+
+                        // TextCollider will always take the new collider's item as ClosestPossibleInteractable
+                        // But if we already had one and the new one is the owner of the volume parent to previous one
+                        // then we don't want to take the new collider's item as ClosestPossibleInteractable
+                        if (firstItem != null || secondItem != null) 
+                        {
+                            ContainerVolume firstVolume = firstItem.parentVolume as ContainerVolume;
+                            if (firstVolume != null && firstVolume.ownerItem == secondItem)
+                            {
+                                return false;
+                            }
+                        }
+
                         float num3 = Vector3.Distance(__instance.ClosestPossibleInteractable.transform.position, __instance.Display_InteractionSphere.transform.position);
                         float num4 = Vector3.Distance(__instance.ClosestPossibleInteractable.transform.position, __instance.Display_InteractionSphere_Palm.transform.position);
                         bool flag = true;

@@ -127,6 +127,11 @@ namespace EFM
                 infoCountText.gameObject.SetActive(true);
                 infoCountText.text = (item.containingVolume / 1000f).ToString("0.##") + "/" + (item.maxVolume / 1000f).ToString("0.##");
             }
+            else if(item.maxArmor > 0)
+            {
+                infoCountText.gameObject.SetActive(true);
+                infoCountText.text = item.armor.ToString("0") + "/" + item.maxArmor.ToString("0");
+            }
             else
             {
                 infoCountText.gameObject.SetActive(false);
