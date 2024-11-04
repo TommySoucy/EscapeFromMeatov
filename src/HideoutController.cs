@@ -3258,7 +3258,7 @@ namespace EFM
         public void OnPlayerExperienceChanged()
         {
             raidReportExperience.text = Mod.experience.ToString() + "/" + (Mod.level >= Mod.XPPerLevel.Length ? "INFINITY" : Mod.XPPerLevel[Mod.level].ToString());
-            raidReportBarFill.sizeDelta = new Vector2(Mod.level >= Mod.XPPerLevel.Length ? 0 : Mod.level / (float)Mod.XPPerLevel[Mod.level] * 450f, 12.8f);
+            raidReportBarFill.sizeDelta = new Vector2(Mod.level >= Mod.XPPerLevel.Length ? 0 : Mod.experience / (float)Mod.XPPerLevel[Mod.level] * 450f, 12.8f);
         }
 
         public void UpdateLoadButtonList()
