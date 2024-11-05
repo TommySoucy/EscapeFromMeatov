@@ -22,6 +22,8 @@ namespace EFM
         }
 
         public static RaidManager instance { get; private set; }
+        public static float defaultEnergyRate;
+        public static float defaultHydrationRate;
 
         public float raidTime; // Amount of time to complete the raid, in seconds
         public int maxPMCCount;
@@ -63,6 +65,18 @@ namespace EFM
             instance = this;
 
             Mod.currentLocationIndex = 2;
+
+            // Remove hideout rates
+            for (int i = 0; i < Mod.GetHealthCount(); ++i)
+            {
+                Mod.SetBasePositiveHealthRate(i, Mod.GetBasePositiveHealthRate(i) - HideoutController.defaultHealthRates[i]);
+            }
+            Mod.baseEnergyRate -= HideoutController.defaultEnergyRate;
+            Mod.baseHydrationRate -= HideoutController.defaultHydrationRate;
+
+            // Add raid rates
+            Mod.baseEnergyRate -= defaultEnergyRate;
+            Mod.baseHydrationRate -= defaultHydrationRate;
         }
 
         public void Start()
@@ -662,7 +676,7 @@ namespace EFM
         {
             Vector3 spawnPosition = GetSpawnPosition(spawn);
             GM.CurrentSceneSettings.DeathResetPoint = spawn.transform;
-            GM.CurrentMovementManager.TeleportToPoint(spawnPosition, true);
+            GM.CurrentMovementManager.TeleportToPoint(spawnPosition, false);
 
             // Choose extractions
             List<Extraction> extractionsToUse = Mod.charChoicePMC ? PMCExtractions : scavExtractions;
@@ -763,6 +777,16 @@ namespace EFM
             }
         }
 
+        public void UpdateRates()
+        {
+            for (int i = 0; i < Mod.GetHealthCount(); ++i)
+            {
+                Mod.SetHealth(i, Mathf.Max(0, Mathf.Min(Mod.GetCurrentMaxHealth(i), Mod.GetHealth(i) + Mod.GetCurrentHealthRate(i) + Mod.GetCurrentNonLethalHealthRate(i) * Time.deltaTime)));
+            }
+            Mod.hydration = Mathf.Max(0, Mathf.Min(Mod.currentMaxHydration, Mod.hydration + Mod.currentHydrationRate * Time.deltaTime));
+            Mod.energy = Mathf.Max(0, Mathf.Min(Mod.currentMaxEnergy, Mod.energy + Mod.currentEnergyRate * Time.deltaTime));
+        }
+
         public void Update()
         {
             UpdateControl();
@@ -818,6 +842,8 @@ namespace EFM
             }
 
             UpdateTime();
+
+            UpdateRates();
         }
 
         public void UpdateControl()

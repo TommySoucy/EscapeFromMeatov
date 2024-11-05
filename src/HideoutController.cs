@@ -178,7 +178,14 @@ namespace EFM
             // Reset current max health
             Mod.SetCurrentMaxHealthArray(Mod.defaultMaxHealth);
 
-            // Add hideout health rates
+            // Remove raid rates if necessary
+            if (Mod.justFinishedRaid)
+            {
+                Mod.baseEnergyRate -= RaidManager.defaultEnergyRate;
+                Mod.baseHydrationRate -= RaidManager.defaultHydrationRate;
+            }
+
+            // Add hideout rates
             for (int i = 0; i < Mod.GetHealthCount(); ++i)
             {
                 Mod.SetBasePositiveHealthRate(i, Mod.GetBasePositiveHealthRate(i) + defaultHealthRates[i]);

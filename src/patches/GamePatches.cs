@@ -1175,6 +1175,17 @@ namespace EFM
 
             if (slot == null)
             {
+                // In vanilla, physical object collider layer is only set to NoCol when and item is in QBS
+                // SetQuickBeltSlot will reset item collider layers to default when slot is set to null
+                // But QBS is set to null any time we end interaction with an item, after our own MeatovItem.EndInteraction
+                // But an item is added to a volume on MeatovItem.EndInteraction, which sets its colliders to NoCol
+                // Problem that after we set it to NoCol, it gets reset to Default by this method
+                // So here we must make sure that is gets set to NoCol again if the item is in a volume
+                if(item.parentVolume != null)
+                {
+                    item.physObj.SetAllCollidersToLayer(false, "NoCol");
+                }
+
                 return;
             }
 

@@ -2784,6 +2784,10 @@ namespace EFM
             HideoutController.defaultEnergyRate = ((float)globalRegens["Energy"]) / 60;
             HideoutController.defaultHydrationRate = ((float)globalRegens["Hydration"]) / 60;
 
+            JToken globalExistence = globalDB["config"]["Health"]["Effects"]["Existence"];
+            RaidManager.defaultEnergyRate = ((float)globalExistence["EnergyDamage"]) / 60;
+            RaidManager.defaultHydrationRate = ((float)globalExistence["HydrationDamage"]) / 60;
+
             JToken globalHealthFactors = globalDB["config"]["Health"]["ProfileHealthSettings"]["HealthFactorsSettings"];
             baseMaxEnergy = (float)globalHealthFactors["Energy"]["Maximum"];
             baseMaxHydration = (float)globalHealthFactors["Hydration"]["Maximum"];

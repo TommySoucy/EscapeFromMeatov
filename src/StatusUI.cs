@@ -729,7 +729,7 @@ namespace EFM
 
                 StaminaUI.instance.barFill.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina / Mod.currentMaxStamina * 100);
             }
-            else if (movementVector2.magnitude > 0 && GM.CurrentMovementManager.m_isGrounded && Mod.weight > Mod.currentWeightLimit / 2)
+            else if (movementVector2.magnitude > 0 && GM.CurrentMovementManager.m_isGrounded && Mod.weight > (Mod.currentWeightLimit * 2 / 3))
             {
                 // Reset stamina timer
                 Mod.staminaTimer = 2;
