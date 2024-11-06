@@ -1276,6 +1276,7 @@ namespace EFM
                             //    rig.currentWeight += item.currentWeight;
                             //}
                             rig.UpdateClosedMode();
+                            item.gameObject.SetActive(rig.open);
                             return;
                         }
                     }

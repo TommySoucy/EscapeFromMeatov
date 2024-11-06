@@ -400,65 +400,95 @@ namespace EFM
                         {
                             if (equipment.TryGetValue("FirstPrimaryWeapon", out MeatovItemData firstPrimaryWeaponData) && firstPrimaryWeaponData.magType != FistVR.FireArmMagazineType.mNone)
                             {
+                                MeatovItemData itemDataToUse = null;
                                 if (Mod.magDefaultItemDataByMagType.TryGetValue(firstPrimaryWeaponData.magType, out List<MeatovItemData> itemDatas) && itemDatas.Count > 0)
                                 {
-                                    MeatovItemData itemData = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
-                                    itemDict.Add(itemData, maxCount);
-
-                                    if (inventory.ContainsKey(itemData.tarkovID))
-                                    {
-                                        inventory[itemData.tarkovID] += maxCount;
-                                    }
-                                    else
-                                    {
-                                        inventory.Add(itemData.tarkovID, maxCount);
-                                    }
+                                    itemDataToUse = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
+                                }
+                                else if(Mod.roundDefaultItemDataByRoundType.TryGetValue(firstPrimaryWeaponData.roundType, out List<MeatovItemData> roundItemDatas) && roundItemDatas.Count > 0)
+                                {
+                                    itemDataToUse = roundItemDatas[UnityEngine.Random.Range(0, roundItemDatas.Count)];
+                                    maxCount = UnityEngine.Random.Range(5, 15);
                                 }
                                 else
                                 {
-                                    Mod.LogWarning("No mag item data for mag type " + firstPrimaryWeaponData.magType + " needed for bot inventory first primary weapon " + firstPrimaryWeaponData.tarkovID);
+                                    Mod.LogError("No mag/round item data for mag type " + firstPrimaryWeaponData.magType + " or round type "+ firstPrimaryWeaponData.roundType + " needed for bot inventory first primary weapon " + firstPrimaryWeaponData.tarkovID);
+                                }
+
+                                if(itemDataToUse != null)
+                                {
+                                    itemDict.Add(itemDataToUse, maxCount);
+
+                                    if (inventory.ContainsKey(itemDataToUse.tarkovID))
+                                    {
+                                        inventory[itemDataToUse.tarkovID] += maxCount;
+                                    }
+                                    else
+                                    {
+                                        inventory.Add(itemDataToUse.tarkovID, maxCount);
+                                    }
                                 }
                             }
                             if(equipment.TryGetValue("SecondPrimaryWeapon", out MeatovItemData secondPrimaryWeaponData) && secondPrimaryWeaponData.magType != FistVR.FireArmMagazineType.mNone)
                             {
+                                MeatovItemData itemDataToUse = null;
                                 if (Mod.magDefaultItemDataByMagType.TryGetValue(secondPrimaryWeaponData.magType, out List<MeatovItemData> itemDatas) && itemDatas.Count > 0)
                                 {
-                                    MeatovItemData itemData = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
-                                    itemDict.Add(itemData, maxCount);
-
-                                    if (inventory.ContainsKey(itemData.tarkovID))
-                                    {
-                                        inventory[itemData.tarkovID] += maxCount;
-                                    }
-                                    else
-                                    {
-                                        inventory.Add(itemData.tarkovID, maxCount);
-                                    }
+                                    itemDataToUse = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
+                                }
+                                else if (Mod.roundDefaultItemDataByRoundType.TryGetValue(secondPrimaryWeaponData.roundType, out List<MeatovItemData> roundItemDatas) && roundItemDatas.Count > 0)
+                                {
+                                    itemDataToUse = roundItemDatas[UnityEngine.Random.Range(0, roundItemDatas.Count)];
+                                    maxCount = UnityEngine.Random.Range(5, 15);
                                 }
                                 else
                                 {
-                                    Mod.LogWarning("No mag item data for mag type " + secondPrimaryWeaponData.magType + " needed for bot inventory second primary weapon " + secondPrimaryWeaponData.tarkovID);
+                                    Mod.LogWarning("No mag/round item data for mag type " + secondPrimaryWeaponData.magType + " or round type "+ secondPrimaryWeaponData.roundType + " needed for bot inventory second primary weapon " + secondPrimaryWeaponData.tarkovID);
+                                }
+
+                                if (itemDataToUse != null)
+                                {
+                                    itemDict.Add(itemDataToUse, maxCount);
+
+                                    if (inventory.ContainsKey(itemDataToUse.tarkovID))
+                                    {
+                                        inventory[itemDataToUse.tarkovID] += maxCount;
+                                    }
+                                    else
+                                    {
+                                        inventory.Add(itemDataToUse.tarkovID, maxCount);
+                                    }
                                 }
                             }
                             if(equipment.TryGetValue("Holster", out MeatovItemData holsterWeaponData) && holsterWeaponData.magType != FistVR.FireArmMagazineType.mNone)
                             {
+                                MeatovItemData itemDataToUse = null;
                                 if (Mod.magDefaultItemDataByMagType.TryGetValue(holsterWeaponData.magType, out List<MeatovItemData> itemDatas) && itemDatas.Count > 0)
                                 {
-                                    MeatovItemData itemData = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
-                                    itemDict.Add(itemData, maxCount);
-
-                                    if (inventory.ContainsKey(itemData.tarkovID))
-                                    {
-                                        inventory[itemData.tarkovID] += maxCount;
-                                    }
-                                    else
-                                    {
-                                        inventory.Add(itemData.tarkovID, maxCount);
-                                    }
+                                    itemDataToUse = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
+                                }
+                                else if (Mod.roundDefaultItemDataByRoundType.TryGetValue(holsterWeaponData.roundType, out List<MeatovItemData> roundItemDatas) && roundItemDatas.Count > 0)
+                                {
+                                    itemDataToUse = roundItemDatas[UnityEngine.Random.Range(0, roundItemDatas.Count)];
+                                    maxCount = UnityEngine.Random.Range(5, 15);
                                 }
                                 else
                                 {
-                                    Mod.LogWarning("No mag item data for mag type " + holsterWeaponData.magType + " needed for bot inventory holster weapon " + holsterWeaponData.tarkovID);
+                                    Mod.LogWarning("No mag/round item data for mag type " + holsterWeaponData.magType + " or round type "+ secondPrimaryWeaponData.roundType + " needed for bot inventory holster weapon " + holsterWeaponData.tarkovID);
+                                }
+
+                                if (itemDataToUse != null)
+                                {
+                                    itemDict.Add(itemDataToUse, maxCount);
+
+                                    if (inventory.ContainsKey(itemDataToUse.tarkovID))
+                                    {
+                                        inventory[itemDataToUse.tarkovID] += maxCount;
+                                    }
+                                    else
+                                    {
+                                        inventory.Add(itemDataToUse.tarkovID, maxCount);
+                                    }
                                 }
                             }
                         }

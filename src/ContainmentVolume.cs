@@ -112,6 +112,11 @@ namespace EFM
 
                 item.parentVolume = this;
 
+                if(this is ContainerVolume)
+                {
+                    (this as ContainerVolume).ownerItem.UpdateClosedMode();
+                }
+
                 OnItemAddedInvoke(item);
             }
             return fits;

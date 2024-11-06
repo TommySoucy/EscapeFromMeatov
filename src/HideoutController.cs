@@ -201,27 +201,6 @@ namespace EFM
 
             ammoBoxesByRoundClassByRoundType = new Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>>();
 
-            // Set live data
-            //float totalMaxHealth = 0;
-            //for (int i = 0; i < 7; ++i)
-            //{
-            //    Mod.currentMaxHealth[i] = Mod.defaultMaxHealth[i];
-            //    totalMaxHealth += Mod.currentMaxHealth[i];
-            //    Mod.currentHealthRates[i] += Mod.hideoutHealthRates[i];
-            //}
-            //GM.CurrentPlayerBody.SetHealthThreshold(totalMaxHealth);
-            //if (Mod.justFinishedRaid)
-            //{
-            //    Mod.currentEnergyRate -= Mod.raidEnergyRate;
-            //    Mod.currentHydrationRate -= Mod.raidHydrationRate;
-            //}
-            //Mod.currentEnergyRate += Mod.hideoutEnergyRate;
-            //Mod.currentHydrationRate += Mod.hideoutHydrationRate;
-            //if (currentSkillGroupLevelingBoosts == null)
-            //{
-            //    currentSkillGroupLevelingBoosts = new Dictionary<Skill.SkillType, float>();
-            //}
-
             Mod.LogInfo("\t0");
             // Spawn areas
             Dictionary<int, Area> areas = new Dictionary<int, Area>();
