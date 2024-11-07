@@ -58,7 +58,7 @@ namespace EFM
             if (fits || bypass)
             {
                 item.physObj.SetAllCollidersToLayer(false, "NoCol");
-                H3MP.Mod.SetKinematicRecursive(transform, true);
+                H3MP.Mod.SetKinematicRecursive(item.transform, true);
                 item.physObj.SetParentage(itemRoot.transform);
                 if (item.physObj.IsAltHeld)
                 {
@@ -151,7 +151,7 @@ namespace EFM
 
                 volume -= item.volumes[item.mode];
                 item.parentVolume = null;
-                H3MP.Mod.SetKinematicRecursive(transform, false);
+                H3MP.Mod.SetKinematicRecursive(item.transform, false);
                 item.physObj.SetAllCollidersToLayer(false, "Default");
 
                 OnItemRemovedInvoke(item);

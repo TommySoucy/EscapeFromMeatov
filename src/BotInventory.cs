@@ -900,7 +900,6 @@ namespace EFM
 
         public void Spawn(MeatovItem lootBox, bool PMC)
         {
-            Mod.LogInfo("Sosig inventory spawn");
             MeatovItem backpack = null;
             MeatovItem vest = null;
             foreach (KeyValuePair<string, MeatovItemData> equipmentEntry in equipment)
@@ -924,21 +923,16 @@ namespace EFM
                 };
                 lootBox.containerVolume.SpawnItem(equipmentEntry.Value, 1, !PMC, true, del);
             }
-            Mod.LogInfo("\t0");
             foreach (KeyValuePair<string, Dictionary<MeatovItemData, int>> lootGroupEntry in loot)
             {
-                Mod.LogInfo("\t\t1");
                 foreach (KeyValuePair<MeatovItemData, int> lootEntry in lootGroupEntry.Value)
                 {
-                    Mod.LogInfo("\t\t\t2");
                     if (lootGroupEntry.Key.Equals("backpackLoot") && backpack != null)
                     {
-                        Mod.LogInfo("\t\t\t\tBAckpack loot");
                         backpack.containerVolume.SpawnItem(lootEntry.Key, lootEntry.Value, !PMC, true);
                     }
                     else if (lootGroupEntry.Key.Equals("vestLoot") && vest != null && lootEntry.Value == 1)
                     {
-                        Mod.LogInfo("\t\t\t\tRig loot");
                         FVRPhysicalObject.FVRPhysicalObjectSize size = FVRPhysicalObject.FVRPhysicalObjectSize.CantCarryBig;
                         for (int i = 0; i < Mod.sizeVolumes.Length; ++i)
                         {
@@ -967,7 +961,6 @@ namespace EFM
                     }
                     else
                     {
-                        Mod.LogInfo("\t\t\t\tLoose loot");
                         lootBox.containerVolume.SpawnItem(lootEntry.Key, lootEntry.Value, !PMC, true);
                     }
                 }
