@@ -1156,6 +1156,12 @@ namespace EFM
 
             MeatovItem item = __instance.GetComponent<MeatovItem>();
 
+            // No item could happen with things like grenade pins
+            if (item == null)
+            {
+                return;
+            }
+
             if (skipPatch)
             {
                 skipPatch = false;

@@ -203,7 +203,13 @@ namespace EFM
                         if(Mod.defaultItemData.TryGetValue(item, out MeatovItemData itemData))
                         {
                             totalVolume += itemData.volumes[0];
-                            itemsToSpawn.Enqueue(new KeyValuePair<MeatovItemData, int>(itemData, 1));
+                            int actualMaxStack = itemData.maxStack;
+                            if (itemData.itemType == MeatovItem.ItemType.Round)
+                            {
+                                actualMaxStack = 30;
+                            }
+                            int stack = UnityEngine.Random.Range(1, actualMaxStack + 1);
+                            itemsToSpawn.Enqueue(new KeyValuePair<MeatovItemData, int>(itemData, stack));
                         }
 
                         if(maxVolume != -1 && totalVolume >= maxVolume)
@@ -218,12 +224,14 @@ namespace EFM
                         long randomItemSelection = LongRandom(0, totalProbabilityWeight, new System.Random());
                         long currentItemWeight = 0;
                         string item = null;
+                        int maxStack = 1;
                         for (int j = 0; j < items.Count; ++j)
                         {
                             currentItemWeight += itemProbabilityWeight[j];
                             if (randomItemSelection < currentItemWeight)
                             {
                                 item = items[j];
+                                maxStack = itemStack[j];
                                 break;
                             }
                         }
@@ -231,7 +239,7 @@ namespace EFM
                         if (Mod.defaultItemData.TryGetValue(item, out MeatovItemData itemData))
                         {
                             totalVolume += itemData.volumes[0];
-                            itemsToSpawn.Enqueue(new KeyValuePair<MeatovItemData, int>(itemData, 1));
+                            itemsToSpawn.Enqueue(new KeyValuePair<MeatovItemData, int>(itemData, UnityEngine.Random.Range(1, maxStack + 1)));
                         }
 
                         if (maxVolume != -1 && totalVolume >= maxVolume)
@@ -247,7 +255,13 @@ namespace EFM
                         {
                             MeatovItemData itemData = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
                             totalVolume += itemData.volumes[0];
-                            itemsToSpawn.Enqueue(new KeyValuePair<MeatovItemData, int>(itemData, 1));
+                            int actualMaxStack = itemData.maxStack;
+                            if (itemData.itemType == MeatovItem.ItemType.Round)
+                            {
+                                actualMaxStack = 30;
+                            }
+                            int stack = UnityEngine.Random.Range(1, actualMaxStack + 1);
+                            itemsToSpawn.Enqueue(new KeyValuePair<MeatovItemData, int>(itemData, stack));
                         }
 
                         if (maxVolume != -1 && totalVolume >= maxVolume)
@@ -263,7 +277,13 @@ namespace EFM
                         {
                             MeatovItemData itemData = itemDatas[UnityEngine.Random.Range(0, itemDatas.Count)];
                             totalVolume += itemData.volumes[0];
-                            itemsToSpawn.Enqueue(new KeyValuePair<MeatovItemData, int>(itemData, 1));
+                            int actualMaxStack = itemData.maxStack;
+                            if (itemData.itemType == MeatovItem.ItemType.Round)
+                            {
+                                actualMaxStack = 30;
+                            }
+                            int stack = UnityEngine.Random.Range(1, actualMaxStack + 1);
+                            itemsToSpawn.Enqueue(new KeyValuePair<MeatovItemData, int>(itemData, stack));
                         }
 
                         if (maxVolume != -1 && totalVolume >= maxVolume)

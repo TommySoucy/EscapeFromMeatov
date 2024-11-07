@@ -154,7 +154,12 @@ namespace EFM
                                     string itemID = itemList[UnityEngine.Random.Range(0, itemList.Count)].ToString();
                                     if (Mod.defaultItemData.TryGetValue(itemID, out MeatovItemData itemData))
                                     {
-                                        int stack = UnityEngine.Random.Range(1, itemData.maxStack + 1);
+                                        int actualMaxStack = itemData.maxStack;
+                                        if(itemData.itemType == MeatovItem.ItemType.Round)
+                                        {
+                                            actualMaxStack = 30;
+                                        }
+                                        int stack = UnityEngine.Random.Range(1, actualMaxStack + 1);
                                         if (itemDict.ContainsKey(itemData))
                                         {
                                             itemDict[itemData] += stack;
@@ -194,7 +199,12 @@ namespace EFM
                                     string itemID = itemList[UnityEngine.Random.Range(0, itemList.Count)].ToString();
                                     if (Mod.defaultItemData.TryGetValue(itemID, out MeatovItemData itemData))
                                     {
-                                        int stack = UnityEngine.Random.Range(1, itemData.maxStack + 1);
+                                        int actualMaxStack = itemData.maxStack;
+                                        if (itemData.itemType == MeatovItem.ItemType.Round)
+                                        {
+                                            actualMaxStack = 30;
+                                        }
+                                        int stack = UnityEngine.Random.Range(1, actualMaxStack + 1);
                                         if (itemDict.ContainsKey(itemData))
                                         {
                                             itemDict[itemData] += stack;
@@ -234,7 +244,12 @@ namespace EFM
                                     string itemID = itemList[UnityEngine.Random.Range(0, itemList.Count)].ToString();
                                     if (Mod.defaultItemData.TryGetValue(itemID, out MeatovItemData itemData))
                                     {
-                                        int stack = UnityEngine.Random.Range(1, itemData.maxStack + 1);
+                                        int actualMaxStack = itemData.maxStack;
+                                        if (itemData.itemType == MeatovItem.ItemType.Round)
+                                        {
+                                            actualMaxStack = 30;
+                                        }
+                                        int stack = UnityEngine.Random.Range(1, actualMaxStack + 1);
                                         if (itemDict.ContainsKey(itemData))
                                         {
                                             itemDict[itemData] += stack;
