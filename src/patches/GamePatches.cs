@@ -1169,6 +1169,10 @@ namespace EFM
                         item.UpdateClosedMode();
                     }
                 }
+                else if (item.parentVolume != null)
+                {
+                    item.physObj.SetAllCollidersToLayer(false, "NoCol");
+                }
 
                 return;
             }

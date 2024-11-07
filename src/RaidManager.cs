@@ -679,12 +679,14 @@ namespace EFM
             GM.CurrentMovementManager.TeleportToPoint(spawnPosition, false);
 
             // Choose extractions
+            Mod.LogInfo("Choosing extractions");
             List<Extraction> extractionsToUse = Mod.charChoicePMC ? PMCExtractions : scavExtractions;
             List<Extraction> noRestrictionExtractions = new List<Extraction>();
             List<Extraction> restrictionExtractions = new List<Extraction>();
             for(int i=0; i < extractionsToUse.Count; ++i)
             {
                 Extraction extraction = extractionsToUse[i];
+                Mod.LogInfo("\tChecking extraction: "+ extraction.extractionName);
                 extraction.distToSpawn = Vector3.Distance(spawnPosition, extraction.transform.position);
 
                 // Find which list to add to depending if the extraction has any restrictions
@@ -694,10 +696,12 @@ namespace EFM
                     || (extraction.itemWhitelist != null && extraction.itemWhitelist.Count > 0)
                     || (extraction.itemBlacklist != null && extraction.itemBlacklist.Count > 0))
                 {
+                    Mod.LogInfo("\t\tGot restrictions");
                     extractionListToAdd = restrictionExtractions;
                 }
                 else
                 {
+                    Mod.LogInfo("\t\tNO restrictions");
                     extractionListToAdd = noRestrictionExtractions;
                 }
 
@@ -717,6 +721,17 @@ namespace EFM
                         }
                     }
                 }
+            }
+
+            Mod.LogInfo("\tFinal no restrict extraction list:"); 
+            for (int i = 0; i < noRestrictionExtractions.Count; ++i)
+            {
+                Mod.LogInfo("\t\t"+ noRestrictionExtractions[i].name);
+            }
+            Mod.LogInfo("\tFinal restrict extraction list:"); 
+            for (int i = 0; i < restrictionExtractions.Count; ++i)
+            {
+                Mod.LogInfo("\t\t"+ restrictionExtractions[i].name);
             }
 
             // Add a third (min 1) of the farthest no restriction extractions we found
@@ -759,6 +774,10 @@ namespace EFM
                 GameObject extractionCard = Instantiate(StatusUI.instance.extractionCardPrefab, StatusUI.instance.extractionsParent.transform);
                 extractionCard.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = "EXFIL" + (i < 10 ? "0" + i : i.ToString()) + " " + activeExtractions[i].extractionName;
                 activeExtractions[i].cardRequirementText = extractionCard.transform.GetChild(0).GetChild(1).GetComponent<Text>();
+                if (activeExtractions[i].activeTimes != null && activeExtractions[i].activeTimes.Count > 0)
+                {
+                    extractionCard.transform.GetChild(1).GetChild(0).gameObject.SetActive(true);
+                }
                 extractionCard.SetActive(true);
             }
         }

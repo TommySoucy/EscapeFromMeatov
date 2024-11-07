@@ -36,6 +36,7 @@ namespace EFM
                 {
                     if (fvrHand.Input.AXButtonDown)
                     {
+                        Mod.LogInfo("AX Pressed while having togglable");
                         if(collidingTogglableItem != null)
                         {
                             switch (collidingTogglableItem.itemType)
@@ -54,6 +55,7 @@ namespace EFM
                         }
                         else
                         {
+                            Mod.LogInfo("\tLC toggling");
                             collidingTogglableLC.ToggleMode();
                         }
                     }
@@ -184,10 +186,9 @@ namespace EFM
             }
             if(collider == togglableCollider)
             {
-                collidingVolume = null;
-                volumeCollider = null;
                 collidingTogglableItem = null;
                 collidingTogglableLC = null;
+                togglableCollider = null;
             }
         }
 

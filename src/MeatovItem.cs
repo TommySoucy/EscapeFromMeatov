@@ -2403,12 +2403,24 @@ namespace EFM
 		{
             hand.heldItem = this;
             hand.hasScript = true;
-            gameObject.SetActive(true);
 
-            // We set a default position because when an item is taken out of a slot
-            // if the item was inactive at some other position, it might get stuck
-            // in the environment when we being interacting with it
-            transform.position = hand.transform.position;
+            if (!gameObject.activeSelf)
+            {
+                // We set a default position because when an item is taken out of a slot
+                // if the item was inactive at some other position, it might get stuck
+                // in the environment when we being interacting with it
+                if (physObj.PoseOverride != null)
+                {
+                    FVRViveHand.AlignChild(transform, physObj.PoseOverride, hand.transform);
+                }
+                else
+                {
+                    transform.position = hand.transform.position;
+                    transform.rotation = hand.transform.rotation;
+                }
+            }
+
+            gameObject.SetActive(true);
 
             // Ensure the Grabbity_HoverSphere is displayed also when holding equipment item, so we know where to put the item in an equip slot
             // This is only necessary for equipment items because the slots are much smaller than the item itself so we need to know what specific point to put inside the slot

@@ -131,7 +131,7 @@ namespace EFM
 
         public void ToggleMode()
         {
-            volumeRoot.SetActive(volumeRoot.activeSelf);
+            volumeRoot.SetActive(!volumeRoot.activeSelf);
 
             if (volumeRoot.activeSelf)
             {
@@ -173,7 +173,7 @@ namespace EFM
                     for (int i = 0; i < itemCountArray.Count; ++i)
                     {
                         currentWeight += (int)itemCountArray[i]["relativeProbability"];
-                        if(randomItemCountSelection < currentWeight)
+                        if (randomItemCountSelection < currentWeight)
                         {
                             itemCount = Mathf.Min(maxItemCount, (int)itemCountArray[i]["count"]);
                             break;
@@ -206,7 +206,7 @@ namespace EFM
                             itemsToSpawn.Enqueue(new KeyValuePair<MeatovItemData, int>(itemData, 1));
                         }
 
-                        if(totalVolume >= maxVolume)
+                        if(maxVolume != -1 && totalVolume >= maxVolume)
                         {
                             break;
                         }
@@ -234,7 +234,7 @@ namespace EFM
                             itemsToSpawn.Enqueue(new KeyValuePair<MeatovItemData, int>(itemData, 1));
                         }
 
-                        if (totalVolume >= maxVolume)
+                        if (maxVolume != -1 && totalVolume >= maxVolume)
                         {
                             break;
                         }
@@ -250,7 +250,7 @@ namespace EFM
                             itemsToSpawn.Enqueue(new KeyValuePair<MeatovItemData, int>(itemData, 1));
                         }
 
-                        if (totalVolume >= maxVolume)
+                        if (maxVolume != -1 && totalVolume >= maxVolume)
                         {
                             break;
                         }
@@ -266,7 +266,7 @@ namespace EFM
                             itemsToSpawn.Enqueue(new KeyValuePair<MeatovItemData, int>(itemData, 1));
                         }
 
-                        if (totalVolume >= maxVolume)
+                        if (maxVolume != -1 && totalVolume >= maxVolume)
                         {
                             break;
                         }

@@ -474,7 +474,7 @@ namespace EFM
                                 }
                                 else
                                 {
-                                    Mod.LogWarning("No mag/round item data for mag type " + holsterWeaponData.magType + " or round type "+ secondPrimaryWeaponData.roundType + " needed for bot inventory holster weapon " + holsterWeaponData.tarkovID);
+                                    Mod.LogWarning("No mag/round item data for mag type " + holsterWeaponData.magType + " or round type "+ holsterWeaponData.roundType + " needed for bot inventory holster weapon " + holsterWeaponData.tarkovID);
                                 }
 
                                 if (itemDataToUse != null)

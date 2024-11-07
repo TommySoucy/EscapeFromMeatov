@@ -2756,6 +2756,7 @@ namespace EFM
         {
             Mod.OnPartHealthChanged -= OnPartHealthChanged;
             Mod.OnPartCurrentMaxHealthChanged -= OnPartHealthChanged;
+            Effect.OnEffectRemoved -= OnPartEffectRemoved;
             SetPage(0);
             clickAudio.Play();
         }
@@ -3084,9 +3085,11 @@ namespace EFM
             }
             else
             {
+                Mod.LogInfo("OnPart health changed " + index);
                 treatmentPartImages[index].color = Color.Lerp(Color.red, Color.white, Mod.GetHealth(index) / Mod.GetCurrentMaxHealth(index));
                 treatmentPartHealths[index].text = ((int)Mod.GetHealth(index)).ToString() + "/" + ((int)Mod.GetCurrentMaxHealth(index));
 
+                Mod.LogInfo("\t0");
                 float total = 0;
                 float totalMax = 0;
                 for (int i = 0; i < Mod.GetHealthCount(); ++i)
@@ -3096,15 +3099,19 @@ namespace EFM
                 }
                 treatmentTotalHeatlh.text = ((int)total).ToString() + "/" + ((int)totalMax);
 
+                Mod.LogInfo("\t0");
                 if (Mod.GetHealth(index) == Mod.GetCurrentMaxHealth(index))
                 {
+                    Mod.LogInfo("\t\t1");
                     // Make sure part has no health treatment
-                    if(treatmentObjectsByEffectTypeByParent.TryGetValue(index, out Dictionary<Effect.EffectType, GameObject> treatmentObjectsByEffectType)
+                    if (treatmentObjectsByEffectTypeByParent.TryGetValue(index, out Dictionary<Effect.EffectType, GameObject> treatmentObjectsByEffectType)
                         && treatmentObjectsByEffectType.TryGetValue(Effect.EffectType.HealthRate, out GameObject treatmentObject))
                     {
+                        Mod.LogInfo("\t\t\t2");
                         // Find parent
-                        if(treatmentParentsByObject.TryGetValue(treatmentObject, out GameObject parentTreatmentObject))
+                        if (treatmentParentsByObject.TryGetValue(treatmentObject, out GameObject parentTreatmentObject))
                         {
+                            Mod.LogInfo("\t\t\t\t3");
                             // Remove from parent
                             treatmentParentsByObject.Remove(treatmentObject);
                             treatmentObjectsByParent[parentTreatmentObject].Remove(treatmentObject);
@@ -3113,6 +3120,7 @@ namespace EFM
                             // Otherwise, remove parent
                             if (treatmentObjectsByParent[parentTreatmentObject].Count > 0)
                             {
+                                Mod.LogInfo("\t\t\t\t\t4");
                                 treatmentObjectsByEffectType.Remove(Effect.EffectType.HealthRate);
 
                                 int totalCost = 0;
@@ -3124,6 +3132,7 @@ namespace EFM
                             }
                             else
                             {
+                                Mod.LogInfo("\t\t\t\t\t5");
                                 treatmentObjectsByParent.Remove(parentTreatmentObject);
                                 treatmentObjectsByEffectTypeByParent.Remove(index);
                                 treatmentParentsByIndex.Remove(index);
@@ -3135,23 +3144,28 @@ namespace EFM
                 }
                 else
                 {
+                    Mod.LogInfo("\t\t6");
                     // Make sure part has health treatment
                     if (treatmentObjectsByEffectTypeByParent.TryGetValue(index, out Dictionary<Effect.EffectType, GameObject> treatmentObjectsByEffectType)
                         && treatmentObjectsByEffectType.TryGetValue(Effect.EffectType.HealthRate, out GameObject treatmentObject))
                     {
+                        Mod.LogInfo("\t\t\t7");
                         // Treatment already exists under this parent, recalculate cost
                         int cost = (int)(Mod.GetCurrentMaxHealth(index) - Mod.GetHealth(index)) * (int)Mod.globalDB["config"]["Health"]["HealPrice"]["HealthPointPrice"];
                         treatmentObject.transform.GetChild(3).GetComponent<Text>().text = cost.ToString();
                         treatmentCosts[treatmentObject] = cost;
 
+                        Mod.LogInfo("\t\t\t7");
                         // Then recalculate parent cost
                         if (treatmentParentsByObject.TryGetValue(treatmentObject, out GameObject parentTreatmentObject))
                         {
+                            Mod.LogInfo("\t\t\t\t8");
                             treatmentObjectsByParent[parentTreatmentObject][treatmentObject] = cost;
 
                             int totalCost = 0;
                             foreach (KeyValuePair<GameObject, int> objectEntry in treatmentObjectsByParent[parentTreatmentObject])
                             {
+                                Mod.LogInfo("\t\t\t\t\t9");
                                 totalCost += objectEntry.Value;
                             }
                             parentTreatmentObject.transform.GetChild(3).GetComponent<Text>().text = totalCost.ToString();
@@ -3159,6 +3173,7 @@ namespace EFM
                     }
                     else // Dont yet have health treatment under this parent or parent does not yet exist
                     {
+                        Mod.LogInfo("\t\t\t10");
                         GameObject newTreatmentObject = Instantiate(treatmentPartSubEntry, treatmentListParent);
                         int cost = (int)(Mod.GetCurrentMaxHealth(index) - Mod.GetHealth(index)) * (int)Mod.globalDB["config"]["Health"]["HealPrice"]["HealthPointPrice"];
                         treatmentCosts.Add(newTreatmentObject, cost);
@@ -3167,9 +3182,11 @@ namespace EFM
                         newTreatmentObject.transform.GetChild(1).GetComponent<Text>().text = "Health";
                         newTreatmentObject.transform.GetChild(3).GetComponent<Text>().text = cost.ToString();
 
+                        Mod.LogInfo("\t\t\t10");
                         GameObject newTreatmentParentObject = null;
                         if (treatmentObjectsByEffectType == null) // Parent does not exist
                         {
+                            Mod.LogInfo("\t\t\t\t11");
                             newTreatmentParentObject = Instantiate(treatmentPartEntry, treatmentListParent);
                             newTreatmentObject.transform.SetAsLastSibling();
                             treatmentSelected.Add(newTreatmentParentObject, true);
@@ -3182,6 +3199,7 @@ namespace EFM
                         }
                         else // Parent exists
                         {
+                            Mod.LogInfo("\t\t\t\t11");
                             newTreatmentParentObject = treatmentParentsByIndex[index];
                             newTreatmentObject.transform.SetSiblingIndex(newTreatmentParentObject.transform.GetSiblingIndex() + 1);
                             treatmentObjectsByParent[newTreatmentParentObject].Add(newTreatmentObject, cost);

@@ -81,7 +81,7 @@ namespace EFM
                 {
                     inventory.Add(item.tarkovID, item.stack);
                 }
-                if(inventoryItems.TryGetValue(item.tarkovID, out List<MeatovItem> items))
+                if (inventoryItems.TryGetValue(item.tarkovID, out List<MeatovItem> items))
                 {
                     items.Add(item);
                 }
@@ -112,7 +112,7 @@ namespace EFM
 
                 item.parentVolume = this;
 
-                if(this is ContainerVolume)
+                if (this is ContainerVolume)
                 {
                     (this as ContainerVolume).ownerItem.UpdateClosedMode();
                 }
