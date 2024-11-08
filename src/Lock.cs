@@ -17,11 +17,14 @@ namespace EFM
 
         public void OnTriggerEnter(Collider other)
         {
+            Mod.LogInfo("Lock trigger enter");
             if (locked)
             {
                 MeatovItem item = other.GetComponentInParent<MeatovItem>();
+                Mod.LogInfo("\tLocked, got item?: "+(item != null)+", ID: "+(item == null ? "null" : item.tarkovID)+" and we want "+ keyID);
                 if (item != null && item.tarkovID.Equals(keyID))
                 {
+                    Mod.LogInfo("\t\tUnlocking");
                     UnlockAction();
                 }
             }

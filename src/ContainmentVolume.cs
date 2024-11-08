@@ -151,7 +151,14 @@ namespace EFM
 
                 volume -= item.volumes[item.mode];
                 item.parentVolume = null;
-                H3MP.Mod.SetKinematicRecursive(item.transform, false);
+                if(item.containerVolume == null)
+                {
+                    H3MP.Mod.SetKinematicRecursive(item.transform, false);
+                }
+                else // Container item, only unset kinematic for the item and not children
+                {
+                    item.physObj.RootRigidbody.isKinematic = false;
+                }
                 item.physObj.SetAllCollidersToLayer(false, "Default");
 
                 OnItemRemovedInvoke(item);
