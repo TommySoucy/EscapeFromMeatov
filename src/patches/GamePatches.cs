@@ -2709,8 +2709,8 @@ namespace EFM
                 return true;
             }
 
-            // Return if not enough stamina
-            if (Mod.stamina < Mod.jumpStaminaDrain)
+            // Return if not enough stamina or weight >= max weight
+            if (Mod.stamina < Mod.jumpStaminaDrain || Mod.weight >= Mod.currentWeightLimit)
             {
                 return false;
             }
@@ -2763,9 +2763,15 @@ namespace EFM
 
         public static Vector3 LimitVelocity(Vector3 originalValue)
         {
+            // Limit velocity to 0 if weight >= max weight
+            if(Mod.weight >= Mod.currentWeightLimit)
+            {
+                return new Vector3(0, originalValue.y, 0);
+            }
+
             // Note that smoothLocoVelocity's magnitude in xz plane is limited to GM.Options.MovementOptions.TPLocoSpeeds[GM.Options.MovementOptions.TPLocoSpeedIndex]
             // A good default is MovementOptions.TPLocoSpeedIndex = 2, for a TPLocoSpeeds of 1.8
-            // Is sprintingEngaged, vector is multiplied by 2 for total xz velocity of 3.6
+            // If sprintingEngaged, vector is multiplied by 2 for total xz velocity of 3.6
             float maxMagnitude = GM.Options.MovementOptions.TPLocoSpeeds[GM.Options.MovementOptions.TPLocoSpeedIndex] * 2;
             float magnitude = Mathf.Sqrt(originalValue.x * originalValue.x + originalValue.z * originalValue.z);
             if (magnitude > maxMagnitude)

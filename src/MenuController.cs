@@ -29,7 +29,7 @@ namespace EFM
             GM.CurrentPlayerBody.ConfigureQuickbelt(-4);
 
             // Enforce specific options
-            QualitySettings.lodBias = 5;
+            QualitySettings.lodBias = 10;
             GM.Options.MovementOptions.TPLocoSpeedIndex = 2; // Limits walk speed to 1.8, sprint to 3.6
             GM.Options.SimulationOptions.ObjectGravityMode = SimulationOptions.GravityMode.Realistic;
             GM.Options.SimulationOptions.PlayerGravityMode = SimulationOptions.GravityMode.Realistic;

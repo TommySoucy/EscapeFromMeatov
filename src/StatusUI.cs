@@ -713,62 +713,101 @@ namespace EFM
             Vector3 movementVector = GM.CurrentMovementManager.m_smoothLocoVelocity;
             Vector2 movementVector2 = new Vector2(movementVector.x, movementVector.z);
 
-            if ((GM.CurrentMovementManager.m_sprintingEngaged || movementVector2.magnitude > 3.6f) && GM.CurrentMovementManager.m_isGrounded)
+            float weightFraction = ((float)Mod.weight) / Mod.currentWeightLimit;
+            if(weightFraction < 0.5)
             {
-                // Reset stamina timer
-                Mod.staminaTimer = 2;
+                // No regen while sprinting
 
-                float currentStaminaDrain = Mod.sprintStaminaDrain * Time.deltaTime;
-
-                if (Mod.weight > Mod.currentWeightLimit)
+                if ((GM.CurrentMovementManager.m_sprintingEngaged || movementVector2.magnitude > 3.6f) && GM.CurrentMovementManager.m_isGrounded) // Sprinting
                 {
-                    currentStaminaDrain += Mod.overweightStaminaDrain * Time.deltaTime;
+                    // Reset stamina timer to prevent stamina regen
+                    Mod.staminaTimer = 1.5f;
+
+                    // Drain stamina
+                    float currentStaminaDrain = Mod.sprintStaminaDrain * Time.deltaTime;
+                    Mod.stamina = Mathf.Max(Mod.stamina - currentStaminaDrain, 0);
+
+                    StaminaUI.instance.barFill.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina / Mod.currentMaxStamina * 100);
                 }
 
-                Mod.stamina = Mathf.Max(Mod.stamina - currentStaminaDrain, 0);
-
-                StaminaUI.instance.barFill.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina / Mod.currentMaxStamina * 100);
-            }
-            else if (movementVector2.magnitude > 0 && GM.CurrentMovementManager.m_isGrounded && Mod.weight > (Mod.currentWeightLimit * 2 / 3))
-            {
-                // Reset stamina timer
-                Mod.staminaTimer = 2;
-
-                float currentStaminaDrain = Mod.overweightStaminaDrain * Time.deltaTime;
-
-                Mod.stamina = Mathf.Max(Mod.stamina - currentStaminaDrain, 0);
-
-                StaminaUI.instance.barFill.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina / Mod.currentMaxStamina * 100);
-            }
-            else if (Mod.weight > Mod.currentWeightLimit)
-            {
-                // Reset stamina timer to prevent stamina regen even while not moving if we are above max weight
-                Mod.staminaTimer = 2;
-            }
-            else // Not using stamina
-            {
                 if (Mod.staminaTimer > 0)
                 {
                     Mod.staminaTimer -= Time.deltaTime;
                 }
-                else if(Mod.stamina <= Mod.currentMaxStamina)
+                else if (Mod.stamina <= Mod.currentMaxStamina)
                 {
                     Mod.stamina = Mathf.Min(Mod.stamina + Mod.currentStaminaRate * Time.deltaTime, Mod.currentMaxStamina);
 
                     StaminaUI.instance.barFill.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina / Mod.currentMaxStamina * 100);
                 }
             }
-
-            // If reach 0 stamina due to being overweight, activate overweight fatigue effect
-            if (Mod.stamina == 0 && Mod.weight > Mod.currentWeightLimit)
+            else if (weightFraction < 0.75)
             {
-                if (Effect.overweightFatigue == null)
+                // Encumbered, 50% stamina regen, no regen while moving, double stamina drain while sprinting
+
+                if ((GM.CurrentMovementManager.m_sprintingEngaged || movementVector2.magnitude > 3.6f) && GM.CurrentMovementManager.m_isGrounded) // Sprinting
                 {
-                    new Effect(Effect.EffectType.OverweightFatigue, 0, 300, 0);
+                    // Reset stamina timer to prevent stamina regen
+                    Mod.staminaTimer = 1.5f;
+
+                    // Drain stamina
+                    float currentStaminaDrain = Mod.sprintStaminaDrain * Time.deltaTime * 2;
+                    Mod.stamina = Mathf.Max(Mod.stamina - currentStaminaDrain, 0);
+
+                    StaminaUI.instance.barFill.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina / Mod.currentMaxStamina * 100);
                 }
-                else
+                else if (movementVector2.magnitude > 0 && GM.CurrentMovementManager.m_isGrounded) // Moving
                 {
-                    Effect.overweightFatigue.timer = 300;
+                    // Reset stamina timer to prevent stamina regen
+                    Mod.staminaTimer = 1.5f;
+                }
+                
+                // If reach 0 stamina due to being overweight, activate overweight fatigue effect
+                if (Mod.stamina == 0)
+                {
+                    if (Effect.overweightFatigue == null)
+                    {
+                        new Effect(Effect.EffectType.OverweightFatigue, 0, 300, 0);
+                    }
+                    else
+                    {
+                        Effect.overweightFatigue.timer = 300;
+                    }
+                }
+
+                if (Mod.staminaTimer > 0)
+                {
+                    Mod.staminaTimer -= Time.deltaTime;
+                }
+                else if (Mod.stamina <= Mod.currentMaxStamina)
+                {
+                    Mod.stamina = Mathf.Min(Mod.stamina + Mod.currentStaminaRate * Time.deltaTime * 0.5f, Mod.currentMaxStamina);
+
+                    StaminaUI.instance.barFill.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina / Mod.currentMaxStamina * 100);
+                }
+            }
+            else // Weight >=75% max weight. If >=100%, movement will be prevented by patch
+            {
+                // No stamina regen, stamina drain while walking
+
+                // Reset stamina timer to prevent stamina regen
+                Mod.staminaTimer = 1.5f;
+
+                if ((GM.CurrentMovementManager.m_sprintingEngaged || movementVector2.magnitude > 3.6f) && GM.CurrentMovementManager.m_isGrounded) // Sprinting
+                {
+                    // Drain stamina
+                    float currentStaminaDrain = Mod.sprintStaminaDrain * Time.deltaTime * 2;
+                    Mod.stamina = Mathf.Max(Mod.stamina - currentStaminaDrain, 0);
+
+                    StaminaUI.instance.barFill.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina / Mod.currentMaxStamina * 100);
+                }
+                else if (movementVector2.magnitude > 0 && GM.CurrentMovementManager.m_isGrounded) // Moving
+                {
+                    // Drain stamina
+                    float currentStaminaDrain = Mod.overweightStaminaDrain * Time.deltaTime;
+                    Mod.stamina = Mathf.Max(Mod.stamina - currentStaminaDrain, 0);
+
+                    StaminaUI.instance.barFill.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina / Mod.currentMaxStamina * 100);
                 }
             }
         }

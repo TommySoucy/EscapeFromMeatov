@@ -526,6 +526,11 @@ namespace EFM
         // WHEN WE REMOVE AN ITEM FROM PLAYER INVENTORY, WE ONLY WANT TO REMOVE PARENT SPECIFIC WEIGHT AND NOT THE CHILDREN'S
         // BECAUSE THOSE ARE INCLUDED IN PARENT currentWeight AND WILL GET REREMOVED WHEN WE SUBSEQUENTLY REMOVE THE CHILDREN FROM PLAYER INVENTORY
         // When we Add/RemoveTo/FromPlayerInventory, we only add/remove the item.GetSpecificWeight for this reason
+        // WEIGHT's EFFECT ON STAMINA:
+        // <50% max weight, Unencumbered, full stamina regen, regen while walking, no regen while sprinting
+        // >=50% max weight, Encumbered, 50% stamina regen, no regen while moving, double stamina drain while sprinting
+        // >=75%+ max weight, no stamina regen, stamina drain while walking
+        // >=100%+ max weight, Overencumbered, can't move
         private static int _weight = 0; // Overencumbered at currentWeightLimit / 2, Critical overencumbered at currentWeightLimit
         public static int weight
         {
