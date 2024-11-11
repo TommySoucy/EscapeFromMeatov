@@ -58,6 +58,20 @@ namespace EFM
             if (fits || bypass)
             {
                 item.physObj.SetAllCollidersToLayer(false, "NoCol");
+                if (item.physObj.AttachmentsList.Count > 0)
+                {
+                    for (int j = 0; j < item.physObj.AttachmentsList.Count; j++)
+                    {
+                        if (item.physObj.AttachmentsList[j] != null)
+                        {
+                            item.physObj.AttachmentsList[j].SetAllCollidersToLayer(false, "NoCol");
+                            if (item.physObj.AttachmentsList[j] is AttachableFirearmPhysicalObject && (item.physObj.AttachmentsList[j] as AttachableFirearmPhysicalObject).FA.Magazine != null)
+                            {
+                                (item.physObj.AttachmentsList[j] as AttachableFirearmPhysicalObject).FA.Magazine.SetAllCollidersToLayer(false, "NoCol");
+                            }
+                        }
+                    }
+                }
                 H3MP.Mod.SetKinematicRecursive(item.transform, true);
                 item.physObj.SetParentage(itemRoot.transform);
                 if (item.physObj.IsAltHeld)
@@ -159,7 +173,21 @@ namespace EFM
                 {
                     item.physObj.RootRigidbody.isKinematic = false;
                 }
-                item.physObj.SetAllCollidersToLayer(false, "Default");
+                item.physObj.SetAllCollidersToLayer(false, "Default"); 
+                if (item.physObj.AttachmentsList.Count > 0)
+                {
+                    for (int j = 0; j < item.physObj.AttachmentsList.Count; j++)
+                    {
+                        if (item.physObj.AttachmentsList[j] != null)
+                        {
+                            item.physObj.AttachmentsList[j].SetAllCollidersToLayer(false, "Default");
+                            if (item.physObj.AttachmentsList[j] is AttachableFirearmPhysicalObject && (item.physObj.AttachmentsList[j] as AttachableFirearmPhysicalObject).FA.Magazine != null)
+                            {
+                                (item.physObj.AttachmentsList[j] as AttachableFirearmPhysicalObject).FA.Magazine.SetAllCollidersToLayer(false, "Default");
+                            }
+                        }
+                    }
+                }
 
                 OnItemRemovedInvoke(item);
             }
