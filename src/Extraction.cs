@@ -54,6 +54,7 @@ namespace EFM
 
         public string extractionName;
         public float extractionTime = 10;
+        public bool restricted; // Set to true if this extraction should be restricted despite no restrictions (ex.: behind locked door)
         public List<Vector2> activeTimes; // Time ranges in seconds from 0 to 86400 (24h) during which this extraction can actually be used
         public List<string> itemRequirements; // Items consumed upon using the extraction
         public List<int> itemRequirementCounts; // The amount of each item consumed upon using the extraction

@@ -47,6 +47,7 @@ namespace EFM
                 _taskState = value;
                 if (_taskState != preValue)
                 {
+                    Mod.LogInfo("Task "+ID+":"+name+" state changed from " + preValue + " to " + _taskState);
                     OnTaskStateChangedInvoke(this, preValue);
                 }
             }
@@ -858,7 +859,7 @@ namespace EFM
                     fulfilled = CompareInt(compareMethod, targetTrader.level, value);
                     break;
                 case ConditionType.TraderStanding:
-                    fulfilled = CompareFloat(compareMethod, targetTrader.standing, value);
+                    fulfilled = CompareFloat(compareMethod, targetTrader.standing, standingValue);
                     break;
                 case ConditionType.Skill:
                     fulfilled = CompareInt(compareMethod, targetSkill.GetLevel(), value);
