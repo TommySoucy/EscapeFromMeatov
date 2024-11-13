@@ -29,7 +29,7 @@ namespace EFM
         public static int meatovTimeMultiplier = 7;
         public static readonly float headshotDamageMultiplier = 1.2f;
         public static readonly float handDamageResist = 0.5f;
-        public static readonly float[] sizeVolumes = { 1000, 2500, 5000, 30000, 0, 50000}; // 0: Small, 1: Medium, 2: Large, 3: Massive, 4: None, 5: CantCarryBig
+        public static readonly float[] sizeVolumes = { 1000, 2500, 10000, 30000, 0, 50000}; // 0: Small, 1: Medium, 2: Large, 3: Massive, 4: None, 5: CantCarryBig
         public static int[] neededForPriorities = new int[] { 2, 3, 4, 0, 1 }; // Task, Area, Wishlist, Barter, Production
         public static Color[] neededForColors = new Color[] { Color.yellow, Color.red, Color.cyan, Color.magenta, Color.blue }; // Task, Area, Wishlist, Barter, Production
         public static Color neededForAreaFulfilledColor = Color.green;

@@ -8240,7 +8240,7 @@
       },
       {
         "level": 0,
-        "standing": 0.0,
+        "standing": 1.0,
         "salesSum": 0,
         "standingToRestore": 0.0,
         "unlocked": true,
