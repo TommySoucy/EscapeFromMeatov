@@ -526,6 +526,12 @@ namespace EFM
         // WHEN WE REMOVE AN ITEM FROM PLAYER INVENTORY, WE ONLY WANT TO REMOVE PARENT SPECIFIC WEIGHT AND NOT THE CHILDREN'S
         // BECAUSE THOSE ARE INCLUDED IN PARENT currentWeight AND WILL GET REREMOVED WHEN WE SUBSEQUENTLY REMOVE THE CHILDREN FROM PLAYER INVENTORY
         // When we Add/RemoveTo/FromPlayerInventory, we only add/remove the item.GetSpecificWeight for this reason
+        // WHEN WE MOVE AN ITEM TO/FROM A RIG SLOT (BY QBS WHILE HAVING RIG EQUIPPED OR IN LOOSE RIG) WE EXPECT THE
+        // MEATOVITEM PARENTING SYSTEM TO HANDLING WEIGHT MANAGEMENT AS THE ITEM GETS DE/ATTACHED TO/FROM RIG ITEM
+        // BUT IF THE ITEM'S PARENT DOESN'T CHANGE DESPITE THE CHANGE OF SLOT (WHEN IN A SLOT, AN ITEM'S PARENT SHOULD BE NULL, SO THIS
+        // COULD HAPPEN IF THE ITEM IS LOOSE IN HIDEOUT AND GETS PUT IN RIG SLOT SOMEHOW, LIKE A LOAD OF SAVED ITEM FOR EXAMPLE), THE PARENTING SYSTEM
+        // WILL NOT BE CALLED AND SO MUST BE CALLED MANUALLY
+        // This is why we call MeatovItem.OnTransformParentChanged manually in SetQuickBeltSlotPatch in case parent doesn't change
         // WEIGHT's EFFECT ON STAMINA:
         // <50% max weight, Unencumbered, full stamina regen, regen while walking, no regen while sprinting
         // >=50% max weight, Encumbered, 50% stamina regen, no regen while moving, double stamina drain while sprinting

@@ -978,6 +978,7 @@ namespace EFM
         public static int fullSkip;
         public static bool skipPatch;
         public static bool dontProcessRigWeight;
+        public static Transform preParent;
 
         static void Prefix(ref FVRQuickBeltSlot slot, ref FVRPhysicalObject __instance)
         {
@@ -987,6 +988,8 @@ namespace EFM
             {
                 return;
             }
+
+            preParent = __instance.transform.parent;
 
             // In case that new slot is same as current, we want to skip most of the patch
             // Can be possible in case of harnessed slot
@@ -1097,12 +1100,15 @@ namespace EFM
                                 if (rig.rigSlots[slotIndex] == __instance.QuickbeltSlot)
                                 {
                                     rig.itemsInSlots[slotIndex] = null;
-                                    // NOTE that we dont process weight here, it will be handled by parenting system
-                                    //if (!dontProcessRigWeight)
-                                    //{
-                                    //    // Note that this will also decrement from total weight
-                                    //    rig.currentWeight -= item.currentWeight;
-                                    //}
+
+                                    // We call the parenting system manually if the item's parent is not changed
+                                    // because it will otherwise never get called
+                                    // The parent could be unchanged if going from null to null (ex.: Loading saved QBS rig items)
+                                    if (__instance.transform.parent == preParent)
+                                    {
+                                        item.OnTransformParentChanged();
+                                    }
+
                                     return;
                                 }
                             }
@@ -1118,12 +1124,13 @@ namespace EFM
                             {
                                 EquipmentSlot.currentRig.itemsInSlots[i] = null;
 
-                                // NOTE that we dont process weight here, it will be handled by parenting system
-                                //if (!dontProcessRigWeight)
-                                //{
-                                //    // Note that this will also decrement from total weight
-                                //    EquipmentSlot.currentRig.currentWeight -= item.currentWeight;
-                                //}
+                                // We call the parenting system manually if the item's parent is not changed
+                                // because it will otherwise never get called
+                                // The parent could be unchanged if going from null to null (ex.: Loading saved QBS rig items)
+                                if (__instance.transform.parent == preParent)
+                                {
+                                    item.OnTransformParentChanged();
+                                }
 
                                 // The model of the rig in the equipment slot should be updated
                                 EquipmentSlot.currentRig.UpdateClosedMode();
@@ -1279,12 +1286,13 @@ namespace EFM
                         if (rig.rigSlots[slotIndex] == __instance.QuickbeltSlot)
                         {
                             rig.itemsInSlots[slotIndex] = item;
-                            // NOTE that we dont process weight here, it will be handled by parenting system
-                            //if (!dontProcessRigWeight)
-                            //{
-                            //    // Note that this will also increment total weight
-                            //    rig.currentWeight += item.currentWeight;
-                            //}
+                            // We call the parenting system manually if the item's parent is not changed
+                            // because it will otherwise never get called
+                            // The parent could be unchanged if going from null to null (ex.: Loading saved QBS rig items)
+                            if (__instance.transform.parent == preParent)
+                            {
+                                item.OnTransformParentChanged();
+                            }
                             rig.UpdateClosedMode();
                             item.gameObject.SetActive(rig.open);
                             return;
@@ -1301,12 +1309,13 @@ namespace EFM
                     {
                         MeatovItem parentRigItem = EquipmentSlot.currentRig;
                         parentRigItem.itemsInSlots[slotIndex - 6] = item;
-                        // NOTE that we dont process weight here, it will be handled by parenting system
-                        //if (!dontProcessRigWeight)
-                        //{
-                        //    // Note that this will also increment total weight
-                        //    parentRigItem.currentWeight += item.currentWeight;
-                        //}
+                        // We call the parenting system manually if the item's parent is not changed
+                        // because it will otherwise never get called
+                        // The parent could be unchanged if going from null to null (ex.: Loading saved QBS rig items)
+                        if (__instance.transform.parent == preParent)
+                        {
+                            item.OnTransformParentChanged();
+                        }
                         parentRigItem.UpdateClosedMode();
                         break;
                     }
@@ -1320,7 +1329,6 @@ namespace EFM
     // as we set them in the assets
     class QBSIsKeepingTrackWithHeadPatch
     {
-
         static bool Prefix(FVRQuickBeltSlot __instance, bool value)
         {
             if (!Mod.inMeatovScene)
