@@ -3308,6 +3308,36 @@ namespace EFM
                     childIndex = parent.children.Count;
                     parent.children.Add(this);
                     parent.currentWeight += currentWeight;
+
+                    // Check if now in a containment volume, and if so, disable collisions
+                    if(physObj != null)
+                    {
+                        MeatovItem currentParent = this;
+                        while (currentParent != null)
+                        {
+                            if (currentParent.parentVolume != null)
+                            {
+                                physObj.SetAllCollidersToLayer(false, "NoCol");
+                                if (physObj.AttachmentsList.Count > 0)
+                                {
+                                    for (int j = 0; j < physObj.AttachmentsList.Count; j++)
+                                    {
+                                        if (physObj.AttachmentsList[j] != null)
+                                        {
+                                            physObj.AttachmentsList[j].SetAllCollidersToLayer(false, "NoCol");
+                                            if (physObj.AttachmentsList[j] is AttachableFirearmPhysicalObject && (physObj.AttachmentsList[j] as AttachableFirearmPhysicalObject).FA.Magazine != null)
+                                            {
+                                                (physObj.AttachmentsList[j] as AttachableFirearmPhysicalObject).FA.Magazine.SetAllCollidersToLayer(false, "NoCol");
+                                            }
+                                        }
+                                    }
+                                }
+                                break;
+                            }
+
+                            currentParent = currentParent.parent;
+                        }
+                    }
                 }
             }
 

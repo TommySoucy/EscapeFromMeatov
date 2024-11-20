@@ -679,14 +679,12 @@ namespace EFM
             GM.CurrentMovementManager.TeleportToPoint(spawnPosition, false);
 
             // Choose extractions
-            Mod.LogInfo("Choosing extractions");
             List<Extraction> extractionsToUse = Mod.charChoicePMC ? PMCExtractions : scavExtractions;
             List<Extraction> noRestrictionExtractions = new List<Extraction>();
             List<Extraction> restrictionExtractions = new List<Extraction>();
             for(int i=0; i < extractionsToUse.Count; ++i)
             {
                 Extraction extraction = extractionsToUse[i];
-                Mod.LogInfo("\tChecking extraction: "+ extraction.extractionName);
                 extraction.distToSpawn = Vector3.Distance(spawnPosition, extraction.transform.position);
 
                 // Find which list to add to depending if the extraction has any restrictions
@@ -697,12 +695,10 @@ namespace EFM
                     || (extraction.itemWhitelist != null && extraction.itemWhitelist.Count > 0)
                     || (extraction.itemBlacklist != null && extraction.itemBlacklist.Count > 0))
                 {
-                    Mod.LogInfo("\t\tGot restrictions");
                     extractionListToAdd = restrictionExtractions;
                 }
                 else
                 {
-                    Mod.LogInfo("\t\tNO restrictions");
                     extractionListToAdd = noRestrictionExtractions;
                 }
 
@@ -713,26 +709,21 @@ namespace EFM
                 }
                 else
                 {
+                    bool added = false;
                     for (int j = 0; j < extractionListToAdd.Count; ++j)
                     {
                         if (extraction.distToSpawn < extractionListToAdd[j].distToSpawn)
                         {
+                            added = true;
                             extractionListToAdd.Insert(j, extraction);
                             break;
                         }
                     }
+                    if (!added)
+                    {
+                        extractionListToAdd.Add(extraction);
+                    }
                 }
-            }
-
-            Mod.LogInfo("\tFinal no restrict extraction list:"); 
-            for (int i = 0; i < noRestrictionExtractions.Count; ++i)
-            {
-                Mod.LogInfo("\t\t\"+i+\":" + noRestrictionExtractions[i].extractionName+":"+ noRestrictionExtractions[i].distToSpawn+"m");
-            }
-            Mod.LogInfo("\tFinal restrict extraction list:"); 
-            for (int i = 0; i < restrictionExtractions.Count; ++i)
-            {
-                Mod.LogInfo("\t\t"+i+":"+ restrictionExtractions[i].extractionName + ":" + restrictionExtractions[i].distToSpawn + "m");
             }
 
             // Add a third (min 1) of the farthest no restriction extractions we found
@@ -744,10 +735,8 @@ namespace EFM
             else
             {
                 int count = Mathf.Max(1, noRestrictionExtractions.Count / 3);
-                Mod.LogInfo("\tWill have "+count+" no restrict. extractions");
                 for (int i = noRestrictionExtractions.Count - 1, j = 0; i >= 0 && j < count; --i, ++j)
                 {
-                    Mod.LogInfo("\t\tAdding "+ noRestrictionExtractions[i].extractionName);
                     noRestrictionExtractions[i].active = true;
                     noRestrictionExtractions[i].extractionsIndex = activeExtractions.Count;
                     activeExtractions.Add(noRestrictionExtractions[i]);
@@ -758,13 +747,11 @@ namespace EFM
             if (restrictionExtractions.Count > 0)
             {
                 int count = Mathf.Max(1, restrictionExtractions.Count / 2);
-                Mod.LogInfo("\tWill have " + count + " restricted extractions");
                 for (int j = 0; j < count; ++j)
                 {
                     int rand = UnityEngine.Random.Range(0, restrictionExtractions.Count);
                     if (!restrictionExtractions[rand].active)
                     {
-                        Mod.LogInfo("\t\tAdding " + restrictionExtractions[rand].extractionName);
                         restrictionExtractions[rand].active = true;
                         restrictionExtractions[rand].extractionsIndex = activeExtractions.Count;
                         activeExtractions.Add(restrictionExtractions[rand]);

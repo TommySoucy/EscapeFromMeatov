@@ -47,8 +47,8 @@ namespace EFM
 			Vector3 vector = hand.Input.Pos - transform.position;
 			vector = Vector3.ProjectOnPlane(vector, Root.right).normalized;
 			Vector3 forward = Root.forward;
-			rotAngle = Mathf.Atan2(Vector3.Dot(Root.right, Vector3.Cross(forward, vector)), Vector3.Dot(forward, vector)) * 57.29578f;
-			if (rotAngle > 0f)
+            rotAngle = Mathf.Atan2(Vector3.Dot(Root.right, Vector3.Cross(forward, vector)), Vector3.Dot(forward, vector)) * 57.29578f;
+            if (rotAngle > 0f)
 			{
 				rotAngle -= 360f;
 			}

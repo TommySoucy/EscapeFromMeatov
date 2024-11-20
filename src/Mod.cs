@@ -2218,6 +2218,25 @@ namespace EFM
             ApplyTransform(ref v, t.parent);
         }
 
+        public static void PrintNonNoColLayersOnItem(MeatovItem item)
+        {
+            Mod.LogInfo("PrintContainerVolumeContentLayers on " + item.name);
+            Collider[] cols = item.physObj.GetComponentsInChildren<Collider>(true);
+            for(int i=0; i < cols.Length; ++i)
+            {
+                if (!cols[i].isTrigger && !LayerMask.LayerToName(cols[i].gameObject.layer).Equals("NoCol"))
+                {
+                    Mod.LogInfo("\tCollider "+ cols[i].name+" is not on NoCol:");
+                    Transform currentParent = cols[i].transform;
+                    while(currentParent != null)
+                    {
+                        Mod.LogInfo("\t\t"+currentParent.name);
+                        currentParent = currentParent.parent;
+                    }
+                }
+            }
+        }
+
         public static float DebugCalcVolumeOfObject(GameObject prefabInstance)
         {
             Mod.LogInfo("DebugCalcVolumeOfObject: "+prefabInstance.name);

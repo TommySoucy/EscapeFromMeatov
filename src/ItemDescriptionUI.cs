@@ -106,6 +106,7 @@ namespace EFM
 
         public void SetDescriptionPack(DescriptionPack pack)
         {
+            Mod.LogInfo("SetDescriptionPack");
             if (descriptionPack != null && descriptionPack.itemData != null)
             {
                 descriptionPack.itemData.OnNeededForChanged -= OnNeededForChanged;
@@ -132,6 +133,7 @@ namespace EFM
 
             descriptionPack = pack;
 
+            Mod.LogInfo("\t0");
             descriptionPack.itemData.OnNeededForChanged += OnNeededForChanged;
             descriptionPack.itemData.OnNeededForAreaTotalChanged += OnNeededForAreaTotalChanged;
             descriptionPack.itemData.OnNeededForTaskTotalChanged += OnNeededForTaskTotalChanged;
@@ -152,9 +154,10 @@ namespace EFM
                     descriptionPack.item.OnSightingRangeChanged += OnSightingRangeChanged;
                 }
             }
+            Mod.LogInfo("\t0");
 
             // Summary
-            if(descriptionPack.item != null)
+            if (descriptionPack.item != null)
             {
                 summaryItemView.SetItem(descriptionPack.item);
             }
@@ -170,8 +173,9 @@ namespace EFM
             summaryWishlist.gameObject.SetActive(descriptionPack.itemData.onWishlist);
             summaryWishlist.color = Mod.neededForColors[2];
 
+            Mod.LogInfo("\t0");
             // Full
-            if(descriptionPack.item != null)
+            if (descriptionPack.item != null)
             {
                 fullItemView.SetItem(descriptionPack.item);
 
@@ -192,6 +196,7 @@ namespace EFM
                                          descriptionPack.currencyIconIndexOverride, descriptionPack.valueOverride, descriptionPack.hasToolOveride, descriptionPack.isToolOverride,
                                          descriptionPack.hasFIROverride, descriptionPack.isFIROverride);
             }
+            Mod.LogInfo("\t0");
             fullName.text = descriptionPack.itemData.name;
             description.text = descriptionPack.itemData.description;
             effects.SetActive((descriptionPack.itemData.consumeEffects != null && descriptionPack.itemData.consumeEffects.Count > 0) || (descriptionPack.itemData.effects != null && descriptionPack.itemData.effects.Count > 0));
@@ -221,6 +226,7 @@ namespace EFM
             neededForBartersTotal.color = Mod.neededForColors[3];
             neededForProductionsTitle.color = Mod.neededForColors[4];
             neededForProductionsTotal.color = Mod.neededForColors[4];
+            Mod.LogInfo("\t0");
             UpdateCompatibilityLists();
 
             // Common
